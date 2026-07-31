@@ -1,0 +1,256 @@
+# GitLab CI — fe workspace (packages + apps/web + apps/landing-page-web)
+# Repo root = fe/
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+stages:
+  - lint
+  - build
+  - deploy
+
+variables:
+  PNPM_VERSION: "11.7.0"
+  PNPM_STORE_DIR: "$CI_PROJECT_DIR/.pnpm-store"
+  NEXT_TELEMETRY_DISABLED: "1"
+
+default:
+  image: node:22-bookworm
+  interruptible: true
+
+.pnpm_job:
+  before_script:
+    - corepack enable
+    - corepack prepare "pnpm@${PNPM_VERSION}" --activate
+    - pnpm config set store-dir "$PNPM_STORE_DIR"
+    - pnpm install --frozen-lockfile
+  cache:
+    key:
+      files:
+        - pnpm-lock.yaml
+    paths:
+      - .pnpm-store
+    policy: pull-push
+
+.rules_packages:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - packages/**/*
+        - pnpm-lock.yaml
+        - package.json
+        - pnpm-workspace.yaml
+        - .gitlab-ci.yml
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+.rules_web:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - apps/web/**/*
+        - packages/**/*
+        - pnpm-lock.yaml
+        - package.json
+        - pnpm-workspace.yaml
+        - .gitlab-ci.yml
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+.rules_landing:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - apps/landing-page-web/**/*
+        - packages/**/*
+        - pnpm-lock.yaml
+        - package.json
+        - pnpm-workspace.yaml
+        - .gitlab-ci.yml
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+# ── Packages ────────────────────────────────────────────────────────────────
+lint:packages:
+  extends:
+    - .pnpm_job
+    - .rules_packages
+  stage: lint
+  script:
+    - pnpm --filter "./packages/*" run type-check
+
+build:packages:
+  extends:
+    - .pnpm_job
+    - .rules_packages
+  stage: build
+  needs:
+    - job: lint:packages
+      optional: true
+  script:
+    - pnpm --filter "./packages/*" run build
+  artifacts:
+    paths:
+      - packages/*/dist/
+    expire_in: 1 day
+
+# ── App: web ────────────────────────────────────────────────────────────────
+lint:web:
+  extends:
+    - .pnpm_job
+    - .rules_web
+  stage: lint
+  script:
+    - pnpm --filter "./packages/*" run build
+    - pnpm --filter landing-page-generator-fe lint
+
+build:web:
+  extends:
+    - .pnpm_job
+    - .rules_web
+  stage: build
+  needs:
+    - job: lint:web
+      optional: true
+  script:
+    - pnpm --filter "./packages/*" run build
+    - pnpm --filter landing-page-generator-fe build
+  artifacts:
+    paths:
+      - apps/web/.next/
+    exclude:
+      - apps/web/.next/cache/**
+    expire_in: 1 day
+
+# ── App: landing ────────────────────────────────────────────────────────────
+lint:landing:
+  extends:
+    - .pnpm_job
+    - .rules_landing
+  stage: lint
+  script:
+    - pnpm --filter "./packages/*" run build
+    - pnpm --filter landing-page-web lint
+
+build:landing:
+  extends:
+    - .pnpm_job
+    - .rules_landing
+  stage: build
+  needs:
+    - job: lint:landing
+      optional: true
+  script:
+    - pnpm --filter "./packages/*" run build
+    - pnpm --filter landing-page-web build
+  artifacts:
+    paths:
+      - apps/landing-page-web/.next/
+    exclude:
+      - apps/landing-page-web/.next/cache/**
+    expire_in: 1 day
+
+# ── Deploy (Vercel) ─────────────────────────────────────────────────────────
+# GitLab CI/CD variables (masked / protected):
+#   VERCEL_TOKEN
+#   VERCEL_ORG_ID
+#   VERCEL_PROJECT_ID_LANDING
+#   VERCEL_PROJECT_ID_WEB
+
+.vercel_deploy:
+  image: node:22-bookworm
+  stage: deploy
+  interruptible: true
+  before_script:
+    - chmod +x ./scripts/vercel-deploy.sh
+
+deploy:landing:preview:
+  extends: .vercel_deploy
+  needs:
+    - job: build:landing
+      optional: true
+  script:
+    - bash ./scripts/vercel-deploy.sh landing
+  environment:
+    name: preview/landing
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - apps/landing-page-web/**/*
+        - packages/**/*
+        - pnpm-lock.yaml
+        - package.json
+        - pnpm-workspace.yaml
+        - apps/landing-page-web/vercel.json
+        - .gitlab-ci.yml
+
+deploy:landing:production:
+  extends: .vercel_deploy
+  needs:
+    - job: build:landing
+      optional: true
+  script:
+    - bash ./scripts/vercel-deploy.sh landing --prod
+  environment:
+    name: production/landing
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - apps/landing-page-web/**/*
+        - packages/**/*
+        - pnpm-lock.yaml
+        - package.json
+        - pnpm-workspace.yaml
+        - apps/landing-page-web/vercel.json
+        - .gitlab-ci.yml
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+      allow_failure: true
+
+deploy:web:preview:
+  extends: .vercel_deploy
+  needs:
+    - job: build:web
+      optional: true
+  script:
+    - bash ./scripts/vercel-deploy.sh web
+  environment:
+    name: preview/web
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - apps/web/**/*
+        - packages/**/*
+        - pnpm-lock.yaml
+        - package.json
+        - pnpm-workspace.yaml
+        - apps/web/vercel.json
+        - .gitlab-ci.yml
+
+deploy:web:production:
+  extends: .vercel_deploy
+  needs:
+    - job: build:web
+      optional: true
+  script:
+    - bash ./scripts/vercel-deploy.sh web --prod
+  environment:
+    name: production/web
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - apps/web/**/*
+        - packages/**/*
+        - pnpm-lock.yaml
+        - package.json
+        - pnpm-workspace.yaml
+        - apps/web/vercel.json
+        - .gitlab-ci.yml
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+      allow_failure: true
