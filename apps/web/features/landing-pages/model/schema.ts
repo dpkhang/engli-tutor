@@ -10,7 +10,12 @@ export const createLandingPageSchema = z.object({
     .regex(/^[a-z0-9-]+$/, "Chỉ dùng a-z, 0-9 và dấu gạch ngang"),
 });
 
+export const updateLandingPageSchema = createLandingPageSchema.extend({
+  status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]),
+});
+
 export type CreateLandingPageValues = z.infer<typeof createLandingPageSchema>;
+export type UpdateLandingPageValues = z.infer<typeof updateLandingPageSchema>;
 
 export function slugifyName(name: string): string {
   return name

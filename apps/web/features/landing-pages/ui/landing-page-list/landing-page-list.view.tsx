@@ -1,13 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { Button } from "@landing-page-generator/ui";
-import type { LandingPage } from "../../model/types";
-
-const STATUS_LABEL: Record<LandingPage["status"], string> = {
-  DRAFT: "Draft",
-  PUBLISHED: "Published",
-  ARCHIVED: "Archived",
-};
+import { STATUS_LABEL, type LandingPage } from "../../model/types";
 
 export type LandingPageListViewProps = {
   pages: LandingPage[];
@@ -45,7 +40,8 @@ export function LandingPageListView({
       {isError ? (
         <div className="space-y-3 rounded-2xl border border-border bg-background p-5">
           <p className="text-sm text-red-600">
-            {errorMessage ?? "Không thể kết nối backend. Kiểm tra `NEXT_PUBLIC_API_URL` và `be` đang chạy."}
+            {errorMessage ??
+              "Không thể kết nối backend. Kiểm tra `NEXT_PUBLIC_API_URL` và `be` đang chạy."}
           </p>
           <Button type="button" variant="outline" onClick={onRetry}>
             Thử lại
@@ -62,9 +58,10 @@ export function LandingPageListView({
       {!isLoading && !isError && pages.length > 0 ? (
         <div className="grid gap-3">
           {pages.map((page) => (
-            <article
+            <Link
               key={page.id}
-              className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-background px-5 py-4"
+              href={`/pages/${page.id}`}
+              className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-background px-5 py-4 transition-colors hover:border-accent/50 hover:bg-surface/60"
             >
               <div className="min-w-0">
                 <h3 className="truncate font-medium text-foreground">{page.name}</h3>
@@ -73,7 +70,7 @@ export function LandingPageListView({
               <span className="shrink-0 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
                 {STATUS_LABEL[page.status]}
               </span>
-            </article>
+            </Link>
           ))}
         </div>
       ) : null}

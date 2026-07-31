@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCreateLandingPage } from "../../hooks/use-landing-pages";
@@ -12,6 +13,7 @@ import {
 import { LandingPageFormView } from "./landing-page-form.view";
 
 export function LandingPageForm() {
+  const router = useRouter();
   const create = useCreateLandingPage();
   const form = useForm<CreateLandingPageValues>({
     resolver: zodResolver(createLandingPageSchema),
@@ -28,8 +30,9 @@ export function LandingPageForm() {
 
   const onSubmit = form.handleSubmit(async (values) => {
     try {
-      await create.mutateAsync(values);
+      const page = await create.mutateAsync(values);
       form.reset({ name: "", slug: "" });
+      router.push(`/pages/${page.id}`);
     } catch {
       // error surfaced via mutation
     }
