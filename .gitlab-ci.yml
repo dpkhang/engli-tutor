@@ -173,6 +173,11 @@ deploy:landing:preview:
     - job: build:landing
       optional: true
   script:
+    - |
+      if [ -z "${VERCEL_PROJECT_ID_LANDING:-}" ]; then
+        echo "Missing VERCEL_PROJECT_ID_LANDING (do not use VERCEL_PROJECT_ID for landing deploy)"
+        exit 1
+      fi
     - bash ./scripts/vercel-deploy.sh landing
   environment:
     name: preview/landing
@@ -193,6 +198,11 @@ deploy:landing:production:
     - job: build:landing
       optional: true
   script:
+    - |
+      if [ -z "${VERCEL_PROJECT_ID_LANDING:-}" ]; then
+        echo "Missing VERCEL_PROJECT_ID_LANDING (do not use VERCEL_PROJECT_ID for landing deploy)"
+        exit 1
+      fi
     - bash ./scripts/vercel-deploy.sh landing --prod
   environment:
     name: production/landing
@@ -217,6 +227,11 @@ deploy:web:preview:
     - job: build:web
       optional: true
   script:
+    - |
+      if [ -z "${VERCEL_PROJECT_ID_WEB:-}" ]; then
+        echo "Missing VERCEL_PROJECT_ID_WEB (do not use VERCEL_PROJECT_ID for web deploy)"
+        exit 1
+      fi
     - bash ./scripts/vercel-deploy.sh web
   environment:
     name: preview/web
@@ -237,6 +252,11 @@ deploy:web:production:
     - job: build:web
       optional: true
   script:
+    - |
+      if [ -z "${VERCEL_PROJECT_ID_WEB:-}" ]; then
+        echo "Missing VERCEL_PROJECT_ID_WEB (do not use VERCEL_PROJECT_ID for web deploy)"
+        exit 1
+      fi
     - bash ./scripts/vercel-deploy.sh web --prod
   environment:
     name: production/web
