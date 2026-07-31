@@ -1,10 +1,20 @@
 {
-  "name": "landing-page-generator-fe",
+  "name": "@landing-page-generator/fe",
   "private": true,
-  "version": "0.1.0",
-  "scripts": { "dev": "next dev -p 3000", "build": "next build", "start": "next start -p 3000", "lint": "tsc --noEmit" },
-  "dependencies": {
-    "@hookform/resolvers": "latest", "@radix-ui/react-slot": "latest", "@tanstack/react-query": "latest", "class-variance-authority": "latest", "clsx": "latest", "lucide-react": "latest", "next": "latest", "react": "latest", "react-dom": "latest", "react-hook-form": "latest", "tailwind-merge": "latest", "zod": "latest"
+  "scripts": {
+    "install:all": "bash ./scripts/install-workspace.sh all",
+    "install:web": "bash ./scripts/install-workspace.sh web",
+    "install:landing": "bash ./scripts/install-workspace.sh landing",
+    "install:ui": "bash ./scripts/install-workspace.sh ui",
+    "install:packages": "bash ./scripts/install-workspace.sh packages",
+    "dev:web": "pnpm build:pkg && pnpm --filter landing-page-generator-fe dev",
+    "dev:landing": "pnpm build:pkg && pnpm --filter landing-page-web dev",
+    "build": "pnpm build:pkg && pnpm --filter landing-page-generator-fe build && pnpm --filter landing-page-web build",
+    "build:pkg": "pnpm --filter \"./packages/*\" run build",
+    "lint": "pnpm -r --filter \"./apps/*\" --filter \"./packages/*\" lint"
   },
-  "devDependencies": { "@tailwindcss/postcss": "latest", "@types/node": "latest", "@types/react": "latest", "@types/react-dom": "latest", "postcss": "latest", "tailwindcss": "latest", "typescript": "latest" }
+  "devDependencies": {
+    "oxfmt": "^0.61.0"
+  },
+  "packageManager": "pnpm@11.7.0"
 }

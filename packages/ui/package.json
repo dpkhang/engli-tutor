@@ -6,6 +6,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
+    "install:workspace": "pnpm --dir ../.. install:ui",
+    "install:all": "pnpm --dir ../.. install:all",
     "build": "tsc",
     "type-check": "tsc --noEmit"
   },

@@ -1,0 +1,10 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+allowBuilds:
+  "@prisma/engines": true
+  prisma: true
+  sharp: true
+minimumReleaseAgeExclude:
+  - lucide-react@1.28.0
+  - postcss@8.5.25

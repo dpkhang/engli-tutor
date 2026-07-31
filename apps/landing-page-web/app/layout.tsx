@@ -24,8 +24,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="vi" className={`${display.variable} ${sans.variable}`}>
-      <body>
+    <html lang="vi" className={`${display.variable} ${sans.variable}`} suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <SiteShell>{children}</SiteShell>
       </body>
     </html>

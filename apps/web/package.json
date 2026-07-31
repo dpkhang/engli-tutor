@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "install:workspace": "pnpm --dir ../.. install:web",
+    "install:all": "pnpm --dir ../.. install:all",
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
