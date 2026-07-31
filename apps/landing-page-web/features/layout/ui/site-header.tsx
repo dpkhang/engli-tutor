@@ -91,13 +91,22 @@ export function SiteHeader() {
       return;
     }
 
+    let raf = 0;
     const onScroll = () => {
-      setScrolled(window.scrollY > SCROLL_SOLID_AT);
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const next = window.scrollY > SCROLL_SOLID_AT;
+        setScrolled((prev) => (prev === next ? prev : next));
+      });
     };
 
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, [isMarketingHome]);
 
   useEffect(() => {
@@ -140,7 +149,7 @@ export function SiteHeader() {
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-[background,box-shadow,backdrop-filter] duration-300",
         useSolidHeader
-          ? "bg-background/75 shadow-[0_8px_30px_-18px_rgba(6,53,45,0.45)] backdrop-blur-xl backdrop-saturate-150"
+          ? "bg-background/88 shadow-[0_8px_30px_-18px_rgba(6,53,45,0.45)] backdrop-blur-md"
           : "bg-gradient-to-b from-[#041f1a]/75 via-[#041f1a]/35 to-transparent",
       )}
       initial={{ opacity: 0, y: -10 }}
