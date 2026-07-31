@@ -7,7 +7,7 @@ import { ArrowUpRight, ChevronDown } from "lucide-react";
 import { authClient, useSession } from "@/lib/auth-client";
 import { Button, cn } from "@landing-page-generator/ui";
 import { motion, AnimatePresence } from "motion/react";
-import { getAppUrl } from "@/features/auth/model/session";
+import { getAppUrl, getAuthHref } from "@/features/auth/model/session";
 
 const GUEST_NAV = [
   { href: "/#features", label: "Tính năng" },
@@ -117,6 +117,7 @@ export function SiteHeader() {
   const isLoggedIn = Boolean(user);
   const navItems = isLoggedIn ? MEMBER_NAV : GUEST_NAV;
   const appUrl = getAppUrl();
+  const authHref = getAuthHref();
   const displayName = user?.name?.trim() || user?.email?.split("@")[0] || "Tài khoản";
 
   const linkTone = useSolidHeader
@@ -247,7 +248,7 @@ export function SiteHeader() {
               <>
                 {!isAuth && !isPayment ? (
                   <Link
-                    href="/auth"
+                    href={authHref}
                     className={cn(
                       "hidden h-9 items-center rounded-md px-3 text-sm transition-colors sm:inline-flex",
                       onHero

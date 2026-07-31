@@ -1,16 +1,11 @@
-import { Suspense } from "react";
-import { AuthPage } from "@/features/auth";
+import { redirect } from "next/navigation";
 
+function workspaceLoginUrl(): string {
+  const app = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  return `${app}/login`;
+}
+
+/** Auth UI runs on workspace so session cookies are first-party. */
 export default function AuthRoutePage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-[100svh] items-center justify-center text-sm text-muted-foreground">
-          Đang tải...
-        </div>
-      }
-    >
-      <AuthPage />
-    </Suspense>
-  );
+  redirect(workspaceLoginUrl());
 }

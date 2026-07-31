@@ -6,6 +6,8 @@ import type {
 } from "../model/types";
 
 function apiBase(): string {
+  // Production (Vercel): same-origin via next.config rewrites.
+  if (process.env.NEXT_PUBLIC_AUTH_SAME_ORIGIN === "true") return "";
   return (process.env.NEXT_PUBLIC_API_URL ?? "https://landing-generator-be.onrender.com").replace(
     /\/$/,
     "",

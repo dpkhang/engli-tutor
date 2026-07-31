@@ -2,13 +2,16 @@ import { createAuthClient } from "better-auth/react";
 
 export type PagecraftAuthClient = ReturnType<typeof createAuthClient>;
 
-/** Create Better Auth client. `baseURL` must be the public API origin (no trailing slash). */
-export function createPagecraftAuthClient(baseURL: string): PagecraftAuthClient {
-  const normalized = baseURL.replace(/\/$/, "");
-  if (!normalized) {
-    throw new Error("Auth baseURL is empty. Set NEXT_PUBLIC_API_URL.");
+/**
+ * Create Better Auth client.
+ * - With `baseURL`: talk to API directly (local FE → Render).
+ * - Without: same-origin `/api/auth` (Vercel rewrite → API; first-party cookies).
+ */
+export function createPagecraftAuthClient(baseURL?: string): PagecraftAuthClient {
+  if (baseURL && baseURL.length > 0) {
+    return createAuthClient({ baseURL: baseURL.replace(/\/$/, "") });
   }
-  return createAuthClient({ baseURL: normalized });
+  return createAuthClient();
 }
 
 export function authErrorMessage(

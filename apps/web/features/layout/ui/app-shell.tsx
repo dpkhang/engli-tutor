@@ -13,7 +13,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const signOut = () => {
     void authClient.signOut().then(() => {
-      window.location.assign(`${marketingUrl}/auth`);
+      window.location.assign("/login");
     });
   };
 

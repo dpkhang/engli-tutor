@@ -1,4 +1,4 @@
-import { LandingPageDetail } from "@/features/landing-pages/ui/landing-page-detail";
+import { LandingPageDetail } from "@/features/landing-pages";
 
 type PageProps = {
   params: Promise<{ id: string }>;
