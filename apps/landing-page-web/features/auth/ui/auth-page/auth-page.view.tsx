@@ -16,16 +16,10 @@ export type AuthPageViewProps = {
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 };
 
-export function AuthPageView({
-  mode,
-  pending,
-  error,
-  onModeChange,
-  onSubmit,
-}: AuthPageViewProps) {
+export function AuthPageView({ mode, pending, error, onModeChange, onSubmit }: AuthPageViewProps) {
   return (
-    <main className="relative min-h-[100svh] overflow-hidden bg-[radial-gradient(ellipse_at_top_left,hsl(158_30%_90%),hsl(var(--background))_50%)]">
-      <div className="relative mx-auto grid min-h-[100svh] max-w-6xl items-stretch gap-0 px-5 pt-24 pb-16 sm:px-8 lg:grid-cols-2 lg:gap-12 lg:px-8 lg:pt-20 lg:pb-20">
+    <main className="relative min-h-svh overflow-hidden bg-[radial-gradient(ellipse_at_top_left,hsl(158_30%_90%),hsl(var(--background))_50%)]">
+      <div className="relative mx-auto grid min-h-svh max-w-6xl items-stretch gap-0 px-5 pt-24 pb-16 sm:px-8 lg:grid-cols-2 lg:gap-12 lg:px-8 lg:pt-20 lg:pb-20">
         <motion.div
           className="flex w-full max-w-md items-center justify-self-center lg:justify-self-start"
           initial={{ opacity: 0, y: 18 }}
@@ -123,11 +117,7 @@ export function AuthPageView({
               {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
               <Button type="submit" className="h-11 w-full" size="lg" disabled={pending}>
-                {pending
-                  ? "Đang xử lý..."
-                  : mode === "login"
-                    ? "Đăng nhập"
-                    : "Tạo tài khoản"}
+                {pending ? "Đang xử lý..." : mode === "login" ? "Đăng nhập" : "Tạo tài khoản"}
               </Button>
             </form>
 
