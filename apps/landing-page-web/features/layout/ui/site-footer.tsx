@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useDemoSession } from "@/features/auth/hooks/use-demo-session";
+import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
 
 const FOOTER_LINKS = [
   {
@@ -25,7 +25,7 @@ const FOOTER_LINKS = [
 ];
 
 export function SiteFooter() {
-  const { isLoggedIn, entryHref } = useDemoSession();
+  const { isLoggedIn, entryHref } = useAuthSession();
 
   return (
     <footer className="border-t border-border bg-foreground text-primary-foreground">

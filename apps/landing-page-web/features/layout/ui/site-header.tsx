@@ -4,14 +4,10 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
+import { authClient, useSession } from "@landing-page-generator/auth";
 import { Button, cn } from "@landing-page-generator/ui";
 import { motion, AnimatePresence } from "motion/react";
-import {
-  clearDemoSession,
-  getAppUrl,
-  readDemoSession,
-  type DemoSession,
-} from "@/features/auth/model/session";
+import { getAppUrl } from "@/features/auth/model/session";
 
 const GUEST_NAV = [
   { href: "/#features", label: "Tính năng" },
@@ -70,20 +66,10 @@ export function SiteHeader() {
   const isPayment = pathname.startsWith("/payment");
   const isMarketingHome = pathname === "/";
   const [scrolled, setScrolled] = useState(false);
-  const [session, setSession] = useState<DemoSession | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const sync = () => setSession(readDemoSession());
-    sync();
-    window.addEventListener("pagecraft:auth", sync);
-    window.addEventListener("storage", sync);
-    return () => {
-      window.removeEventListener("pagecraft:auth", sync);
-      window.removeEventListener("storage", sync);
-    };
-  }, []);
+  const { data, isPending } = useSession();
+  const user = data?.user ?? null;
 
   useEffect(() => {
     if (!isMarketingHome) {
@@ -128,20 +114,20 @@ export function SiteHeader() {
 
   const useSolidHeader = isAuth || isPayment || scrolled;
   const onHero = isMarketingHome && !scrolled;
-  const isLoggedIn = Boolean(session);
+  const isLoggedIn = Boolean(user);
   const navItems = isLoggedIn ? MEMBER_NAV : GUEST_NAV;
   const appUrl = getAppUrl();
-  const displayName = session?.name?.trim() || session?.email?.split("@")[0] || "Tài khoản";
+  const displayName = user?.name?.trim() || user?.email?.split("@")[0] || "Tài khoản";
 
   const linkTone = useSolidHeader
     ? "text-muted-foreground hover:text-foreground"
     : "text-primary-foreground/80 hover:text-primary-foreground";
 
   const signOut = () => {
-    clearDemoSession();
-    setSession(null);
     setMenuOpen(false);
-    window.dispatchEvent(new Event("pagecraft:auth"));
+    void authClient.signOut().then(() => {
+      window.location.assign("/");
+    });
   };
 
   return (
@@ -184,7 +170,14 @@ export function SiteHeader() {
           </nav>
 
           <div className="flex items-center gap-2">
-            {isLoggedIn ? (
+            {isPending ? (
+              <span
+                className={cn(
+                  "h-9 w-20 animate-pulse rounded-md",
+                  onHero ? "bg-primary-foreground/15" : "bg-muted",
+                )}
+              />
+            ) : isLoggedIn ? (
               <div className="relative" ref={menuRef}>
                 <button
                   type="button"
@@ -223,7 +216,7 @@ export function SiteHeader() {
                     >
                       <div className="px-2.5 py-2">
                         <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
-                        <p className="truncate text-xs text-muted-foreground">{session?.email}</p>
+                        <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
                       </div>
 
                       <WorkspaceMenuCard href={appUrl} className="mx-0.5" />

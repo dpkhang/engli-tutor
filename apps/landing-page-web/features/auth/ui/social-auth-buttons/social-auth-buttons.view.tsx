@@ -37,27 +37,6 @@ const PROVIDERS: SocialProviderItem[] = [
     ),
   },
   {
-    id: "apple",
-    label: "Apple",
-    icon: (
-      <svg viewBox="0 0 24 24" className="size-4 fill-current" aria-hidden>
-        <path d="M16.37 12.63c0-2.05 1.67-3.04 1.75-3.09-0.96-1.4-2.45-1.59-2.97-1.61-1.26-.13-2.47.75-3.11.75-.65 0-1.64-.73-2.7-.71-1.39.02-2.67.81-3.38 2.05-1.45 2.51-.37 6.22 1.04 8.26.69 1 1.51 2.12 2.58 2.08 1.04-.04 1.43-.67 2.69-.67 1.25 0 1.61.67 2.71.65 1.12-.02 1.83-1.01 2.51-2.02.79-1.15 1.11-2.26 1.13-2.32-.02-.01-2.16-.83-2.18-3.37zM14.7 6.4c.57-.69.95-1.65.85-2.61-.82.03-1.81.55-2.4 1.24-.53.61-.99 1.59-.87 2.52.92.07 1.86-.47 2.42-1.15z" />
-      </svg>
-    ),
-  },
-  {
-    id: "facebook",
-    label: "Facebook",
-    icon: (
-      <svg viewBox="0 0 24 24" className="size-4" aria-hidden>
-        <path
-          fill="#1877F2"
-          d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.09 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.95h-1.51c-1.49 0-1.95.93-1.95 1.87v2.25h3.32l-.53 3.49h-2.79V24C19.61 23.09 24 18.1 24 12.07z"
-        />
-      </svg>
-    ),
-  },
-  {
     id: "github",
     label: "GitHub",
     icon: (
@@ -79,33 +58,25 @@ export type SocialAuthButtonsViewProps = SocialAuthButtonsProps & {
   onProviderClick: (provider: SocialProviderItem) => void;
 };
 
-export function SocialAuthButtonsView({
-  disabled,
-  className,
-  pending,
-  onProviderClick,
-}: SocialAuthButtonsViewProps) {
+export function SocialAuthButtonsView({ className }: SocialAuthButtonsViewProps) {
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn("space-y-2", className)}>
       <div className="grid grid-cols-2 gap-2">
         {PROVIDERS.map((provider) => (
           <Button
             key={provider.id}
             type="button"
             variant="outline"
-            className="h-11 justify-start gap-2.5 bg-background px-3"
-            disabled={disabled || pending !== null}
-            onClick={() => {
-              onProviderClick(provider);
-            }}
+            className="h-11 justify-start gap-2.5 bg-background px-3 opacity-60"
+            disabled
+            title="Sắp ra mắt"
           >
             {provider.icon}
-            <span className="truncate text-sm font-medium">
-              {pending === provider.id ? "Đang chuyển..." : provider.label}
-            </span>
+            <span className="truncate text-sm font-medium">{provider.label}</span>
           </Button>
         ))}
       </div>
+      <p className="text-center text-xs text-muted-foreground">Đăng nhập mạng xã hội — sắp ra mắt</p>
     </div>
   );
 }

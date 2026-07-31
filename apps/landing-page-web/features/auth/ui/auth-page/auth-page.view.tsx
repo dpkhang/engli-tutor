@@ -75,7 +75,7 @@ export function AuthPageView({
 
             <div className="flex items-center gap-3 text-xs text-muted-foreground">
               <span className="h-px flex-1 bg-border" />
-              <span>hoặc dùng email</span>
+              <span>đăng nhập bằng email</span>
               <span className="h-px flex-1 bg-border" />
             </div>
 
@@ -114,24 +114,21 @@ export function AuthPageView({
                   placeholder="••••••••"
                   className="h-11 w-full bg-background"
                   autoComplete={mode === "login" ? "current-password" : "new-password"}
+                  minLength={8}
                   required
                   disabled={pending}
                 />
               </label>
 
-              {error ? <p className="text-sm text-red-600">{error}</p> : null}
+              {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
               <Button type="submit" className="h-11 w-full" size="lg" disabled={pending}>
                 {pending
-                  ? "Đang vào workspace..."
+                  ? "Đang xử lý..."
                   : mode === "login"
                     ? "Đăng nhập"
                     : "Tạo tài khoản"}
               </Button>
-
-              <p className="text-center text-xs text-muted-foreground">
-                Demo: sau khi đăng nhập sẽ về trang chủ với menu Workspace.
-              </p>
             </form>
 
             <p className="text-sm text-muted-foreground">
@@ -159,8 +156,8 @@ export function AuthPageView({
             Vào workspace và xuất bản trang tiếp theo.
           </p>
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-primary-foreground/75">
-            Đăng nhập nhanh bằng Google, Apple, Facebook hoặc GitHub — rồi quản lý landing page
-            trong cùng một chỗ.
+            Đăng nhập bằng email để quản lý landing page trong cùng một chỗ. Đăng nhập mạng xã hội
+            sẽ sớm có.
           </p>
         </motion.aside>
       </div>

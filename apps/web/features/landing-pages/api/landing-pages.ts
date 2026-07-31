@@ -19,9 +19,15 @@ async function parseError(response: Response): Promise<string> {
   return `Request failed (${response.status})`;
 }
 
+const jsonHeaders = {
+  Accept: "application/json",
+  "Content-Type": "application/json",
+} as const;
+
 export async function getLandingPages(): Promise<LandingPage[]> {
   const response = await fetch(`${apiBase()}/api/landing-pages`, {
     headers: { Accept: "application/json" },
+    credentials: "include",
     cache: "no-store",
   });
   if (!response.ok) throw new Error(await parseError(response));
@@ -31,6 +37,7 @@ export async function getLandingPages(): Promise<LandingPage[]> {
 export async function getLandingPage(id: string): Promise<LandingPageDetail> {
   const response = await fetch(`${apiBase()}/api/landing-pages/${id}`, {
     headers: { Accept: "application/json" },
+    credentials: "include",
     cache: "no-store",
   });
   if (!response.ok) throw new Error(await parseError(response));
@@ -40,10 +47,8 @@ export async function getLandingPage(id: string): Promise<LandingPageDetail> {
 export async function createLandingPage(input: CreateLandingPageInput): Promise<LandingPage> {
   const response = await fetch(`${apiBase()}/api/landing-pages`, {
     method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
+    headers: jsonHeaders,
+    credentials: "include",
     body: JSON.stringify(input),
   });
   if (!response.ok) throw new Error(await parseError(response));
@@ -56,10 +61,8 @@ export async function updateLandingPage(
 ): Promise<LandingPageDetail> {
   const response = await fetch(`${apiBase()}/api/landing-pages/${id}`, {
     method: "PATCH",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
+    headers: jsonHeaders,
+    credentials: "include",
     body: JSON.stringify(input),
   });
   if (!response.ok) throw new Error(await parseError(response));
@@ -70,6 +73,7 @@ export async function deleteLandingPage(id: string): Promise<void> {
   const response = await fetch(`${apiBase()}/api/landing-pages/${id}`, {
     method: "DELETE",
     headers: { Accept: "application/json" },
+    credentials: "include",
   });
   if (!response.ok && response.status !== 204) {
     throw new Error(await parseError(response));

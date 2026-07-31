@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useMotionTemplate, useMotionValue, useSpring } from "motion/react";
-import { useDemoSession } from "@/features/auth/hooks/use-demo-session";
+import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
 import { goToEntry } from "@/features/auth/model/session";
 import { MasterBannerView } from "./master-banner.view";
 
@@ -18,7 +18,7 @@ function canUseParallax() {
 }
 
 export function MasterBanner() {
-  const { entryLabel } = useDemoSession();
+  const { entryLabel, isLoggedIn } = useAuthSession();
   const sectionRef = useRef<HTMLElement>(null);
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
@@ -79,7 +79,7 @@ export function MasterBanner() {
       entryLabel={entryLabel}
       imageTransform={imageTransform}
       glowTransform={glowTransform}
-      onEntryClick={goToEntry}
+      onEntryClick={() => goToEntry(isLoggedIn)}
       onFeaturesClick={() => {
         document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
       }}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Manrope } from "next/font/google";
 import { QueryProvider } from "@/providers/query-provider";
+import { AuthGate } from "@/providers/auth-gate";
 import { AppShell } from "@/features/layout";
 import "./globals.css";
 
@@ -28,7 +29,9 @@ export default function RootLayout({
     <html lang="vi" className={`${display.variable} ${sans.variable}`} suppressHydrationWarning>
       <body suppressHydrationWarning>
         <QueryProvider>
-          <AppShell>{children}</AppShell>
+          <AppShell>
+            <AuthGate>{children}</AuthGate>
+          </AppShell>
         </QueryProvider>
       </body>
     </html>

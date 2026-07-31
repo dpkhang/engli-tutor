@@ -1,0 +1,27 @@
+{
+  "name": "@landing-page-generator/auth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "install:workspace": "pnpm --dir ../.. install:ui",
+    "install:all": "pnpm --dir ../.. install:all",
+    "build": "tsc",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "better-auth": "^1.3.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.17",
+    "react": "^19.2.8",
+    "typescript": "~5.9.3"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}
