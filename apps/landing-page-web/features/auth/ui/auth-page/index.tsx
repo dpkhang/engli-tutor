@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { authClient, authErrorMessage, useSession } from "@landing-page-generator/auth";
+import { authClient, authErrorMessage, useSession } from "@/lib/auth-client";
 import { getAppUrl, goToWorkspace } from "@/features/auth/model/session";
 import { AuthPageView, type AuthMode } from "./auth-page.view";
 

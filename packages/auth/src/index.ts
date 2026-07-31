@@ -1,11 +1,6 @@
 export {
-  authClient,
   authErrorMessage,
-  getApiUrl,
-  getMarketingUrl,
-  getWorkspaceUrl,
-  signIn,
-  signOut,
-  signUp,
-  useSession,
+  createPagecraftAuthClient,
+  normalizePublicUrl,
+  type PagecraftAuthClient,
 } from "./client";

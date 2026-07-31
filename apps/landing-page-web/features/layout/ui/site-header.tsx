@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
-import { authClient, useSession } from "@landing-page-generator/auth";
+import { authClient, useSession } from "@/lib/auth-client";
 import { Button, cn } from "@landing-page-generator/ui";
 import { motion, AnimatePresence } from "motion/react";
 import { getAppUrl } from "@/features/auth/model/session";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "@landing-page-generator/auth";
+import { useSession } from "@/lib/auth-client";
 import { getAppUrl, getAuthHref, getEntryHref } from "@/features/auth/model/session";
 
 export function useAuthSession() {

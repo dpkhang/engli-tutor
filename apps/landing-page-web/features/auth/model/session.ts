@@ -1,8 +1,6 @@
-import { getWorkspaceUrl } from "@landing-page-generator/auth";
-
-/** Workspace app URL. */
+/** Workspace app URL — read in the Next app so NEXT_PUBLIC_* is inlined. */
 export function getAppUrl(): string {
-  return getWorkspaceUrl();
+  return (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
 }
 
 export function getAuthHref(): string {

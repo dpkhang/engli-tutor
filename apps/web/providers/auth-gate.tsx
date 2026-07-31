@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { getMarketingUrl, useSession } from "@landing-page-generator/auth";
+import { getMarketingUrl, useSession } from "@/lib/auth-client";
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const { data, isPending } = useSession();

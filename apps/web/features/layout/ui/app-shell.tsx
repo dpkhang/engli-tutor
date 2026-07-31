@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
-import { authClient, getMarketingUrl, useSession } from "@landing-page-generator/auth";
+import { authClient, getMarketingUrl, useSession } from "@/lib/auth-client";
 import { Button } from "@landing-page-generator/ui";
 
 export function AppShell({ children }: { children: React.ReactNode }) {

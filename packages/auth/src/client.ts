@@ -1,30 +1,25 @@
-"use client";
-
 import { createAuthClient } from "better-auth/react";
 
-export function getApiUrl(): string {
-  return (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001").replace(/\/$/, "");
+export type PagecraftAuthClient = ReturnType<typeof createAuthClient>;
+
+/** Create a Better Auth client. Pass `baseURL` from the Next app so `NEXT_PUBLIC_*` is inlined. */
+export function createPagecraftAuthClient(baseURL: string): PagecraftAuthClient {
+  const normalized = baseURL.replace(/\/$/, "");
+  if (!normalized) {
+    throw new Error("Auth baseURL is empty. Set NEXT_PUBLIC_API_URL.");
+  }
+  return createAuthClient({ baseURL: normalized });
 }
 
-/** Workspace app URL (used by marketing). */
-export function getWorkspaceUrl(): string {
-  return (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
-}
-
-/** Marketing site URL (used by workspace). */
-export function getMarketingUrl(): string {
-  return (process.env.NEXT_PUBLIC_MARKETING_URL ?? "http://localhost:3002").replace(/\/$/, "");
-}
-
-export const authClient = createAuthClient({
-  baseURL: getApiUrl(),
-});
-
-export const { useSession, signIn, signUp, signOut } = authClient;
-
-export function authErrorMessage(error: { message?: string; statusText?: string } | null | undefined): string {
+export function authErrorMessage(
+  error: { message?: string; statusText?: string } | null | undefined,
+): string {
   if (!error) return "Đã xảy ra lỗi. Thử lại.";
   if (error.message) return error.message;
   if (error.statusText) return error.statusText;
   return "Đã xảy ra lỗi. Thử lại.";
+}
+
+export function normalizePublicUrl(value: string | undefined, fallback: string): string {
+  return (value && value.length > 0 ? value : fallback).replace(/\/$/, "");
 }
