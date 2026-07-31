@@ -159,6 +159,11 @@ build:landing:
 #   VERCEL_ORG_ID
 #   VERCEL_PROJECT_ID_LANDING
 #   VERCEL_PROJECT_ID_WEB
+# App public URLs (forwarded to Vercel build via --build-env on deploy):
+#   landing: NEXT_PUBLIC_APP_URL, NEXT_PUBLIC_SITE_URL
+#   web:     NEXT_PUBLIC_API_URL, NEXT_PUBLIC_MARKETING_URL
+# Set these in GitLab CI/CD Variables (same names). Redeploy after changing.
+# (Setting them only in GitLab without redeploy does nothing — Next inlines at build.)
 
 .vercel_deploy:
   image: node:22-bookworm

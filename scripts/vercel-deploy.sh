@@ -12,6 +12,9 @@
 #   VERCEL_ORG_ID                 # Team ID (team_...) from the team that owns the project
 #   VERCEL_PROJECT_ID_LANDING     # Project Settings → General → Project ID (prj_...)
 #   VERCEL_PROJECT_ID_WEB
+# Also forward to Vercel build (NEXT_PUBLIC_* are baked at build time):
+#   landing → NEXT_PUBLIC_APP_URL, NEXT_PUBLIC_SITE_URL
+#   web     → NEXT_PUBLIC_API_URL, NEXT_PUBLIC_MARKETING_URL
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -200,6 +203,46 @@ export VERCEL_PROJECT_ID="$PROJECT_ID"
 ARGS=(--token "$VERCEL_TOKEN" --yes --project "$PROJECT_ID")
 if [[ "$MODE" == "--prod" ]]; then
   ARGS+=(--prod)
+fi
+
+# NEXT_PUBLIC_* are inlined at `next build` on Vercel.
+# GitLab CI vars are NOT available there unless we pass --build-env / --env.
+forward_public_env() {
+  local key="$1"
+  local val="${!key:-}"
+  if [[ -z "$val" ]]; then
+    echo "⚠ ${key} is unset — client will fall back to localhost defaults" >&2
+    return
+  fi
+  if [[ "$val" == *localhost* || "$val" == *127.0.0.1* ]]; then
+    echo "⚠ ${key}=${val} still points at localhost (ok for local only)" >&2
+  fi
+  echo "  Build env: ${key}"
+  ARGS+=(--build-env "${key}=${val}" --env "${key}=${val}")
+}
+
+case "$APP" in
+  landing)
+    forward_public_env NEXT_PUBLIC_APP_URL
+    forward_public_env NEXT_PUBLIC_SITE_URL
+    ;;
+  web)
+    forward_public_env NEXT_PUBLIC_API_URL
+    forward_public_env NEXT_PUBLIC_MARKETING_URL
+    ;;
+esac
+
+if [[ "$APP" == "web" && -z "${NEXT_PUBLIC_API_URL:-}" ]]; then
+  echo "✖ NEXT_PUBLIC_API_URL is required for web deploy (backend API origin)" >&2
+  exit 1
+fi
+if [[ "$APP" == "web" && -z "${NEXT_PUBLIC_MARKETING_URL:-}" ]]; then
+  echo "✖ NEXT_PUBLIC_MARKETING_URL is required for web deploy (landing site origin)" >&2
+  exit 1
+fi
+if [[ "$APP" == "landing" && -z "${NEXT_PUBLIC_APP_URL:-}" ]]; then
+  echo "✖ NEXT_PUBLIC_APP_URL is required for landing deploy (workspace web origin)" >&2
+  exit 1
 fi
 
 npx --yes vercel@latest deploy "${ARGS[@]}"
