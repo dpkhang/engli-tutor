@@ -1,0 +1,10 @@
+{
+  "name": "landing-page-generator-fe",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": { "dev": "next dev -p 3000", "build": "next build", "start": "next start -p 3000", "lint": "tsc --noEmit" },
+  "dependencies": {
+    "@hookform/resolvers": "latest", "@radix-ui/react-slot": "latest", "@tanstack/react-query": "latest", "class-variance-authority": "latest", "clsx": "latest", "lucide-react": "latest", "next": "latest", "react": "latest", "react-dom": "latest", "react-hook-form": "latest", "tailwind-merge": "latest", "zod": "latest"
+  },
+  "devDependencies": { "@tailwindcss/postcss": "latest", "@types/node": "latest", "@types/react": "latest", "@types/react-dom": "latest", "postcss": "latest", "tailwindcss": "latest", "typescript": "latest" }
+}
