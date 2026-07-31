@@ -1,3 +1,3 @@
-import { type InputHTMLAttributes } from "react";
-export type InputProps = InputHTMLAttributes<HTMLInputElement>;
-export declare const Input: import("react").ForwardRefExoticComponent<InputProps & import("react").RefAttributes<HTMLInputElement>>;
+import * as React from "react";
+declare function Input({ className, type, ...props }: React.ComponentProps<"input">): React.JSX.Element;
+export { Input };

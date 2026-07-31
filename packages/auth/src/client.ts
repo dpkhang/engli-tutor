@@ -2,7 +2,7 @@ import { createAuthClient } from "better-auth/react";
 
 export type PagecraftAuthClient = ReturnType<typeof createAuthClient>;
 
-/** Create a Better Auth client. Pass `baseURL` from the Next app so `NEXT_PUBLIC_*` is inlined. */
+/** Create Better Auth client. `baseURL` must be the public API origin (no trailing slash). */
 export function createPagecraftAuthClient(baseURL: string): PagecraftAuthClient {
   const normalized = baseURL.replace(/\/$/, "");
   if (!normalized) {

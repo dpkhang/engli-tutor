@@ -1,10 +1,10 @@
+import * as React from "react";
 import { type VariantProps } from "class-variance-authority";
-import { type ButtonHTMLAttributes } from "react";
 declare const buttonVariants: (props?: ({
-    variant?: "default" | "outline" | "ghost" | "secondary" | null | undefined;
-    size?: "default" | "sm" | "lg" | null | undefined;
+    variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | null | undefined;
+    size?: "default" | "xs" | "sm" | "lg" | "icon" | "icon-xs" | "icon-sm" | "icon-lg" | null | undefined;
 } & import("class-variance-authority/types").ClassProp) | undefined) => string;
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
-}
-export declare const Button: import("react").ForwardRefExoticComponent<ButtonProps & import("react").RefAttributes<HTMLButtonElement>>;
-export {};
+declare function Button({ className, variant, size, asChild, ...props }: React.ComponentProps<"button"> & VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+}): React.JSX.Element;
+export { Button, buttonVariants };

@@ -6,7 +6,11 @@ import type {
 } from "../model/types";
 
 function apiBase(): string {
-  return (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001").replace(/\/$/, "");
+  const url = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+  if (!url) {
+    throw new Error("NEXT_PUBLIC_API_URL is missing. Check apps/web/.env.local and restart next.");
+  }
+  return url;
 }
 
 async function parseError(response: Response): Promise<string> {

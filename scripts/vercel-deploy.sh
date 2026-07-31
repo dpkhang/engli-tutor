@@ -13,7 +13,7 @@
 #   VERCEL_PROJECT_ID_LANDING     # Project Settings → General → Project ID (prj_...)
 #   VERCEL_PROJECT_ID_WEB
 # Also forward to Vercel build (NEXT_PUBLIC_* are baked at build time):
-#   landing → NEXT_PUBLIC_APP_URL, NEXT_PUBLIC_SITE_URL
+#   landing → NEXT_PUBLIC_API_URL, NEXT_PUBLIC_APP_URL, NEXT_PUBLIC_SITE_URL
 #   web     → NEXT_PUBLIC_API_URL, NEXT_PUBLIC_MARKETING_URL
 set -euo pipefail
 
@@ -223,6 +223,7 @@ forward_public_env() {
 
 case "$APP" in
   landing)
+    forward_public_env NEXT_PUBLIC_API_URL
     forward_public_env NEXT_PUBLIC_APP_URL
     forward_public_env NEXT_PUBLIC_SITE_URL
     ;;
@@ -232,8 +233,8 @@ case "$APP" in
     ;;
 esac
 
-if [[ "$APP" == "web" && -z "${NEXT_PUBLIC_API_URL:-}" ]]; then
-  echo "✖ NEXT_PUBLIC_API_URL is required for web deploy (backend API origin)" >&2
+if [[ -z "${NEXT_PUBLIC_API_URL:-}" ]]; then
+  echo "✖ NEXT_PUBLIC_API_URL is required for $APP deploy (backend API origin)" >&2
   exit 1
 fi
 if [[ "$APP" == "web" && -z "${NEXT_PUBLIC_MARKETING_URL:-}" ]]; then
@@ -242,6 +243,10 @@ if [[ "$APP" == "web" && -z "${NEXT_PUBLIC_MARKETING_URL:-}" ]]; then
 fi
 if [[ "$APP" == "landing" && -z "${NEXT_PUBLIC_APP_URL:-}" ]]; then
   echo "✖ NEXT_PUBLIC_APP_URL is required for landing deploy (workspace web origin)" >&2
+  exit 1
+fi
+if [[ "$APP" == "landing" && -z "${NEXT_PUBLIC_SITE_URL:-}" ]]; then
+  echo "✖ NEXT_PUBLIC_SITE_URL is required for landing deploy (marketing public URL)" >&2
   exit 1
 fi
 
