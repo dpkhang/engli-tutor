@@ -5,10 +5,7 @@ import {
   normalizePublicUrl,
 } from "@landing-page-generator/auth";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-if (!apiUrl) {
-  throw new Error("NEXT_PUBLIC_API_URL is missing. Check apps/web/.env.local and restart next.");
-}
+const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
 
 export const authClient = createPagecraftAuthClient(apiUrl);
 

@@ -1,15 +1,21 @@
 import path from "node:path";
 import type { NextConfig } from "next";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL?.trim().replace(/\/$/, "");
-if (!apiUrl) {
-  throw new Error(
-    "[landing-page-web] NEXT_PUBLIC_API_URL is required in .env.local (e.g. https://landing-generator-be.onrender.com)",
+/** Baked into the client bundle. Prefer CI/Vercel env; fallback keeps prod deploys working. */
+const DEFAULT_API_URL = "https://landing-generator-be.onrender.com";
+
+const apiUrl = (process.env.NEXT_PUBLIC_API_URL?.trim() || DEFAULT_API_URL).replace(
+  /\/$/,
+  "",
+);
+
+if (!process.env.NEXT_PUBLIC_API_URL?.trim()) {
+  console.warn(
+    `[landing-page-web] NEXT_PUBLIC_API_URL unset — using ${DEFAULT_API_URL}. Set it in Vercel/GitLab for production.`,
   );
 }
 
 const nextConfig: NextConfig = {
-  // Force-inline into the client bundle (Turbopack/monorepo often misses package/app fallbacks)
   env: {
     NEXT_PUBLIC_API_URL: apiUrl,
   },

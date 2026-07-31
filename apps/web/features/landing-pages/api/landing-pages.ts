@@ -6,11 +6,10 @@ import type {
 } from "../model/types";
 
 function apiBase(): string {
-  const url = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
-  if (!url) {
-    throw new Error("NEXT_PUBLIC_API_URL is missing. Check apps/web/.env.local and restart next.");
-  }
-  return url;
+  return (process.env.NEXT_PUBLIC_API_URL ?? "https://landing-generator-be.onrender.com").replace(
+    /\/$/,
+    "",
+  );
 }
 
 async function parseError(response: Response): Promise<string> {
