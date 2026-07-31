@@ -64,6 +64,7 @@ export function LandingPageDetail({ id }: { id: string }) {
       isError={query.isError}
       loadError={query.error?.message ?? null}
       register={form.register}
+      control={form.control}
       errors={form.formState.errors}
       dirty={form.formState.isDirty}
       pending={update.isPending}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "src/styles/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true
+  },
+  "iconLibrary": "lucide",
+  "aliases": {
+    "components": "@landing-page-generator/ui/components",
+    "utils": "@landing-page-generator/ui/lib/utils",
+    "hooks": "@landing-page-generator/ui/hooks",
+    "lib": "@landing-page-generator/ui/lib",
+    "ui": "@landing-page-generator/ui/components"
+  }
+}
