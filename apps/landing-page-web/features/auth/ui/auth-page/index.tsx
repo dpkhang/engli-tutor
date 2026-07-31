@@ -1,21 +1,36 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { authClient, authErrorMessage, useSession } from "@/lib/auth-client";
-import { getAppUrl, goToWorkspace } from "@/features/auth/model/session";
+import { getAppUrl } from "@/features/auth/model/session";
 import { AuthPageView, type AuthMode } from "./auth-page.view";
 
+function resolveReturnTo(raw: string | null): string {
+  const fallback = getAppUrl();
+  if (!raw) return fallback;
+  try {
+    const url = new URL(raw);
+    const allowed = new URL(fallback);
+    if (url.origin !== allowed.origin) return fallback;
+    return url.toString();
+  } catch {
+    return fallback;
+  }
+}
+
 export function AuthPage() {
+  const searchParams = useSearchParams();
+  const returnTo = resolveReturnTo(searchParams.get("returnTo"));
   const { data, isPending: sessionPending } = useSession();
   const [mode, setMode] = useState<AuthMode>("login");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!sessionPending && data?.user) {
-      window.location.replace(getAppUrl());
-    }
-  }, [sessionPending, data?.user]);
+    if (sessionPending || !data?.user) return;
+    window.location.replace(returnTo);
+  }, [sessionPending, data?.user, returnTo]);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -51,7 +66,7 @@ export function AuthPage() {
         }
       }
 
-      goToWorkspace();
+      window.location.assign(returnTo);
     } catch {
       setPending(false);
       setError("Không thể kết nối máy chủ xác thực. Thử lại.");
