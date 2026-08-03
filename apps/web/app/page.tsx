@@ -1,5 +1,5 @@
-import { WorkspaceHome } from "@/features/landing-pages";
+import { DashboardOverview } from "@/features/dashboard/ui/dashboard-overview";
 
 export default function HomePage() {
-  return <WorkspaceHome />;
+  return <DashboardOverview />;
 }

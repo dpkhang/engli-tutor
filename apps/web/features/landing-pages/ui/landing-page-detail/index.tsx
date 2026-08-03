@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,12 +14,21 @@ import {
   type UpdateLandingPageValues,
 } from "../../model/schema";
 import { LandingPageDetailView } from "./landing-page-detail.view";
+import {
+  getLandingPageLocalMetadata,
+  type LandingPageLocalMetadata,
+} from "../../model/local-metadata";
 
 export function LandingPageDetail({ id }: { id: string }) {
   const router = useRouter();
   const query = useLandingPage(id);
   const update = useUpdateLandingPage(id);
   const remove = useDeleteLandingPage();
+  const [localMetadata, setLocalMetadata] = useState<LandingPageLocalMetadata | null>(null);
+
+  useEffect(() => {
+    setLocalMetadata(getLandingPageLocalMetadata(id));
+  }, [id]);
 
   const form = useForm<UpdateLandingPageValues>({
     resolver: zodResolver(updateLandingPageSchema),
@@ -51,7 +60,7 @@ export function LandingPageDetail({ id }: { id: string }) {
     if (!window.confirm("Xóa landing page này? Thao tác không hoàn tác.")) return;
     try {
       await remove.mutateAsync(id);
-      router.replace("/");
+      router.replace("/landing-pages");
     } catch {
       // surfaced via mutation
     }
@@ -60,6 +69,7 @@ export function LandingPageDetail({ id }: { id: string }) {
   return (
     <LandingPageDetailView
       page={query.data ?? null}
+      localMetadata={localMetadata}
       isLoading={query.isLoading}
       isError={query.isError}
       loadError={query.error?.message ?? null}

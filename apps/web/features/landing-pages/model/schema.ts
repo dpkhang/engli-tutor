@@ -17,6 +17,19 @@ export const updateLandingPageSchema = createLandingPageSchema.extend({
 export type CreateLandingPageValues = z.infer<typeof createLandingPageSchema>;
 export type UpdateLandingPageValues = z.infer<typeof updateLandingPageSchema>;
 
+export const createLandingPageAdvancedSchema = createLandingPageSchema.extend({
+  status: z.enum(["DRAFT", "PUBLISHED"]),
+  description: z.string().trim().max(240, "Mô tả tối đa 240 ký tự"),
+  category: z.enum(["MARKETING", "PRODUCT", "EVENT", "PORTFOLIO", "OTHER"]),
+  objective: z.enum(["LEADS", "SALES", "REGISTRATION", "AWARENESS"]),
+  template: z.enum(["BLANK", "PRODUCT_LAUNCH", "EVENT", "LEAD_CAPTURE"]),
+  tags: z.array(z.string().trim().min(1).max(24)).max(5, "Tối đa 5 tags"),
+});
+
+export type CreateLandingPageAdvancedValues = z.infer<
+  typeof createLandingPageAdvancedSchema
+>;
+
 export function slugifyName(name: string): string {
   return name
     .normalize("NFD")
