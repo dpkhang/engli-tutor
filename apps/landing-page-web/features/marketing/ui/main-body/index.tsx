@@ -2,7 +2,7 @@
 
 import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
 import { goToEntry } from "@/features/auth/model/session";
-import { PLANS } from "@/features/marketing/model/plans";
+import { PLANS, planCheckoutHref } from "@/features/marketing/model/plans";
 import { MainBodyView } from "./main-body.view";
 
 export function MainBody() {
@@ -14,7 +14,7 @@ export function MainBody() {
       plans={PLANS}
       onEntryClick={() => goToEntry(isLoggedIn)}
       onPlanClick={(planId) => {
-        window.location.href = `/payment?plan=${planId}`;
+        window.location.href = planCheckoutHref(planId);
       }}
     />
   );

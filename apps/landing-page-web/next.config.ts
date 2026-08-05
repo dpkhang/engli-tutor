@@ -5,7 +5,9 @@ import type { NextConfig } from "next";
 const DEFAULT_API_URL = "https://landing-generator-be.onrender.com";
 
 const apiUrl = (process.env.NEXT_PUBLIC_API_URL?.trim() || DEFAULT_API_URL).replace(/\/$/, "");
-const useSameOriginProxy = Boolean(process.env.VERCEL);
+// Keep cookies first-party in production and during localhost development while
+// continuing to use the configured upstream API.
+const useSameOriginProxy = true;
 
 if (!process.env.NEXT_PUBLIC_API_URL?.trim()) {
   console.warn(
@@ -35,7 +37,6 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    if (!useSameOriginProxy) return [];
     return [{ source: "/api/:path*", destination: `${apiUrl}/api/:path*` }];
   },
 };

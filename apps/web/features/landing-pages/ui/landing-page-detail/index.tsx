@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useActionDialog } from "@landing-page-generator/ui";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -18,6 +19,7 @@ import {
 
 export function LandingPageDetail({ id }: { id: string }) {
   const router = useRouter();
+  const dialog = useActionDialog();
   const query = useLandingPage(id);
   const update = useUpdateLandingPage(id);
   const remove = useDeleteLandingPage();
@@ -54,7 +56,13 @@ export function LandingPageDetail({ id }: { id: string }) {
   });
 
   const onDelete = async () => {
-    if (!window.confirm("Xóa landing page này? Thao tác không hoàn tác.")) return;
+    const accepted = await dialog.confirm({
+      title: "Xóa landing page?",
+      description: "Landing page và dữ liệu liên quan sẽ bị xóa vĩnh viễn. Thao tác này không thể hoàn tác.",
+      confirmLabel: "Xóa landing page",
+      tone: "danger",
+    });
+    if (!accepted) return;
     try {
       await remove.mutateAsync(id);
       router.replace("/landing-pages");

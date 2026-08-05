@@ -1,5 +1,7 @@
 export type PlanId = "starter" | "growth" | "scale";
 
+export type PaidPlanId = Extract<PlanId, "growth" | "scale">;
+
 export type BillingPeriod = "monthly" | "yearly";
 
 export type Plan = {
@@ -23,10 +25,10 @@ export const PLANS: Plan[] = [
     period: "mãi mãi",
     description: "Dùng thử và launch trang đầu tiên — phù hợp cá nhân khám phá Pagecraft.",
     features: [
+      "50 credit đăng ký (một lần)",
       "1 landing page đang hoạt động",
       "Template cơ bản, publish nhanh",
       "Domain phụ Pagecraft",
-      "Không cần thẻ để bắt đầu",
     ],
     cta: "Bắt đầu miễn phí",
     featured: false,
@@ -39,11 +41,11 @@ export const PLANS: Plan[] = [
     period: "/ tháng",
     description: "Cho team marketing chạy nhiều chiến dịch và tối ưu chuyển đổi.",
     features: [
+      "120 credit mỗi kỳ thanh toán",
       "Tới 10 landing page",
       "A/B headline & variant copy",
       "Custom domain riêng",
       "Analytics cơ bản theo chiến dịch",
-      "Hỗ trợ ưu tiên trong giờ hành chính",
     ],
     cta: "Chọn Growth",
     featured: true,
@@ -56,11 +58,11 @@ export const PLANS: Plan[] = [
     period: "/ tháng",
     description: "Cho agency và brand cần kiểm soát sâu, nhiều workspace.",
     features: [
+      "500 credit mỗi kỳ thanh toán",
       "Không giới hạn landing page",
       "Workspace team & phân quyền",
       "Priority support 24/7",
       "SSO & audit log cơ bản",
-      "Onboarding riêng với CS",
     ],
     cta: "Chọn Scale",
     featured: false,
@@ -78,6 +80,15 @@ export const BILLING_PERIODS: {
 
 export function getPlanById(id: string | null | undefined): Plan {
   return PLANS.find((plan) => plan.id === id) ?? PLANS.find((plan) => plan.featured)!;
+}
+
+export function isPaidPlan(id: PlanId): id is PaidPlanId {
+  return id === "growth" || id === "scale";
+}
+
+export function planCheckoutHref(planId: PlanId): string {
+  if (planId === "starter") return "/auth";
+  return `/payment/checkout?plan=${planId}`;
 }
 
 export function formatVnd(value: number): string {

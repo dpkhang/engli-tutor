@@ -1,11 +1,12 @@
 "use client";
 import { FormEvent } from "react";
 import { ExternalLink, FileImage, Plus, Trash2 } from "lucide-react";
-import { Badge, Button, Card, CardContent, Input, Label } from "@landing-page-generator/ui";
+import { Badge, Button, Card, CardContent, Input, Label, useActionDialog } from "@landing-page-generator/ui";
 import { PageHeader } from "@/features/layout";
 import { mediaHooks } from "@/features/workspace-api/hooks";
 
 export default function MediaPage() {
+  const dialog = useActionDialog();
   const query = mediaHooks.useList();
   const create = mediaHooks.useCreate();
   const remove = mediaHooks.useDelete();
@@ -86,7 +87,15 @@ export default function MediaPage() {
                 variant="outline"
                 size="sm"
                 className="w-full"
-                onClick={() => remove.mutate(item.id)}
+                onClick={async () => {
+                  const accepted = await dialog.confirm({
+                    title: "Xóa asset?",
+                    description: `Asset “${item.name}” sẽ bị xóa khỏi thư viện media.`,
+                    confirmLabel: "Xóa asset",
+                    tone: "danger",
+                  });
+                  if (accepted) remove.mutate(item.id);
+                }}
               >
                 <Trash2 /> Xóa
               </Button>

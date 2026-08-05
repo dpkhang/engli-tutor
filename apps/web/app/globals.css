@@ -29,3 +29,47 @@
     background: hsl(var(--accent) / 0.28);
   }
 }
+
+@layer components {
+  .workspace-background {
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(circle at 88% 4%, hsl(var(--accent) / 0.12), transparent 27rem),
+      radial-gradient(circle at 8% 96%, hsl(var(--primary) / 0.09), transparent 25rem),
+      linear-gradient(145deg, hsl(var(--background)) 8%, hsl(var(--surface) / 0.72) 100%);
+  }
+
+  .workspace-ambient {
+    opacity: 0.32;
+    background-image: radial-gradient(hsl(var(--foreground) / 0.22) 0.65px, transparent 0.65px);
+    background-size: 18px 18px;
+    mask-image: linear-gradient(to bottom, black, transparent 72%);
+  }
+
+  .dark .workspace-background {
+    background-image:
+      radial-gradient(circle at 86% 2%, hsl(var(--accent) / 0.1), transparent 28rem),
+      radial-gradient(circle at 5% 95%, hsl(var(--primary) / 0.08), transparent 24rem),
+      linear-gradient(145deg, hsl(var(--background)) 10%, hsl(var(--surface) / 0.54) 100%);
+  }
+
+  .dark .workspace-ambient {
+    opacity: 0.2;
+  }
+
+  [data-slot="card"] {
+    transition: border-color 160ms ease;
+  }
+
+  @media (hover: hover) {
+    [data-slot="card"]:hover {
+      border-color: hsl(var(--primary) / 0.22);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="card"] {
+    transition: none;
+  }
+}

@@ -10,15 +10,26 @@ import {
   CardTitle,
   Input,
   Label,
+  useActionDialog,
 } from "@landing-page-generator/ui";
 import { PageHeader } from "@/features/layout";
 import { authClient, useSession } from "@/lib/auth-client";
 
 export default function AccountsPage() {
+  const dialog = useActionDialog();
   const { data } = useSession();
   const user = data?.user;
 
-  const signOut = () => void authClient.signOut().then(() => window.location.assign("/login"));
+  const signOut = async () => {
+    const accepted = await dialog.confirm({
+      title: "Đăng xuất?",
+      description: "Bạn sẽ cần đăng nhập lại để tiếp tục quản lý workspace.",
+      confirmLabel: "Đăng xuất",
+      tone: "danger",
+    });
+    if (!accepted) return;
+    void authClient.signOut().then(() => window.location.assign("/login"));
+  };
 
   return (
     <div className="space-y-8">
@@ -72,7 +83,7 @@ export default function AccountsPage() {
               </div>
             </CardContent>
           </Card>
-          <Button type="button" variant="outline" className="w-full" onClick={signOut}>
+          <Button type="button" variant="outline" className="w-full" onClick={() => void signOut()}>
             Đăng xuất khỏi phiên này
           </Button>
         </div>

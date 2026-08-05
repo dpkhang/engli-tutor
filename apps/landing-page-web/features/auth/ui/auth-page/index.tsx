@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { authClient, authErrorMessage, useSession } from "@/lib/auth-client";
-import { getAppUrl } from "@/features/auth/model/session";
+import { getAppUrl, getSiteUrl } from "@/features/auth/model/session";
 import { AuthPageView, type AuthMode } from "./auth-page.view";
 
 function resolveReturnTo(raw: string | null): string {
@@ -11,8 +11,8 @@ function resolveReturnTo(raw: string | null): string {
   if (!raw) return fallback;
   try {
     const url = new URL(raw);
-    const allowed = new URL(fallback);
-    if (url.origin !== allowed.origin) return fallback;
+    const allowed = [getAppUrl(), getSiteUrl()].map((origin) => new URL(origin).origin);
+    if (!allowed.includes(url.origin)) return fallback;
     return url.toString();
   } catch {
     return fallback;

@@ -54,6 +54,10 @@ type Props = {
   onModeChange: (mode: CreateMode) => void;
   openaiReady: boolean;
   openaiUnknown: boolean;
+  creditBalance: number | null;
+  aiGenerateCost: number;
+  hasEnoughCredits: boolean;
+  creditsLoading: boolean;
   registerManual: UseFormRegister<CreateLandingPageAdvancedValues>;
   controlManual: Control<CreateLandingPageAdvancedValues>;
   errorsManual: FieldErrors<CreateLandingPageAdvancedValues>;
@@ -91,6 +95,10 @@ export function CreateLandingPageView({
   onModeChange,
   openaiReady,
   openaiUnknown,
+  creditBalance,
+  aiGenerateCost,
+  hasEnoughCredits,
+  creditsLoading,
   registerManual,
   controlManual,
   errorsManual,
@@ -129,6 +137,10 @@ export function CreateLandingPageView({
           { label: "Slug hợp lệ", ready: /^[a-z0-9-]{3,120}$/.test(slug) },
           { label: "Mô tả đủ chi tiết", ready: brief.trim().length >= 20 },
           { label: "OpenAI sẵn sàng", ready: openaiReady },
+          {
+            label: `Đủ credit (≥ ${aiGenerateCost})`,
+            ready: !creditsLoading && hasEnoughCredits,
+          },
         ]
       : [
           { label: "Tên trang hợp lệ", ready: name.trim().length >= 3 },
@@ -181,9 +193,32 @@ export function CreateLandingPageView({
                 <Alert variant="destructive">
                   <Info />
                   <AlertDescription>
-                    OpenAI chưa cấu hình. Thêm <code className="font-mono">OPENAI_API_KEY</code> vào
-                    backend (xem <code className="font-mono">be/.env.example</code>), khởi động lại
-                    API, rồi refresh trang.
+                    Backend production chưa cấu hình{" "}
+                    <code className="font-mono">OPENAI_API_KEY</code>. Thêm biến này vào Environment
+                    của service Render, redeploy API rồi refresh trang.
+                  </AlertDescription>
+                </Alert>
+              ) : null}
+
+              {!creditsLoading && !hasEnoughCredits ? (
+                <Alert variant="destructive">
+                  <Info />
+                  <AlertDescription>
+                    Không đủ credit (cần {aiGenerateCost}, còn {creditBalance ?? 0}).{" "}
+                    <Link href="/payments" className="underline">
+                      Nạp credit bằng thẻ
+                    </Link>
+                    .
+                  </AlertDescription>
+                </Alert>
+              ) : null}
+
+              {!creditsLoading ? (
+                <Alert>
+                  <Info />
+                  <AlertDescription>
+                    Chi phí AI generate: <strong>{aiGenerateCost} credit</strong> · Số dư:{" "}
+                    <strong>{creditBalance ?? 0}</strong>
                   </AlertDescription>
                 </Alert>
               ) : null}
@@ -585,7 +620,11 @@ export function CreateLandingPageView({
             <Button
               type="submit"
               size="lg"
-              disabled={pending || (mode === "ai" && !openaiReady && !openaiUnknown)}
+              disabled={
+                pending ||
+                (mode === "ai" &&
+                  ((!openaiReady && !openaiUnknown) || (!creditsLoading && !hasEnoughCredits)))
+              }
             >
               {pending ? (
                 <>

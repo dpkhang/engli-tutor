@@ -13,11 +13,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  useActionDialog,
 } from "@landing-page-generator/ui";
 import { PageHeader } from "@/features/layout";
 import { templateHooks } from "@/features/workspace-api/hooks";
 
 export default function TemplatesPage() {
+  const dialog = useActionDialog();
   const query = templateHooks.useList();
   const create = templateHooks.useCreate();
   const remove = templateHooks.useDelete();
@@ -97,7 +99,15 @@ export default function TemplatesPage() {
                 size="sm"
                 className="w-full"
                 disabled={remove.isPending}
-                onClick={() => remove.mutate(item.id)}
+                onClick={async () => {
+                  const accepted = await dialog.confirm({
+                    title: "Xóa template?",
+                    description: `Template “${item.name}” sẽ bị xóa vĩnh viễn.`,
+                    confirmLabel: "Xóa template",
+                    tone: "danger",
+                  });
+                  if (accepted) remove.mutate(item.id);
+                }}
               >
                 <Trash2 /> Xóa
               </Button>

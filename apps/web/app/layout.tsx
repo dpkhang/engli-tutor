@@ -3,6 +3,7 @@ import { Fraunces, Manrope } from "next/font/google";
 import { QueryProvider } from "@/providers/query-provider";
 import { AuthGate } from "@/providers/auth-gate";
 import { AppShell } from "@/features/layout";
+import { ActionDialogProvider } from "@landing-page-generator/ui";
 import "./globals.css";
 
 const display = Fraunces({
@@ -34,9 +35,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body suppressHydrationWarning>
         <QueryProvider>
-          <AppShell>
-            <AuthGate>{children}</AuthGate>
-          </AppShell>
+          <ActionDialogProvider>
+            <AppShell>
+              <AuthGate>{children}</AuthGate>
+            </AppShell>
+          </ActionDialogProvider>
         </QueryProvider>
       </body>
     </html>

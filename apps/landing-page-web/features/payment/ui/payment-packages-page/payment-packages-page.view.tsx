@@ -1,21 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { Button, cn } from "@landing-page-generator/ui";
+import { Alert, AlertDescription, Button, cn } from "@landing-page-generator/ui";
 import { motion } from "motion/react";
 import { PageBackLink } from "@/features/layout";
-import type { Plan, PlanId } from "@/features/marketing/model/plans";
+import { planCheckoutHref, type Plan, type PlanId } from "@/features/marketing/model/plans";
 
 export type PaymentPackagesPageViewProps = {
   plans: Plan[];
   queriedPlan: string | null;
   highlighted: PlanId;
+  checkoutState: string | null;
+  checkoutType: string | null;
 };
 
 export function PaymentPackagesPageView({
   plans,
   queriedPlan,
   highlighted,
+  checkoutState,
+  checkoutType,
 }: PaymentPackagesPageViewProps) {
   return (
     <main className="relative min-h-[100svh] bg-[radial-gradient(ellipse_at_top,hsl(158_28%_92%),hsl(var(--background))_55%)] dark:bg-[radial-gradient(ellipse_at_top,hsl(166_24%_15%),hsl(var(--background))_55%)]">
@@ -35,9 +39,24 @@ export function PaymentPackagesPageView({
             Chọn package phù hợp
           </h1>
           <p className="text-sm text-muted-foreground sm:text-base">
-            So sánh benefit từng gói. Sau khi chọn, bạn sẽ chọn thời hạn và phương thức thanh toán.
+            So sánh benefit từng gói. Gói trả phí thanh toán qua Stripe — credit cố định mỗi kỳ.
           </p>
         </motion.div>
+
+        {checkoutState === "success" ? (
+          <Alert>
+            <AlertDescription>
+              {checkoutType === "subscription"
+                ? "Đăng ký thành công. Credit kỳ đầu sẽ được cộng sau vài giây."
+                : "Thanh toán thành công. Credit sẽ được cộng trong giây lát."}
+            </AlertDescription>
+          </Alert>
+        ) : null}
+        {checkoutState === "cancel" ? (
+          <Alert variant="destructive">
+            <AlertDescription>Đã hủy thanh toán trên Stripe.</AlertDescription>
+          </Alert>
+        ) : null}
 
         <div className="grid gap-5 lg:grid-cols-3">
           {plans.map((plan, index) => {
@@ -117,7 +136,7 @@ export function PaymentPackagesPageView({
                   ))}
                 </ul>
 
-                <Link href={`/payment/checkout?plan=${plan.id}`} className="mt-8 block">
+                <Link href={planCheckoutHref(plan.id)} className="mt-8 block">
                   <Button
                     type="button"
                     className={cn(

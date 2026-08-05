@@ -13,12 +13,14 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  useActionDialog,
 } from "@landing-page-generator/ui";
 import { PageHeader } from "@/features/layout";
 import { leadHooks, useUpdateLead } from "@/features/workspace-api/hooks";
 import type { Lead } from "@/features/workspace-api/api";
 
 export default function LeadsPage() {
+  const dialog = useActionDialog();
   const query = leadHooks.useList();
   const create = leadHooks.useCreate();
   const update = useUpdateLead();
@@ -136,7 +138,19 @@ export default function LeadsPage() {
                     </Select>
                   </td>
                   <td className="p-4">
-                    <Button variant="ghost" size="icon-sm" onClick={() => remove.mutate(lead.id)}>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={async () => {
+                        const accepted = await dialog.confirm({
+                          title: "Xóa lead?",
+                          description: `Thông tin của ${lead.name || lead.email || lead.phone || "lead này"} sẽ bị xóa vĩnh viễn.`,
+                          confirmLabel: "Xóa lead",
+                          tone: "danger",
+                        });
+                        if (accepted) remove.mutate(lead.id);
+                      }}
+                    >
                       <Trash2 />
                     </Button>
                   </td>

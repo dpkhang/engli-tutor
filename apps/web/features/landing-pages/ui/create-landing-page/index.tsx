@@ -10,6 +10,7 @@ import {
   useGenerateLandingPage,
   useWorkspaceIntegrations,
 } from "../../hooks/use-landing-pages";
+import { useBillingMe } from "@/features/payments/hooks/use-billing";
 import {
   createLandingPageAdvancedSchema,
   generateLandingPageFormSchema,
@@ -25,6 +26,7 @@ export function CreateLandingPage() {
   const create = useCreateLandingPage();
   const generate = useGenerateLandingPage();
   const integrations = useWorkspaceIntegrations();
+  const credits = useBillingMe();
   const [mode, setMode] = useState<CreateMode>("ai");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
@@ -32,6 +34,10 @@ export function CreateLandingPage() {
 
   const openaiReady = integrations.data?.openai === true;
   const openaiUnknown = integrations.isLoading;
+  const creditBalance = credits.data?.balance;
+  const aiGenerateCost = credits.data?.aiGenerateCost ?? 10;
+  const hasEnoughCredits =
+    creditBalance == null ? true : creditBalance >= aiGenerateCost;
 
   const manualForm = useForm<CreateLandingPageAdvancedValues>({
     resolver: zodResolver(createLandingPageAdvancedSchema),
@@ -127,7 +133,13 @@ export function CreateLandingPage() {
   const onAiSubmit = aiForm.handleSubmit(async (values) => {
     if (!openaiReady) {
       setSubmitError(
-        "OpenAI chưa được cấu hình. Thêm OPENAI_API_KEY vào backend rồi thử lại.",
+        "Backend production chưa có OPENAI_API_KEY. Cấu hình biến này trên Render, redeploy API rồi thử lại.",
+      );
+      return;
+    }
+    if (creditBalance != null && creditBalance < aiGenerateCost) {
+      setSubmitError(
+        `Không đủ credit (cần ${aiGenerateCost}, còn ${creditBalance}). Nạp thêm tại Thanh toán.`,
       );
       return;
     }
@@ -148,11 +160,13 @@ export function CreateLandingPage() {
         template: "PRODUCT_LAUNCH",
         tags: ["ai-generated"],
       });
+      void credits.refetch();
       router.push(`/demo/${page.slug}`);
     } catch (error) {
       setSubmitError(
         error instanceof Error ? error.message : "Không thể tạo landing page bằng AI",
       );
+      void credits.refetch();
     }
   });
 
@@ -165,6 +179,10 @@ export function CreateLandingPage() {
       }}
       openaiReady={openaiReady}
       openaiUnknown={openaiUnknown}
+      creditBalance={creditBalance ?? null}
+      aiGenerateCost={aiGenerateCost}
+      hasEnoughCredits={hasEnoughCredits}
+      creditsLoading={credits.isLoading}
       registerManual={manualForm.register}
       controlManual={manualForm.control}
       errorsManual={manualForm.formState.errors}

@@ -8,12 +8,16 @@ export function PaymentPackagesPage() {
   const searchParams = useSearchParams();
   const queriedPlan = searchParams.get("plan");
   const highlighted = getPlanById(queriedPlan).id;
+  const checkoutState = searchParams.get("checkout");
+  const checkoutType = searchParams.get("type");
 
   return (
     <PaymentPackagesPageView
       plans={PLANS}
       queriedPlan={queriedPlan}
       highlighted={highlighted}
+      checkoutState={checkoutState}
+      checkoutType={checkoutType}
     />
   );
 }

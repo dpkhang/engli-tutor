@@ -7,6 +7,7 @@ import {
   BarChart3,
   BookOpenText,
   ChevronDown,
+  Coins,
   CreditCard,
   ExternalLink,
   FileText,
@@ -22,7 +23,9 @@ import {
   X,
 } from "lucide-react";
 import { authClient, getMarketingUrl, useSession } from "@/lib/auth-client";
-import { Button, cn, ThemeToggle } from "@landing-page-generator/ui";
+import { Button, cn, ThemeToggle, useActionDialog } from "@landing-page-generator/ui";
+import { AnimatePresence, motion } from "motion/react";
+import { useBillingMe } from "@/features/payments/hooks/use-billing";
 
 const navigation = [
   {
@@ -54,6 +57,7 @@ function isActivePath(pathname: string, href: string) {
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const dialog = useActionDialog();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -61,6 +65,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const { data } = useSession();
   const user = data?.user;
+  const credits = useBillingMe(Boolean(user));
   const displayName = user?.name?.trim() || user?.email?.split("@")[0] || "Tài khoản";
   const initials = displayName.slice(0, 2).toUpperCase();
 
@@ -90,7 +95,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return <div className="min-h-svh bg-background">{children}</div>;
   }
 
-  const signOut = () => {
+  const signOut = async () => {
+    const accepted = await dialog.confirm({
+      title: "Đăng xuất?",
+      description: "Bạn sẽ cần đăng nhập lại để tiếp tục quản lý workspace.",
+      confirmLabel: "Đăng xuất",
+      tone: "danger",
+    });
+    if (!accepted) return;
     setAccountOpen(false);
     void authClient.signOut().then(() => window.location.assign("/login"));
   };
@@ -98,20 +110,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const sidebar = (
     <>
       <div className="flex h-16 items-center justify-between border-b px-4">
-        <Link
-          href="/"
-          className="flex min-w-0 items-center gap-3"
-          onClick={() => setMobileOpen(false)}
-        >
-          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary font-[family-name:var(--font-display)] text-lg text-primary-foreground">
-            P
-          </span>
-          {!collapsed ? (
+        {!collapsed ? (
+          <Link href="/" className="flex min-w-0 items-center" onClick={() => setMobileOpen(false)}>
             <span className="font-[family-name:var(--font-display)] text-lg tracking-tight">
               Pagecraft
             </span>
-          ) : null}
-        </Link>
+          </Link>
+        ) : (
+          <span aria-hidden />
+        )}
         <Button
           type="button"
           variant="ghost"
@@ -142,14 +149,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   title={collapsed ? item.label : undefined}
                   onClick={() => setMobileOpen(false)}
                   className={cn(
-                    "flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors",
+                    "group flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-[background,color,transform,box-shadow] duration-200",
                     active
                       ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                      : "text-muted-foreground hover:translate-x-0.5 hover:bg-muted hover:text-foreground",
                     collapsed && "justify-center px-0",
                   )}
                 >
-                  <Icon className="size-4.5 shrink-0" />
+                  <Icon className="size-4.5 shrink-0 transition-transform duration-200 group-hover:scale-110" />
                   {!collapsed ? <span>{item.label}</span> : null}
                 </Link>
               );
@@ -175,7 +182,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             "mt-1 flex h-10 w-full items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
             collapsed && "justify-center px-0",
           )}
-          onClick={signOut}
+          onClick={() => void signOut()}
         >
           <LogOut className="size-4.5" />
           {!collapsed ? <span>Đăng xuất</span> : null}
@@ -185,19 +192,27 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="min-h-svh bg-[linear-gradient(135deg,hsl(var(--background)),hsl(var(--surface))_140%)]">
-      {mobileOpen ? (
-        <button
-          type="button"
-          aria-label="Đóng menu"
-          className="fixed inset-0 z-40 bg-foreground/30 backdrop-blur-sm lg:hidden"
-          onClick={() => setMobileOpen(false)}
-        />
-      ) : null}
+    <div className="workspace-background relative min-h-svh overflow-hidden">
+      <div aria-hidden className="workspace-ambient pointer-events-none fixed inset-0" />
+
+      <AnimatePresence>
+        {mobileOpen ? (
+          <motion.button
+            type="button"
+            aria-label="Đóng menu"
+            className="fixed inset-0 z-40 bg-foreground/30 backdrop-blur-sm lg:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setMobileOpen(false)}
+          />
+        ) : null}
+      </AnimatePresence>
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r bg-card transition-transform duration-200 lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r bg-card shadow-[12px_0_40px_-32px_hsl(var(--foreground)/0.35)] transition-[width,transform] duration-200 ease-out lg:translate-x-0",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
           collapsed && "lg:w-20",
         )}
@@ -205,8 +220,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {sidebar}
       </aside>
 
-      <div className={cn("transition-[padding] duration-200 lg:pl-64", collapsed && "lg:pl-20")}>
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/85 px-4 backdrop-blur-xl sm:px-6">
+      <div className={cn("relative transition-[padding] duration-200 ease-out lg:pl-64", collapsed && "lg:pl-20")}>
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/80 px-4 shadow-[0_10px_30px_-28px_hsl(var(--foreground)/0.45)] backdrop-blur-xl sm:px-6">
           <div className="flex items-center gap-2">
             <Button
               type="button"
@@ -231,6 +246,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-1.5">
+            {user ? (
+              <Button variant="outline" size="sm" asChild className="hidden sm:inline-flex">
+                <Link href="/payments" className="gap-1.5">
+                  <Coins className="size-3.5" />
+                  {credits.isLoading ? "…" : (credits.data?.balance ?? 0)}
+                </Link>
+              </Button>
+            ) : null}
             <ThemeToggle />
             {user ? (
               <div className="relative" ref={accountMenuRef}>
@@ -260,10 +283,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   />
                 </button>
 
+                <AnimatePresence>
                 {accountOpen ? (
-                  <div
+                  <motion.div
                     role="menu"
                     className="absolute top-full right-0 mt-2 w-64 rounded-xl border bg-popover p-2 text-popover-foreground shadow-xl"
+                    initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                    transition={{ duration: 0.18, ease: "easeOut" }}
                   >
                     <div className="border-b px-3 py-2.5">
                       <p className="truncate text-sm font-semibold">{displayName}</p>
@@ -298,20 +326,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         type="button"
                         role="menuitem"
                         className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                        onClick={signOut}
+                        onClick={() => void signOut()}
                       >
                         <LogOut className="size-4" />
                         Đăng xuất
                       </button>
                     </div>
-                  </div>
+                  </motion.div>
                 ) : null}
+                </AnimatePresence>
               </div>
             ) : null}
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+        <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+          {children}
+        </main>
       </div>
     </div>
   );

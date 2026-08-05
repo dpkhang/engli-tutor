@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { authClient, authErrorMessage, getMarketingUrl, useSession } from "@/lib/auth-client";
 import { LoginPageView, type AuthMode } from "./login-page.view";
 
@@ -12,7 +12,6 @@ function resolveReturnTo(raw: string | null): string {
 }
 
 export function LoginPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = resolveReturnTo(searchParams.get("returnTo"));
   const { data, isPending: sessionPending } = useSession();
@@ -22,8 +21,8 @@ export function LoginPage() {
 
   useEffect(() => {
     if (sessionPending || !data?.user) return;
-    router.replace(returnTo);
-  }, [sessionPending, data?.user, returnTo, router]);
+    window.location.replace(returnTo);
+  }, [sessionPending, data?.user, returnTo]);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -59,8 +58,18 @@ export function LoginPage() {
         }
       }
 
-      router.replace(returnTo);
-      router.refresh();
+      const sessionResult = await authClient.getSession();
+      if (sessionResult.error || !sessionResult.data?.user) {
+        setPending(false);
+        setError(
+          "Đăng nhập thành công nhưng trình duyệt không lưu được phiên. Vui lòng xóa cookie cũ của Pagecraft rồi thử lại.",
+        );
+        return;
+      }
+
+      // Reload the document so AuthGate starts with the session cookie that was
+      // just committed by the auth response, instead of its pre-login cache.
+      window.location.assign(returnTo);
     } catch {
       setPending(false);
       setError("Không thể kết nối máy chủ xác thực. Thử lại.");

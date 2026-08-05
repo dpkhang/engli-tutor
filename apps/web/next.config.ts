@@ -11,8 +11,10 @@ if (!process.env.NEXT_PUBLIC_API_URL?.trim()) {
   );
 }
 
-/** On Vercel, proxy API so auth cookies are first-party (stops marketing↔workspace loop). */
-const useSameOriginProxy = Boolean(process.env.VERCEL);
+// Always proxy API calls through the frontend origin. This keeps auth cookies
+// first-party on both Vercel domains and localhost while the upstream can still
+// be the production Render API.
+const useSameOriginProxy = true;
 
 const nextConfig: NextConfig = {
   env: {
@@ -28,7 +30,6 @@ const nextConfig: NextConfig = {
     root: path.join(__dirname, "../.."),
   },
   async rewrites() {
-    if (!useSameOriginProxy) return [];
     return [{ source: "/api/:path*", destination: `${apiUrl}/api/:path*` }];
   },
 };

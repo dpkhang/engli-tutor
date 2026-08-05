@@ -1,11 +1,12 @@
 "use client";
 import { FormEvent } from "react";
 import { Globe2, LockKeyhole, Plus, Trash2 } from "lucide-react";
-import { Badge, Button, Card, CardContent, Input, Label } from "@landing-page-generator/ui";
+import { Badge, Button, Card, CardContent, Input, Label, useActionDialog } from "@landing-page-generator/ui";
 import { PageHeader } from "@/features/layout";
 import { domainHooks } from "@/features/workspace-api/hooks";
 
 export default function DomainsPage() {
+  const dialog = useActionDialog();
   const query = domainHooks.useList();
   const create = domainHooks.useCreate();
   const remove = domainHooks.useDelete();
@@ -76,7 +77,15 @@ export default function DomainsPage() {
                 variant="outline"
                 size="sm"
                 className="w-full"
-                onClick={() => remove.mutate(domain.id)}
+                onClick={async () => {
+                  const accepted = await dialog.confirm({
+                    title: "Gỡ domain?",
+                    description: `Domain ${domain.hostname} sẽ không còn kết nối với workspace.`,
+                    confirmLabel: "Gỡ domain",
+                    tone: "danger",
+                  });
+                  if (accepted) remove.mutate(domain.id);
+                }}
               >
                 <Trash2 /> Gỡ domain
               </Button>

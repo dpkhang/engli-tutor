@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "@/lib/auth-client";
-import { getAppUrl, getAuthHref, getEntryHref } from "@/features/auth/model/session";
+import { getAppUrl, getEntryHref, getMarketingAuthHref } from "@/features/auth/model/session";
 
 export function useAuthSession() {
   const { data, isPending, error } = useSession();
@@ -15,7 +15,7 @@ export function useAuthSession() {
     isPending,
     error,
     isLoggedIn,
-    entryHref: isLoggedIn ? getAppUrl() : getAuthHref(),
+    entryHref: isLoggedIn ? getAppUrl() : getMarketingAuthHref(),
     entryLabel: isLoggedIn ? "Mở Workspace" : "Bắt đầu miễn phí",
     getEntryHref: () => getEntryHref(isLoggedIn),
   };

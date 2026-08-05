@@ -42,10 +42,10 @@ export function DashboardOverview() {
 
       <section className="grid gap-4 md:grid-cols-3">
         {stats.map(({ label, value, icon: Icon }) => (
-          <Card key={label} className="gap-4 shadow-none">
+          <Card key={label} className="group gap-4 shadow-none">
             <CardHeader className="flex-row items-center justify-between space-y-0">
               <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
-              <span className="grid size-9 place-items-center rounded-lg bg-primary/10 text-primary">
+              <span className="grid size-9 place-items-center rounded-lg bg-primary/10 text-primary transition-[transform,background] duration-200 group-hover:scale-110 group-hover:bg-primary/15">
                 <Icon className="size-4.5" />
               </span>
             </CardHeader>
@@ -80,10 +80,12 @@ export function DashboardOverview() {
               <Link
                 key={page.id}
                 href={`/pages/${page.id}`}
-                className="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0"
+                className="group/row -mx-3 flex items-center justify-between gap-4 rounded-lg px-3 py-4 transition-colors hover:bg-muted/70 first:pt-3 last:pb-3"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold">{page.name}</p>
+                  <p className="truncate text-sm font-semibold transition-colors group-hover/row:text-primary">
+                    {page.name}
+                  </p>
                   <p className="truncate text-xs text-muted-foreground">/{page.slug}</p>
                 </div>
                 <Badge variant={page.status === "PUBLISHED" ? "default" : "secondary"}>

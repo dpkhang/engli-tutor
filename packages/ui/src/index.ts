@@ -31,6 +31,12 @@ export {
 export { Separator } from "./components/separator";
 export { ThemeToggle } from "./components/theme-toggle";
 export {
+  ActionDialogProvider,
+  useActionDialog,
+  type DialogOptions,
+  type DialogTone,
+} from "./components/action-dialog";
+export {
   Accordion,
   AccordionItem,
   AccordionTrigger,
