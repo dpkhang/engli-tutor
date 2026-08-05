@@ -5,6 +5,7 @@ import type { NextConfig } from "next";
 const DEFAULT_API_URL = "https://landing-generator-be.onrender.com";
 
 const apiUrl = (process.env.NEXT_PUBLIC_API_URL?.trim() || DEFAULT_API_URL).replace(/\/$/, "");
+const useSameOriginProxy = Boolean(process.env.VERCEL);
 
 if (!process.env.NEXT_PUBLIC_API_URL?.trim()) {
   console.warn(
@@ -15,6 +16,7 @@ if (!process.env.NEXT_PUBLIC_API_URL?.trim()) {
 const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: apiUrl,
+    NEXT_PUBLIC_AUTH_SAME_ORIGIN: useSameOriginProxy ? "true" : "false",
   },
   transpilePackages: [
     "@landing-page-generator/ui",
@@ -31,6 +33,10 @@ const nextConfig: NextConfig = {
         hostname: "images.unsplash.com",
       },
     ],
+  },
+  async rewrites() {
+    if (!useSameOriginProxy) return [];
+    return [{ source: "/api/:path*", destination: `${apiUrl}/api/:path*` }];
   },
 };
 

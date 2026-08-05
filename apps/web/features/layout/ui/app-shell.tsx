@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -44,11 +44,7 @@ const navigation = [
   },
   {
     label: "Quản trị",
-    items: [
-      { href: "/payments", label: "Thanh toán", icon: CreditCard },
-      { href: "/accounts", label: "Tài khoản", icon: UserRound },
-      { href: "/settings", label: "Cài đặt", icon: Settings },
-    ],
+    items: [{ href: "/payments", label: "Thanh toán", icon: CreditCard }],
   },
 ];
 
@@ -61,16 +57,41 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
   const { data } = useSession();
   const user = data?.user;
   const displayName = user?.name?.trim() || user?.email?.split("@")[0] || "Tài khoản";
   const initials = displayName.slice(0, 2).toUpperCase();
+
+  useEffect(() => {
+    setAccountOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!accountOpen) return;
+
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (!accountMenuRef.current?.contains(event.target as Node)) setAccountOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setAccountOpen(false);
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [accountOpen]);
 
   if (pathname === "/login" || pathname.startsWith("/demo/")) {
     return <div className="min-h-svh bg-background">{children}</div>;
   }
 
   const signOut = () => {
+    setAccountOpen(false);
     void authClient.signOut().then(() => window.location.assign("/login"));
   };
 
@@ -212,23 +233,80 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-1.5">
             <ThemeToggle />
             {user ? (
-              <Link
-                href="/accounts"
-                className="flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-muted"
-              >
-                <span className="grid size-8 place-items-center rounded-full bg-primary/12 text-xs font-bold text-primary">
-                  {initials}
-                </span>
-                <span className="hidden text-left sm:block">
-                  <span className="block max-w-40 truncate text-sm font-semibold">
-                    {displayName}
+              <div className="relative" ref={accountMenuRef}>
+                <button
+                  type="button"
+                  className="flex items-center gap-3 rounded-xl px-2 py-1.5 text-left hover:bg-muted"
+                  aria-haspopup="menu"
+                  aria-expanded={accountOpen}
+                  onClick={() => setAccountOpen((open) => !open)}
+                >
+                  <span className="grid size-8 place-items-center rounded-full bg-primary/12 text-xs font-bold text-primary">
+                    {initials}
                   </span>
-                  <span className="block max-w-40 truncate text-xs text-muted-foreground">
-                    {user.email}
+                  <span className="hidden text-left sm:block">
+                    <span className="block max-w-40 truncate text-sm font-semibold">
+                      {displayName}
+                    </span>
+                    <span className="block max-w-40 truncate text-xs text-muted-foreground">
+                      {user.email}
+                    </span>
                   </span>
-                </span>
-                <ChevronDown className="hidden size-4 text-muted-foreground sm:block" />
-              </Link>
+                  <ChevronDown
+                    className={cn(
+                      "hidden size-4 text-muted-foreground transition-transform sm:block",
+                      accountOpen && "rotate-180",
+                    )}
+                  />
+                </button>
+
+                {accountOpen ? (
+                  <div
+                    role="menu"
+                    className="absolute top-full right-0 mt-2 w-64 rounded-xl border bg-popover p-2 text-popover-foreground shadow-xl"
+                  >
+                    <div className="border-b px-3 py-2.5">
+                      <p className="truncate text-sm font-semibold">{displayName}</p>
+                      <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                    <div className="py-1.5">
+                      <Link
+                        href="/accounts"
+                        role="menuitem"
+                        className={cn(
+                          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-muted",
+                          pathname.startsWith("/accounts") && "bg-muted font-medium",
+                        )}
+                      >
+                        <UserRound className="size-4 text-muted-foreground" />
+                        Tài khoản
+                      </Link>
+                      <Link
+                        href="/settings"
+                        role="menuitem"
+                        className={cn(
+                          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-muted",
+                          pathname.startsWith("/settings") && "bg-muted font-medium",
+                        )}
+                      >
+                        <Settings className="size-4 text-muted-foreground" />
+                        Cài đặt
+                      </Link>
+                    </div>
+                    <div className="border-t pt-1.5">
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                        onClick={signOut}
+                      >
+                        <LogOut className="size-4" />
+                        Đăng xuất
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
             ) : null}
           </div>
         </header>

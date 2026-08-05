@@ -65,6 +65,26 @@ On Vercel, `apps/web/next.config.ts` enables same-origin `/api/:path*` rewrites 
 | `NEXT_PUBLIC_APP_URL` | Workspace origin |
 | `NEXT_PUBLIC_SITE_URL` | Marketing origin |
 
+### Production domain mapping
+
+Use the following values for the `pagecraft-ai.site` deployment:
+
+```text
+# Workspace
+NEXT_PUBLIC_API_URL=https://landing-generator-be.onrender.com
+NEXT_PUBLIC_MARKETING_URL=https://pagecraft-ai.site
+
+# Marketing
+NEXT_PUBLIC_API_URL=https://landing-generator-be.onrender.com
+NEXT_PUBLIC_APP_URL=https://app.pagecraft-ai.site
+NEXT_PUBLIC_SITE_URL=https://pagecraft-ai.site
+```
+
+Both Vercel apps proxy `/api/*` to `NEXT_PUBLIC_API_URL`, allowing the browser to keep the shared
+cookie first-party on `pagecraft-ai.site`. The backend must use matching `WEB_ORIGIN`,
+`LANDING_ORIGIN`, and `AUTH_COOKIE_DOMAIN=.pagecraft-ai.site` values. Set `APP_URL` to
+`https://app.pagecraft-ai.site` so Better Auth callbacks also return through the first-party proxy.
+
 ## API client architecture
 
 ```text
@@ -140,4 +160,3 @@ NEXT_PUBLIC_SITE_URL
 ```
 
 The token, org ID and project IDs must belong to the same Vercel scope.
-
