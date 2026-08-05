@@ -49,3 +49,13 @@ export function useTopupCheckout() {
     },
   });
 }
+
+export function useConfirmCheckout() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (sessionId: string) => billingApi.confirm(sessionId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: billingMeQueryKey });
+    },
+  });
+}

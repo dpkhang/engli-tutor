@@ -71,4 +71,8 @@ export const billingApi = {
       packId,
       returnOrigin: typeof window !== "undefined" ? window.location.origin : undefined,
     }),
+  confirm: (sessionId: string) =>
+    workspaceApiClient.post<{ subscribed?: boolean; planId?: string }>("/api/billing/confirm", {
+      sessionId,
+    }),
 };
