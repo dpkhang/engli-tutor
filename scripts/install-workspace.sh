@@ -16,6 +16,10 @@ Workspaces:
   landing   Install apps/landing-page-web (+ deps), then build packages
   ui        Install all packages/*, then build them
   packages  Alias of ui
+
+Package scripts:
+  pnpm install:landing-page       Install all LandingCraft workspaces
+  pnpm module:add <package...>    Add dependencies to both applications
 EOF
 }
 

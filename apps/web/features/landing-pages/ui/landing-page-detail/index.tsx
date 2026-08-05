@@ -9,10 +9,7 @@ import {
   useLandingPage,
   useUpdateLandingPage,
 } from "../../hooks/use-landing-pages";
-import {
-  updateLandingPageSchema,
-  type UpdateLandingPageValues,
-} from "../../model/schema";
+import { updateLandingPageSchema, type UpdateLandingPageValues } from "../../model/schema";
 import { LandingPageDetailView } from "./landing-page-detail.view";
 import {
   getLandingPageLocalMetadata,

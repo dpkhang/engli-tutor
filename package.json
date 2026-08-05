@@ -3,10 +3,12 @@
   "private": true,
   "scripts": {
     "install:all": "bash ./scripts/install-workspace.sh all",
+    "install:landing-page": "bash ./scripts/install-workspace.sh all",
     "install:web": "bash ./scripts/install-workspace.sh web",
     "install:landing": "bash ./scripts/install-workspace.sh landing",
     "install:ui": "bash ./scripts/install-workspace.sh ui",
     "install:packages": "bash ./scripts/install-workspace.sh packages",
+    "module:add": "bash ./scripts/add-module.sh",
     "ci:lint": "pnpm --filter \"./packages/*\" run type-check && pnpm --filter \"./packages/*\" run build && pnpm -r --filter \"./apps/*\" lint",
     "ci:build": "pnpm build:pkg && pnpm --filter landing-page-generator-fe build && pnpm --filter landing-page-web build",
     "ci:packages": "pnpm --filter \"./packages/*\" run type-check && pnpm --filter \"./packages/*\" run build",

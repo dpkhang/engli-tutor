@@ -164,7 +164,7 @@ export function MainBodyView({
                   key={plan.id}
                   className={`flex flex-col gap-6 rounded-2xl border p-7 ${
                     plan.featured
-                      ? "border-accent bg-foreground text-primary-foreground"
+                      ? "border-accent bg-foreground text-primary-foreground dark:bg-card dark:text-card-foreground"
                       : "border-border bg-background text-foreground"
                   }`}
                 >
@@ -178,7 +178,7 @@ export function MainBodyView({
                       ) : null}
                     </div>
                     <p
-                      className={`text-sm ${plan.featured ? "text-primary-foreground/70" : "text-muted-foreground"}`}
+                      className={`text-sm ${plan.featured ? "text-primary-foreground/70 dark:text-muted-foreground" : "text-muted-foreground"}`}
                     >
                       {plan.description}
                     </p>
@@ -188,7 +188,9 @@ export function MainBodyView({
                     {plan.price}
                     <span
                       className={`ml-1 text-sm font-sans font-normal ${
-                        plan.featured ? "text-primary-foreground/65" : "text-muted-foreground"
+                        plan.featured
+                          ? "text-primary-foreground/65 dark:text-muted-foreground"
+                          : "text-muted-foreground"
                       }`}
                     >
                       {plan.period}
@@ -201,7 +203,9 @@ export function MainBodyView({
                         <span className="text-accent">→</span>
                         <span
                           className={
-                            plan.featured ? "text-primary-foreground/85" : "text-muted-foreground"
+                            plan.featured
+                              ? "text-primary-foreground/85 dark:text-card-foreground/85"
+                              : "text-muted-foreground"
                           }
                         >
                           {feature}
@@ -278,7 +282,7 @@ export function MainBodyView({
         className="section-snap mx-auto flex w-full max-w-6xl flex-col justify-center px-5 py-24 sm:px-8"
       >
         <motion.div
-          className="relative overflow-hidden rounded-3xl bg-[linear-gradient(145deg,#06352d,#0a4a3c_50%,#1f8a68)] px-8 py-14 text-primary-foreground sm:px-12"
+          className="relative overflow-hidden rounded-3xl bg-[linear-gradient(145deg,#06352d,#0a4a3c_50%,#1f8a68)] px-8 py-14 text-white sm:px-12"
           {...fadeUp}
         >
           <div
@@ -286,10 +290,10 @@ export function MainBodyView({
             className="absolute -right-16 -bottom-20 h-64 w-64 rounded-full border border-white/15"
           />
           <div className="relative max-w-xl space-y-5">
-            <h2 className="font-[family-name:var(--font-display)] text-3xl tracking-tight sm:text-4xl">
+            <h2 className="font-[family-name:var(--font-display)] text-3xl tracking-tight text-[#f4fbf8] sm:text-4xl">
               Sẵn sàng launch trang tiếp theo?
             </h2>
-            <p className="text-base text-primary-foreground/75">
+            <p className="text-base text-[#f4fbf8]/75">
               Tạo tài khoản miễn phí, chọn template và publish landing trong cùng một buổi.
             </p>
             <Button

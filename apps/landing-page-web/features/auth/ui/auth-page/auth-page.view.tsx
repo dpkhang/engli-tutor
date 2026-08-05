@@ -18,7 +18,7 @@ export type AuthPageViewProps = {
 
 export function AuthPageView({ mode, pending, error, onModeChange, onSubmit }: AuthPageViewProps) {
   return (
-    <main className="relative min-h-svh overflow-hidden bg-[radial-gradient(ellipse_at_top_left,hsl(158_30%_90%),hsl(var(--background))_50%)]">
+    <main className="relative min-h-svh overflow-hidden bg-[radial-gradient(ellipse_at_top_left,hsl(158_30%_90%),hsl(var(--background))_50%)] dark:bg-[radial-gradient(ellipse_at_top_left,hsl(166_24%_15%),hsl(var(--background))_50%)]">
       <div className="relative mx-auto grid min-h-svh max-w-6xl items-stretch gap-0 px-5 pt-24 pb-16 sm:px-8 lg:grid-cols-2 lg:gap-12 lg:px-8 lg:pt-20 lg:pb-20">
         <motion.div
           className="flex w-full max-w-md items-center justify-self-center lg:justify-self-start"

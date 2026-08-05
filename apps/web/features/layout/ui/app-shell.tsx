@@ -22,7 +22,7 @@ import {
   X,
 } from "lucide-react";
 import { authClient, getMarketingUrl, useSession } from "@/lib/auth-client";
-import { Button, cn } from "@landing-page-generator/ui";
+import { Button, cn, ThemeToggle } from "@landing-page-generator/ui";
 
 const navigation = [
   {
@@ -66,8 +66,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const displayName = user?.name?.trim() || user?.email?.split("@")[0] || "Tài khoản";
   const initials = displayName.slice(0, 2).toUpperCase();
 
-  if (pathname === "/login") {
-    return <div className="min-h-svh bg-background px-5 sm:px-8">{children}</div>;
+  if (pathname === "/login" || pathname.startsWith("/demo/")) {
+    return <div className="min-h-svh bg-background">{children}</div>;
   }
 
   const signOut = () => {
@@ -77,7 +77,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const sidebar = (
     <>
       <div className="flex h-16 items-center justify-between border-b px-4">
-        <Link href="/" className="flex min-w-0 items-center gap-3" onClick={() => setMobileOpen(false)}>
+        <Link
+          href="/"
+          className="flex min-w-0 items-center gap-3"
+          onClick={() => setMobileOpen(false)}
+        >
           <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary font-[family-name:var(--font-display)] text-lg text-primary-foreground">
             P
           </span>
@@ -102,7 +106,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <nav className="flex-1 space-y-5 overflow-y-auto p-3" aria-label="Điều hướng chính">
         {navigation.map((group) => (
           <div key={group.label} className="space-y-1">
-            {!collapsed ? <p className="px-3 pb-1 text-[10px] font-bold tracking-[0.16em] text-muted-foreground/75 uppercase">{group.label}</p> : null}
+            {!collapsed ? (
+              <p className="px-3 pb-1 text-[10px] font-bold tracking-[0.16em] text-muted-foreground/75 uppercase">
+                {group.label}
+              </p>
+            ) : null}
             {group.items.map((item) => {
               const Icon = item.icon;
               const active = isActivePath(pathname, item.href);
@@ -201,18 +209,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </Button>
           </div>
 
-          {user ? (
-            <Link href="/accounts" className="flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-muted">
-              <span className="grid size-8 place-items-center rounded-full bg-primary/12 text-xs font-bold text-primary">
-                {initials}
-              </span>
-              <span className="hidden text-left sm:block">
-                <span className="block max-w-40 truncate text-sm font-semibold">{displayName}</span>
-                <span className="block max-w-40 truncate text-xs text-muted-foreground">{user.email}</span>
-              </span>
-              <ChevronDown className="hidden size-4 text-muted-foreground sm:block" />
-            </Link>
-          ) : null}
+          <div className="flex items-center gap-1.5">
+            <ThemeToggle />
+            {user ? (
+              <Link
+                href="/accounts"
+                className="flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-muted"
+              >
+                <span className="grid size-8 place-items-center rounded-full bg-primary/12 text-xs font-bold text-primary">
+                  {initials}
+                </span>
+                <span className="hidden text-left sm:block">
+                  <span className="block max-w-40 truncate text-sm font-semibold">
+                    {displayName}
+                  </span>
+                  <span className="block max-w-40 truncate text-xs text-muted-foreground">
+                    {user.email}
+                  </span>
+                </span>
+                <ChevronDown className="hidden size-4 text-muted-foreground sm:block" />
+              </Link>
+            ) : null}
+          </div>
         </header>
 
         <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">{children}</main>

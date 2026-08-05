@@ -5,12 +5,15 @@
   "scripts": {
     "install:workspace": "pnpm --dir ../.. install:landing",
     "install:all": "pnpm --dir ../.. install:all",
+    "install:landing-page": "pnpm --dir ../.. install:landing-page",
+    "module:add": "pnpm --dir ../.. module:add",
     "dev": "next dev -p 3002",
     "build": "next build",
     "start": "next start -p 3002",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@landing-page-generator/api-client": "workspace:*",
     "@landing-page-generator/auth": "workspace:*",
     "@landing-page-generator/ui": "workspace:*",
     "lucide-react": "^1.28.0",

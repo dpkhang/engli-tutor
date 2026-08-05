@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @source "../../../packages/ui/src";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --font-display: var(--font-display), "Fraunces", serif;
   --font-sans: var(--font-sans), "Manrope", sans-serif;
@@ -32,6 +34,7 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     /* Cool mist + deep pine + mint accent — not purple / cream-terracotta */
     --radius: 0.625rem;
     --background: 160 28% 97%;
@@ -53,6 +56,30 @@
     --accent: 158 72% 42%;
     --accent-foreground: 168 42% 8%;
     --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+  }
+
+  .dark {
+    color-scheme: dark;
+    --background: 168 34% 7%;
+    --foreground: 150 24% 94%;
+    --card: 168 28% 10%;
+    --card-foreground: 150 24% 94%;
+    --popover: 168 28% 10%;
+    --popover-foreground: 150 24% 94%;
+    --surface: 167 25% 12%;
+    --primary: 158 58% 46%;
+    --primary-foreground: 168 42% 7%;
+    --secondary: 166 20% 16%;
+    --secondary-foreground: 150 24% 94%;
+    --muted: 166 20% 16%;
+    --muted-foreground: 158 12% 66%;
+    --border: 164 17% 22%;
+    --input: 164 17% 24%;
+    --ring: 158 58% 46%;
+    --accent: 158 72% 48%;
+    --accent-foreground: 168 42% 7%;
+    --destructive: 0 62% 48%;
     --destructive-foreground: 0 0% 98%;
   }
 

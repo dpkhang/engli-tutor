@@ -6,5 +6,6 @@ export { Badge, badgeVariants } from "./components/badge";
 export { Alert, AlertTitle, AlertDescription, } from "./components/alert";
 export { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectScrollDownButton, SelectScrollUpButton, SelectSeparator, SelectTrigger, SelectValue, } from "./components/select";
 export { Separator } from "./components/separator";
+export { ThemeToggle } from "./components/theme-toggle";
 export { Accordion, AccordionItem, AccordionTrigger, AccordionContent, } from "./components/accordion";
 export { cn } from "./lib/utils";

@@ -1,53 +1,103 @@
-function apiBase() {
-  if (process.env.NEXT_PUBLIC_AUTH_SAME_ORIGIN === "true") return "";
-  return (process.env.NEXT_PUBLIC_API_URL ?? "https://landing-generator-be.onrender.com").replace(/\/$/, "");
-}
+import { workspaceApiClient } from "@/lib/workspace-api-client";
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${apiBase()}${path}`, {
-    ...init,
-    credentials: "include",
-    headers: { Accept: "application/json", ...(init?.body ? { "Content-Type": "application/json" } : {}), ...init?.headers },
-  });
-  if (!response.ok) {
-    const body = await response.json().catch(() => null) as { message?: string } | null;
-    throw new Error(body?.message ?? `Request failed (${response.status})`);
-  }
-  if (response.status === 204) return undefined as T;
-  return response.json() as Promise<T>;
-}
-
-export type Template = { id: string; name: string; description: string | null; category: string; status: "DRAFT" | "PUBLISHED" | "ARCHIVED"; thumbnailUrl: string | null; createdAt: string; updatedAt: string };
-export type MediaAsset = { id: string; name: string; kind: "IMAGE" | "VIDEO" | "DOCUMENT" | "OTHER"; url: string; mimeType: string | null; size: number | null; altText: string | null; folder: string | null; createdAt: string };
-export type Lead = { id: string; name: string | null; email: string | null; phone: string | null; status: "NEW" | "CONTACTED" | "QUALIFIED" | "CONVERTED" | "ARCHIVED"; source: string | null; landingPage: { id: string; name: string; slug: string } | null; createdAt: string };
-export type Domain = { id: string; hostname: string; status: "PENDING" | "VERIFIED" | "FAILED"; sslEnabled: boolean; landingPage: { id: string; name: string; slug: string } | null; createdAt: string };
-export type WorkspaceSettings = { id: string; workspaceName: string; logoUrl: string | null; primaryColor: string; notificationEmail: boolean; notificationLeads: boolean; notificationPublish: boolean };
+export type Template = {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string;
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  thumbnailUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+export type MediaAsset = {
+  id: string;
+  name: string;
+  kind: "IMAGE" | "VIDEO" | "DOCUMENT" | "OTHER";
+  url: string;
+  mimeType: string | null;
+  size: number | null;
+  altText: string | null;
+  folder: string | null;
+  createdAt: string;
+};
+export type Lead = {
+  id: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  status: "NEW" | "CONTACTED" | "QUALIFIED" | "CONVERTED" | "ARCHIVED";
+  source: string | null;
+  landingPage: { id: string; name: string; slug: string } | null;
+  createdAt: string;
+};
+export type Domain = {
+  id: string;
+  hostname: string;
+  status: "PENDING" | "VERIFIED" | "FAILED";
+  sslEnabled: boolean;
+  landingPage: { id: string; name: string; slug: string } | null;
+  createdAt: string;
+};
+export type WorkspaceSettings = {
+  id: string;
+  workspaceName: string;
+  logoUrl: string | null;
+  primaryColor: string;
+  notificationEmail: boolean;
+  notificationLeads: boolean;
+  notificationPublish: boolean;
+};
 
 export const workspaceApi = {
   templates: {
-    list: () => request<Template[]>("/api/templates"),
-    create: (input: { name: string; description?: string; category: string; status?: Template["status"] }) => request<Template>("/api/templates", { method: "POST", body: JSON.stringify(input) }),
-    update: (id: string, input: Partial<Pick<Template, "name" | "description" | "category" | "status">>) => request<Template>(`/api/templates/${id}`, { method: "PATCH", body: JSON.stringify(input) }),
-    delete: (id: string) => request<void>(`/api/templates/${id}`, { method: "DELETE" }),
+    list: () => workspaceApiClient.get<Template[]>("/api/templates"),
+    create: (input: {
+      name: string;
+      description?: string;
+      category: string;
+      status?: Template["status"];
+    }) => workspaceApiClient.post<Template>("/api/templates", input),
+    update: (
+      id: string,
+      input: Partial<Pick<Template, "name" | "description" | "category" | "status">>,
+    ) => workspaceApiClient.patch<Template>(`/api/templates/${id}`, input),
+    delete: (id: string) => workspaceApiClient.delete(`/api/templates/${id}`),
   },
   media: {
-    list: () => request<MediaAsset[]>("/api/media"),
-    create: (input: { name: string; url: string; kind?: MediaAsset["kind"]; altText?: string; folder?: string }) => request<MediaAsset>("/api/media", { method: "POST", body: JSON.stringify(input) }),
-    delete: (id: string) => request<void>(`/api/media/${id}`, { method: "DELETE" }),
+    list: () => workspaceApiClient.get<MediaAsset[]>("/api/media"),
+    create: (input: {
+      name: string;
+      url: string;
+      kind?: MediaAsset["kind"];
+      altText?: string;
+      folder?: string;
+    }) => workspaceApiClient.post<MediaAsset>("/api/media", input),
+    delete: (id: string) => workspaceApiClient.delete(`/api/media/${id}`),
   },
   leads: {
-    list: () => request<Lead[]>("/api/leads"),
-    create: (input: { name?: string; email?: string; phone?: string; source?: string }) => request<Lead>("/api/leads", { method: "POST", body: JSON.stringify(input) }),
-    update: (id: string, input: Partial<Pick<Lead, "name" | "email" | "phone" | "status" | "source">>) => request<Lead>(`/api/leads/${id}`, { method: "PATCH", body: JSON.stringify(input) }),
-    delete: (id: string) => request<void>(`/api/leads/${id}`, { method: "DELETE" }),
+    list: () => workspaceApiClient.get<Lead[]>("/api/leads"),
+    create: (input: {
+      name?: string | null;
+      email?: string | null;
+      phone?: string | null;
+      source?: string | null;
+      landingPageId?: string | null;
+    }) => workspaceApiClient.post<Lead>("/api/leads", input),
+    update: (
+      id: string,
+      input: Partial<Pick<Lead, "name" | "email" | "phone" | "status" | "source">>,
+    ) => workspaceApiClient.patch<Lead>(`/api/leads/${id}`, input),
+    delete: (id: string) => workspaceApiClient.delete(`/api/leads/${id}`),
   },
   domains: {
-    list: () => request<Domain[]>("/api/domains"),
-    create: (hostname: string) => request<Domain>("/api/domains", { method: "POST", body: JSON.stringify({ hostname }) }),
-    delete: (id: string) => request<void>(`/api/domains/${id}`, { method: "DELETE" }),
+    list: () => workspaceApiClient.get<Domain[]>("/api/domains"),
+    create: (hostname: string) => workspaceApiClient.post<Domain>("/api/domains", { hostname }),
+    delete: (id: string) => workspaceApiClient.delete(`/api/domains/${id}`),
   },
   settings: {
-    get: () => request<WorkspaceSettings | null>("/api/settings"),
-    update: (input: Omit<WorkspaceSettings, "id">) => request<WorkspaceSettings>("/api/settings", { method: "PUT", body: JSON.stringify(input) }),
+    get: () => workspaceApiClient.get<WorkspaceSettings | null>("/api/settings"),
+    update: (input: Omit<WorkspaceSettings, "id">) =>
+      workspaceApiClient.put<WorkspaceSettings>("/api/settings", input),
   },
 };

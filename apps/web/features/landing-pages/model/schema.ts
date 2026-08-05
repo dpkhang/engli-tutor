@@ -26,9 +26,20 @@ export const createLandingPageAdvancedSchema = createLandingPageSchema.extend({
   tags: z.array(z.string().trim().min(1).max(24)).max(5, "Tối đa 5 tags"),
 });
 
-export type CreateLandingPageAdvancedValues = z.infer<
-  typeof createLandingPageAdvancedSchema
->;
+export type CreateLandingPageAdvancedValues = z.infer<typeof createLandingPageAdvancedSchema>;
+
+export const generateLandingPageFormSchema = createLandingPageSchema.extend({
+  brief: z
+    .string()
+    .trim()
+    .min(20, "Mô tả tối thiểu 20 ký tự")
+    .max(4000, "Mô tả tối đa 4000 ký tự"),
+  audience: z.string().trim().max(500).optional(),
+  tone: z.enum(["professional", "friendly", "bold", "luxury", "playful"]),
+  language: z.enum(["vi", "en"]),
+});
+
+export type GenerateLandingPageFormValues = z.infer<typeof generateLandingPageFormSchema>;
 
 export function slugifyName(name: string): string {
   return name

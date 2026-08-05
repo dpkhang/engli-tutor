@@ -28,13 +28,13 @@ export function SiteFooter() {
   const { isLoggedIn, entryHref } = useAuthSession();
 
   return (
-    <footer className="border-t border-border bg-foreground text-primary-foreground">
+    <footer className="border-t border-border bg-foreground text-primary-foreground dark:bg-card dark:text-card-foreground">
       <div className="mx-auto grid max-w-6xl gap-8 px-5 py-8 sm:px-8 md:grid-cols-[1.6fr_1fr_1fr] md:gap-6 md:py-9">
         <div className="space-y-2">
           <p className="font-[family-name:var(--font-display)] text-xl tracking-tight">
             Pagecraft
           </p>
-          <p className="max-w-xs text-sm leading-relaxed text-primary-foreground/65">
+          <p className="max-w-xs text-sm leading-relaxed text-primary-foreground/65 dark:text-muted-foreground">
             Landing page AI — nhanh, rõ ràng, sẵn sàng xuất bản.
           </p>
         </div>
@@ -56,14 +56,14 @@ export function SiteFooter() {
                     {external ? (
                       <a
                         href={href}
-                        className="text-sm text-primary-foreground/70 transition-colors hover:text-primary-foreground"
+                        className="text-sm text-primary-foreground/70 transition-colors hover:text-primary-foreground dark:text-muted-foreground dark:hover:text-foreground"
                       >
                         {label}
                       </a>
                     ) : (
                       <Link
                         href={href}
-                        className="text-sm text-primary-foreground/70 transition-colors hover:text-primary-foreground"
+                        className="text-sm text-primary-foreground/70 transition-colors hover:text-primary-foreground dark:text-muted-foreground dark:hover:text-foreground"
                       >
                         {label}
                       </Link>
@@ -76,8 +76,8 @@ export function SiteFooter() {
         ))}
       </div>
 
-      <div className="border-t border-primary-foreground/10">
-        <div className="mx-auto flex max-w-6xl flex-col gap-1 px-5 py-3 text-xs text-primary-foreground/50 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+      <div className="border-t border-primary-foreground/10 dark:border-border">
+        <div className="mx-auto flex max-w-6xl flex-col gap-1 px-5 py-3 text-xs text-primary-foreground/50 dark:text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <span>© {new Date().getFullYear()} Pagecraft</span>
           <span>Built for marketers who ship fast.</span>
         </div>

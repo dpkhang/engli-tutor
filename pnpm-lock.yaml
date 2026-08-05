@@ -14,6 +14,9 @@ importers:
 
   apps/landing-page-web:
     dependencies:
+      '@landing-page-generator/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
       '@landing-page-generator/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -63,6 +66,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.5.7
         version: 5.5.7(@standard-schema/spec@1.1.0)(ajv@8.20.0)(effect@3.20.0)(react-hook-form@7.83.0(react@19.2.8))(valibot@1.4.2(typescript@5.9.3))(zod@4.4.3)
+      '@landing-page-generator/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
       '@landing-page-generator/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -112,6 +118,12 @@ importers:
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+
+  packages/api-client:
+    devDependencies:
       typescript:
         specifier: ~5.9.3
         version: 5.9.3

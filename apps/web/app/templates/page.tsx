@@ -1,14 +1,5 @@
-"use client";
-import { FormEvent } from "react";
-import { LayoutTemplate, Plus, Trash2 } from "lucide-react";
-import { Badge, Button, Card, CardContent, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@landing-page-generator/ui";
-import { PageHeader } from "@/features/layout";
-import { templateHooks } from "@/features/workspace-api/hooks";
+import { TemplatesPage } from "@/features/templates";
 
-export default function TemplatesPage() {
-  const query = templateHooks.useList(); const create = templateHooks.useCreate(); const remove = templateHooks.useDelete();
-  const submit = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); const form = new FormData(event.currentTarget); create.mutate({ name: String(form.get("name")), category: String(form.get("category")), description: String(form.get("description") || "") }, { onSuccess: () => event.currentTarget.reset() }); };
-  return <div className="space-y-8"><PageHeader eyebrow="Content" title="Templates" description="Tạo và quản lý bộ mẫu tái sử dụng cho landing page." />
-    <Card className="shadow-none"><CardContent><form className="grid gap-4 md:grid-cols-[1fr_180px_1fr_auto] md:items-end" onSubmit={submit}><div className="space-y-2"><Label htmlFor="template-name">Tên template</Label><Input id="template-name" name="name" required minLength={3} placeholder="Product launch" /></div><div className="space-y-2"><Label htmlFor="template-category">Danh mục</Label><Input id="template-category" name="category" required defaultValue="Marketing" /></div><div className="space-y-2"><Label htmlFor="template-description">Mô tả</Label><Input id="template-description" name="description" placeholder="Mô tả ngắn..." /></div><Button disabled={create.isPending}><Plus /> Tạo</Button></form>{create.error ? <p className="mt-3 text-sm text-destructive">{create.error.message}</p> : null}</CardContent></Card>
-    <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{query.data?.map((item) => <Card key={item.id} className="gap-4 shadow-none"><CardContent className="space-y-4"><div className="flex items-start justify-between gap-3"><span className="grid size-10 place-items-center rounded-lg bg-primary/10 text-primary"><LayoutTemplate className="size-5" /></span><Badge variant={item.status === "PUBLISHED" ? "default" : "secondary"}>{item.status}</Badge></div><div><h2 className="font-semibold">{item.name}</h2><p className="text-xs text-muted-foreground">{item.category}</p><p className="mt-2 text-sm text-muted-foreground">{item.description || "Chưa có mô tả"}</p></div><Button variant="outline" size="sm" className="w-full" disabled={remove.isPending} onClick={() => remove.mutate(item.id)}><Trash2 /> Xóa</Button></CardContent></Card>)}</section>{!query.isLoading && !query.data?.length ? <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">Chưa có template.</p> : null}</div>;
+export default function TemplatesRoutePage() {
+  return <TemplatesPage />;
 }

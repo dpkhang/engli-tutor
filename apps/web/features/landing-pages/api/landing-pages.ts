@@ -1,86 +1,53 @@
 import type {
   CreateLandingPageInput,
+  GenerateLandingPageInput,
   LandingPage,
   LandingPageDetail,
   UpdateLandingPageInput,
+  WorkspaceIntegrations,
 } from "../model/types";
-
-function apiBase(): string {
-  // Production (Vercel): same-origin via next.config rewrites.
-  if (process.env.NEXT_PUBLIC_AUTH_SAME_ORIGIN === "true") return "";
-  return (process.env.NEXT_PUBLIC_API_URL ?? "https://landing-generator-be.onrender.com").replace(
-    /\/$/,
-    "",
-  );
-}
-
-async function parseError(response: Response): Promise<string> {
-  try {
-    const body = (await response.json()) as { message?: string };
-    if (body.message) return body.message;
-  } catch {
-    // ignore
-  }
-  return `Request failed (${response.status})`;
-}
-
-const jsonHeaders = {
-  Accept: "application/json",
-  "Content-Type": "application/json",
-} as const;
+import { workspaceApiClient } from "@/lib/workspace-api-client";
 
 export async function getLandingPages(): Promise<LandingPage[]> {
-  const response = await fetch(`${apiBase()}/api/landing-pages`, {
-    headers: { Accept: "application/json" },
-    credentials: "include",
-    cache: "no-store",
-  });
-  if (!response.ok) throw new Error(await parseError(response));
-  return response.json() as Promise<LandingPage[]>;
+  return workspaceApiClient.get<LandingPage[]>("/api/landing-pages", { cache: "no-store" });
 }
 
 export async function getLandingPage(id: string): Promise<LandingPageDetail> {
-  const response = await fetch(`${apiBase()}/api/landing-pages/${id}`, {
-    headers: { Accept: "application/json" },
-    credentials: "include",
+  return workspaceApiClient.get<LandingPageDetail>(`/api/landing-pages/${id}`, {
     cache: "no-store",
   });
-  if (!response.ok) throw new Error(await parseError(response));
-  return response.json() as Promise<LandingPageDetail>;
+}
+
+export async function getLandingPageBySlug(slug: string): Promise<LandingPageDetail> {
+  return workspaceApiClient.get<LandingPageDetail>(
+    `/api/landing-pages/by-slug/${encodeURIComponent(slug)}`,
+    { cache: "no-store" },
+  );
 }
 
 export async function createLandingPage(input: CreateLandingPageInput): Promise<LandingPage> {
-  const response = await fetch(`${apiBase()}/api/landing-pages`, {
-    method: "POST",
-    headers: jsonHeaders,
-    credentials: "include",
-    body: JSON.stringify(input),
-  });
-  if (!response.ok) throw new Error(await parseError(response));
-  return response.json() as Promise<LandingPage>;
+  return workspaceApiClient.post<LandingPage>("/api/landing-pages", input);
+}
+
+export async function generateLandingPage(
+  input: GenerateLandingPageInput,
+): Promise<LandingPageDetail> {
+  return workspaceApiClient.post<LandingPageDetail>("/api/landing-pages/generate", input);
 }
 
 export async function updateLandingPage(
   id: string,
   input: UpdateLandingPageInput,
 ): Promise<LandingPageDetail> {
-  const response = await fetch(`${apiBase()}/api/landing-pages/${id}`, {
-    method: "PATCH",
-    headers: jsonHeaders,
-    credentials: "include",
-    body: JSON.stringify(input),
-  });
-  if (!response.ok) throw new Error(await parseError(response));
-  return response.json() as Promise<LandingPageDetail>;
+  return workspaceApiClient.patch<LandingPageDetail>(`/api/landing-pages/${id}`, input);
 }
 
 export async function deleteLandingPage(id: string): Promise<void> {
-  const response = await fetch(`${apiBase()}/api/landing-pages/${id}`, {
-    method: "DELETE",
-    headers: { Accept: "application/json" },
-    credentials: "include",
+  return workspaceApiClient.delete(`/api/landing-pages/${id}`);
+}
+
+export async function getWorkspaceIntegrations(): Promise<WorkspaceIntegrations> {
+  return workspaceApiClient.get<WorkspaceIntegrations>("/api/meta/integrations", {
+    cache: "no-store",
   });
-  if (!response.ok && response.status !== 204) {
-    throw new Error(await parseError(response));
-  }
 }

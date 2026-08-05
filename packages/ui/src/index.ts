@@ -29,6 +29,7 @@ export {
   SelectValue,
 } from "./components/select";
 export { Separator } from "./components/separator";
+export { ThemeToggle } from "./components/theme-toggle";
 export {
   Accordion,
   AccordionItem,

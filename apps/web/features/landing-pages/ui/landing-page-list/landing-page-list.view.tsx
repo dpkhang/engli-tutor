@@ -62,8 +62,12 @@ export function LandingPageListView({
     <section className="space-y-4">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h2 className="font-[family-name:var(--font-display)] text-2xl tracking-tight">Thư viện trang</h2>
-          <p className="text-sm text-muted-foreground">Tìm kiếm và quản lý các chiến dịch trong workspace.</p>
+          <h2 className="font-[family-name:var(--font-display)] text-2xl tracking-tight">
+            Thư viện trang
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Tìm kiếm và quản lý các chiến dịch trong workspace.
+          </p>
         </div>
         <Badge variant="secondary">{total} trang</Badge>
       </div>
@@ -79,7 +83,9 @@ export function LandingPageListView({
           />
         </div>
         <Select value={status} onValueChange={(value) => onStatusChange(value as StatusFilter)}>
-          <SelectTrigger className="w-full sm:w-44"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-44">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="ALL">Tất cả trạng thái</SelectItem>
             <SelectItem value="DRAFT">Draft</SelectItem>
@@ -91,21 +97,48 @@ export function LandingPageListView({
 
       {isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {[0, 1, 2].map((item) => <div key={item} className="h-44 animate-pulse rounded-xl bg-muted" />)}
+          {[0, 1, 2].map((item) => (
+            <div key={item} className="h-44 animate-pulse rounded-xl bg-muted" />
+          ))}
         </div>
       ) : null}
 
       {isError ? (
-        <Alert variant="destructive"><AlertDescription className="flex flex-col items-start gap-3"><span>{errorMessage ?? "Không thể kết nối backend."}</span><Button type="button" variant="outline" size="sm" onClick={onRetry}>Thử lại</Button></AlertDescription></Alert>
+        <Alert variant="destructive">
+          <AlertDescription className="flex flex-col items-start gap-3">
+            <span>{errorMessage ?? "Không thể kết nối backend."}</span>
+            <Button type="button" variant="outline" size="sm" onClick={onRetry}>
+              Thử lại
+            </Button>
+          </AlertDescription>
+        </Alert>
       ) : null}
 
       {!isLoading && !isError && pages.length === 0 ? (
         <Card className="border-dashed shadow-none">
           <CardContent className="flex flex-col items-center py-12 text-center">
-            <span className="mb-4 grid size-12 place-items-center rounded-full bg-muted"><FileSearch className="size-5 text-muted-foreground" /></span>
-            <p className="font-semibold">{hasFilters ? "Không tìm thấy trang phù hợp" : "Chưa có landing page"}</p>
-            <p className="mt-1 max-w-sm text-sm text-muted-foreground">{hasFilters ? "Thử đổi từ khóa hoặc bộ lọc trạng thái." : "Bấm “Tạo landing page” để bắt đầu chiến dịch đầu tiên."}</p>
-            {hasFilters ? <Button type="button" variant="outline" size="sm" className="mt-4" onClick={onClearFilters}>Xóa bộ lọc</Button> : null}
+            <span className="mb-4 grid size-12 place-items-center rounded-full bg-muted">
+              <FileSearch className="size-5 text-muted-foreground" />
+            </span>
+            <p className="font-semibold">
+              {hasFilters ? "Không tìm thấy trang phù hợp" : "Chưa có landing page"}
+            </p>
+            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+              {hasFilters
+                ? "Thử đổi từ khóa hoặc bộ lọc trạng thái."
+                : "Bấm “Tạo landing page” để bắt đầu chiến dịch đầu tiên."}
+            </p>
+            {hasFilters ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-4"
+                onClick={onClearFilters}
+              >
+                Xóa bộ lọc
+              </Button>
+            ) : null}
           </CardContent>
         </Card>
       ) : null}
@@ -113,13 +146,31 @@ export function LandingPageListView({
       {!isLoading && !isError && pages.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {pages.map((page) => (
-            <Card key={page.id} className="group gap-4 overflow-hidden py-0 shadow-none transition hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md">
+            <Card
+              key={page.id}
+              className="group gap-4 overflow-hidden py-0 shadow-none transition hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md"
+            >
               <div className="h-24 border-b bg-[linear-gradient(135deg,hsl(var(--primary)/.13),hsl(var(--surface)))] p-4">
-                <div className="flex items-start justify-between"><span className="rounded-md bg-background/80 px-2 py-1 font-mono text-[11px] text-muted-foreground">/{page.slug}</span><Badge variant={statusVariant(page.status)}>{STATUS_LABEL[page.status]}</Badge></div>
+                <div className="flex items-start justify-between">
+                  <span className="rounded-md bg-background/80 px-2 py-1 font-mono text-[11px] text-muted-foreground">
+                    /{page.slug}
+                  </span>
+                  <Badge variant={statusVariant(page.status)}>{STATUS_LABEL[page.status]}</Badge>
+                </div>
               </div>
               <CardContent className="space-y-4 pb-5">
-                <div><h3 className="truncate font-semibold">{page.name}</h3><p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground"><CalendarDays className="size-3.5" />Cập nhật {formatDate(page.updatedAt)}</p></div>
-                <Button asChild variant="outline" size="sm" className="w-full"><Link href={`/pages/${page.id}`}>Quản lý trang <ArrowUpRight /></Link></Button>
+                <div>
+                  <h3 className="truncate font-semibold">{page.name}</h3>
+                  <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <CalendarDays className="size-3.5" />
+                    Cập nhật {formatDate(page.updatedAt)}
+                  </p>
+                </div>
+                <Button asChild variant="outline" size="sm" className="w-full">
+                  <Link href={`/pages/${page.id}`}>
+                    Quản lý trang <ArrowUpRight />
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           ))}

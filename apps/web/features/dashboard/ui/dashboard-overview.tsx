@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { ArrowRight, CircleCheck, Clock3, FileText, Plus } from "lucide-react";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@landing-page-generator/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@landing-page-generator/ui";
 import { PageHeader } from "@/features/layout";
 import { useLandingPages } from "@/features/landing-pages/hooks/use-landing-pages";
 
@@ -56,7 +63,9 @@ export function DashboardOverview() {
             <p className="text-sm text-muted-foreground">Các trang được cập nhật mới nhất.</p>
           </div>
           <Button asChild variant="ghost" size="sm">
-            <Link href="/landing-pages">Xem tất cả <ArrowRight /></Link>
+            <Link href="/landing-pages">
+              Xem tất cả <ArrowRight />
+            </Link>
           </Button>
         </CardHeader>
         <CardContent>
@@ -78,7 +87,11 @@ export function DashboardOverview() {
                   <p className="truncate text-xs text-muted-foreground">/{page.slug}</p>
                 </div>
                 <Badge variant={page.status === "PUBLISHED" ? "default" : "secondary"}>
-                  {page.status === "PUBLISHED" ? "Published" : page.status === "DRAFT" ? "Draft" : "Archived"}
+                  {page.status === "PUBLISHED"
+                    ? "Published"
+                    : page.status === "DRAFT"
+                      ? "Draft"
+                      : "Archived"}
                 </Badge>
               </Link>
             ))}

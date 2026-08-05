@@ -4,10 +4,7 @@ import type { NextConfig } from "next";
 /** Baked into the client bundle. Prefer CI/Vercel env; fallback keeps prod deploys working. */
 const DEFAULT_API_URL = "https://landing-generator-be.onrender.com";
 
-const apiUrl = (process.env.NEXT_PUBLIC_API_URL?.trim() || DEFAULT_API_URL).replace(
-  /\/$/,
-  "",
-);
+const apiUrl = (process.env.NEXT_PUBLIC_API_URL?.trim() || DEFAULT_API_URL).replace(/\/$/, "");
 
 if (!process.env.NEXT_PUBLIC_API_URL?.trim()) {
   console.warn(
@@ -19,7 +16,11 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: apiUrl,
   },
-  transpilePackages: ["@landing-page-generator/ui", "@landing-page-generator/auth"],
+  transpilePackages: [
+    "@landing-page-generator/ui",
+    "@landing-page-generator/auth",
+    "@landing-page-generator/api-client",
+  ],
   turbopack: {
     root: path.join(__dirname, "../.."),
   },

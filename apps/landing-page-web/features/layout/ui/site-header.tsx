@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
 import { authClient, useSession } from "@/lib/auth-client";
-import { Button, cn } from "@landing-page-generator/ui";
+import { Button, cn, ThemeToggle } from "@landing-page-generator/ui";
 import { motion, AnimatePresence } from "motion/react";
 import { getAppUrl, getAuthHref } from "@/features/auth/model/session";
 
@@ -31,7 +31,7 @@ function WorkspaceMenuCard({ href, className }: { href: string; className?: stri
       href={href}
       role="menuitem"
       className={cn(
-        "group relative block overflow-hidden rounded-2xl px-3.5 py-2.5 text-left text-primary-foreground outline-none",
+        "group relative block overflow-hidden rounded-2xl px-3.5 py-2.5 text-left text-white outline-none",
         "bg-[linear-gradient(145deg,#06352d_0%,#0a4a3c_48%,#1f8a68_100%)]",
         "shadow-[0_14px_36px_-16px_rgba(6,53,45,0.65)] transition-shadow duration-300",
         "hover:shadow-[0_16px_36px_-14px_rgba(6,53,45,0.7)]",
@@ -48,11 +48,11 @@ function WorkspaceMenuCard({ href, className }: { href: string; className?: stri
           <span className="font-[family-name:var(--font-display)] text-base leading-none tracking-tight">
             Mở Workspace
           </span>
-          <span className="block truncate text-xs text-primary-foreground/70">
+          <span className="block truncate text-xs text-white/70">
             Quản lý landing page & xuất bản
           </span>
         </span>
-        <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-foreground/12 text-primary-foreground transition-colors duration-300 group-hover:bg-accent group-hover:text-accent-foreground">
+        <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-white/12 text-white transition-colors duration-300 group-hover:bg-accent group-hover:text-accent-foreground">
           <ArrowUpRight className="size-3.5" strokeWidth={2.25} />
         </span>
       </span>
@@ -122,7 +122,7 @@ export function SiteHeader() {
 
   const linkTone = useSolidHeader
     ? "text-muted-foreground hover:text-foreground"
-    : "text-primary-foreground/80 hover:text-primary-foreground";
+    : "text-white/80 hover:text-white";
 
   const signOut = () => {
     setMenuOpen(false);
@@ -146,7 +146,7 @@ export function SiteHeader() {
       {useSolidHeader ? (
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,hsla(160,28%,97%,0.92),hsla(158,22%,93%,0.55)_70%,hsla(160,28%,97%,0.2))]"
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,hsla(160,28%,97%,0.92),hsla(158,22%,93%,0.55)_70%,hsla(160,28%,97%,0.2))] dark:bg-[linear-gradient(180deg,hsla(168,34%,7%,0.94),hsla(167,25%,12%,0.7)_70%,hsla(168,34%,7%,0.25))]"
         />
       ) : null}
 
@@ -155,7 +155,7 @@ export function SiteHeader() {
           href="/"
           className={cn(
             "font-[family-name:var(--font-display)] text-xl tracking-tight transition-colors",
-            useSolidHeader ? "text-foreground" : "text-primary-foreground",
+            useSolidHeader ? "text-foreground" : "text-white",
           )}
         >
           Pagecraft
@@ -171,11 +171,16 @@ export function SiteHeader() {
           </nav>
 
           <div className="flex items-center gap-2">
+            <ThemeToggle
+              className={cn(
+                onHero && "text-white/80 hover:bg-white/10 hover:text-white",
+              )}
+            />
             {isPending ? (
               <span
                 className={cn(
                   "h-9 w-20 animate-pulse rounded-md",
-                  onHero ? "bg-primary-foreground/15" : "bg-muted",
+                  onHero ? "bg-white/15" : "bg-muted",
                 )}
               />
             ) : isLoggedIn ? (
@@ -185,21 +190,21 @@ export function SiteHeader() {
                   className={cn(
                     "inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full px-2.5 text-sm shadow-sm transition-colors",
                     onHero
-                      ? "border border-primary-foreground/25 bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/16"
+                      ? "border border-white/25 bg-white/10 text-white hover:bg-white/16"
                       : "border border-border/80 bg-background/80 text-foreground hover:bg-muted",
                   )}
                   onClick={() => setMenuOpen((open) => !open)}
                   aria-expanded={menuOpen}
                   aria-haspopup="menu"
                 >
-                  <span className="inline-flex size-6 items-center justify-center rounded-full bg-[linear-gradient(145deg,#0a4a3c,#1f8a68)] text-[10px] font-semibold text-primary-foreground">
+                  <span className="inline-flex size-6 items-center justify-center rounded-full bg-[linear-gradient(145deg,#0a4a3c,#1f8a68)] text-[10px] font-semibold text-white">
                     {displayName.slice(0, 1).toUpperCase()}
                   </span>
                   <span className="hidden max-w-[7.5rem] truncate sm:inline">{displayName}</span>
                   <ChevronDown
                     className={cn(
                       "size-3.5 transition-transform duration-200",
-                      onHero ? "text-primary-foreground/70" : "text-muted-foreground",
+                      onHero ? "text-white/70" : "text-muted-foreground",
                       menuOpen && "rotate-180",
                     )}
                   />
@@ -252,7 +257,7 @@ export function SiteHeader() {
                     className={cn(
                       "hidden h-9 items-center rounded-md px-3 text-sm transition-colors sm:inline-flex",
                       onHero
-                        ? "text-primary-foreground/90 hover:bg-primary-foreground/10"
+                        ? "text-white/90 hover:bg-white/10"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground",
                     )}
                   >

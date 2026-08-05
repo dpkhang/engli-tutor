@@ -50,7 +50,7 @@ export function MasterBannerView({
 
       <div
         aria-hidden
-        className="absolute inset-0 bg-[linear-gradient(115deg,rgba(3,28,24,0.94)_0%,rgba(4,40,34,0.82)_38%,rgba(6,45,40,0.62)_62%,rgba(3,22,20,0.78)_100%)]"
+        className="absolute inset-0 bg-[linear-gradient(115deg,rgba(3,28,24,0.84)_0%,rgba(4,40,34,0.7)_38%,rgba(6,45,40,0.48)_62%,rgba(3,22,20,0.64)_100%)]"
       />
       <div
         aria-hidden
@@ -74,7 +74,7 @@ export function MasterBannerView({
       <div className="relative mx-auto flex min-h-svh max-w-6xl flex-col justify-end px-5 pt-28 pb-16 sm:px-8 sm:pb-20 lg:pb-24">
         <div className="max-w-3xl">
           <motion.p
-            className="font-[family-name:var(--font-display)] text-[clamp(3.5rem,11vw,8.5rem)] leading-[0.88] tracking-[-0.04em] text-primary-foreground"
+            className="font-[family-name:var(--font-display)] text-[clamp(3.5rem,11vw,8.5rem)] leading-[0.88] tracking-[-0.04em] text-white"
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease: easeOut }}
@@ -90,7 +90,7 @@ export function MasterBannerView({
           />
 
           <motion.h1
-            className="mt-7 max-w-2xl text-[clamp(1.35rem,2.6vw,2rem)] leading-tight font-medium text-primary-foreground/95"
+            className="mt-7 max-w-2xl text-[clamp(1.35rem,2.6vw,2rem)] leading-tight font-medium text-white/95"
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.15, ease: easeOut }}
@@ -99,7 +99,7 @@ export function MasterBannerView({
           </motion.h1>
 
           <motion.p
-            className="mt-4 max-w-xl text-base leading-relaxed text-primary-foreground/72 sm:text-lg"
+            className="mt-4 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.22, ease: "easeOut" }}
@@ -125,7 +125,7 @@ export function MasterBannerView({
             <Button
               size="lg"
               variant="outline"
-              className="border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10"
+              className="border-white/40 bg-transparent text-white shadow-none hover:bg-white/10 hover:text-white dark:border-white/40 dark:bg-transparent dark:text-white dark:hover:bg-white/10 dark:hover:text-white"
               type="button"
               onClick={onFeaturesClick}
             >
@@ -138,7 +138,7 @@ export function MasterBannerView({
           aria-hidden
           className="pointer-events-none absolute bottom-8 left-1/2 hidden -translate-x-1/2 md:block"
         >
-          <span className="hero-scroll-cue block h-9 w-px origin-top bg-primary-foreground/45" />
+          <span className="hero-scroll-cue block h-9 w-px origin-top bg-white/45" />
         </div>
       </div>
     </section>
