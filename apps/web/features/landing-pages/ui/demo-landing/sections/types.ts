@@ -9,4 +9,5 @@ export type SectionRenderProps = {
   slug: string;
   tokens: LayoutTokens;
   preset: string;
+  heroImageUrl?: string;
 };

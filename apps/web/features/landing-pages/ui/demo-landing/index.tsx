@@ -1,16 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Eye, FileText, LoaderCircle } from "lucide-react";
+import { ArrowLeft, Check, Eye, FileText, Globe2, Link2, LoaderCircle, Rocket } from "lucide-react";
 import { Alert, AlertDescription, Badge, Button } from "@landing-page-generator/ui";
-import { useLandingPageBySlug } from "../../hooks/use-landing-pages";
+import {
+  useLandingPageBySlug,
+  useUpdateLandingPage,
+} from "../../hooks/use-landing-pages";
 import { parseGeneratedContent } from "../../model/generated-content";
 import { DemoLandingRenderer } from "./demo-landing-renderer";
 
 export function DemoLanding({ slug }: { slug: string }) {
   const query = useLandingPageBySlug(slug);
+  const update = useUpdateLandingPage(query.data?.id ?? "");
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const [publishSuccess, setPublishSuccess] = useState(false);
   const content = query.data ? parseGeneratedContent(query.data.content) : null;
+  const isDraft = query.data?.status === "DRAFT";
+  const isPublished = query.data?.status === "PUBLISHED";
 
   useEffect(() => {
     if (!content) return;
@@ -24,6 +32,23 @@ export function DemoLanding({ slug }: { slug: string }) {
       if (meta && previousDescription != null) meta.setAttribute("content", previousDescription);
     };
   }, [content]);
+
+  useEffect(() => {
+    setPublishError(null);
+    setPublishSuccess(false);
+  }, [slug, query.data?.status]);
+
+  const onPublish = async () => {
+    if (!query.data || !isDraft) return;
+    setPublishError(null);
+    setPublishSuccess(false);
+    try {
+      await update.mutateAsync({ status: "PUBLISHED" });
+      setPublishSuccess(true);
+    } catch (error) {
+      setPublishError(error instanceof Error ? error.message : "Không thể xuất bản trang");
+    }
+  };
 
   if (query.isLoading) {
     return (
@@ -72,28 +97,69 @@ export function DemoLanding({ slug }: { slug: string }) {
   return (
     <div>
       <div className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <div className="flex min-w-0 items-center gap-3">
-            <Badge variant="secondary" className="gap-1.5">
-              <Eye className="size-3" /> Demo
-            </Badge>
-            <p className="truncate text-sm font-medium">{query.data.name}</p>
-            <span className="hidden font-mono text-xs text-muted-foreground sm:inline">
-              /{query.data.slug}
-            </span>
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:px-6">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <Badge variant="secondary" className="gap-1.5">
+                <Eye className="size-3" /> Demo
+              </Badge>
+              <Badge variant={isPublished ? "default" : "outline"}>
+                {isPublished ? "Published" : query.data.status}
+              </Badge>
+              <p className="truncate text-sm font-medium">{query.data.name}</p>
+              <span className="hidden font-mono text-xs text-muted-foreground sm:inline">
+                /{query.data.slug}
+              </span>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/landing-pages">
+                  <ArrowLeft /> Danh sách
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/pages/${query.data.id}`}>
+                  <FileText /> Chi tiết
+                </Link>
+              </Button>
+              {isDraft ? (
+                <Button size="sm" onClick={() => void onPublish()} disabled={update.isPending}>
+                  {update.isPending ? (
+                    <>
+                      <LoaderCircle className="animate-spin" /> Đang xuất bản...
+                    </>
+                  ) : (
+                    <>
+                      <Rocket /> Xuất bản
+                    </>
+                  )}
+                </Button>
+              ) : isPublished ? (
+                <Button size="sm" variant="secondary" disabled>
+                  <Check /> Đã xuất bản
+                </Button>
+              ) : null}
+            </div>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/landing-pages">
-                <ArrowLeft /> Danh sách
-              </Link>
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link href={`/pages/${query.data.id}`}>
-                <FileText /> Chi tiết
-              </Link>
-            </Button>
-          </div>
+          {(publishError || publishSuccess || isDraft) && (
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+              {publishError ? <span className="text-destructive">{publishError}</span> : null}
+              {publishSuccess || isPublished ? (
+                <span className="inline-flex items-center gap-1.5 text-foreground">
+                  <Check className="size-3.5 text-primary" />
+                  Trang đã xuất bản. Gắn domain riêng trên trang Domains.
+                </span>
+              ) : isDraft ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Globe2 className="size-3.5" />
+                  Xuất bản khi sẵn sàng ·{" "}
+                  <Link href="/domains" className="inline-flex items-center gap-1 underline">
+                    <Link2 className="size-3" /> Domains
+                  </Link>
+                </span>
+              ) : null}
+            </div>
+          )}
         </div>
       </div>
       <DemoLandingRenderer content={content} landingPageId={query.data.id} slug={query.data.slug} />

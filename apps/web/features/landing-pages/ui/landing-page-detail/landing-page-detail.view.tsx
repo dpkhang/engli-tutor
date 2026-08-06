@@ -10,6 +10,7 @@ import {
   Copy,
   Eye,
   FileCode2,
+  PencilLine,
   Globe2,
   Layers3,
   Save,
@@ -325,8 +326,8 @@ export function LandingPageDetailView({
                       Mở demo để xem landing page đầy đủ và thử form thu thập leads.
                     </p>
                     <Button type="button" variant="outline" size="sm" className="mt-4" asChild>
-                      <Link href={`/demo/${page.slug}`}>
-                        <Eye /> Xem demo
+                      <Link href={`/pages/${page.id}/edit`}>
+                        <PencilLine /> Chỉnh sửa nội dung
                       </Link>
                     </Button>
                   </>

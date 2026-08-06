@@ -87,6 +87,7 @@ export function useUpdateLandingPage(id: string) {
     mutationFn: (input: UpdateLandingPageInput) => updateLandingPage(id, input),
     onSuccess: async (page) => {
       queryClient.setQueryData(landingPageQueryKey(id), page);
+      queryClient.setQueryData(landingPageBySlugQueryKey(page.slug), page);
       await queryClient.invalidateQueries({ queryKey: landingPagesQueryKey });
     },
   });

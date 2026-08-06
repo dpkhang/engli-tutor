@@ -55,8 +55,12 @@ export const generatedLandingContentSchema = z.object({
   }),
   sections: z.array(generatedSectionSchema).min(3).max(10),
   layout: generatedLayoutSchema.optional(),
+  media: z.object({ heroImageUrl: z.string().url() }).optional(),
 });
 
+export type LayoutPreset = (typeof LAYOUT_PRESETS)[number];
+export type LayoutDensity = (typeof LAYOUT_DENSITIES)[number];
+export type LayoutRadius = (typeof LAYOUT_RADII)[number];
 export type GeneratedLayout = z.infer<typeof generatedLayoutSchema>;
 export type GeneratedLandingContent = z.infer<typeof generatedLandingContentSchema>;
 export type GeneratedSection = z.infer<typeof generatedSectionSchema>;

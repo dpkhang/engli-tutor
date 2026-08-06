@@ -4,13 +4,19 @@ import { SectionShell } from "../section-shell";
 import type { SectionRenderProps } from "../types";
 
 export function HeroSplitForm(props: SectionRenderProps) {
-  const { section, primaryColor, secondaryColor, landingPageId, slug, tokens } = props;
+  const { section, primaryColor, secondaryColor, landingPageId, slug, tokens, heroImageUrl } = props;
   return (
     <SectionShell
       id="hero"
       tokens={tokens}
       className="text-white"
-      style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)` }}
+      style={{
+        backgroundImage: heroImageUrl
+          ? `linear-gradient(135deg, ${primaryColor}e6 0%, ${secondaryColor}b8 100%), url("${heroImageUrl}")`
+          : `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
     >
       <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-5">
@@ -41,14 +47,20 @@ export function HeroSplitForm(props: SectionRenderProps) {
 }
 
 export function HeroCenteredCta(props: SectionRenderProps) {
-  const { section, primaryColor, secondaryColor, tokens } = props;
+  const { section, primaryColor, secondaryColor, tokens, heroImageUrl } = props;
   return (
     <SectionShell
       id="hero"
       tokens={tokens}
       narrow
       className="text-center text-white"
-      style={{ background: `linear-gradient(160deg, ${secondaryColor} 0%, ${primaryColor} 100%)` }}
+      style={{
+        backgroundImage: heroImageUrl
+          ? `linear-gradient(160deg, ${secondaryColor}dc 0%, ${primaryColor}c7 100%), url("${heroImageUrl}")`
+          : `linear-gradient(160deg, ${secondaryColor} 0%, ${primaryColor} 100%)`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
     >
       <p className="text-xs font-bold tracking-[0.22em] text-white/70 uppercase">Landing demo</p>
       <h1 className="mt-4 font-[family-name:var(--font-display)] text-4xl leading-tight tracking-tight sm:text-5xl">
@@ -69,13 +81,19 @@ export function HeroCenteredCta(props: SectionRenderProps) {
 }
 
 export function HeroAsymmetric(props: SectionRenderProps) {
-  const { section, primaryColor, secondaryColor, landingPageId, slug, tokens } = props;
+  const { section, primaryColor, secondaryColor, landingPageId, slug, tokens, heroImageUrl } = props;
   return (
     <SectionShell id="hero" tokens={tokens} className="bg-background">
       <div className="grid items-stretch gap-8 lg:grid-cols-[0.9fr_1.1fr]">
         <div
           className="flex flex-col justify-end rounded-[var(--lp-radius)] p-8 text-white sm:p-10"
-          style={{ background: `linear-gradient(145deg, ${primaryColor}, ${secondaryColor})` }}
+          style={{
+            backgroundImage: heroImageUrl
+              ? `linear-gradient(145deg, ${primaryColor}d9, ${secondaryColor}a6), url("${heroImageUrl}")`
+              : `linear-gradient(145deg, ${primaryColor}, ${secondaryColor})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
         >
           <p className="text-xs font-bold tracking-[0.2em] text-white/70 uppercase">Landing demo</p>
           <h1 className="mt-4 font-[family-name:var(--font-display)] text-3xl leading-tight tracking-tight sm:text-4xl">

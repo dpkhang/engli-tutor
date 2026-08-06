@@ -46,6 +46,44 @@ export async function deleteLandingPage(id: string): Promise<void> {
   return workspaceApiClient.delete(`/api/landing-pages/${id}`);
 }
 
+export type WizardDraftServerResponse = {
+  id: string;
+  updatedAt: string;
+  payload: {
+    version: 1;
+    mode: "ai" | "manual";
+    step: 1 | 2 | 3 | 4;
+    selectedFrameId: string | null;
+    ai: {
+      name: string;
+      slug: string;
+      brief: string;
+      audience?: string;
+      tone: "professional" | "friendly" | "bold" | "luxury" | "playful";
+      language: "vi" | "en";
+    };
+  };
+} | null;
+
+export async function getWizardDraft(): Promise<WizardDraftServerResponse> {
+  return workspaceApiClient.get<WizardDraftServerResponse>("/api/landing-pages/wizard-draft", {
+    cache: "no-store",
+  });
+}
+
+export async function putWizardDraft(
+  payload: NonNullable<WizardDraftServerResponse>["payload"],
+): Promise<NonNullable<WizardDraftServerResponse>> {
+  return workspaceApiClient.put<NonNullable<WizardDraftServerResponse>>(
+    "/api/landing-pages/wizard-draft",
+    { payload },
+  );
+}
+
+export async function deleteWizardDraft(): Promise<void> {
+  return workspaceApiClient.delete("/api/landing-pages/wizard-draft");
+}
+
 export async function getWorkspaceIntegrations(): Promise<WorkspaceIntegrations> {
   return workspaceApiClient.get<WorkspaceIntegrations>("/api/meta/integrations", {
     cache: "no-store",

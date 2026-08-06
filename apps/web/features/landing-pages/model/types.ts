@@ -7,6 +7,7 @@ export type LandingPage = {
   status: LandingPageStatus;
   createdAt: string;
   updatedAt: string;
+  hasContent?: boolean;
 };
 
 export type LandingPageDetail = LandingPage & {
@@ -18,6 +19,13 @@ export type CreateLandingPageInput = {
   slug: string;
 };
 
+export type GenerateLandingPageLayoutHint = {
+  preset: "bold-split" | "editorial-stack" | "minimal-center" | "soft-cards";
+  density?: "compact" | "comfortable" | "airy";
+  radius?: "sharp" | "soft" | "pill";
+  sectionVariantPlan?: Record<string, string>;
+};
+
 export type GenerateLandingPageInput = {
   name: string;
   slug: string;
@@ -25,12 +33,15 @@ export type GenerateLandingPageInput = {
   audience?: string;
   tone: "professional" | "friendly" | "bold" | "luxury" | "playful";
   language: "vi" | "en";
+  layoutPreset?: GenerateLandingPageLayoutHint["preset"];
+  layout?: GenerateLandingPageLayoutHint;
 };
 
 export type UpdateLandingPageInput = {
   name?: string;
   slug?: string;
   status?: LandingPageStatus;
+  content?: import("./generated-content").GeneratedLandingContent;
 };
 
 export type WorkspaceIntegrations = {

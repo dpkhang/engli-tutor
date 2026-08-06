@@ -35,6 +35,7 @@ export function DemoLandingRenderer({ content, landingPageId, slug }: Props) {
             slug={slug}
             tokens={tokens}
             preset={layout.preset}
+            heroImageUrl={section.type === "hero" ? content.media?.heroImageUrl : undefined}
           />
         );
       })}
