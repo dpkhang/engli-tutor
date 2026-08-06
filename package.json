@@ -18,8 +18,9 @@
     "deploy:landing:prod": "bash ./scripts/vercel-deploy.sh landing --prod",
     "deploy:web": "bash ./scripts/vercel-deploy.sh web",
     "deploy:web:prod": "bash ./scripts/vercel-deploy.sh web --prod",
-    "dev:web": "pnpm build:pkg && pnpm --filter landing-page-generator-fe dev",
-    "dev:landing": "pnpm build:pkg && pnpm --filter landing-page-web dev",
+    "dev:web": "pnpm build:pkg && pnpm --filter landing-page-generator-fe dev:https",
+    "dev:landing": "pnpm build:pkg && pnpm --filter landing-page-web dev:https",
+    "dev:admin": "pnpm --dir ../admin dev:https",
     "build": "pnpm build:pkg && pnpm --filter landing-page-generator-fe build && pnpm --filter landing-page-web build",
     "build:pkg": "pnpm --filter \"./packages/*\" run build",
     "lint": "pnpm -r --filter \"./apps/*\" --filter \"./packages/*\" lint"

@@ -46,4 +46,5 @@ export {
   type AccordionTriggerProps,
   type AccordionContentProps,
 } from "./components/accordion";
+export { useLockScroll } from "./hooks/use-lock-scroll";
 export { cn } from "./lib/utils";

@@ -221,7 +221,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className={cn("relative transition-[padding] duration-200 ease-out lg:pl-64", collapsed && "lg:pl-20")}>
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/80 px-4 shadow-[0_10px_30px_-28px_hsl(var(--foreground)/0.45)] backdrop-blur-xl sm:px-6">
+        <header
+          className={cn(
+            "fixed top-0 z-30 flex h-16 items-center justify-between border-b bg-background/80 px-4 shadow-[0_10px_30px_-28px_hsl(var(--foreground)/0.45)] backdrop-blur-xl sm:px-6",
+            "left-0 right-[var(--scrollbar-compensation,0px)]",
+            collapsed ? "lg:left-20" : "lg:left-64",
+          )}
+        >
           <div className="flex items-center gap-2">
             <Button
               type="button"
@@ -339,6 +345,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             ) : null}
           </div>
         </header>
+
+        <div className="h-16 shrink-0" aria-hidden />
 
         <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
           {children}

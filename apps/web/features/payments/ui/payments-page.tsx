@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowUpCircle,
   Check,
@@ -12,6 +13,7 @@ import {
   LoaderCircle,
   ReceiptText,
   Sparkles,
+  X,
 } from "lucide-react";
 import {
   Alert,
@@ -24,6 +26,7 @@ import {
   CardHeader,
   CardTitle,
   cn,
+  useLockScroll,
 } from "@landing-page-generator/ui";
 import { PageHeader } from "@/features/layout";
 import {
@@ -74,6 +77,7 @@ export default function PaymentsPage() {
   const [period, setPeriod] = useState<"monthly" | "yearly">("monthly");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
+  const [showUpgradeOptions, setShowUpgradeOptions] = useState(false);
 
   useEffect(() => {
     if (checkoutState !== "success") return;
@@ -112,6 +116,9 @@ export default function PaymentsPage() {
   const activePlanId = currentPlanId(data);
   const activePlan = currentPlanDetails(data);
   const comparePlans = allPlansForCompare(data?.subscriptionPlans ?? []);
+  const activePlanIndex = comparePlans.findIndex((plan) => plan.id === activePlanId);
+  const higherPlans = activePlanIndex < 0 ? [] : comparePlans.slice(activePlanIndex + 1);
+  useLockScroll(showUpgradeOptions && higherPlans.length > 0);
 
   const redirectCheckout = async (url: string | null) => {
     if (!url) {
@@ -138,8 +145,8 @@ export default function PaymentsPage() {
     setError(null);
     setPending(`up-${planId}`);
     try {
-      await upgrade.mutateAsync(planId);
-      await billing.refetch();
+      const result = await upgrade.mutateAsync(planId);
+      await redirectCheckout(result.url);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không nâng cấp được gói");
     } finally {
@@ -159,9 +166,6 @@ export default function PaymentsPage() {
       setPending(null);
     }
   };
-
-  const upgradeTarget =
-    activePlanId === "growth" ? data?.subscriptionPlans.find((p) => p.id === "scale") : null;
 
   return (
     <div className="space-y-8">
@@ -271,11 +275,22 @@ export default function PaymentsPage() {
                   </Alert>
                 ) : null}
 
-                <Button asChild variant="outline">
-                  <Link href="/landing-pages/new">
-                    <Sparkles /> Tạo landing bằng AI
-                  </Link>
-                </Button>
+                <div className="flex flex-wrap gap-3">
+                  <Button asChild variant="outline">
+                    <Link href="/landing-pages/new">
+                      <Sparkles /> Tạo landing bằng AI
+                    </Link>
+                  </Button>
+                  {higherPlans.length > 0 ? (
+                    <Button
+                      type="button"
+                      disabled={!stripeReady || Boolean(pending)}
+                      onClick={() => setShowUpgradeOptions(true)}
+                    >
+                      <ArrowUpCircle /> Nâng cấp gói
+                    </Button>
+                  ) : null}
+                </div>
               </div>
 
               <div className="space-y-3">
@@ -294,148 +309,147 @@ export default function PaymentsPage() {
         </CardContent>
       </Card>
 
-      <div className="space-y-4">
-        <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-          So sánh các gói
-        </h2>
-        <div className="grid gap-4 lg:grid-cols-3">
-          {comparePlans.map((plan) => {
-            const isCurrent = !billing.isLoading && plan.id === activePlanId;
-            const price =
-              period === "yearly" && !plan.isFree
-                ? plan.priceVndMonthly * 10
-                : plan.priceVndMonthly;
-
-            return (
-              <Card
-                key={plan.id}
+      <AnimatePresence>
+        {showUpgradeOptions && higherPlans.length > 0 ? (
+        <motion.div
+          className="fixed inset-0 z-[100] grid place-items-center overflow-y-auto bg-black/45 p-4 backdrop-blur-[2px]"
+          role="presentation"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18, ease: "easeOut" }}
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setShowUpgradeOptions(false);
+          }}
+        >
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="upgrade-dialog-title"
+            className={cn(
+              "relative my-auto w-full rounded-2xl border bg-popover p-6 text-popover-foreground shadow-2xl",
+              higherPlans.length <= 1 && "max-w-md",
+              higherPlans.length === 2 && "max-w-3xl",
+              higherPlans.length >= 3 && "max-w-5xl",
+            )}
+            initial={{ opacity: 0, y: 16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.97 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4"
+              aria-label="Đóng"
+              onClick={() => setShowUpgradeOptions(false)}
+            >
+              <X />
+            </Button>
+            <div className="space-y-2 pr-12">
+              <h2 id="upgrade-dialog-title" className="flex items-center gap-2 text-xl font-semibold">
+                <ArrowUpCircle className="size-5 text-primary" /> Chọn gói muốn nâng cấp
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Chỉ những gói cao hơn {activePlan.name} được hiển thị. Chọn một gói để bắt đầu
+                thanh toán.
+              </p>
+            </div>
+            <div className="mt-6 space-y-5">
+              {!hasPaidPlan ? (
+                <div className="flex flex-wrap gap-2">
+                  {(["monthly", "yearly"] as const).map((p) => (
+                    <Button
+                      key={p}
+                      type="button"
+                      size="sm"
+                      variant={period === p ? "default" : "outline"}
+                      onClick={() => setPeriod(p)}
+                    >
+                      {p === "monthly" ? "Theo tháng" : "Theo năm (−2 tháng)"}
+                    </Button>
+                  ))}
+                </div>
+              ) : null}
+              <div
                 className={cn(
-                  "relative shadow-none",
-                  isCurrent && "border-primary ring-2 ring-primary/15",
-                  !isCurrent && plan.featured && "border-primary/40",
+                  "grid gap-4",
+                  higherPlans.length === 1 && "grid-cols-1",
+                  higherPlans.length === 2 && "md:grid-cols-2",
+                  higherPlans.length >= 3 && "md:grid-cols-2 lg:grid-cols-3",
                 )}
               >
-                {isCurrent ? (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-[11px] font-semibold tracking-wide text-primary-foreground uppercase">
-                    Đang dùng
-                  </span>
-                ) : null}
-                <CardHeader className="space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <CardTitle className="text-xl">{plan.name}</CardTitle>
-                    {plan.featured && !isCurrent ? (
-                      <Badge variant="secondary">Phổ biến</Badge>
-                    ) : null}
-                  </div>
-                  <CardDescription>{plan.description}</CardDescription>
-                  <p className="font-[family-name:var(--font-display)] text-2xl tracking-tight">
-                    {plan.isFree ? "0đ" : formatVnd(price)}
-                    <span className="ml-1 text-sm font-sans font-normal text-muted-foreground">
-                      {plan.isFree
-                        ? "mãi mãi"
-                        : period === "yearly"
-                          ? "/ năm"
-                          : "/ tháng"}
-                    </span>
-                  </p>
-                  {!plan.isFree ? (
-                    <p className="text-xs text-muted-foreground">
-                      {plan.creditsPerPeriod} credit/kỳ
-                    </p>
-                  ) : null}
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex gap-2">
-                        <Check className="mt-0.5 size-4 shrink-0 text-primary" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  {isCurrent ? (
-                    <Button className="w-full" variant="secondary" disabled>
-                      Gói hiện tại
-                    </Button>
-                  ) : plan.isFree ? (
-                    <Button className="w-full" variant="outline" disabled>
-                      Miễn phí khi đăng ký
-                    </Button>
-                  ) : (
-                    <Button
-                      className="w-full"
-                      disabled={!stripeReady || Boolean(pending) || hasPaidPlan}
-                      onClick={() => void onSubscribe(plan.id as SubscriptionPlan["id"])}
-                    >
-                      {pending === `sub-${plan.id}` ? (
-                        <LoaderCircle className="animate-spin" />
-                      ) : (
-                        <>
-                          <CreditCard /> Đăng ký bằng thẻ
-                        </>
-                      )}
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                {higherPlans.map((plan) => {
+                  const price =
+                    period === "yearly" && !plan.isFree
+                      ? plan.priceVndMonthly * 10
+                      : plan.priceVndMonthly;
 
-        {!hasPaidPlan ? (
-          <div className="flex gap-2">
-            {(["monthly", "yearly"] as const).map((p) => (
-              <Button
-                key={p}
-                type="button"
-                size="sm"
-                variant={period === p ? "default" : "outline"}
-                onClick={() => setPeriod(p)}
-              >
-                {p === "monthly" ? "Theo tháng" : "Theo năm (−2 tháng)"}
-              </Button>
-            ))}
-          </div>
+                  return (
+                    <Card
+                      key={plan.id}
+                      className={cn(
+                        "relative shadow-none",
+                        plan.featured && "border-primary/40",
+                      )}
+                    >
+                    <CardHeader className="space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <CardTitle className="text-xl">{plan.name}</CardTitle>
+                        {plan.featured ? <Badge variant="secondary">Phổ biến</Badge> : null}
+                      </div>
+                      <CardDescription>{plan.description}</CardDescription>
+                      <p className="font-[family-name:var(--font-display)] text-2xl tracking-tight">
+                        {formatVnd(price)}
+                        <span className="ml-1 text-sm font-sans font-normal text-muted-foreground">
+                          {period === "yearly" ? "/ năm" : "/ tháng"}
+                        </span>
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {plan.creditsPerPeriod} credit/kỳ
+                      </p>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <ul className="space-y-2 text-sm text-muted-foreground">
+                        {plan.features.map((feature) => (
+                          <li key={feature} className="flex gap-2">
+                            <Check className="mt-0.5 size-4 shrink-0 text-primary" />
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+                      <Button
+                        className="w-full"
+                        disabled={!stripeReady || Boolean(pending)}
+                        onClick={() =>
+                          void (hasPaidPlan
+                            ? onUpgrade(plan.id as SubscriptionPlan["id"])
+                            : onSubscribe(plan.id as SubscriptionPlan["id"]))
+                        }
+                      >
+                        {pending === `${hasPaidPlan ? "up" : "sub"}-${plan.id}` ? (
+                          <LoaderCircle className="animate-spin" />
+                        ) : (
+                          <>
+                            <CreditCard /> Nâng cấp lên {plan.name}
+                          </>
+                        )}
+                      </Button>
+                    </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
         ) : null}
-      </div>
+      </AnimatePresence>
 
       {hasPaidPlan ? (
-        <div className="grid gap-6 lg:grid-cols-2">
-          {upgradeTarget ? (
-            <Card className="shadow-none">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ArrowUpCircle className="size-5 text-primary" /> Nâng cấp gói
-                </CardTitle>
-                <CardDescription>
-                  Đang dùng {activePlan.name} → nâng lên {upgradeTarget.name} (
-                  {upgradeTarget.creditsPerPeriod} credit/kỳ).
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="mb-4 space-y-1.5 text-sm text-muted-foreground">
-                  {upgradeTarget.features.map((feature) => (
-                    <li key={feature} className="flex gap-2">
-                      <Check className="mt-0.5 size-4 shrink-0 text-primary" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  disabled={upgrade.isPending}
-                  onClick={() => void onUpgrade(upgradeTarget.id)}
-                >
-                  {pending === `up-${upgradeTarget.id}` ? (
-                    <LoaderCircle className="animate-spin" />
-                  ) : (
-                    `Nâng cấp lên ${upgradeTarget.name}`
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-          ) : null}
-
-          <Card className={cn("shadow-none", !upgradeTarget && "lg:col-span-2")}>
+        <div>
+          <Card className="shadow-none">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CreditCard className="size-5 text-primary" /> Mua thêm credit

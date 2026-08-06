@@ -104,7 +104,8 @@ cookie first-party on `pagecraft-ai.site`. The backend must use matching `WEB_OR
 | --- | --- |
 | `/` | Dashboard overview |
 | `/landing-pages` | Landing page management |
-| `/landing-pages/new` | Detailed creation flow |
+| `/landing-pages/new` | Detailed creation flow (AI generate → layout recipe) |
+| `/demo/:slug` | AI landing demo (variant registry UI) |
 | `/pages/:id` | Landing page detail |
 | `/templates` | Template CRUD |
 | `/media` | Media metadata CRUD |
@@ -136,6 +137,10 @@ pnpm exec oxfmt --check apps packages
 ```
 
 Configuration: `.oxfmtrc.json`.
+
+## Docs
+
+- AI landing layout variants (nghiệp vụ): [`../be/docs/AI_LANDING_LAYOUT_VARIANTS.md`](../be/docs/AI_LANDING_LAYOUT_VARIANTS.md)
 
 ## Vercel setup
 

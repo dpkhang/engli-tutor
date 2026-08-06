@@ -29,9 +29,8 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(__dirname, "../.."),
   },
-  async rewrites() {
-    return [{ source: "/api/:path*", destination: `${apiUrl}/api/:path*` }];
-  },
+  // Proxy lives in app/api/[...path]/route.ts (rewrites would bypass it and
+  // forward browser Origin → Render INVALID_ORIGIN for local domains).
 };
 
 export default nextConfig;

@@ -19,6 +19,7 @@ import {
   type GenerateLandingPageFormValues,
 } from "../../model/schema";
 import { saveLandingPageLocalMetadata } from "../../model/local-metadata";
+import { AiGeneratingOverlay } from "./ai-generating-overlay";
 import { CreateLandingPageView, type CreateMode } from "./create-landing-page.view";
 
 export function CreateLandingPage() {
@@ -171,7 +172,9 @@ export function CreateLandingPage() {
   });
 
   return (
-    <CreateLandingPageView
+    <>
+      <AiGeneratingOverlay open={generate.isPending} pageName={aiName} />
+      <CreateLandingPageView
       mode={mode}
       onModeChange={(next) => {
         setMode(next);
@@ -208,5 +211,6 @@ export function CreateLandingPage() {
       }
       onSubmit={mode === "ai" ? onAiSubmit : onManualSubmit}
     />
+    </>
   );
 }

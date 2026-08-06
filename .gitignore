@@ -5,3 +5,7 @@ node_modules
 dist
 generated
 *.tsbuildinfo
+.DS_Store
+*.log
+.turbo
+.pnpm-debug.log*

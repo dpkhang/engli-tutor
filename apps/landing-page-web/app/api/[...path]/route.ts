@@ -1,10 +1,48 @@
-import type { NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 type RouteContext = {
   params: Promise<{ path: string[] }>;
 };
 
-function adaptLocalRequestCookies(headers: Headers) {
+const HOP_BY_HOP = new Set([
+  "content-encoding",
+  "content-length",
+  "transfer-encoding",
+  "connection",
+  "keep-alive",
+  "alt-svc",
+  "cf-ray",
+  "cf-cache-status",
+  "server",
+  "rndr-id",
+  "x-render-origin-server",
+]);
+
+function isLocalDevHost(hostname: string) {
+  return (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    /^local(\.|$)/.test(hostname)
+  );
+}
+
+/** Local BFF → Render: present a production origin Render already trusts. */
+function rewriteOriginForUpstream(headers: Headers, hostname: string) {
+  headers.delete("sec-fetch-site");
+  headers.delete("sec-fetch-mode");
+  headers.delete("sec-fetch-dest");
+  headers.delete("sec-fetch-user");
+
+  if (!isLocalDevHost(hostname)) return;
+
+  const trusted = (
+    process.env.NEXT_PUBLIC_PROXY_ORIGIN?.trim() || "https://app.pagecraft-ai.site"
+  ).replace(/\/$/, "");
+  headers.set("origin", trusted);
+  headers.set("referer", `${trusted}/`);
+}
+
+function adaptLocalHttpRequestCookies(headers: Headers) {
   const cookie = headers.get("cookie");
   if (!cookie) return;
   headers.set(
@@ -13,21 +51,20 @@ function adaptLocalRequestCookies(headers: Headers) {
   );
 }
 
-function adaptLocalResponseCookies(headers: Headers) {
-  const cookies = headers.getSetCookie();
-  if (cookies.length === 0) return;
+function adaptSetCookieForLocal(raw: string, https: boolean): string {
+  let adapted = raw
+    .replace(/;\s*Domain=[^;]*/gi, "")
+    .replace(/;\s*Partitioned=?[^;]*/gi, "");
 
-  headers.delete("set-cookie");
-  for (const cookie of cookies) {
-    headers.append(
-      "set-cookie",
-      cookie
-        .replace(/^__Secure-/, "")
-        .replace(/;\s*Domain=[^;]+/gi, "")
-        .replace(/;\s*Secure/gi, "")
-        .replace(/;\s*SameSite=None/gi, "; SameSite=Lax"),
-    );
+  if (!https) {
+    adapted = adapted
+      .replace(/^__Secure-/i, "")
+      .replace(/^__Host-/i, "")
+      .replace(/;\s*Secure/gi, "")
+      .replace(/;\s*SameSite=None/gi, "; SameSite=Lax");
   }
+
+  return adapted;
 }
 
 async function proxy(request: NextRequest, context: RouteContext) {
@@ -41,10 +78,11 @@ async function proxy(request: NextRequest, context: RouteContext) {
   const headers = new Headers(request.headers);
   headers.delete("host");
   headers.delete("content-length");
+  rewriteOriginForUpstream(headers, request.nextUrl.hostname);
 
-  const isLocalhost =
-    request.nextUrl.hostname === "localhost" || request.nextUrl.hostname === "127.0.0.1";
-  if (isLocalhost) adaptLocalRequestCookies(headers);
+  const local = isLocalDevHost(request.nextUrl.hostname);
+  const https = request.nextUrl.protocol === "https:";
+  if (local && !https) adaptLocalHttpRequestCookies(headers);
 
   const response = await fetch(upstream, {
     method: request.method,
@@ -54,14 +92,25 @@ async function proxy(request: NextRequest, context: RouteContext) {
     cache: "no-store",
   });
 
-  const responseHeaders = new Headers(response.headers);
-  if (isLocalhost) adaptLocalResponseCookies(responseHeaders);
-
-  return new Response(response.body, {
+  const body = await response.arrayBuffer();
+  const res = new NextResponse(body, {
     status: response.status,
     statusText: response.statusText,
-    headers: responseHeaders,
   });
+
+  for (const [key, value] of response.headers) {
+    const lower = key.toLowerCase();
+    if (lower === "set-cookie" || HOP_BY_HOP.has(lower)) continue;
+    res.headers.append(key, value);
+  }
+
+  const rawCookies = response.headers.getSetCookie();
+  for (const raw of rawCookies) {
+    const value = local ? adaptSetCookieForLocal(raw, https) : raw;
+    res.headers.append("set-cookie", value);
+  }
+
+  return res;
 }
 
 export const dynamic = "force-dynamic";

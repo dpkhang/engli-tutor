@@ -65,7 +65,10 @@ export const billingApi = {
       returnOrigin: typeof window !== "undefined" ? window.location.origin : undefined,
     }),
   upgrade: (planId: SubscriptionPlan["id"]) =>
-    workspaceApiClient.post<{ planId: string; status: string }>("/api/billing/upgrade", { planId }),
+    workspaceApiClient.post<{ url: string }>("/api/billing/upgrade", {
+      planId,
+      returnOrigin: typeof window !== "undefined" ? window.location.origin : undefined,
+    }),
   topup: (packId: TopupPack["id"]) =>
     workspaceApiClient.post<CheckoutResponse>("/api/billing/topup", {
       packId,
