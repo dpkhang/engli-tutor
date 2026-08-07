@@ -87,8 +87,9 @@ export function PaymentResultPage() {
   const Icon = state === "processing" ? LoaderCircle : state === "success" ? Check : CircleX;
 
   return (
-    <div className="mx-auto flex min-h-[calc(100svh-8rem)] max-w-xl items-center px-4 py-12">
-      <Card className="w-full overflow-hidden text-center shadow-lg">
+    <main className="workspace-background relative flex min-h-svh items-center justify-center overflow-hidden px-4 py-12">
+      <div aria-hidden className="workspace-ambient pointer-events-none absolute inset-0" />
+      <Card className="relative z-10 w-full max-w-xl overflow-hidden text-center shadow-lg">
         <CardContent className="flex flex-col items-center px-6 py-10 sm:px-10">
           <div
             className={`mb-6 grid size-16 place-items-center rounded-full ${
@@ -112,9 +113,39 @@ export function PaymentResultPage() {
           <p className="mt-3 text-sm leading-6 text-muted-foreground">{message}</p>
 
           {state !== "processing" ? (
-            <div className="mt-6 w-full rounded-xl bg-muted/60 px-4 py-3">
-              <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Gói thanh toán</p>
-              <p className="mt-1 text-lg font-semibold">{packageName}</p>
+            <div
+              className={`mt-7 w-full rounded-2xl border px-5 py-5 text-left ${
+                state === "success"
+                  ? "border-emerald-500/35 bg-emerald-500/10 shadow-[0_12px_36px_-20px_hsl(145_65%_38%/.65)]"
+                  : "border-border bg-muted/50"
+              }`}
+            >
+              <div className="flex items-center gap-4">
+                <span
+                  className={`grid size-11 shrink-0 place-items-center rounded-xl ${
+                    state === "success"
+                      ? "bg-emerald-600 text-white"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {state === "success" ? <Check className="size-5" /> : <CircleX className="size-5" />}
+                </span>
+                <div className="min-w-0">
+                  <p
+                    className={`text-xs font-bold tracking-[0.14em] uppercase ${
+                      state === "success" ? "text-emerald-700 dark:text-emerald-400" : "text-muted-foreground"
+                    }`}
+                  >
+                    {state === "success" ? "Gói đã kích hoạt" : "Gói thanh toán chưa hoàn tất"}
+                  </p>
+                  <p className="mt-1 truncate text-2xl font-bold text-foreground">{packageName}</p>
+                </div>
+              </div>
+              {state === "success" ? (
+                <p className="mt-4 border-t border-emerald-500/20 pt-3 text-sm text-emerald-800 dark:text-emerald-300">
+                  Quyền lợi của gói đã được cập nhật vào workspace của bạn.
+                </p>
+              ) : null}
             </div>
           ) : null}
 
@@ -136,6 +167,6 @@ export function PaymentResultPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }

@@ -47,6 +47,8 @@ export type UpdateLandingPageInput = {
 export type WorkspaceIntegrations = {
   ai: boolean;
   openai: boolean;
+  /** OpenAI Images API + R2 public upload ready for hero banners. */
+  imageGeneration?: boolean;
   email: boolean;
   r2: boolean;
   redis: boolean;

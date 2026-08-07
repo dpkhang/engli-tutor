@@ -71,6 +71,8 @@ type Props = {
   onDiscardDraft?: () => void;
   openaiReady: boolean;
   openaiUnknown: boolean;
+  /** Hero banner via OpenAI Images + R2. Optional — generate still works without it. */
+  imageGenerationReady?: boolean;
   creditBalance: number | null;
   aiGenerateCost: number;
   hasEnoughCredits: boolean;
@@ -322,6 +324,7 @@ export function CreateLandingPageView({
   onDiscardDraft,
   openaiReady,
   openaiUnknown,
+  imageGenerationReady = false,
   creditBalance,
   aiGenerateCost,
   hasEnoughCredits,
@@ -371,6 +374,10 @@ export function CreateLandingPageView({
           { label: "Mô tả đủ chi tiết", ready: brief.trim().length >= 20 },
           { label: "Đã chọn khung trang", ready: Boolean(selectedFrame) },
           { label: "OpenAI sẵn sàng", ready: openaiReady },
+          {
+            label: "Hero image (OpenAI + R2)",
+            ready: imageGenerationReady === true,
+          },
           {
             label: `Đủ credit (≥ ${aiGenerateCost})`,
             ready: !creditsLoading && hasEnoughCredits,
@@ -470,6 +477,18 @@ export function CreateLandingPageView({
                     Backend production chưa cấu hình{" "}
                     <code className="font-mono">OPENAI_API_KEY</code>. Thêm biến này vào Environment
                     của service Render, redeploy API rồi refresh trang.
+                  </AlertDescription>
+                </Alert>
+              ) : null}
+
+              {!openaiUnknown && openaiReady && !imageGenerationReady ? (
+                <Alert>
+                  <Info />
+                  <AlertDescription>
+                    Hero image chưa bật — cần Cloudflare R2 (
+                    <code className="font-mono">R2_*</code> +{" "}
+                    <code className="font-mono">R2_PUBLIC_BASE_URL</code>). AI vẫn tạo copy được;
+                    banner hero sẽ bỏ qua cho đến khi R2 sẵn sàng.
                   </AlertDescription>
                 </Alert>
               ) : null}

@@ -69,6 +69,13 @@ export function CreateLandingPage() {
 
   const openaiReady = integrations.data?.openai === true;
   const openaiUnknown = integrations.isLoading;
+  // Prefer explicit imageGeneration when BE exposes it; fall back to openai+r2 for older deploys.
+  const imageGenerationReady =
+    integrations.data?.imageGeneration === true ||
+    (integrations.data != null &&
+      integrations.data.imageGeneration == null &&
+      integrations.data.openai === true &&
+      integrations.data.r2 === true);
   const creditBalance = credits.data?.balance;
   const aiGenerateCost = credits.data?.aiGenerateCost ?? 10;
   const hasEnoughCredits =
@@ -426,6 +433,7 @@ export function CreateLandingPage() {
         onDiscardDraft={discardDraft}
         openaiReady={openaiReady}
         openaiUnknown={openaiUnknown}
+        imageGenerationReady={imageGenerationReady}
         creditBalance={creditBalance ?? null}
         aiGenerateCost={aiGenerateCost}
         hasEnoughCredits={hasEnoughCredits}

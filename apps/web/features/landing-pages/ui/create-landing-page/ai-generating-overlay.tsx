@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { FileText, LayoutTemplate, Sparkles, Type, WandSparkles } from "lucide-react";
+import { FileText, ImageIcon, LayoutTemplate, Sparkles, Type, WandSparkles } from "lucide-react";
 import { cn, useLockScroll } from "@landing-page-generator/ui";
 
 const STAGES = [
@@ -23,6 +23,12 @@ const STAGES = [
     title: "Viết nội dung",
     detail: "Soạn headline, mô tả và thông điệp chuyển đổi",
     icon: Type,
+  },
+  {
+    id: "visual",
+    title: "Tạo ảnh hero",
+    detail: "Sinh banner và gắn vào phần hero của trang",
+    icon: ImageIcon,
   },
   {
     id: "polish",

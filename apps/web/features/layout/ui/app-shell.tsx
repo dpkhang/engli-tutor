@@ -91,7 +91,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     };
   }, [accountOpen]);
 
-  if (pathname === "/login" || pathname.startsWith("/demo/")) {
+  if (
+    pathname === "/login" ||
+    pathname.startsWith("/demo/") ||
+    pathname === "/payments/result"
+  ) {
     return <div className="min-h-svh bg-background">{children}</div>;
   }
 
