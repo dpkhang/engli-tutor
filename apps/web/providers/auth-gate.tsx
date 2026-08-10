@@ -3,8 +3,19 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { getMarketingUrl, useSession } from "@/lib/auth-client";
+import { isCustomDomainHost } from "@/lib/platform-hosts";
 
-const PUBLIC_PATHS = new Set(["/login"]);
+const LOGIN_PATH = "/login";
+
+function isPublicPath(pathname: string) {
+  if (pathname === LOGIN_PATH || pathname.startsWith("/p/") || pathname === "/domain-unavailable") {
+    return true;
+  }
+  if (typeof window !== "undefined" && isCustomDomainHost(window.location.hostname)) {
+    return true;
+  }
+  return false;
+}
 
 function AuthSplash({ message }: { message: string }) {
   return (
@@ -40,7 +51,8 @@ function getSafeReturnTo(): string {
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isPublic = PUBLIC_PATHS.has(pathname);
+  const isLogin = pathname === LOGIN_PATH;
+  const isPublic = isPublicPath(pathname);
   const { data, isPending } = useSession();
   const user = data?.user;
   const redirected = useRef(false);
@@ -48,7 +60,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isPending || redirected.current) return;
 
-    if (isPublic && user) {
+    // Logged-in users leaving /login go to workspace; /p/* stays viewable.
+    if (isLogin && user) {
       redirected.current = true;
       window.location.replace(getSafeReturnTo());
       return;
@@ -58,16 +71,19 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     redirected.current = true;
     const returnTo = encodeURIComponent(pathname || "/");
     window.location.replace(`/login?returnTo=${returnTo}`);
-  }, [isPublic, isPending, user, pathname]);
+  }, [isLogin, isPublic, isPending, user, pathname]);
 
-  if (isPending) {
+  if (isPending && !isPublic) {
     return <AuthSplash message="Đang chuẩn bị workspace..." />;
   }
 
-  if (isPublic) {
+  if (isLogin) {
     return user ? <AuthSplash message="Đang mở workspace..." /> : <>{children}</>;
   }
 
+  if (isPublic) return <>{children}</>;
+
+  if (isPending) return <AuthSplash message="Đang chuẩn bị workspace..." />;
   if (!user) return <AuthSplash message="Đang chuyển tới trang đăng nhập..." />;
 
   return <>{children}</>;

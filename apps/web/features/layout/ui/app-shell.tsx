@@ -26,6 +26,7 @@ import { authClient, getMarketingUrl, useSession } from "@/lib/auth-client";
 import { Button, cn, ThemeToggle, useActionDialog } from "@landing-page-generator/ui";
 import { AnimatePresence, motion } from "motion/react";
 import { useBillingMe } from "@/features/payments/hooks/use-billing";
+import { isCustomDomainHost } from "@/lib/platform-hosts";
 
 const navigation = [
   {
@@ -94,7 +95,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (
     pathname === "/login" ||
     pathname.startsWith("/demo/") ||
-    pathname === "/payments/result"
+    pathname.startsWith("/p/") ||
+    pathname === "/domain-unavailable" ||
+    pathname === "/payments/result" ||
+    (typeof window !== "undefined" && isCustomDomainHost(window.location.hostname))
   ) {
     return <div className="min-h-svh bg-background">{children}</div>;
   }

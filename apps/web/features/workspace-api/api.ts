@@ -67,6 +67,46 @@ export type DomainSearchResponse = {
   years: number;
   results: DomainSearchResult[];
 };
+
+export type DomainDnsRecordInstruction = {
+  type: "TXT" | "CNAME";
+  host: string;
+  hostLabel: string;
+  value: string;
+  purpose: string;
+  required: boolean;
+};
+
+export type DomainVerificationInstructions = {
+  hostname: string;
+  kind: "subdomain" | "apex";
+  method: "CNAME" | "TXT";
+  records: DomainDnsRecordInstruction[];
+  expectedTxtValue: string;
+  expectedCnameTarget: string | null;
+  lookupHosts: string[];
+  skipDns: boolean;
+  notes: string[];
+};
+
+export type DomainVerificationPayload = {
+  domain: Domain;
+  instructions: DomainVerificationInstructions | null;
+  message?: string;
+};
+
+export type DomainVerifyResult = {
+  domain: Domain;
+  dns: {
+    ok: boolean;
+    skipDns: boolean;
+    matchedHost: string | null;
+    message: string;
+    checkedHosts: string[];
+    foundValues: string[];
+  } | null;
+  instructions: DomainVerificationInstructions | null;
+};
 export type WorkspaceSettings = {
   id: string;
   workspaceName: string;
@@ -141,7 +181,12 @@ export const workspaceApi = {
         "/api/domains/purchase",
         { ...input, returnOrigin: window.location.origin },
       ),
-    verify: (id: string) => workspaceApiClient.post<Domain>(`/api/domains/${id}/verify`, {}),
+    verify: (id: string) =>
+      workspaceApiClient.post<DomainVerifyResult>(`/api/domains/${id}/verify`, {}),
+    getVerification: (id: string) =>
+      workspaceApiClient.get<DomainVerificationPayload>(`/api/domains/${id}/verification`),
+    setSsl: (id: string, enabled: boolean) =>
+      workspaceApiClient.post<Domain>(`/api/domains/${id}/ssl`, { enabled }),
     confirmCheckout: (sessionId: string) =>
       workspaceApiClient.post("/api/billing/confirm", { sessionId }),
     delete: (id: string) => workspaceApiClient.delete(`/api/domains/${id}`),

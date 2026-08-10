@@ -115,7 +115,8 @@ export function LandingPageDetailView({
 
   if (!page) return null;
 
-  const publicPath = `/${page.slug}`;
+  const publicPath = `/p/${page.slug}`;
+  const isPublished = page.status === "PUBLISHED";
 
   return (
     <div className="space-y-8">
@@ -137,12 +138,24 @@ export function LandingPageDetailView({
               {page.name}
             </h1>
             <p className="font-mono text-sm text-muted-foreground">{publicPath}</p>
+            {!isPublished ? (
+              <p className="text-xs text-muted-foreground">
+                Link công khai chỉ mở sau khi xuất bản.
+              </p>
+            ) : null}
           </div>
           <div className="flex flex-wrap gap-2">
             {page.content ? (
               <Button type="button" asChild>
                 <Link href={`/demo/${page.slug}`}>
                   <Eye /> Xem demo
+                </Link>
+              </Button>
+            ) : null}
+            {isPublished ? (
+              <Button type="button" variant="secondary" asChild>
+                <Link href={publicPath} target="_blank" rel="noreferrer">
+                  Mở trang công khai
                 </Link>
               </Button>
             ) : null}

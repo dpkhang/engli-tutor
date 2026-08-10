@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useEffect, useRef } from "react";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -8,7 +8,9 @@ import {
   CheckCircle2,
   Clock3,
   Globe2,
+  LoaderCircle,
   LockKeyhole,
+  LockKeyholeOpen,
   Plus,
   Search,
   ShieldCheck,
@@ -25,11 +27,18 @@ import {
   CardTitle,
   Input,
   Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   useActionDialog,
 } from "@landing-page-generator/ui";
 import { PageHeader } from "@/features/layout";
+import { useLandingPages } from "@/features/landing-pages/hooks/use-landing-pages";
 import { domainHooks } from "@/features/workspace-api/hooks";
 import type { Domain } from "@/features/workspace-api/api";
+import { DomainVerificationPanel } from "./domain-verification-panel";
 
 const STATUS_CONFIG: Record<
   Domain["status"],
@@ -45,15 +54,25 @@ const STATUS_CONFIG: Record<
 export default function DomainsPage() {
   const searchParams = useSearchParams();
   const dialog = useActionDialog();
+  const pagesQuery = useLandingPages();
   const query = domainHooks.useList();
   const create = domainHooks.useCreate();
+  const update = domainHooks.useUpdate();
   const remove = domainHooks.useDelete();
+  const setSsl = domainHooks.useSetSsl();
   const confirmCheckout = domainHooks.useConfirmCheckout();
   const confirmedSession = useRef<string | null>(null);
+  const [verifyingId, setVerifyingId] = useState<string | null>(null);
+  const [createPageId, setCreatePageId] = useState("");
+  const [createFormError, setCreateFormError] = useState<string | null>(null);
   const domains = query.data ?? [];
+  const publishedPages = useMemo(
+    () => (pagesQuery.data ?? []).filter((page) => page.status === "PUBLISHED"),
+    [pagesQuery.data],
+  );
   const verified = domains.filter((domain) => domain.status === "VERIFIED").length;
   const pending = domains.filter((domain) =>
-    ["PENDING", "REGISTERING", "DNS_PENDING"].includes(domain.status),
+    ["PENDING", "REGISTERING", "DNS_PENDING", "FAILED"].includes(domain.status),
   ).length;
   const sslEnabled = domains.filter((domain) => domain.sslEnabled).length;
   const checkoutState = searchParams.get("checkout");
@@ -75,10 +94,24 @@ export default function DomainsPage() {
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!createPageId) {
+      setCreateFormError("Chọn landing page (slug) để gắn với domain.");
+      return;
+    }
+    setCreateFormError(null);
     const form = new FormData(event.currentTarget);
     create.mutate(
-      { hostname: String(form.get("hostname")).trim().toLowerCase() },
-      { onSuccess: () => event.currentTarget.reset() },
+      {
+        hostname: String(form.get("hostname")).trim().toLowerCase(),
+        landingPageId: createPageId,
+      },
+      {
+        onSuccess: (domain) => {
+          event.currentTarget.reset();
+          setCreatePageId("");
+          setVerifyingId(domain.id);
+        },
+      },
     );
   };
 
@@ -89,7 +122,10 @@ export default function DomainsPage() {
       confirmLabel: "Gỡ domain",
       tone: "danger",
     });
-    if (accepted) remove.mutate(domain.id);
+    if (accepted) {
+      if (verifyingId === domain.id) setVerifyingId(null);
+      remove.mutate(domain.id);
+    }
   };
 
   return (
@@ -97,7 +133,7 @@ export default function DomainsPage() {
       <PageHeader
         eyebrow="Publishing"
         title="Tên miền"
-        description="Kết nối, xác minh và theo dõi SSL cho custom domain của workspace."
+        description="Kết nối domain, gắn landing page đã xuất bản, xác minh DNS và theo dõi SSL."
         action={
           <Button asChild variant="outline">
             <Link href="/domains/search">
@@ -143,30 +179,66 @@ export default function DomainsPage() {
 
       <Card className="shadow-none">
         <CardHeader>
-          <CardTitle>Kết nối domain mới</CardTitle>
+          <CardTitle>Kết nối domain sẵn có</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Nhập hostname đầy đủ, không bao gồm giao thức hoặc đường dẫn.
+            Hostname sẽ phục vụ đúng slug đã gắn sau khi DNS verified (vd. campaign.brand.com → /p/my-slug).
           </p>
         </CardHeader>
         <CardContent>
-          <form className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={submit}>
-            <div className="flex-1 space-y-2">
-              <Label htmlFor="domain-hostname">Hostname</Label>
+          <form
+            className="grid gap-3 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_auto] sm:items-start"
+            onSubmit={submit}
+          >
+            <div className="grid min-w-0 grid-rows-[1.25rem_2.25rem] gap-2">
+              <Label htmlFor="domain-hostname" className="h-5 leading-5">
+                Hostname
+              </Label>
               <Input
                 id="domain-hostname"
                 name="hostname"
                 required
-                placeholder="campaign.example.com"
+                className="h-9"
+                placeholder="lp.brand.com hoặc campaign.pagecraft-ai.site"
                 autoComplete="off"
                 aria-invalid={Boolean(create.error)}
               />
             </div>
-            <Button disabled={create.isPending} className="sm:w-auto">
-              <Plus /> {create.isPending ? "Đang kết nối..." : "Kết nối"}
-            </Button>
+            <div className="grid min-w-0 grid-rows-[1.25rem_2.25rem] gap-2">
+              <Label className="h-5 leading-5">Landing page</Label>
+              <Select
+                value={createPageId || "__none"}
+                onValueChange={(value) => {
+                  setCreateFormError(null);
+                  setCreatePageId(value === "__none" ? "" : value);
+                }}
+              >
+                <SelectTrigger className="h-9 w-full">
+                  <SelectValue placeholder="Chọn page + slug" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none">Chọn page đã publish</SelectItem>
+                  {publishedPages.map((page) => (
+                    <SelectItem key={page.id} value={page.id}>
+                      {page.name} · /{page.slug}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-rows-[1.25rem_2.25rem] gap-2">
+              <span className="hidden h-5 sm:block" aria-hidden />
+              <Button disabled={create.isPending || !publishedPages.length} className="h-9 w-full sm:w-auto">
+                <Plus /> {create.isPending ? "Đang kết nối..." : "Kết nối"}
+              </Button>
+            </div>
           </form>
-          <p className="mt-2 min-h-5 text-sm text-destructive" role={create.error ? "alert" : undefined}>
-            {create.error?.message ?? ""}
+          <p className="mt-2 text-xs text-muted-foreground">
+            {publishedPages.length
+              ? "Bắt buộc gắn page PUBLISHED. Sau verify, mở https://hostname sẽ render đúng slug."
+              : "Chưa có page đã xuất bản — publish ở /demo/[slug], rồi gắn domain."}
+          </p>
+          <p className="mt-1 min-h-5 text-sm text-destructive" role={create.error || createFormError ? "alert" : undefined}>
+            {createFormError ?? create.error?.message ?? ""}
           </p>
         </CardContent>
       </Card>
@@ -180,7 +252,7 @@ export default function DomainsPage() {
                 {query.isLoading ? "Đang tải..." : `${domains.length} domain trong workspace`}
               </p>
             </div>
-            {pending > 0 ? <Badge variant="secondary">{pending} đang chờ</Badge> : null}
+            {pending > 0 ? <Badge variant="secondary">{pending} cần xử lý</Badge> : null}
           </div>
         </CardHeader>
 
@@ -198,63 +270,179 @@ export default function DomainsPage() {
           </div>
         ) : null}
 
-        <div className="divide-y">
+        {domains.length > 0 ? (
+          <div className="overflow-x-auto">
+            <div className="min-w-[980px]">
+              <div
+                className="grid grid-cols-[minmax(220px,1.25fr)_minmax(180px,0.9fr)_minmax(190px,0.8fr)_minmax(170px,auto)] items-center gap-4 border-b bg-muted/30 px-5 py-2.5 text-xs font-medium whitespace-nowrap text-muted-foreground"
+                role="row"
+              >
+                <span>Domain</span>
+                <span>Landing page</span>
+                <span>Trạng thái / SSL</span>
+                <span className="text-right">Thao tác</span>
+              </div>
+
+              <div className="divide-y">
           {domains.map((domain) => {
             const status = STATUS_CONFIG[domain.status];
             const StatusIcon = status.icon;
+            const needsVerify = domain.status !== "VERIFIED";
+            const canToggleSsl = domain.status === "VERIFIED" || domain.dnsStatus === "ACTIVE";
+            const sslBusy = setSsl.isPending && setSsl.variables?.id === domain.id;
             return (
-              <div
-                key={domain.id}
-                className="relative grid gap-4 px-4 py-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(130px,0.8fr)_auto] sm:items-center sm:px-5"
-              >
-                <div className="flex min-w-0 items-center gap-3">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
-                    <Globe2 className="size-4.5" />
-                  </span>
+              <div key={domain.id}>
+                <div className="grid min-h-20 grid-cols-[minmax(220px,1.25fr)_minmax(180px,0.9fr)_minmax(190px,0.8fr)_minmax(170px,auto)] items-center gap-4 px-5 py-4 whitespace-nowrap transition-colors hover:bg-muted/20">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+                      <Globe2 className="size-4.5" />
+                    </span>
+                    <div className="min-w-0">
+                      {domain.status === "VERIFIED" ? (
+                        <a
+                          href={`https://${domain.hostname}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block truncate text-sm font-semibold text-foreground hover:text-primary"
+                        >
+                          {domain.hostname}
+                        </a>
+                      ) : (
+                        <p className="truncate text-sm font-semibold text-foreground">
+                          {domain.hostname}
+                        </p>
+                      )}
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        {domain.source === "PURCHASED" ? "Thuê" : "Sẵn có"}
+                        {domain.landingPage
+                          ? ` · → /p/${domain.landingPage.slug}`
+                          : " · chưa gắn slug"}
+                      </p>
+                    </div>
+                  </div>
+
                   <div className="min-w-0">
-                    {domain.status === "VERIFIED" ? (
-                      <a
-                        href={`https://${domain.hostname}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="block truncate text-sm font-semibold text-foreground hover:text-primary"
+                    <Select
+                      value={domain.landingPage?.id ?? "__none"}
+                      onValueChange={(value) =>
+                        update.mutate({
+                          id: domain.id,
+                          landingPageId: value === "__none" ? null : value,
+                        })
+                      }
+                    >
+                      <SelectTrigger className="h-9 w-full" aria-label="Landing page">
+                        <SelectValue placeholder="Chọn page" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none">Chưa gắn</SelectItem>
+                        {publishedPages.map((page) => (
+                          <SelectItem key={page.id} value={page.id}>
+                            {page.name} · /{page.slug}
+                          </SelectItem>
+                        ))}
+                        {domain.landingPage &&
+                        !publishedPages.some((page) => page.id === domain.landingPage?.id) ? (
+                          <SelectItem value={domain.landingPage.id}>
+                            {domain.landingPage.name} · /{domain.landingPage.slug} (chưa publish)
+                          </SelectItem>
+                        ) : null}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex min-w-0 flex-nowrap items-center gap-2">
+                    <Badge variant={status.variant} className="shrink-0 gap-1.5">
+                      <StatusIcon className="size-3" /> {status.label}
+                    </Badge>
+                    <Badge
+                      variant={domain.sslEnabled ? "default" : "secondary"}
+                      className="shrink-0 gap-1.5"
+                    >
+                      <LockKeyhole className="size-3" />
+                      SSL {domain.sslEnabled ? "Bật" : (domain.sslStatus ?? "NONE") === "PENDING" ? "Chờ" : "Tắt"}
+                    </Badge>
+                  </div>
+
+                  <div className="flex min-h-9 flex-nowrap items-center justify-end gap-1.5">
+                    {needsVerify ? (
+                      <Button
+                        type="button"
+                        variant={verifyingId === domain.id ? "secondary" : "outline"}
+                        size="sm"
+                        className="h-9"
+                        onClick={() =>
+                          setVerifyingId((current) => (current === domain.id ? null : domain.id))
+                        }
                       >
-                        {domain.hostname}
-                      </a>
-                    ) : (
-                      <p className="truncate text-sm font-semibold text-foreground">{domain.hostname}</p>
-                    )}
-                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                      {domain.landingPage ? domain.landingPage.name : "Chưa gắn landing page"}
-                    </p>
+                        <ShieldCheck />
+                        {verifyingId === domain.id ? "Ẩn" : "Xác minh"}
+                      </Button>
+                    ) : null}
+                    {canToggleSsl ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-9"
+                        disabled={sslBusy}
+                        onClick={() =>
+                          setSsl.mutate({ id: domain.id, enabled: !domain.sslEnabled })
+                        }
+                      >
+                        {sslBusy ? (
+                          <LoaderCircle className="animate-spin" />
+                        ) : domain.sslEnabled ? (
+                          <LockKeyholeOpen />
+                        ) : (
+                          <LockKeyhole />
+                        )}
+                        {domain.sslEnabled ? "Tắt SSL" : "Bật SSL"}
+                      </Button>
+                    ) : null}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      className="size-9 shrink-0 text-muted-foreground hover:text-destructive"
+                      disabled={remove.isPending}
+                      aria-label={`Gỡ ${domain.hostname}`}
+                      title="Gỡ domain"
+                      onClick={() => void deleteDomain(domain)}
+                    >
+                      <Trash2 />
+                    </Button>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 pl-12 sm:pl-0">
-                  <Badge variant={status.variant} className="gap-1.5">
-                    <StatusIcon className="size-3" /> {status.label}
-                  </Badge>
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <LockKeyhole className="size-3" /> SSL {domain.sslEnabled ? "Bật" : "Tắt"}
-                  </span>
-                </div>
+                {setSsl.isError && setSsl.variables?.id === domain.id ? (
+                  <div className="flex items-center gap-2 border-t border-destructive/15 bg-destructive/5 px-4 py-2 text-xs text-destructive md:px-5">
+                    <AlertCircle className="size-3.5 shrink-0" />
+                    Không thể cập nhật SSL: {setSsl.error.message}
+                  </div>
+                ) : null}
+                {update.isError && update.variables?.id === domain.id ? (
+                  <div className="flex items-center gap-2 border-t border-destructive/15 bg-destructive/5 px-4 py-2 text-xs text-destructive md:px-5">
+                    <AlertCircle className="size-3.5 shrink-0" />
+                    Không thể cập nhật landing page: {update.error.message}
+                  </div>
+                ) : null}
 
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  className="absolute right-4 self-center text-muted-foreground hover:text-destructive sm:static"
-                  disabled={remove.isPending}
-                  aria-label={`Gỡ ${domain.hostname}`}
-                  title="Gỡ domain"
-                  onClick={() => void deleteDomain(domain)}
-                >
-                  <Trash2 />
-                </Button>
+                {verifyingId === domain.id ? (
+                  <div className="border-t bg-muted/20 px-4 py-4 sm:px-5">
+                    <DomainVerificationPanel
+                      domain={domain}
+                      onClose={() => setVerifyingId(null)}
+                    />
+                  </div>
+                ) : null}
               </div>
             );
           })}
-        </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </Card>
     </div>
   );

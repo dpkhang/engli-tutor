@@ -147,7 +147,14 @@ export function DemoLanding({ slug }: { slug: string }) {
               {publishSuccess || isPublished ? (
                 <span className="inline-flex items-center gap-1.5 text-foreground">
                   <Check className="size-3.5 text-primary" />
-                  Trang đã xuất bản. Gắn hoặc thuê domain trên trang Domains.
+                  Đã xuất bản ·{" "}
+                  <Link href={`/p/${query.data.slug}`} className="underline">
+                    /p/{query.data.slug}
+                  </Link>
+                  {" · "}
+                  <Link href="/domains" className="inline-flex items-center gap-1 underline">
+                    <Link2 className="size-3" /> Domains
+                  </Link>
                 </span>
               ) : isDraft ? (
                 <span className="inline-flex items-center gap-1.5">
