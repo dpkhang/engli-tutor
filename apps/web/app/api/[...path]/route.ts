@@ -56,11 +56,17 @@ function adaptLocalHttpRequestCookies(headers: Headers) {
   );
 }
 
-function adaptSetCookieForLocal(raw: string, https: boolean): string {
-  let adapted = raw
-    // Host-only on local.* — Domain=app.pagecraft-ai.site would be rejected.
-    .replace(/;\s*Domain=[^;]*/gi, "")
-    .replace(/;\s*Partitioned=?[^;]*/gi, "");
+function adaptSetCookieForBrowser(raw: string, hostname: string, https: boolean): string {
+  const cookieDomain = raw.match(/;\s*Domain=([^;]*)/i)?.[1]?.trim().replace(/^\./, "");
+  const domainMatchesHost = cookieDomain
+    ? hostname === cookieDomain || hostname.endsWith(`.${cookieDomain}`)
+    : true;
+
+  let adapted = raw.replace(/;\s*Partitioned=?[^;]*/gi, "");
+
+  // Browsers reject Set-Cookie when an upstream shared domain does not contain
+  // the frontend proxy host (for example, a Vercel preview deployment).
+  if (!domainMatchesHost) adapted = adapted.replace(/;\s*Domain=[^;]*/gi, "");
 
   if (!https) {
     // HTTP localhost cannot use __Secure- / Secure cookies.
@@ -117,7 +123,7 @@ async function proxy(request: NextRequest, context: RouteContext) {
     console.info(`[api-proxy] ${request.method} /api/${path.join("/")} set-cookie: ${names}`);
   }
   for (const raw of rawCookies) {
-    const value = local ? adaptSetCookieForLocal(raw, https) : raw;
+    const value = adaptSetCookieForBrowser(raw, request.nextUrl.hostname, https);
     res.headers.append("set-cookie", value);
   }
 

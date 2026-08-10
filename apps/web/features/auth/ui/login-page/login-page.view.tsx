@@ -2,7 +2,9 @@
 
 import type { FormEvent } from "react";
 import Link from "next/link";
+import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import { Button, Input } from "@landing-page-generator/ui";
+import type { LoginFormValues } from "../../model/login-schema";
 
 export type AuthMode = "login" | "register";
 
@@ -11,6 +13,8 @@ export type LoginPageViewProps = {
   pending: boolean;
   error: string | null;
   marketingUrl: string;
+  register: UseFormRegister<LoginFormValues>;
+  errors: FieldErrors<LoginFormValues>;
   onModeChange: (mode: AuthMode) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 };
@@ -20,6 +24,8 @@ export function LoginPageView({
   pending,
   error,
   marketingUrl,
+  register,
+  errors,
   onModeChange,
   onSubmit,
 }: LoginPageViewProps) {
@@ -63,44 +69,61 @@ export function LoginPageView({
         </button>
       </div>
 
-      <form className="space-y-4" onSubmit={onSubmit}>
+      <form className="space-y-2.5" onSubmit={onSubmit} noValidate>
         {mode === "register" ? (
-          <label className="block space-y-2 text-sm">
+          <label className="block space-y-1.5 text-sm">
             <span className="font-medium text-foreground">Họ và tên</span>
-            <Input name="name" placeholder="Nguyễn Văn A" required disabled={pending} />
+            <Input
+              placeholder="Nguyễn Văn A"
+              disabled={pending}
+              aria-invalid={Boolean(errors.name)}
+              {...register("name")}
+            />
+            <p className="min-h-3 text-[11px] leading-3 text-destructive">
+              {errors.name?.message ?? ""}
+            </p>
           </label>
         ) : null}
 
-        <label className="block space-y-2 text-sm">
+        <label className="block space-y-1.5 text-sm">
           <span className="font-medium text-foreground">Email</span>
           <Input
-            name="email"
             type="email"
             placeholder="ban@congty.com"
             autoComplete="email"
-            required
             disabled={pending}
+            aria-invalid={Boolean(errors.email)}
+            {...register("email")}
           />
+          <p className="min-h-3 text-[11px] leading-3 text-destructive">
+            {errors.email?.message ?? ""}
+          </p>
         </label>
 
-        <label className="block space-y-2 text-sm">
+        <label className="block space-y-1.5 text-sm">
           <span className="font-medium text-foreground">Mật khẩu</span>
           <Input
-            name="password"
             type="password"
             placeholder="••••••••"
             autoComplete={mode === "login" ? "current-password" : "new-password"}
-            minLength={8}
-            required
             disabled={pending}
+            aria-invalid={Boolean(errors.password)}
+            {...register("password")}
           />
+          <p className="min-h-3 text-[11px] leading-3 text-destructive">
+            {errors.password?.message ?? ""}
+          </p>
         </label>
 
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        <p className="min-h-4 text-xs leading-4 text-destructive" role={error ? "alert" : undefined}>
+          {error ?? ""}
+        </p>
 
-        <Button type="submit" className="w-full" size="lg" disabled={pending}>
-          {pending ? "Đang xử lý..." : mode === "login" ? "Đăng nhập" : "Tạo tài khoản"}
-        </Button>
+        <div className="pt-1.5">
+          <Button type="submit" className="w-full" size="lg" disabled={pending}>
+            {pending ? "Đang xử lý..." : mode === "login" ? "Đăng nhập" : "Tạo tài khoản"}
+          </Button>
+        </div>
       </form>
 
       <p className="text-sm text-muted-foreground">

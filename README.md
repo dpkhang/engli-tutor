@@ -1,16 +1,16 @@
-# LandingCraft frontend
+# Pagecraft frontend (`fe`)
 
-Frontend is a pnpm workspace containing two Next.js applications and three shared packages.
+pnpm workspace: hai app Next.js + ba package dùng chung.
 
 ## Workspaces
 
 | Workspace | Package name | Purpose |
 | --- | --- | --- |
-| `apps/web` | `landing-page-generator-fe` | Authenticated workspace dashboard |
-| `apps/landing-page-web` | `landing-page-web` | Public marketing and checkout site |
-| `packages/api-client` | `@landing-page-generator/api-client` | Base Fetch client and interceptors |
+| `apps/web` | `landing-page-generator-fe` | Workspace dashboard (auth) |
+| `apps/landing-page-web` | `landing-page-web` | Marketing + checkout |
+| `packages/api-client` | `@landing-page-generator/api-client` | Fetch client + interceptors |
 | `packages/auth` | `@landing-page-generator/auth` | Better Auth client factory |
-| `packages/ui` | `@landing-page-generator/ui` | Shared components and design tokens |
+| `packages/ui` | `@landing-page-generator/ui` | Shared components / tokens |
 
 ## Install
 
@@ -19,7 +19,7 @@ corepack enable
 pnpm install:landing-page
 ```
 
-Targeted installs:
+Targeted:
 
 ```bash
 pnpm install:web
@@ -27,7 +27,7 @@ pnpm install:landing
 pnpm install:packages
 ```
 
-Add an external dependency to both applications:
+Thêm dependency cho cả hai app:
 
 ```bash
 pnpm module:add date-fns
@@ -37,37 +37,35 @@ pnpm module:add vitest @testing-library/react --dev
 ## Development
 
 ```bash
-pnpm dev:web       # http://localhost:3000
-pnpm dev:landing   # http://localhost:3002
+pnpm dev:web       # http://localhost:3000  (HTTPS local: local.app.pagecraft-ai.site)
+pnpm dev:landing   # http://localhost:3002  (HTTPS local: local.pagecraft-ai.site)
 ```
 
-Environment files:
+Env:
 
 ```bash
 cp apps/web/.env.local.example apps/web/.env.local
 cp apps/landing-page-web/.env.local.example apps/landing-page-web/.env.local
 ```
 
-### Workspace environment
+### Workspace (`apps/web`)
 
 | Variable | Purpose |
 | --- | --- |
-| `NEXT_PUBLIC_API_URL` | Backend API origin |
+| `NEXT_PUBLIC_API_URL` | Backend origin (hoặc Render URL) |
 | `NEXT_PUBLIC_MARKETING_URL` | Marketing site origin |
 
-On Vercel, `apps/web/next.config.ts` enables same-origin `/api/:path*` rewrites to the backend.
+Browser gọi `/api/*` same-origin; Next proxy/route forward tới `NEXT_PUBLIC_API_URL` để cookie first-party.
 
-### Marketing environment
+### Marketing (`apps/landing-page-web`)
 
 | Variable | Purpose |
 | --- | --- |
-| `NEXT_PUBLIC_API_URL` | Backend API origin |
+| `NEXT_PUBLIC_API_URL` | Backend origin |
 | `NEXT_PUBLIC_APP_URL` | Workspace origin |
 | `NEXT_PUBLIC_SITE_URL` | Marketing origin |
 
-### Production domain mapping
-
-Use the following values for the `pagecraft-ai.site` deployment:
+### Production (`pagecraft-ai.site`)
 
 ```text
 # Workspace
@@ -80,54 +78,66 @@ NEXT_PUBLIC_APP_URL=https://app.pagecraft-ai.site
 NEXT_PUBLIC_SITE_URL=https://pagecraft-ai.site
 ```
 
-Both Vercel apps proxy `/api/*` to `NEXT_PUBLIC_API_URL`, allowing the browser to keep the shared
-cookie first-party on `pagecraft-ai.site`. The backend must use matching `WEB_ORIGIN`,
-`LANDING_ORIGIN`, and `AUTH_COOKIE_DOMAIN=.pagecraft-ai.site` values. Set `APP_URL` to
-`https://app.pagecraft-ai.site` so Better Auth callbacks also return through the first-party proxy.
+Backend cần khớp `WEB_ORIGIN`, `LANDING_ORIGIN`, `AUTH_COOKIE_DOMAIN=.pagecraft-ai.site`.  
+Ưu tiên `APP_URL=https://app.pagecraft-ai.site` khi auth callback đi qua first-party proxy.
 
-## API client architecture
+## AI landing + hero image
+
+Wizard `/landing-pages/new`:
+
+1. Brief + frame → `POST /api/landing-pages/generate`
+2. BE tạo copy + (nếu `imageGeneration`) banner R2
+3. Redirect `/demo/:slug` — hero dùng `content.media.heroImageUrl`
+4. Asset cũng xuất hiện trong **Thư viện media** (`/media`)
+
+UI đọc `GET /api/meta/integrations`:
+
+| Flag | Ý nghĩa |
+| --- | --- |
+| `openai` | Đủ key generate copy |
+| `imageGeneration` | OpenAI + R2 + public URL — hero banner |
+| `r2` | R2 credentials có mặt |
+
+Thiếu R2 write permission → generate vẫn ra page, không có ảnh (xem [be/README.md](../be/README.md)).
+
+## API client
 
 ```text
 @landing-page-generator/api-client
   └── ApiClient
-      ├── WorkspaceApiClient
+      ├── WorkspaceApiClient   # credentials + 401 → /login
       └── MarketingApiClient
 ```
-
-`ApiClient` provides typed `get`, `post`, `put`, `patch`, `delete`, JSON serialization and request/response/error interceptors.
-
-`WorkspaceApiClient` adds credentials, client identification and a `401` interceptor that redirects to `/login?returnTo=...`.
 
 ## Workspace routes
 
 | Route | Feature |
 | --- | --- |
-| `/` | Dashboard overview |
-| `/landing-pages` | Landing page management |
-| `/landing-pages/new` | Detailed creation flow (AI generate → layout recipe) |
-| `/demo/:slug` | AI landing demo (variant registry UI) |
-| `/pages/:id` | Landing page detail |
-| `/templates` | Template CRUD |
-| `/media` | Media metadata CRUD |
-| `/leads` | Lead management |
-| `/statistics` | Workspace statistics |
-| `/domains` | Custom domains |
-| `/payments` | Billing UI |
-| `/accounts` | Account UI |
-| `/settings` | Workspace settings |
+| `/` | Dashboard |
+| `/landing-pages` | Danh sách |
+| `/landing-pages/new` | Wizard AI / manual |
+| `/demo/:slug` | Preview AI landing |
+| `/pages/:id` | Chi tiết / editor |
+| `/templates` | Templates |
+| `/media` | Media library (gồm hero AI) |
+| `/leads` | Leads |
+| `/statistics` | Stats |
+| `/domains` | Domains |
+| `/payments` | Billing |
+| `/accounts` | Account |
+| `/settings` | Settings |
 
 ## Commands
 
 | Command | Description |
 | --- | --- |
-| `pnpm build:pkg` | Build all shared packages |
-| `pnpm build` | Build packages and both apps |
-| `pnpm lint` | Typecheck apps and packages |
-| `pnpm ci:web` | Package build + workspace lint/build |
-| `pnpm ci:landing` | Package build + marketing lint/build |
-| `pnpm ci:packages` | Typecheck/build packages |
-| `pnpm deploy:web:prod` | Deploy workspace to Vercel |
-| `pnpm deploy:landing:prod` | Deploy marketing to Vercel |
+| `pnpm build:pkg` | Build packages |
+| `pnpm build` | Packages + cả hai apps |
+| `pnpm lint` | Typecheck |
+| `pnpm ci:web` | Web lint/build |
+| `pnpm ci:landing` | Marketing lint/build |
+| `pnpm deploy:web:prod` | Deploy workspace → Vercel |
+| `pnpm deploy:landing:prod` | Deploy marketing → Vercel |
 
 ## Formatting
 
@@ -136,32 +146,23 @@ pnpm exec oxfmt --write apps packages
 pnpm exec oxfmt --check apps packages
 ```
 
-Configuration: `.oxfmtrc.json`.
+Config: `.oxfmtrc.json`.
 
 ## Docs
 
-- AI landing layout variants (nghiệp vụ): [`../be/docs/AI_LANDING_LAYOUT_VARIANTS.md`](../be/docs/AI_LANDING_LAYOUT_VARIANTS.md)
+- Layout variants: [`../be/docs/AI_LANDING_LAYOUT_VARIANTS.md`](../be/docs/AI_LANDING_LAYOUT_VARIANTS.md)
+- Backend / R2: [`../be/README.md`](../be/README.md)
+- Monorepo overview: [`../README.md`](../README.md)
 
-## Vercel setup
+## Vercel
 
-Create two Vercel projects from this workspace:
+Hai project từ repo `fe`:
 
 | Project | Root Directory |
 | --- | --- |
 | Workspace | `apps/web` |
 | Marketing | `apps/landing-page-web` |
 
-Required CI variables:
+CI variables: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID_WEB`, `VERCEL_PROJECT_ID_LANDING`, cùng các `NEXT_PUBLIC_*` ở trên.
 
-```text
-VERCEL_TOKEN
-VERCEL_ORG_ID
-VERCEL_PROJECT_ID_WEB
-VERCEL_PROJECT_ID_LANDING
-NEXT_PUBLIC_API_URL
-NEXT_PUBLIC_MARKETING_URL
-NEXT_PUBLIC_APP_URL
-NEXT_PUBLIC_SITE_URL
-```
-
-The token, org ID and project IDs must belong to the same Vercel scope.
+> Cloudflare Workers: monorepo cần **Root directory** = `apps/web` hoặc `apps/landing-page-web` (không để `/`). Repo hiện deploy chính qua Vercel; OpenNext/Workers cần adapter riêng.

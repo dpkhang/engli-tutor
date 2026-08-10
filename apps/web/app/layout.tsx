@@ -36,9 +36,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body suppressHydrationWarning>
         <QueryProvider>
           <ActionDialogProvider>
-            <AppShell>
-              <AuthGate>{children}</AuthGate>
-            </AppShell>
+            <AuthGate>
+              <AppShell>{children}</AppShell>
+            </AuthGate>
           </ActionDialogProvider>
         </QueryProvider>
       </body>

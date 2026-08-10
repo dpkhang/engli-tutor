@@ -73,3 +73,22 @@
     transition: none;
   }
 }
+
+@keyframes splash-progress {
+  0% {
+    transform: translateX(-110%);
+  }
+  50% {
+    transform: translateX(50%);
+  }
+  100% {
+    transform: translateX(210%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class*="splash-progress"] {
+    animation: none;
+    transform: translateX(50%);
+  }
+}
