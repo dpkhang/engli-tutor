@@ -32,11 +32,53 @@ function resourceHooks<TItem, TCreate>(
 export const templateHooks = resourceHooks("templates", workspaceApi.templates);
 export const mediaHooks = resourceHooks("media", workspaceApi.media);
 export const leadHooks = resourceHooks("leads", workspaceApi.leads);
-export const domainHooks = resourceHooks("domains", {
-  list: workspaceApi.domains.list,
-  create: (input: { hostname: string }) => workspaceApi.domains.create(input.hostname),
-  delete: workspaceApi.domains.delete,
-});
+export const domainHooks = {
+  ...resourceHooks("domains", {
+    list: workspaceApi.domains.list,
+    create: workspaceApi.domains.create,
+    delete: workspaceApi.domains.delete,
+  }),
+  useUpdate: () => {
+    const client = useQueryClient();
+    return useMutation({
+      mutationFn: ({
+        id,
+        ...input
+      }: {
+        id: string;
+        landingPageId?: string | null;
+        autoRenew?: boolean;
+      }) => workspaceApi.domains.update(id, input),
+      onSuccess: () => client.invalidateQueries({ queryKey: ["domains"] }),
+    });
+  },
+  useSearch: () =>
+    useMutation({
+      mutationFn: ({ q, years }: { q: string; years?: number }) =>
+        workspaceApi.domains.search(q, years ?? 1),
+    }),
+  usePurchase: () => {
+    const client = useQueryClient();
+    return useMutation({
+      mutationFn: workspaceApi.domains.purchase,
+      onSuccess: () => client.invalidateQueries({ queryKey: ["domains"] }),
+    });
+  },
+  useVerify: () => {
+    const client = useQueryClient();
+    return useMutation({
+      mutationFn: (id: string) => workspaceApi.domains.verify(id),
+      onSuccess: () => client.invalidateQueries({ queryKey: ["domains"] }),
+    });
+  },
+  useConfirmCheckout: () => {
+    const client = useQueryClient();
+    return useMutation({
+      mutationFn: (sessionId: string) => workspaceApi.domains.confirmCheckout(sessionId),
+      onSuccess: () => client.invalidateQueries({ queryKey: ["domains"] }),
+    });
+  },
+};
 
 export function useUpdateLead() {
   const client = useQueryClient();

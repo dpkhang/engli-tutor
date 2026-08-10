@@ -11,6 +11,7 @@ export type Plan = {
   priceValue: number;
   period: string;
   description: string;
+  imageUrl: string;
   features: string[];
   cta: string;
   featured: boolean;
@@ -24,6 +25,7 @@ export const PLANS: Plan[] = [
     priceValue: 0,
     period: "mãi mãi",
     description: "Dùng thử và launch trang đầu tiên — phù hợp cá nhân khám phá Pagecraft.",
+    imageUrl: "/images/plan-starter.png",
     features: [
       "50 credit đăng ký (một lần)",
       "1 landing page đang hoạt động",
@@ -40,6 +42,7 @@ export const PLANS: Plan[] = [
     priceValue: 299_000,
     period: "/ tháng",
     description: "Cho team marketing chạy nhiều chiến dịch và tối ưu chuyển đổi.",
+    imageUrl: "/images/plan-growth.png",
     features: [
       "120 credit mỗi kỳ thanh toán",
       "Tới 10 landing page",
@@ -57,6 +60,7 @@ export const PLANS: Plan[] = [
     priceValue: 799_000,
     period: "/ tháng",
     description: "Cho agency và brand cần kiểm soát sâu, nhiều workspace.",
+    imageUrl: "/images/plan-scale.png",
     features: [
       "500 credit mỗi kỳ thanh toán",
       "Không giới hạn landing page",

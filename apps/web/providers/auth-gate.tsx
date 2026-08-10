@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { useSession } from "@/lib/auth-client";
+import { getMarketingUrl, useSession } from "@/lib/auth-client";
 
 const PUBLIC_PATHS = new Set(["/login"]);
 
@@ -28,7 +28,14 @@ function AuthSplash({ message }: { message: string }) {
 
 function getSafeReturnTo(): string {
   const value = new URLSearchParams(window.location.search).get("returnTo");
-  return value?.startsWith("/") && !value.startsWith("//") ? value : "/";
+  if (value?.startsWith("/") && !value.startsWith("//")) return value;
+  try {
+    const target = new URL(value ?? "");
+    if (target.origin === new URL(getMarketingUrl()).origin) return target.toString();
+  } catch {
+    // Invalid and external return URLs fall back to the workspace root.
+  }
+  return "/";
 }
 
 export function AuthGate({ children }: { children: React.ReactNode }) {

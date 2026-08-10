@@ -1,9 +1,82 @@
 "use client";
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import { ExternalLink, FileImage, Plus, Trash2 } from "lucide-react";
-import { Badge, Button, Card, CardContent, Input, Label, useActionDialog } from "@landing-page-generator/ui";
+import { Button, Card, CardContent, Input, Label, useActionDialog } from "@landing-page-generator/ui";
 import { PageHeader } from "@/features/layout";
 import { mediaHooks } from "@/features/workspace-api/hooks";
+import type { MediaAsset } from "@/features/workspace-api/api";
+
+function getMediaSource(url: string) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+}
+
+function MediaItem({
+  item,
+  deleting,
+  onDelete,
+}: {
+  item: MediaAsset;
+  deleting: boolean;
+  onDelete: () => void;
+}) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const showImage = item.kind === "IMAGE" && !imageFailed;
+
+  return (
+    <article className="group overflow-hidden rounded-lg border bg-card transition-[border-color,box-shadow] hover:border-primary/25 hover:shadow-sm">
+      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+        {showImage ? (
+          <img
+            src={item.url}
+            alt={item.altText ?? item.name}
+            className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            onError={() => setImageFailed(true)}
+          />
+        ) : (
+          <div className="grid size-full place-items-center text-muted-foreground/60">
+            <FileImage className="size-8" strokeWidth={1.5} />
+          </div>
+        )}
+
+        <div className="absolute top-2 right-2 flex gap-1 rounded-md border bg-background/90 p-1 shadow-sm backdrop-blur-sm">
+          <Button asChild variant="ghost" size="icon-xs">
+            <a href={item.url} target="_blank" rel="noreferrer" aria-label={`Mở ${item.name}`} title="Mở media">
+              <ExternalLink />
+            </a>
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            className="hover:text-destructive"
+            disabled={deleting}
+            aria-label={`Xóa ${item.name}`}
+            title="Xóa media"
+            onClick={onDelete}
+          >
+            <Trash2 />
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex min-w-0 items-center justify-between gap-3 px-3 py-2.5">
+        <div className="min-w-0">
+          <h2 className="truncate text-sm font-medium text-foreground" title={item.name}>
+            {item.name}
+          </h2>
+          <p className="truncate text-xs text-muted-foreground">{getMediaSource(item.url)}</p>
+        </div>
+        <span className="shrink-0 text-[10px] font-medium text-muted-foreground/70 uppercase">
+          {item.kind}
+        </span>
+      </div>
+    </article>
+  );
+}
 
 export default function MediaPage() {
   const dialog = useActionDialog();
@@ -59,48 +132,23 @@ export default function MediaPage() {
       </Card>
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {query.data?.map((item) => (
-          <Card key={item.id} className="overflow-hidden py-0 shadow-none">
-            <div className="grid h-32 place-items-center bg-muted">
-              {item.kind === "IMAGE" ? (
-                <img
-                  src={item.url}
-                  alt={item.altText ?? item.name}
-                  className="size-full object-cover"
-                />
-              ) : (
-                <FileImage className="size-8 text-muted-foreground" />
-              )}
-            </div>
-            <CardContent className="space-y-3 py-4">
-              <div className="flex justify-between gap-2">
-                <div className="min-w-0">
-                  <h2 className="truncate text-sm font-semibold">{item.name}</h2>
-                  <Badge variant="outline" className="mt-1">
-                    {item.kind}
-                  </Badge>
-                </div>
-                <a href={item.url} target="_blank" rel="noreferrer">
-                  <ExternalLink className="size-4" />
-                </a>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                onClick={async () => {
-                  const accepted = await dialog.confirm({
-                    title: "Xóa asset?",
-                    description: `Asset “${item.name}” sẽ bị xóa khỏi thư viện media.`,
-                    confirmLabel: "Xóa asset",
-                    tone: "danger",
-                  });
+          <MediaItem
+            key={item.id}
+            item={item}
+            deleting={remove.isPending}
+            onDelete={() => {
+              void dialog
+                .confirm({
+                  title: "Xóa asset?",
+                  description: `Asset “${item.name}” sẽ bị xóa khỏi thư viện media.`,
+                  confirmLabel: "Xóa asset",
+                  tone: "danger",
+                })
+                .then((accepted) => {
                   if (accepted) remove.mutate(item.id);
-                }}
-              >
-                <Trash2 /> Xóa
-              </Button>
-            </CardContent>
-          </Card>
+                });
+            }}
+          />
         ))}
       </section>
     </div>

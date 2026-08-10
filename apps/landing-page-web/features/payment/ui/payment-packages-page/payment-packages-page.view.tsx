@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Check, Coins, Crown, ExternalLink } from "lucide-react";
+import { Check, Coins, Crown, ExternalLink, LoaderCircle } from "lucide-react";
 import { Alert, AlertDescription, Badge, Button, cn } from "@landing-page-generator/ui";
 import { motion } from "motion/react";
 import { PageBackLink } from "@/features/layout";
-import { planCheckoutHref, type Plan, type PlanId } from "@/features/marketing/model/plans";
+import type { Plan, PlanId } from "@/features/marketing/model/plans";
 import type { BillingMe } from "@/features/payment/api/billing";
 
 export type PaymentPackagesPageViewProps = {
@@ -19,6 +19,8 @@ export type PaymentPackagesPageViewProps = {
   billing: BillingMe | null;
   billingLoading: boolean;
   workspaceUrl: string;
+  planHrefs: Record<PlanId, string>;
+  redirectingToCurrentPlan: boolean;
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -66,11 +68,24 @@ export function PaymentPackagesPageView({
   billing,
   billingLoading,
   workspaceUrl,
+  planHrefs,
+  redirectingToCurrentPlan,
 }: PaymentPackagesPageViewProps) {
   const activePlanId = currentPlanId(billing);
   const activePlan = plans.find((p) => p.id === activePlanId) ?? plans[0];
   const benefits = planBenefits(activePlan, billing);
   const paidPlan = billing?.hasPaidPlan ?? false;
+
+  if (redirectingToCurrentPlan) {
+    return (
+      <main className="grid min-h-[100svh] place-items-center px-5">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <LoaderCircle className="size-4 animate-spin" />
+          Đang mở thông tin gói của bạn…
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="relative min-h-[100svh] bg-[radial-gradient(ellipse_at_top,hsl(158_28%_92%),hsl(var(--background))_55%)] dark:bg-[radial-gradient(ellipse_at_top,hsl(166_24%_15%),hsl(var(--background))_55%)]">
@@ -233,7 +248,7 @@ export function PaymentPackagesPageView({
                     isCurrent
                       ? "border-primary ring-2 ring-primary/20"
                       : emphasize
-                        ? "border-accent/50 bg-foreground text-primary-foreground shadow-[0_24px_60px_-28px_rgba(6,53,45,0.55)] dark:bg-card dark:text-card-foreground"
+                        ? "border-accent/60 bg-card text-card-foreground ring-1 ring-accent/20 shadow-[0_24px_60px_-28px_rgba(6,53,45,0.28)]"
                         : "border-border bg-background",
                   )}
                   initial={{ opacity: 0, y: 18 }}
@@ -245,6 +260,14 @@ export function PaymentPackagesPageView({
                       Đang dùng
                     </span>
                   ) : null}
+
+                  <div className="-mx-6 -mt-6 mb-5 aspect-[16/9] overflow-hidden border-b sm:-mx-7 sm:-mt-7">
+                    <img
+                      src={plan.imageUrl}
+                      alt={`Gói ${plan.name}`}
+                      className="size-full object-cover"
+                    />
+                  </div>
 
                   <div className="space-y-1">
                     <div className="flex items-center justify-between gap-2">
@@ -267,9 +290,7 @@ export function PaymentPackagesPageView({
                     <p
                       className={cn(
                         "text-sm leading-relaxed",
-                        emphasize && !isCurrent
-                          ? "text-primary-foreground/75 dark:text-muted-foreground"
-                          : "text-muted-foreground",
+                        "text-muted-foreground",
                       )}
                     >
                       {plan.description}
@@ -281,9 +302,7 @@ export function PaymentPackagesPageView({
                     <span
                       className={cn(
                         "ml-1 text-sm font-sans font-normal",
-                        emphasize && !isCurrent
-                          ? "text-primary-foreground/65 dark:text-muted-foreground"
-                          : "text-muted-foreground",
+                        "text-muted-foreground",
                       )}
                     >
                       {plan.period}
@@ -296,9 +315,7 @@ export function PaymentPackagesPageView({
                         <span className="text-accent">→</span>
                         <span
                           className={
-                            emphasize && !isCurrent
-                              ? "text-primary-foreground/85 dark:text-card-foreground/85"
-                              : "text-muted-foreground"
+                            "text-muted-foreground"
                           }
                         >
                           {feature}
@@ -312,7 +329,7 @@ export function PaymentPackagesPageView({
                       Gói hiện tại
                     </Button>
                   ) : (
-                    <Link href={planCheckoutHref(plan.id)} className="mt-8 block">
+                    <Link href={planHrefs[plan.id]} className="mt-8 block">
                       <Button
                         type="button"
                         className={cn(

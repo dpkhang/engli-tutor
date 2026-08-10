@@ -34,10 +34,38 @@ export type Lead = {
 export type Domain = {
   id: string;
   hostname: string;
-  status: "PENDING" | "VERIFIED" | "FAILED";
+  status: "PENDING" | "REGISTERING" | "DNS_PENDING" | "VERIFIED" | "FAILED";
   sslEnabled: boolean;
-  landingPage: { id: string; name: string; slug: string } | null;
+  source?: "BROUGHT" | "PURCHASED";
+  registrar?: "MANUAL" | "CLOUDFLARE" | "MOCK";
+  dnsStatus?: "NONE" | "PENDING" | "ACTIVE" | "FAILED";
+  sslStatus?: "NONE" | "PENDING" | "ACTIVE" | "FAILED";
+  verification?: string | null;
+  expiresAt?: string | null;
+  autoRenew?: boolean;
+  purchasePriceVnd?: number | null;
+  landingPage: { id: string; name: string; slug: string; status?: string } | null;
   createdAt: string;
+};
+
+export type DomainSearchResult = {
+  hostname: string;
+  available: boolean;
+  premium: boolean;
+  priceVnd: number;
+  retailPriceVnd: number;
+  currency: "vnd";
+  tld: string;
+  years: number;
+  quoteToken: string;
+  quoteExpiresAt: string;
+};
+
+export type DomainSearchResponse = {
+  registrar: "mock" | "cloudflare";
+  query: string;
+  years: number;
+  results: DomainSearchResult[];
 };
 export type WorkspaceSettings = {
   id: string;
@@ -92,7 +120,30 @@ export const workspaceApi = {
   },
   domains: {
     list: () => workspaceApiClient.get<Domain[]>("/api/domains"),
-    create: (hostname: string) => workspaceApiClient.post<Domain>("/api/domains", { hostname }),
+    search: (q: string, years = 1) =>
+      workspaceApiClient.get<DomainSearchResponse>(
+        `/api/domains/search?q=${encodeURIComponent(q)}&years=${years}`,
+      ),
+    create: (input: { hostname: string; landingPageId?: string | null }) =>
+      workspaceApiClient.post<Domain>("/api/domains", input),
+    update: (
+      id: string,
+      input: { landingPageId?: string | null; autoRenew?: boolean; hostname?: string },
+    ) => workspaceApiClient.patch<Domain>(`/api/domains/${id}`, input),
+    purchase: (input: {
+      hostname: string;
+      years: number;
+      quoteToken: string;
+      landingPageId?: string | null;
+      autoRenew?: boolean;
+    }) =>
+      workspaceApiClient.post<{ url: string | null; sessionId: string; domainId: string }>(
+        "/api/domains/purchase",
+        { ...input, returnOrigin: window.location.origin },
+      ),
+    verify: (id: string) => workspaceApiClient.post<Domain>(`/api/domains/${id}/verify`, {}),
+    confirmCheckout: (sessionId: string) =>
+      workspaceApiClient.post("/api/billing/confirm", { sessionId }),
     delete: (id: string) => workspaceApiClient.delete(`/api/domains/${id}`),
   },
   settings: {

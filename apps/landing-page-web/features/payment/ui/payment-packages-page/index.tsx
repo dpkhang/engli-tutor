@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
-import { getAppUrl } from "@/features/auth/model/session";
-import { getPlanById, PLANS } from "@/features/marketing/model/plans";
+import { getAppUrl, getAuthHref, getSiteUrl } from "@/features/auth/model/session";
+import { getPlanById, planCheckoutHref, PLANS, type PlanId } from "@/features/marketing/model/plans";
 import { billingApi } from "@/features/payment/api/billing";
 import { useBillingMe } from "@/features/payment/hooks/use-billing-me";
 import { PaymentPackagesPageView } from "./payment-packages-page.view";
 
 export function PaymentPackagesPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const queriedPlan = searchParams.get("plan");
   const highlighted = getPlanById(queriedPlan).id;
@@ -18,6 +19,17 @@ export function PaymentPackagesPage() {
   const sessionId = searchParams.get("session_id");
   const { isLoggedIn, ready: authReady } = useAuthSession();
   const billing = useBillingMe(isLoggedIn);
+  const redirectingToCurrentPlan = Boolean(
+    !authReady || (isLoggedIn && (billing.isLoading || billing.data?.hasPaidPlan)),
+  );
+  const planHrefs = Object.fromEntries(
+    PLANS.map((plan) => {
+      const checkoutHref = planCheckoutHref(plan.id);
+      if (isLoggedIn) return [plan.id, checkoutHref];
+      if (plan.id === "starter") return [plan.id, getAuthHref("/")];
+      return [plan.id, getAuthHref(`${getSiteUrl()}${checkoutHref}`)];
+    }),
+  ) as Record<PlanId, string>;
 
   useEffect(() => {
     if (checkoutState !== "success" || !isLoggedIn) return;
@@ -39,6 +51,12 @@ export function PaymentPackagesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync once per success redirect
   }, [checkoutState, sessionId, isLoggedIn]);
 
+  useEffect(() => {
+    if (!billing.data?.hasPaidPlan) return;
+    const currentPlan = billing.data.subscription.planId;
+    router.replace(`/payment/checkout?plan=${currentPlan}`);
+  }, [billing.data, router]);
+
   return (
     <PaymentPackagesPageView
       plans={PLANS}
@@ -51,6 +69,8 @@ export function PaymentPackagesPage() {
       billing={billing.data}
       billingLoading={billing.isLoading}
       workspaceUrl={getAppUrl()}
+      planHrefs={planHrefs}
+      redirectingToCurrentPlan={redirectingToCurrentPlan}
     />
   );
 }

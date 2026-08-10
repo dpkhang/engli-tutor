@@ -14,6 +14,7 @@ import {
   type BillingPeriod,
 } from "@/features/marketing/model/plans";
 import { billingApi } from "@/features/payment/api/billing";
+import { useBillingMe } from "@/features/payment/hooks/use-billing-me";
 import { PaymentCheckoutPageView } from "./payment-checkout-page.view";
 
 export function PaymentCheckoutPage() {
@@ -24,10 +25,14 @@ export function PaymentCheckoutPage() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { data: session, isPending: sessionPending } = useSession();
+  const billingMe = useBillingMe(Boolean(session?.user));
 
   const billing = useMemo(() => getBillingTotal(plan, period), [plan, period]);
   const isFree = plan.priceValue === 0;
   const paidPlan = isPaidPlan(plan.id);
+  const ownedPlan = billingMe.data?.hasPaidPlan
+    ? getPlanById(billingMe.data.subscription.planId)
+    : null;
 
   useEffect(() => {
     if (sessionPending) return;
@@ -66,8 +71,17 @@ export function PaymentCheckoutPage() {
       billing={billing}
       isFree={isFree}
       pending={pending}
-      error={error}
+      error={error ?? billingMe.error?.message ?? null}
       workspaceUrl={getAppUrl()}
+      checkingBilling={
+        sessionPending ||
+        !session?.user ||
+        billingMe.isLoading ||
+        (!billingMe.data && !billingMe.error)
+      }
+      ownedPlan={ownedPlan}
+      ownedSubscription={ownedPlan && billingMe.data ? billingMe.data.subscription : null}
+      creditBalance={ownedPlan ? (billingMe.data?.balance ?? null) : null}
       onPeriodChange={setPeriod}
       onSubscribe={() => void onSubscribe()}
     />

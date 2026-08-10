@@ -8,15 +8,22 @@ import { authClient, authErrorMessage, getMarketingUrl, useSession } from "@/lib
 import { loginFormSchema, type LoginFormValues } from "../../model/login-schema";
 import { LoginPageView, type AuthMode } from "./login-page.view";
 
-function resolveReturnTo(raw: string | null): string {
+function resolveReturnTo(raw: string | null, marketingUrl: string): string {
   if (!raw) return "/";
   if (raw.startsWith("/") && !raw.startsWith("//")) return raw;
+  try {
+    const target = new URL(raw);
+    if (target.origin === new URL(marketingUrl).origin) return target.toString();
+  } catch {
+    // Invalid and external return URLs fall back to the workspace root.
+  }
   return "/";
 }
 
 export function LoginPage() {
   const searchParams = useSearchParams();
-  const returnTo = resolveReturnTo(searchParams.get("returnTo"));
+  const marketingUrl = getMarketingUrl();
+  const returnTo = resolveReturnTo(searchParams.get("returnTo"), marketingUrl);
   const { data, isPending: sessionPending } = useSession();
   const [mode, setMode] = useState<AuthMode>("login");
   const [pending, setPending] = useState(false);
@@ -85,7 +92,7 @@ export function LoginPage() {
       mode={mode}
       pending={pending || sessionPending}
       error={error}
-      marketingUrl={getMarketingUrl()}
+      marketingUrl={marketingUrl}
       register={form.register}
       errors={form.formState.errors}
       onModeChange={changeMode}

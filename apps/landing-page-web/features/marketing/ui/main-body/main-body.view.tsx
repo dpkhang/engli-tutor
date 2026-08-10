@@ -164,50 +164,46 @@ export function MainBodyView({
                   key={plan.id}
                   className={`flex flex-col gap-6 rounded-2xl border p-7 ${
                     plan.featured
-                      ? "border-accent bg-foreground text-primary-foreground dark:bg-card dark:text-card-foreground"
+                      ? "border-accent bg-card text-card-foreground ring-1 ring-accent/20"
                       : "border-border bg-background text-foreground"
                   }`}
                 >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between gap-3">
-                      <h3 className="text-lg font-semibold">{plan.name}</h3>
-                      {plan.featured ? (
-                        <span className="text-xs font-semibold tracking-wide text-accent uppercase">
-                          Phổ biến
+                  <div className="relative -mx-5 -mt-5 h-28 overflow-hidden rounded-xl sm:h-32">
+                    <img
+                      src={plan.imageUrl}
+                      alt={`Gói ${plan.name}`}
+                      className="size-full object-cover"
+                    />
+                    <div aria-hidden className="absolute inset-0 bg-black/35" />
+                    {plan.featured ? (
+                      <span className="absolute top-2 right-2 rounded-md bg-accent px-2.5 py-1 text-[11px] font-bold text-accent-foreground uppercase">
+                        Phổ biến
+                      </span>
+                    ) : null}
+                    <div className="absolute top-3 left-3 text-left text-white">
+                      <h3 className="text-sm font-semibold">{plan.name}</h3>
+                      <p className="mt-1 font-[family-name:var(--font-display)] text-2xl leading-none font-semibold tracking-tight sm:text-3xl">
+                        {plan.price}
+                        <span className="ml-1 text-[10px] font-sans font-normal text-white/75">
+                          {plan.period}
                         </span>
-                      ) : null}
+                      </p>
                     </div>
+                  </div>
+
+                  <div>
                     <p
-                      className={`text-sm ${plan.featured ? "text-primary-foreground/70 dark:text-muted-foreground" : "text-muted-foreground"}`}
+                      className="text-sm text-muted-foreground"
                     >
                       {plan.description}
                     </p>
                   </div>
 
-                  <p className="font-[family-name:var(--font-display)] text-4xl tracking-tight">
-                    {plan.price}
-                    <span
-                      className={`ml-1 text-sm font-sans font-normal ${
-                        plan.featured
-                          ? "text-primary-foreground/65 dark:text-muted-foreground"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {plan.period}
-                    </span>
-                  </p>
-
                   <ul className="space-y-2.5 text-sm">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex gap-2">
                         <span className="text-accent">→</span>
-                        <span
-                          className={
-                            plan.featured
-                              ? "text-primary-foreground/85 dark:text-card-foreground/85"
-                              : "text-muted-foreground"
-                          }
-                        >
+                        <span className="text-muted-foreground">
                           {feature}
                         </span>
                       </li>
