@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { LoaderCircle } from "lucide-react";
 import { Alert, AlertDescription, Button } from "@landing-page-generator/ui";
-import { getPublishedLandingPageBySlug } from "../../api/public-landing-pages";
-import { parseGeneratedContent } from "../../model/generated-content";
-import { DemoLandingRenderer } from "./demo-landing-renderer";
+import { getPublishedLandingPageBySlug } from "../api/public-landing-pages";
+import { parseGeneratedContent } from "../model/generated-content";
+import { DemoLandingRenderer } from "./demo-landing/demo-landing-renderer";
 
 export function publicLandingPageQueryKey(slug: string) {
   return ["public-landing-page", slug] as const;
