@@ -115,7 +115,8 @@ export function LandingPageDetailView({
 
   if (!page) return null;
 
-  const publicPath = `/p/${page.slug}`;
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://pagecraft-ai.site").replace(/\/$/, "");
+  const publicPath = `${siteUrl}/p/${page.slug}`;
   const isPublished = page.status === "PUBLISHED";
 
   return (
@@ -154,9 +155,9 @@ export function LandingPageDetailView({
             ) : null}
             {isPublished ? (
               <Button type="button" variant="secondary" asChild>
-                <Link href={publicPath} target="_blank" rel="noreferrer">
+                <a href={publicPath} target="_blank" rel="noreferrer">
                   Mở trang công khai
-                </Link>
+                </a>
               </Button>
             ) : null}
             <Button

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @source "../../../packages/ui/src";
+@source "../../../packages/landing-renderer/src";
 
 @custom-variant dark (&:where(.dark, .dark *));
 

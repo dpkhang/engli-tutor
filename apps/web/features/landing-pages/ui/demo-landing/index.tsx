@@ -12,6 +12,7 @@ import { parseGeneratedContent } from "../../model/generated-content";
 import { DemoLandingRenderer } from "./demo-landing-renderer";
 
 export function DemoLanding({ slug }: { slug: string }) {
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://pagecraft-ai.site").replace(/\/$/, "");
   const query = useLandingPageBySlug(slug);
   const update = useUpdateLandingPage(query.data?.id ?? "");
   const [publishError, setPublishError] = useState<string | null>(null);
@@ -148,9 +149,9 @@ export function DemoLanding({ slug }: { slug: string }) {
                 <span className="inline-flex items-center gap-1.5 text-foreground">
                   <Check className="size-3.5 text-primary" />
                   Đã xuất bản ·{" "}
-                  <Link href={`/p/${query.data.slug}`} className="underline">
-                    /p/{query.data.slug}
-                  </Link>
+                  <a href={`${siteUrl}/p/${query.data.slug}`} target="_blank" rel="noreferrer" className="underline">
+                    {siteUrl}/p/{query.data.slug}
+                  </a>
                   {" · "}
                   <Link href="/domains" className="inline-flex items-center gap-1 underline">
                     <Link2 className="size-3" /> Domains

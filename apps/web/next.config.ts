@@ -19,15 +19,27 @@ const useSameOriginProxy = true;
 const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: apiUrl,
+    NEXT_PUBLIC_SITE_URL: (process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://pagecraft-ai.site").replace(/\/$/, ""),
     NEXT_PUBLIC_AUTH_SAME_ORIGIN: useSameOriginProxy ? "true" : "false",
   },
   transpilePackages: [
     "@landing-page-generator/ui",
     "@landing-page-generator/auth",
     "@landing-page-generator/api-client",
+    "@landing-page-generator/landing-renderer",
   ],
   turbopack: {
     root: path.join(__dirname, "../.."),
+  },
+  async redirects() {
+    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://pagecraft-ai.site").replace(/\/$/, "");
+    return [
+      {
+        source: "/p/:slug",
+        destination: `${siteUrl}/p/:slug`,
+        permanent: false,
+      },
+    ];
   },
   // Proxy lives in app/api/[...path]/route.ts (rewrites would bypass it and
   // forward browser Origin → Render INVALID_ORIGIN for local domains).
