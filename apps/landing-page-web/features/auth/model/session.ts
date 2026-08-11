@@ -1,11 +1,21 @@
+const PROD_APP_URL = "https://app.pagecraft-ai.site";
+const PROD_SITE_URL = "https://pagecraft-ai.site";
+
+function publicUrl(value: string | undefined, prodFallback: string, devFallback: string): string {
+  const explicit = value?.trim();
+  if (explicit) return explicit.replace(/\/$/, "");
+  const fallback = process.env.NODE_ENV === "production" ? prodFallback : devFallback;
+  return fallback.replace(/\/$/, "");
+}
+
 /** Workspace app URL — read in the Next app so NEXT_PUBLIC_* is inlined. */
 export function getAppUrl(): string {
-  return (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  return publicUrl(process.env.NEXT_PUBLIC_APP_URL, PROD_APP_URL, "http://localhost:3000");
 }
 
 /** Marketing site URL (this app). */
 export function getSiteUrl(): string {
-  return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3002").replace(/\/$/, "");
+  return publicUrl(process.env.NEXT_PUBLIC_SITE_URL, PROD_SITE_URL, "http://localhost:3002");
 }
 
 /** Login lives on workspace (same-origin cookies). Marketing only deep-links there. */
