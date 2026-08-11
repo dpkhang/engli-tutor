@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Fraunces, Manrope } from "next/font/google";
-import { SiteShell } from "@/features/layout";
 import "./globals.css";
 
 const display = Fraunces({
@@ -32,9 +31,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body suppressHydrationWarning>
-        <SiteShell>{children}</SiteShell>
-      </body>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }
