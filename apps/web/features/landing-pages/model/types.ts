@@ -8,10 +8,21 @@ export type LandingPage = {
   createdAt: string;
   updatedAt: string;
   hasContent?: boolean;
+  heroImageUrl?: string | null;
 };
 
 export type LandingPageDetail = LandingPage & {
   content: unknown;
+  creditUsage?: {
+    total: number;
+    copy: number;
+    structure: number;
+    image: number;
+    minimum: number;
+    maximum: number;
+    imageSurcharge: number;
+    metrics: { sections: number; items: number; characters: number };
+  };
 };
 
 export type CreateLandingPageInput = {
@@ -33,6 +44,8 @@ export type GenerateLandingPageInput = {
   audience?: string;
   tone: "professional" | "friendly" | "bold" | "luxury" | "playful";
   language: "vi" | "en";
+  heroImageAssetId?: string;
+  generateHeroImage?: boolean;
   layoutPreset?: GenerateLandingPageLayoutHint["preset"];
   layout?: GenerateLandingPageLayoutHint;
 };

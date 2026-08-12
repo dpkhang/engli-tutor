@@ -4,7 +4,7 @@ import type { SectionRenderProps } from "../types";
 export function SocialProofStatRow(props: SectionRenderProps) {
   const { section, tokens } = props;
   return (
-    <SectionShell tokens={tokens} className="bg-muted/40">
+    <SectionShell id="social-proof" tokens={tokens} className="bg-muted/40">
       <h2 className="font-[family-name:var(--font-display)] text-3xl tracking-tight">{section.heading}</h2>
       {section.subheading ? <p className="mt-3 max-w-2xl text-muted-foreground">{section.subheading}</p> : null}
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -21,7 +21,7 @@ export function SocialProofStatRow(props: SectionRenderProps) {
 export function SocialProofLogoStrip(props: SectionRenderProps) {
   const { section, tokens } = props;
   return (
-    <SectionShell tokens={tokens} className="border-y bg-background">
+    <SectionShell id="social-proof" tokens={tokens} className="border-y bg-background">
       <p className="text-center text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
         {section.heading}
       </p>
@@ -46,7 +46,7 @@ export function SocialProofQuoteBanner(props: SectionRenderProps) {
   const { section, primaryColor, tokens } = props;
   const quote = section.items[0] ?? section.body ?? section.heading;
   return (
-    <SectionShell tokens={tokens} className="text-white" style={{ backgroundColor: primaryColor }}>
+    <SectionShell id="social-proof" tokens={tokens} className="text-white" style={{ backgroundColor: primaryColor }}>
       <blockquote className="mx-auto max-w-3xl text-center">
         <p className="font-[family-name:var(--font-display)] text-2xl leading-snug tracking-tight sm:text-3xl">
           “{quote}”

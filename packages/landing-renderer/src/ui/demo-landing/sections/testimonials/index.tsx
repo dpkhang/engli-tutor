@@ -4,7 +4,7 @@ import type { SectionRenderProps } from "../types";
 export function TestimonialsCards2(props: SectionRenderProps) {
   const { section, tokens } = props;
   return (
-    <SectionShell tokens={tokens}>
+    <SectionShell id="testimonials" tokens={tokens}>
       <h2 className="font-[family-name:var(--font-display)] text-3xl tracking-tight">{section.heading}</h2>
       {section.subheading ? <p className="mt-3 max-w-2xl text-muted-foreground">{section.subheading}</p> : null}
       <div className="mt-8 grid gap-4 md:grid-cols-2">
@@ -24,7 +24,7 @@ export function TestimonialsCards2(props: SectionRenderProps) {
 export function TestimonialsCarouselStack(props: SectionRenderProps) {
   const { section, primaryColor, tokens } = props;
   return (
-    <SectionShell tokens={tokens} className="bg-muted/20">
+    <SectionShell id="testimonials" tokens={tokens} className="bg-muted/20">
       <h2 className="font-[family-name:var(--font-display)] text-3xl tracking-tight">{section.heading}</h2>
       {section.subheading ? <p className="mt-3 max-w-2xl text-muted-foreground">{section.subheading}</p> : null}
       <div className="mt-8 space-y-4">

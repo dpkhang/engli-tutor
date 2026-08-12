@@ -11,6 +11,7 @@ export const LAYOUT_DENSITIES = ["compact", "comfortable", "airy"] as const;
 export const LAYOUT_RADII = ["sharp", "soft", "pill"] as const;
 
 export const SECTION_VARIANT_CATALOG = {
+  header: ["simple", "centered"],
   hero: ["split-form", "centered-cta", "asymmetric"],
   features: ["grid-3", "list-check", "bento"],
   "social-proof": ["stat-row", "logo-strip", "quote-banner"],
@@ -31,6 +32,7 @@ export const generatedLayoutSchema = z.object({
 
 export const generatedSectionSchema = z.object({
   type: z.enum([
+    "header",
     "hero",
     "features",
     "social-proof",
@@ -53,7 +55,7 @@ export const generatedLandingContentSchema = z.object({
     secondaryColor: z.string(),
     fontStyle: z.string(),
   }),
-  sections: z.array(generatedSectionSchema).min(3).max(10),
+  sections: z.array(generatedSectionSchema).min(3).max(12),
   layout: generatedLayoutSchema.optional(),
   media: z.object({ heroImageUrl: z.string().url() }).optional(),
 });

@@ -4,6 +4,7 @@ import { CtaCenteredBand, CtaSplitForm } from "./cta";
 import { FaqAccordion, FaqTwoColumn } from "./faq";
 import { FeaturesBento, FeaturesGrid3, FeaturesListCheck } from "./features";
 import { FooterColumns, FooterSimple } from "./footer";
+import { HeaderCentered, HeaderSimple } from "./header";
 import { HeroAsymmetric, HeroCenteredCta, HeroSplitForm } from "./hero";
 import {
   SocialProofLogoStrip,
@@ -16,6 +17,10 @@ import type { SectionRenderProps } from "./types";
 type Registry = Record<SectionType, Record<string, ComponentType<SectionRenderProps>>>;
 
 export const SECTION_VARIANT_REGISTRY: Registry = {
+  header: {
+    simple: HeaderSimple,
+    centered: HeaderCentered,
+  },
   hero: {
     "split-form": HeroSplitForm,
     "centered-cta": HeroCenteredCta,

@@ -54,6 +54,8 @@ export type WizardDraftServerResponse = {
     mode: "ai" | "manual";
     step: 1 | 2 | 3 | 4;
     selectedFrameId: string | null;
+    selectedBannerId?: string | null;
+    generateHeroImage?: boolean;
     ai: {
       name: string;
       slug: string;

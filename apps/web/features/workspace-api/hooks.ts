@@ -71,14 +71,6 @@ export const domainHooks = {
       onSuccess: () => client.invalidateQueries({ queryKey: ["domains"] }),
     });
   },
-  useSetSsl: () => {
-    const client = useQueryClient();
-    return useMutation({
-      mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) =>
-        workspaceApi.domains.setSsl(id, enabled),
-      onSuccess: () => client.invalidateQueries({ queryKey: ["domains"] }),
-    });
-  },
   useVerification: (id: string | null) =>
     useQuery({
       queryKey: ["domains", "verification", id],

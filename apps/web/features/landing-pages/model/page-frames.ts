@@ -26,6 +26,7 @@ export const PAGE_FRAMES: PageFrame[] = [
     density: "comfortable",
     radius: "soft",
     sectionVariantPlan: {
+      header: "simple",
       hero: "split-form",
       features: "grid-3",
       "social-proof": "stat-row",
@@ -45,6 +46,7 @@ export const PAGE_FRAMES: PageFrame[] = [
     density: "airy",
     radius: "sharp",
     sectionVariantPlan: {
+      header: "centered",
       hero: "asymmetric",
       features: "list-check",
       "social-proof": "quote-banner",
@@ -64,6 +66,7 @@ export const PAGE_FRAMES: PageFrame[] = [
     density: "airy",
     radius: "pill",
     sectionVariantPlan: {
+      header: "centered",
       hero: "centered-cta",
       features: "bento",
       "social-proof": "logo-strip",
@@ -83,6 +86,7 @@ export const PAGE_FRAMES: PageFrame[] = [
     density: "comfortable",
     radius: "pill",
     sectionVariantPlan: {
+      header: "simple",
       hero: "centered-cta",
       features: "list-check",
       "social-proof": "stat-row",
@@ -102,6 +106,7 @@ export const PAGE_FRAMES: PageFrame[] = [
     density: "compact",
     radius: "sharp",
     sectionVariantPlan: {
+      header: "simple",
       hero: "split-form",
       features: "bento",
       "social-proof": "stat-row",
@@ -121,6 +126,7 @@ export const PAGE_FRAMES: PageFrame[] = [
     density: "comfortable",
     radius: "soft",
     sectionVariantPlan: {
+      header: "simple",
       hero: "asymmetric",
       features: "grid-3",
       "social-proof": "logo-strip",

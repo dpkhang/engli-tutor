@@ -16,6 +16,7 @@ import {
   useWorkspaceIntegrations,
 } from "../../hooks/use-landing-pages";
 import { useBillingMe } from "@/features/payments/hooks/use-billing";
+import { mediaHooks } from "@/features/workspace-api/hooks";
 import {
   createLandingPageAdvancedSchema,
   generateLandingPageFormSchema,
@@ -53,9 +54,12 @@ export function CreateLandingPage() {
   const generate = useGenerateLandingPage();
   const integrations = useWorkspaceIntegrations();
   const credits = useBillingMe();
+  const media = mediaHooks.useList();
   const [mode, setMode] = useState<CreateMode>("ai");
   const [step, setStep] = useState<WizardStep>(1);
   const [selectedFrameId, setSelectedFrameId] = useState<string | null>(null);
+  const [selectedBannerId, setSelectedBannerId] = useState<string | null>(null);
+  const [generateHeroImage, setGenerateHeroImage] = useState(false);
   const [frameError, setFrameError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
@@ -76,10 +80,14 @@ export function CreateLandingPage() {
       integrations.data.imageGeneration == null &&
       integrations.data.openai === true &&
       integrations.data.r2 === true);
+  const shouldGenerateHeroImage =
+    !selectedBannerId && generateHeroImage && imageGenerationReady;
   const creditBalance = credits.data?.balance;
   const aiGenerateCost = credits.data?.aiGenerateCost ?? 10;
+  const aiGenerateMaxCost = credits.data?.aiGenerationPricing?.maximum ?? aiGenerateCost * 5;
+  const aiImageSurcharge = credits.data?.aiGenerationPricing?.imageSurcharge ?? aiGenerateCost * 2;
   const hasEnoughCredits =
-    creditBalance == null ? true : creditBalance >= aiGenerateCost;
+    creditBalance == null ? true : creditBalance >= aiGenerateMaxCost;
 
   const manualForm = useForm<CreateLandingPageAdvancedValues>({
     resolver: zodResolver(createLandingPageAdvancedSchema),
@@ -109,6 +117,8 @@ export function CreateLandingPage() {
     }
     setMode(draft.mode);
     setSelectedFrameId(queryFrame?.id ?? draft.selectedFrameId);
+    setSelectedBannerId(draft.selectedBannerId);
+    setGenerateHeroImage(draft.selectedBannerId ? false : draft.generateHeroImage);
     const stepOneComplete =
       draft.ai.name.trim().length >= 3 &&
       /^[a-z0-9-]{3,120}$/.test(draft.ai.slug) &&
@@ -202,6 +212,8 @@ export function CreateLandingPage() {
         mode,
         step,
         selectedFrameId,
+        selectedBannerId,
+        generateHeroImage,
         ai: {
           name: aiName ?? "",
           slug: aiSlug ?? "",
@@ -231,6 +243,8 @@ export function CreateLandingPage() {
     mode,
     step,
     selectedFrameId,
+    selectedBannerId,
+    generateHeroImage,
     aiName,
     aiSlug,
     brief,
@@ -245,6 +259,8 @@ export function CreateLandingPage() {
     aiForm.reset(AI_DEFAULTS);
     setStep(1);
     setSelectedFrameId(null);
+    setSelectedBannerId(null);
+    setGenerateHeroImage(false);
     setFrameError(null);
     setSubmitError(null);
     setDraftRestored(false);
@@ -260,6 +276,8 @@ export function CreateLandingPage() {
         mode: "ai" as const,
         step,
         selectedFrameId,
+        selectedBannerId,
+        generateHeroImage,
         ai: {
           name: aiName ?? "",
           slug: aiSlug ?? "",
@@ -370,9 +388,9 @@ export function CreateLandingPage() {
       );
       return;
     }
-    if (creditBalance != null && creditBalance < aiGenerateCost) {
+    if (creditBalance != null && creditBalance < aiGenerateMaxCost) {
       setSubmitError(
-        `Không đủ credit (cần ${aiGenerateCost}, còn ${creditBalance}). Nạp thêm tại Thanh toán.`,
+        `Cần tối thiểu ${aiGenerateMaxCost} credit để tạm giữ cho lần generate (hiện có ${creditBalance}). Phần không sử dụng sẽ được hoàn lại.`,
       );
       return;
     }
@@ -386,6 +404,8 @@ export function CreateLandingPage() {
         tone: values.tone,
         language: values.language,
         layout: frameToLayoutHint(frame),
+        heroImageAssetId: selectedBannerId ?? undefined,
+        generateHeroImage: shouldGenerateHeroImage,
       });
       void deleteWizardDraft().catch(() => undefined);
       setDraftRestored(false);
@@ -397,6 +417,7 @@ export function CreateLandingPage() {
         tags: ["ai-generated", frame.id],
       });
       void credits.refetch();
+      await new Promise((resolve) => window.setTimeout(resolve, 450));
       router.push(`/demo/${page.slug}`);
     } catch (error) {
       setSubmitError(
@@ -408,7 +429,11 @@ export function CreateLandingPage() {
 
   return (
     <>
-      <AiGeneratingOverlay open={generate.isPending} pageName={aiName} />
+      <AiGeneratingOverlay
+        open={generate.isPending}
+        pageName={aiName}
+        includeImageStage={shouldGenerateHeroImage}
+      />
       <CreateLandingPageView
         mode={mode}
         onModeChange={(next) => {
@@ -429,6 +454,15 @@ export function CreateLandingPage() {
           setFrameError(null);
         }}
         frameError={frameError}
+        banners={(media.data ?? []).filter((asset) => asset.kind === "IMAGE")}
+        bannersLoading={media.isLoading}
+        selectedBannerId={selectedBannerId}
+        generateHeroImage={generateHeroImage}
+        onSelectBanner={(id) => {
+          setSelectedBannerId(id);
+          if (id) setGenerateHeroImage(false);
+        }}
+        onGenerateHeroImageChange={setGenerateHeroImage}
         draftRestored={draftRestored}
         onDiscardDraft={discardDraft}
         openaiReady={openaiReady}
@@ -436,6 +470,8 @@ export function CreateLandingPage() {
         imageGenerationReady={imageGenerationReady}
         creditBalance={creditBalance ?? null}
         aiGenerateCost={aiGenerateCost}
+        aiGenerateMaxCost={aiGenerateMaxCost}
+        aiImageSurcharge={aiImageSurcharge}
         hasEnoughCredits={hasEnoughCredits}
         creditsLoading={credits.isLoading}
         registerManual={manualForm.register}

@@ -10,6 +10,8 @@ export type CreateWizardDraft = {
   mode: CreateWizardDraftMode;
   step: CreateWizardDraftStep;
   selectedFrameId: string | null;
+  selectedBannerId: string | null;
+  generateHeroImage: boolean;
   ai: GenerateLandingPageFormValues;
 };
 
@@ -21,6 +23,8 @@ export type ServerWizardDraftResponse = {
     mode: CreateWizardDraftMode;
     step: CreateWizardDraftStep;
     selectedFrameId: string | null;
+    selectedBannerId?: string | null;
+    generateHeroImage?: boolean;
     ai: GenerateLandingPageFormValues;
   };
 } | null;
@@ -38,6 +42,8 @@ function normalizeDraft(input: {
   mode: unknown;
   step: unknown;
   selectedFrameId?: string | null;
+  selectedBannerId?: string | null;
+  generateHeroImage?: boolean;
   ai: Partial<GenerateLandingPageFormValues>;
 }): CreateWizardDraft | null {
   if (!isWizardStep(input.step) || !isCreateMode(input.mode) || !input.ai) return null;
@@ -54,6 +60,8 @@ function normalizeDraft(input: {
     mode: input.mode,
     step,
     selectedFrameId: frameId,
+    selectedBannerId: input.selectedBannerId ?? null,
+    generateHeroImage: input.generateHeroImage === true,
     ai: {
       name: String(input.ai.name ?? ""),
       slug: String(input.ai.slug ?? ""),
@@ -72,6 +80,8 @@ export function draftFromServer(response: ServerWizardDraftResponse): CreateWiza
     mode: response.payload.mode,
     step: response.payload.step,
     selectedFrameId: response.payload.selectedFrameId,
+    selectedBannerId: response.payload.selectedBannerId,
+    generateHeroImage: response.payload.generateHeroImage,
     ai: response.payload.ai,
   });
 }

@@ -11,6 +11,7 @@ import {
   Eye,
   FileText,
   Globe2,
+  ImageIcon,
   Info,
   Link2,
   Layers3,
@@ -55,6 +56,7 @@ import {
   type PageFrame,
 } from "../../model/page-frames";
 import { FrameGallery, FramePreview } from "./frame-gallery";
+import type { MediaAsset } from "@/features/workspace-api/api";
 
 export type CreateMode = "ai" | "manual";
 export type WizardStep = 1 | 2 | 3 | 4;
@@ -67,6 +69,12 @@ type Props = {
   selectedFrameId: string | null;
   onSelectFrame: (id: string) => void;
   frameError: string | null;
+  banners: MediaAsset[];
+  bannersLoading: boolean;
+  selectedBannerId: string | null;
+  generateHeroImage: boolean;
+  onSelectBanner: (id: string | null) => void;
+  onGenerateHeroImageChange: (enabled: boolean) => void;
   draftRestored?: boolean;
   onDiscardDraft?: () => void;
   openaiReady: boolean;
@@ -75,6 +83,8 @@ type Props = {
   imageGenerationReady?: boolean;
   creditBalance: number | null;
   aiGenerateCost: number;
+  aiGenerateMaxCost: number;
+  aiImageSurcharge: number;
   hasEnoughCredits: boolean;
   creditsLoading: boolean;
   registerManual: UseFormRegister<CreateLandingPageAdvancedValues>;
@@ -320,6 +330,12 @@ export function CreateLandingPageView({
   selectedFrameId,
   onSelectFrame,
   frameError,
+  banners,
+  bannersLoading,
+  selectedBannerId,
+  generateHeroImage,
+  onSelectBanner,
+  onGenerateHeroImageChange,
   draftRestored = false,
   onDiscardDraft,
   openaiReady,
@@ -327,6 +343,8 @@ export function CreateLandingPageView({
   imageGenerationReady = false,
   creditBalance,
   aiGenerateCost,
+  aiGenerateMaxCost,
+  aiImageSurcharge,
   hasEnoughCredits,
   creditsLoading,
   registerManual,
@@ -375,11 +393,7 @@ export function CreateLandingPageView({
           { label: "Đã chọn khung trang", ready: Boolean(selectedFrame) },
           { label: "OpenAI sẵn sàng", ready: openaiReady },
           {
-            label: "Hero image (OpenAI + R2)",
-            ready: imageGenerationReady === true,
-          },
-          {
-            label: `Đủ credit (≥ ${aiGenerateCost})`,
+            label: `Đủ hạn mức tạm giữ (≥ ${aiGenerateMaxCost})`,
             ready: !creditsLoading && hasEnoughCredits,
           },
         ]
@@ -481,7 +495,7 @@ export function CreateLandingPageView({
                 </Alert>
               ) : null}
 
-              {!openaiUnknown && openaiReady && !imageGenerationReady ? (
+              {!openaiUnknown && openaiReady && generateHeroImage && !imageGenerationReady ? (
                 <Alert>
                   <Info />
                   <AlertDescription>
@@ -497,7 +511,7 @@ export function CreateLandingPageView({
                 <Alert variant="destructive">
                   <Info />
                   <AlertDescription>
-                    Không đủ credit (cần {aiGenerateCost}, còn {creditBalance ?? 0}).{" "}
+                    Không đủ hạn mức tạm giữ (cần {aiGenerateMaxCost}, còn {creditBalance ?? 0}).{" "}
                     <Link href="/payments" className="underline">
                       Nạp credit bằng thẻ
                     </Link>
@@ -510,8 +524,8 @@ export function CreateLandingPageView({
                 <Alert>
                   <Info />
                   <AlertDescription>
-                    Chi phí AI generate: <strong>{aiGenerateCost} credit</strong> · Số dư:{" "}
-                    <strong>{creditBalance ?? 0}</strong>
+                    Chi phí theo độ phức tạp: <strong>{aiGenerateCost}–{aiGenerateMaxCost} credit</strong> · Số dư:{" "}
+                    <strong>{creditBalance ?? 0}</strong>. Phần tạm giữ không sử dụng sẽ được hoàn lại.
                   </AlertDescription>
                 </Alert>
               ) : null}
@@ -526,7 +540,7 @@ export function CreateLandingPageView({
                       <div>
                         <CardTitle>01 · Mô tả chiến dịch</CardTitle>
                         <CardDescription>
-                          AI sẽ tạo hero, benefits, CTA và các section phù hợp từ brief của bạn.
+                          AI sẽ tạo header, hero, benefits, CTA và các section phù hợp từ brief của bạn.
                         </CardDescription>
                       </div>
                     </div>
@@ -732,6 +746,83 @@ export function CreateLandingPageView({
                         </Button>
                       </div>
                     </div>
+                    <div className="space-y-4 border-t pt-5">
+                      <div>
+                        <p className="flex items-center gap-2 text-sm font-semibold">
+                          <ImageIcon className="size-4 text-primary" /> Banner hero
+                        </p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Ưu tiên chọn ảnh có sẵn để không gọi thêm image model.
+                        </p>
+                      </div>
+
+                      {bannersLoading ? (
+                        <div className="flex h-24 items-center justify-center text-sm text-muted-foreground">
+                          <LoaderCircle className="mr-2 size-4 animate-spin" /> Đang tải thư viện...
+                        </div>
+                      ) : banners.length ? (
+                        <div className="flex gap-3 overflow-x-auto pb-2">
+                          {banners.map((banner) => {
+                            const selected = selectedBannerId === banner.id;
+                            return (
+                              <button
+                                key={banner.id}
+                                type="button"
+                                aria-pressed={selected}
+                                onClick={() => onSelectBanner(selected ? null : banner.id)}
+                                className={cn(
+                                  "group relative w-40 shrink-0 overflow-hidden rounded-md border-2 bg-muted text-left transition-colors",
+                                  selected ? "border-primary" : "border-transparent hover:border-border",
+                                )}
+                              >
+                                <span className="block aspect-[16/9] overflow-hidden bg-muted">
+                                  <img
+                                    src={banner.url}
+                                    alt={banner.altText || banner.name}
+                                    className="size-full object-cover"
+                                  />
+                                </span>
+                                <span className="block truncate px-2 py-2 text-xs font-medium">
+                                  {banner.name}
+                                </span>
+                                {selected ? (
+                                  <span className="absolute top-2 right-2 grid size-6 place-items-center rounded-full bg-primary text-primary-foreground">
+                                    <Check className="size-3.5" />
+                                  </span>
+                                ) : null}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          Thư viện chưa có banner. Bạn có thể tải ảnh tại Thư viện media hoặc tiếp tục không dùng ảnh.
+                        </p>
+                      )}
+
+                      {!selectedBannerId ? (
+                        <label className="flex cursor-pointer items-start gap-3 rounded-md border bg-muted/20 p-4">
+                          <input
+                            type="checkbox"
+                            checked={generateHeroImage}
+                            disabled={!imageGenerationReady}
+                            onChange={(event) => onGenerateHeroImageChange(event.target.checked)}
+                            className="mt-0.5 size-4 accent-[hsl(var(--primary))]"
+                          />
+                          <span>
+                            <span className="block text-sm font-medium">Dùng AI tạo banner mới</span>
+                            <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+                              Chỉ khi bật lựa chọn này hệ thống mới gọi image model và cộng {aiImageSurcharge} credit. Mặc định sẽ bỏ qua bước tạo ảnh.
+                            </span>
+                            {!imageGenerationReady ? (
+                              <span className="mt-1 block text-xs text-destructive">
+                                Image generation hiện chưa sẵn sàng.
+                              </span>
+                            ) : null}
+                          </span>
+                        </label>
+                      ) : null}
+                    </div>
                     <div className="rounded-xl border bg-muted/20 p-4">
                       <div className="mb-3 flex items-center justify-between gap-3">
                         <p className="text-sm font-semibold">Mức độ sẵn sàng</p>
@@ -782,12 +873,13 @@ export function CreateLandingPageView({
                     <div className="grid gap-3 rounded-xl border bg-muted/20 p-4 sm:grid-cols-3">
                       <div><p className="text-xs text-muted-foreground">Landing page</p><p className="mt-1 font-semibold">{name}</p></div>
                       <div><p className="text-xs text-muted-foreground">Khung trang</p><p className="mt-1 font-semibold">{selectedFrame?.name ?? "—"}</p></div>
-                      <div><p className="text-xs text-muted-foreground">Chi phí</p><p className="mt-1 font-semibold">{aiGenerateCost} credit</p></div>
+                      <div><p className="text-xs text-muted-foreground">Chi phí dự kiến</p><p className="mt-1 font-semibold">{aiGenerateCost}–{aiGenerateMaxCost} credit</p></div>
                     </div>
                     <Alert>
                       <Info />
                       <AlertDescription>
-                        Chỉ khi bấm <strong>Tạo trang</strong>, hệ thống mới trừ credit và gọi AI generate.
+                        Chỉ khi bấm <strong>Tạo trang</strong>, hệ thống mới trừ credit để tạo nội dung.
+                        Image model {selectedBannerId || !generateHeroImage ? "sẽ được bỏ qua" : "chỉ chạy vì bạn đã bật tùy chọn tạo banner"}.
                       </AlertDescription>
                     </Alert>
                   </CardContent>

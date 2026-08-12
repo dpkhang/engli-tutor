@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
+  BookOpenCheck,
   BookOpenText,
   ChevronDown,
   Coins,
@@ -174,6 +175,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </nav>
 
       <div className="border-t p-3">
+        <Link
+          href="/guides/publish"
+          title={collapsed ? "Hướng dẫn publish" : undefined}
+          onClick={() => setMobileOpen(false)}
+          className={cn(
+            "mb-2 flex min-h-10 items-center gap-3 rounded-lg border border-primary/20 bg-primary/[0.06] px-3 text-sm font-medium text-primary transition-colors hover:bg-primary/10",
+            pathname === "/guides/publish" && "border-primary/35 bg-primary/12",
+            collapsed && "justify-center px-0",
+          )}
+        >
+          <BookOpenCheck className="size-4.5 shrink-0" />
+          {!collapsed ? <span>Hướng dẫn publish</span> : null}
+        </Link>
         <a
           href={getMarketingUrl()}
           className={cn(

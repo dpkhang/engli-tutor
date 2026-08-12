@@ -112,7 +112,8 @@ export default function PaymentsPage() {
   const stripeReady = data?.stripeConfigured ?? false;
   const balance = data?.balance ?? 0;
   const aiCost = data?.aiGenerateCost ?? 10;
-  const lowCredit = balance < aiCost;
+  const aiMaxCost = data?.aiGenerationPricing?.maximum ?? aiCost * 5;
+  const lowCredit = balance < aiMaxCost;
   const activePlanId = currentPlanId(data);
   const activePlan = currentPlanDetails(data);
   const comparePlans = allPlansForCompare(data?.subscriptionPlans ?? []);
@@ -247,7 +248,7 @@ export default function PaymentsPage() {
                 <dl className="grid gap-3 text-sm sm:grid-cols-2">
                   <div>
                     <dt className="text-muted-foreground">AI generate</dt>
-                    <dd className="font-medium">{aiCost} credit/lần</dd>
+                    <dd className="font-medium">{aiCost}–{aiMaxCost} credit/lần</dd>
                   </div>
                   {hasPaidPlan && data?.subscription.billingPeriod ? (
                     <div>

@@ -92,7 +92,9 @@ async function proxy(request: NextRequest, context: RouteContext) {
     cache: "no-store",
   });
 
-  const body = await response.arrayBuffer();
+  const hasNoBody =
+    request.method === "HEAD" || response.status === 204 || response.status === 205;
+  const body = hasNoBody ? null : await response.arrayBuffer();
   const res = new NextResponse(body, {
     status: response.status,
     statusText: response.statusText,

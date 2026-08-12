@@ -49,8 +49,8 @@ function formatDate(value: string) {
 
 function LandingPageCardSkeleton() {
   return (
-    <Card aria-hidden="true" className="gap-4 overflow-hidden py-0 shadow-none">
-      <div className="relative h-24 animate-pulse border-b bg-muted/70 p-4">
+    <Card aria-hidden="true" className="gap-0 overflow-hidden py-0 shadow-none">
+      <div className="relative aspect-[16/6] min-h-28 animate-pulse bg-muted/70 p-4">
         <div className="flex items-start justify-between">
           <div className="h-6 w-24 rounded-md bg-muted-foreground/15" />
           <div className="flex items-center gap-2">
@@ -60,7 +60,7 @@ function LandingPageCardSkeleton() {
         </div>
         <div className="absolute right-4 bottom-3 h-5 w-16 rounded-full bg-muted-foreground/15" />
       </div>
-      <CardContent className="space-y-4 pb-5">
+      <CardContent className="space-y-4 pt-5 pb-5">
         <div className="animate-pulse space-y-2">
           <div className="h-5 w-2/3 rounded bg-muted" />
           <div className="h-3.5 w-1/2 rounded bg-muted" />
@@ -183,11 +183,37 @@ export function LandingPageListView({
           {pages.map((page) => (
             <Card
               key={page.id}
-              className="group gap-4 overflow-hidden py-0 shadow-none transition hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md"
+              className="group gap-0 overflow-hidden py-0 shadow-none transition hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md"
             >
-              <div className="relative h-24 border-b bg-[linear-gradient(135deg,hsl(var(--primary)/.13),hsl(var(--surface)))] p-4">
-                <div className="flex items-start justify-between">
-                  <span className="rounded-md bg-background/80 px-2 py-1 font-mono text-[11px] text-muted-foreground">
+              <div
+                className={cn(
+                  "relative aspect-[16/6] min-h-28 overflow-hidden bg-[linear-gradient(135deg,hsl(var(--primary)/.13),hsl(var(--surface)))] p-4",
+                  page.heroImageUrl && "text-foreground dark:text-white",
+                )}
+              >
+                {page.heroImageUrl ? (
+                  <>
+                    <img
+                      src={page.heroImageUrl}
+                      alt=""
+                      className="absolute inset-0 size-full object-cover"
+                      loading="lazy"
+                    />
+                    <span
+                      aria-hidden
+                      className="absolute inset-0 bg-white/45 dark:bg-black/55"
+                    />
+                  </>
+                ) : null}
+                <div className="relative z-10 flex items-start justify-between">
+                  <span
+                    className={cn(
+                      "rounded-md px-2 py-1 font-mono text-[11px] backdrop-blur-sm",
+                      page.heroImageUrl
+                        ? "bg-white/75 text-foreground dark:bg-black/45 dark:text-white"
+                        : "bg-background/80 text-muted-foreground",
+                    )}
+                  >
                     /{page.slug}
                   </span>
                   <div className="flex items-center gap-2">
@@ -216,7 +242,11 @@ export function LandingPageListView({
                       asChild={Boolean(page.hasContent)}
                       variant="ghost"
                       size="icon"
-                      className="size-8 bg-background/70"
+                      className={cn(
+                        "size-8",
+                        page.heroImageUrl &&
+                          "bg-white/70 text-foreground hover:bg-white/90 hover:text-foreground dark:bg-black/40 dark:text-white dark:hover:bg-black/55 dark:hover:text-white",
+                      )}
                       disabled={!page.hasContent}
                       aria-label={page.hasContent ? `Sửa nội dung ${page.name}` : "Trang chưa có nội dung"}
                     >
@@ -228,11 +258,11 @@ export function LandingPageListView({
                     </Button>
                   </div>
                 </div>
-                <Badge className="absolute right-4 bottom-3" variant={statusVariant(page.status)}>
+                <Badge className="absolute right-4 bottom-3 z-10" variant={statusVariant(page.status)}>
                   {STATUS_LABEL[page.status]}
                 </Badge>
               </div>
-              <CardContent className="space-y-4 pb-5">
+              <CardContent className="space-y-4 pt-5 pb-5">
                 <div>
                   <h3 className="truncate font-semibold">{page.name}</h3>
                   <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">

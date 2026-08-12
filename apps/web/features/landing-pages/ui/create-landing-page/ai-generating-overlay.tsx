@@ -15,7 +15,7 @@ const STAGES = [
   {
     id: "structure",
     title: "Dựng cấu trúc trang",
-    detail: "Sắp xếp hero, benefits, social proof và CTA",
+    detail: "Sắp xếp header, hero, benefits, social proof và CTA",
     icon: LayoutTemplate,
   },
   {
@@ -41,31 +41,59 @@ const STAGES = [
 type AiGeneratingOverlayProps = {
   open: boolean;
   pageName?: string;
+  includeImageStage?: boolean;
 };
 
-export function AiGeneratingOverlay({ open, pageName }: AiGeneratingOverlayProps) {
+export function AiGeneratingOverlay({ open, pageName, includeImageStage = false }: AiGeneratingOverlayProps) {
   const [stageIndex, setStageIndex] = useState(0);
-  useLockScroll(open);
+  const [progress, setProgress] = useState(0);
+  const [visible, setVisible] = useState(open);
+  useLockScroll(visible);
+  const stages = includeImageStage ? STAGES : STAGES.filter((stage) => stage.id !== "visual");
 
   useEffect(() => {
-    if (!open) {
-      setStageIndex(0);
+    if (open) {
+      setVisible(true);
       return;
     }
 
+    if (!visible) return;
+
+    setProgress(100);
+    setStageIndex(stages.length - 1);
+    const closeTimer = window.setTimeout(() => {
+      setVisible(false);
+      setStageIndex(0);
+      setProgress(0);
+    }, 450);
+
+    return () => window.clearTimeout(closeTimer);
+  }, [open, stages.length, visible]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    setProgress(0);
+    setStageIndex(0);
+    const startedAt = Date.now();
     const timer = window.setInterval(() => {
-      setStageIndex((current) => (current + 1) % STAGES.length);
-    }, 2800);
+      const elapsed = Date.now() - startedAt;
+      // Progress approaches 95% while the request is pending and never moves backwards.
+      const nextProgress = Math.min(95, Math.floor((elapsed / 32_000) * 95));
+      setProgress((current) => Math.max(current, nextProgress));
+      setStageIndex(
+        Math.min(stages.length - 1, Math.floor((nextProgress / 100) * stages.length)),
+      );
+    }, 250);
 
     return () => window.clearInterval(timer);
-  }, [open]);
+  }, [open, stages.length]);
 
-  const active = STAGES[stageIndex] ?? STAGES[0];
-  const progress = ((stageIndex + 1) / STAGES.length) * 100;
+  const active = stages[stageIndex] ?? stages[0] ?? STAGES[0];
 
   return (
     <AnimatePresence>
-      {open ? (
+      {visible ? (
         <motion.div
           className="fixed inset-0 z-[120] flex items-center justify-center overflow-hidden bg-background/80 p-4 backdrop-blur-xl"
           role="alertdialog"
@@ -134,7 +162,7 @@ export function AiGeneratingOverlay({ open, pageName }: AiGeneratingOverlayProps
                 </div>
 
                 <ul className="space-y-2.5">
-                  {STAGES.map((stage, index) => {
+                  {stages.map((stage, index) => {
                     const Icon = stage.icon;
                     const state =
                       index < stageIndex ? "done" : index === stageIndex ? "active" : "todo";

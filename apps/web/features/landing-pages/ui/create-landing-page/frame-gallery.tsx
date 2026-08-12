@@ -34,6 +34,15 @@ export function FramePreview({ frame, className }: FramePreviewProps) {
         <span className="size-1.5 rounded-full bg-emerald-400/80" />
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-1.5">
+        <div className="flex h-4 shrink-0 items-center justify-between gap-2 rounded-sm bg-white/80 px-1.5 dark:bg-white/10">
+          <span className="h-1.5 w-7" style={{ backgroundColor: accent, borderRadius: radius, opacity: 0.9 }} />
+          <div className="flex flex-1 items-center justify-center gap-1">
+            <span className="h-1 w-5 rounded bg-slate-200 dark:bg-white/20" />
+            <span className="h-1 w-5 rounded bg-slate-200 dark:bg-white/20" />
+            <span className="h-1 w-5 rounded bg-slate-200 dark:bg-white/20" />
+          </div>
+          <span className="h-2 w-6" style={{ backgroundColor: accent, borderRadius: radius, opacity: 0.75 }} />
+        </div>
         <div
           className={cn(
             "grid min-h-0 flex-[1.4] gap-1.5",

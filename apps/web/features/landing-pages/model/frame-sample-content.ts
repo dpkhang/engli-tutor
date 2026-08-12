@@ -15,6 +15,14 @@ export const FRAME_PREVIEW_SAMPLE_CONTENT: GeneratedLandingContent = {
   },
   sections: [
     {
+      type: "header",
+      heading: "Pagecraft",
+      subheading: null,
+      body: null,
+      ctaLabel: "Dùng thử miễn phí",
+      items: ["Tính năng", "Đánh giá", "FAQ"],
+    },
+    {
       type: "hero",
       heading: "Biến brief thành landing sẵn chạy ads",
       subheading: "Nội dung mẫu — chỉ để xem bố cục khung trang.",

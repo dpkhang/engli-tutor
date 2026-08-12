@@ -185,8 +185,6 @@ export const workspaceApi = {
       workspaceApiClient.post<DomainVerifyResult>(`/api/domains/${id}/verify`, {}),
     getVerification: (id: string) =>
       workspaceApiClient.get<DomainVerificationPayload>(`/api/domains/${id}/verification`),
-    setSsl: (id: string, enabled: boolean) =>
-      workspaceApiClient.post<Domain>(`/api/domains/${id}/ssl`, { enabled }),
     confirmCheckout: (sessionId: string) =>
       workspaceApiClient.post("/api/billing/confirm", { sessionId }),
     delete: (id: string) => workspaceApiClient.delete(`/api/domains/${id}`),

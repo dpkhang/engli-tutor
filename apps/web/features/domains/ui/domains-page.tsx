@@ -8,9 +8,7 @@ import {
   CheckCircle2,
   Clock3,
   Globe2,
-  LoaderCircle,
   LockKeyhole,
-  LockKeyholeOpen,
   Plus,
   Search,
   ShieldCheck,
@@ -59,7 +57,6 @@ export default function DomainsPage() {
   const create = domainHooks.useCreate();
   const update = domainHooks.useUpdate();
   const remove = domainHooks.useDelete();
-  const setSsl = domainHooks.useSetSsl();
   const confirmCheckout = domainHooks.useConfirmCheckout();
   const confirmedSession = useRef<string | null>(null);
   const [verifyingId, setVerifyingId] = useState<string | null>(null);
@@ -94,12 +91,13 @@ export default function DomainsPage() {
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const formElement = event.currentTarget;
     if (!createPageId) {
       setCreateFormError("Chọn landing page (slug) để gắn với domain.");
       return;
     }
     setCreateFormError(null);
-    const form = new FormData(event.currentTarget);
+    const form = new FormData(formElement);
     create.mutate(
       {
         hostname: String(form.get("hostname")).trim().toLowerCase(),
@@ -107,7 +105,7 @@ export default function DomainsPage() {
       },
       {
         onSuccess: (domain) => {
-          event.currentTarget.reset();
+          formElement.reset();
           setCreatePageId("");
           setVerifyingId(domain.id);
         },
@@ -287,9 +285,16 @@ export default function DomainsPage() {
           {domains.map((domain) => {
             const status = STATUS_CONFIG[domain.status];
             const StatusIcon = status.icon;
-            const needsVerify = domain.status !== "VERIFIED";
-            const canToggleSsl = domain.status === "VERIFIED" || domain.dnsStatus === "ACTIVE";
-            const sslBusy = setSsl.isPending && setSsl.variables?.id === domain.id;
+            const sslStatus = domain.sslStatus ?? "NONE";
+            const needsVerify =
+              domain.status !== "VERIFIED" || sslStatus === "PENDING" || sslStatus === "FAILED";
+            const sslLabel = domain.sslEnabled
+              ? "SSL hoạt động"
+              : sslStatus === "PENDING"
+                ? "SSL đang cấp"
+                : sslStatus === "FAILED"
+                  ? "SSL lỗi"
+                  : "SSL chờ xác minh";
             return (
               <div key={domain.id}>
                 <div className="grid min-h-20 grid-cols-[minmax(220px,1.25fr)_minmax(180px,0.9fr)_minmax(190px,0.8fr)_minmax(170px,auto)] items-center gap-4 px-5 py-4 whitespace-nowrap transition-colors hover:bg-muted/20">
@@ -356,11 +361,11 @@ export default function DomainsPage() {
                       <StatusIcon className="size-3" /> {status.label}
                     </Badge>
                     <Badge
-                      variant={domain.sslEnabled ? "default" : "secondary"}
+                      variant={domain.sslEnabled ? "default" : sslStatus === "FAILED" ? "destructive" : "secondary"}
                       className="shrink-0 gap-1.5"
                     >
                       <LockKeyhole className="size-3" />
-                      SSL {domain.sslEnabled ? "Bật" : (domain.sslStatus ?? "NONE") === "PENDING" ? "Chờ" : "Tắt"}
+                      {sslLabel}
                     </Badge>
                   </div>
 
@@ -376,28 +381,11 @@ export default function DomainsPage() {
                         }
                       >
                         <ShieldCheck />
-                        {verifyingId === domain.id ? "Ẩn" : "Xác minh"}
-                      </Button>
-                    ) : null}
-                    {canToggleSsl ? (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        className="h-9"
-                        disabled={sslBusy}
-                        onClick={() =>
-                          setSsl.mutate({ id: domain.id, enabled: !domain.sslEnabled })
-                        }
-                      >
-                        {sslBusy ? (
-                          <LoaderCircle className="animate-spin" />
-                        ) : domain.sslEnabled ? (
-                          <LockKeyholeOpen />
-                        ) : (
-                          <LockKeyhole />
-                        )}
-                        {domain.sslEnabled ? "Tắt SSL" : "Bật SSL"}
+                        {verifyingId === domain.id
+                          ? "Ẩn"
+                          : domain.status === "VERIFIED"
+                            ? "Cập nhật SSL"
+                            : "Xác minh"}
                       </Button>
                     ) : null}
                     <Button
@@ -415,12 +403,6 @@ export default function DomainsPage() {
                   </div>
                 </div>
 
-                {setSsl.isError && setSsl.variables?.id === domain.id ? (
-                  <div className="flex items-center gap-2 border-t border-destructive/15 bg-destructive/5 px-4 py-2 text-xs text-destructive md:px-5">
-                    <AlertCircle className="size-3.5 shrink-0" />
-                    Không thể cập nhật SSL: {setSsl.error.message}
-                  </div>
-                ) : null}
                 {update.isError && update.variables?.id === domain.id ? (
                   <div className="flex items-center gap-2 border-t border-destructive/15 bg-destructive/5 px-4 py-2 text-xs text-destructive md:px-5">
                     <AlertCircle className="size-3.5 shrink-0" />

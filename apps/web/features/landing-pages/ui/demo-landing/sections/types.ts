@@ -10,4 +10,5 @@ export type SectionRenderProps = {
   tokens: LayoutTokens;
   preset: string;
   heroImageUrl?: string;
+  publicMode: boolean;
 };

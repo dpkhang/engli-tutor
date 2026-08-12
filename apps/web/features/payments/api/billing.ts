@@ -35,6 +35,11 @@ export type TopupPack = {
 export type BillingMe = {
   balance: number;
   aiGenerateCost: number;
+  aiGenerationPricing?: {
+    minimum: number;
+    maximum: number;
+    imageSurcharge: number;
+  };
   signupBonus: number;
   ledger: CreditLedgerEntry[];
   subscription: {
