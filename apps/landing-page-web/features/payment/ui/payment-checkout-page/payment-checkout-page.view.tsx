@@ -1,15 +1,36 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Check, CheckCircle2, Coins, CreditCard, LoaderCircle } from "lucide-react";
-import { Alert, AlertDescription, Button, cn } from "@landing-page-generator/ui";
-import { motion } from "motion/react";
+import {
+  ArrowUpCircle,
+  Check,
+  CheckCircle2,
+  Coins,
+  CreditCard,
+  LoaderCircle,
+  X,
+} from "lucide-react";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  cn,
+  useLockScroll,
+} from "@landing-page-generator/ui";
+import { AnimatePresence, motion } from "motion/react";
 import { PageBackLink } from "@/features/layout";
 import {
   BILLING_PERIODS,
   getBillingTotal,
   type BillingPeriod,
   type Plan,
+  type PlanId,
 } from "@/features/marketing/model/plans";
 
 export type PaymentCheckoutPageViewProps = {
@@ -22,6 +43,7 @@ export type PaymentCheckoutPageViewProps = {
   workspaceUrl: string;
   checkingBilling: boolean;
   ownedPlan: Plan | null;
+  upgradePlans: Plan[];
   ownedSubscription: {
     status: string;
     billingPeriod: BillingPeriod | null;
@@ -31,6 +53,7 @@ export type PaymentCheckoutPageViewProps = {
   creditBalance: number | null;
   onPeriodChange: (period: BillingPeriod) => void;
   onSubscribe: () => void;
+  onUpgrade: (planId: PlanId) => void;
 };
 
 export function PaymentCheckoutPageView({
@@ -43,11 +66,16 @@ export function PaymentCheckoutPageView({
   workspaceUrl,
   checkingBilling,
   ownedPlan,
+  upgradePlans,
   ownedSubscription,
   creditBalance,
   onPeriodChange,
   onSubscribe,
+  onUpgrade,
 }: PaymentCheckoutPageViewProps) {
+  const [showUpgradeOptions, setShowUpgradeOptions] = useState(false);
+  useLockScroll(showUpgradeOptions && upgradePlans.length > 0);
+
   if (isFree || checkingBilling) {
     return (
       <main className="grid min-h-[100svh] place-items-center px-5">
@@ -60,8 +88,7 @@ export function PaymentCheckoutPageView({
   }
 
   if (ownedPlan && ownedSubscription) {
-    const periodLabel =
-      ownedSubscription.billingPeriod === "yearly" ? "Theo năm" : "Theo tháng";
+    const periodLabel = ownedSubscription.billingPeriod === "yearly" ? "Theo năm" : "Theo tháng";
     const renewalDate = ownedSubscription.currentPeriodEnd
       ? new Intl.DateTimeFormat("vi-VN", { dateStyle: "long" }).format(
           new Date(ownedSubscription.currentPeriodEnd),
@@ -76,9 +103,7 @@ export function PaymentCheckoutPageView({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <div
-            className="flex flex-col gap-4 rounded-lg border border-primary/25 px-4 py-4 text-primary sm:flex-row sm:items-center sm:justify-between sm:px-5"
-          >
+          <div className="flex flex-col gap-4 rounded-lg border border-primary/25 px-4 py-4 text-primary sm:flex-row sm:items-center sm:justify-between sm:px-5">
             <div className="flex items-start gap-3" role="status">
               <CheckCircle2 className="mt-0.5 size-6 shrink-0 drop-shadow-sm" />
               <div className="max-w-lg">
@@ -90,10 +115,32 @@ export function PaymentCheckoutPageView({
                 </p>
               </div>
             </div>
-            <Button asChild className="w-full shrink-0 sm:w-auto">
-              <a href={workspaceUrl}>Về workspace</a>
-            </Button>
+            <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row">
+              {upgradePlans.length > 0 ? (
+                <Button
+                  type="button"
+                  className="w-full sm:w-auto"
+                  disabled={pending}
+                  onClick={() => setShowUpgradeOptions(true)}
+                >
+                  <ArrowUpCircle /> Nâng cấp gói
+                </Button>
+              ) : null}
+              <Button
+                asChild
+                variant={upgradePlans.length > 0 ? "outline" : "default"}
+                className="w-full sm:w-auto"
+              >
+                <a href={workspaceUrl}>Về workspace</a>
+              </Button>
+            </div>
           </div>
+
+          {error ? (
+            <Alert variant="destructive" className="mt-4">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
 
           <div className="relative mt-6 h-52 overflow-hidden rounded-lg sm:h-64">
             <img
@@ -151,6 +198,101 @@ export function PaymentCheckoutPageView({
             </ul>
           </div>
 
+          <AnimatePresence>
+            {showUpgradeOptions && upgradePlans.length > 0 ? (
+              <motion.div
+                className="fixed inset-0 z-[100] grid place-items-center overflow-y-auto bg-black/45 p-4 backdrop-blur-[2px]"
+                role="presentation"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+                onMouseDown={(event) => {
+                  if (event.target === event.currentTarget) setShowUpgradeOptions(false);
+                }}
+              >
+                <motion.div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="upgrade-dialog-title"
+                  className={cn(
+                    "relative my-auto w-full rounded-2xl border bg-popover p-6 text-popover-foreground shadow-2xl",
+                    upgradePlans.length === 1 && "max-w-md",
+                    upgradePlans.length === 2 && "max-w-3xl",
+                    upgradePlans.length >= 3 && "max-w-5xl",
+                  )}
+                  initial={{ opacity: 0, y: 16, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.97 }}
+                  transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-4 right-4"
+                    aria-label="Đóng"
+                    onClick={() => setShowUpgradeOptions(false)}
+                  >
+                    <X />
+                  </Button>
+                  <div className="space-y-2 pr-12">
+                    <h2
+                      id="upgrade-dialog-title"
+                      className="flex items-center gap-2 text-xl font-semibold"
+                    >
+                      <ArrowUpCircle className="size-5 text-primary" /> Chọn gói muốn nâng cấp
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      Chỉ những gói cao hơn {ownedPlan.name} được hiển thị.
+                    </p>
+                  </div>
+                  <div
+                    className={cn(
+                      "mt-6 grid gap-4",
+                      upgradePlans.length === 1 && "grid-cols-1",
+                      upgradePlans.length === 2 && "md:grid-cols-2",
+                      upgradePlans.length >= 3 && "md:grid-cols-2 lg:grid-cols-3",
+                    )}
+                  >
+                    {upgradePlans.map((upgradePlan) => (
+                      <Card key={upgradePlan.id} className="shadow-none">
+                        <CardHeader className="space-y-2">
+                          <CardTitle className="text-xl">{upgradePlan.name}</CardTitle>
+                          <CardDescription>{upgradePlan.description}</CardDescription>
+                          <p className="font-[family-name:var(--font-display)] text-2xl tracking-tight">
+                            {upgradePlan.price}
+                            <span className="ml-1 text-sm font-sans font-normal text-muted-foreground">
+                              {upgradePlan.period}
+                            </span>
+                          </p>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <ul className="space-y-2 text-sm text-muted-foreground">
+                            {upgradePlan.features.map((feature) => (
+                              <li key={feature} className="flex gap-2">
+                                <Check className="mt-0.5 size-4 shrink-0 text-primary" />
+                                {feature}
+                              </li>
+                            ))}
+                          </ul>
+                          <Button
+                            type="button"
+                            className="w-full"
+                            disabled={pending}
+                            onClick={() => onUpgrade(upgradePlan.id)}
+                          >
+                            {pending ? <LoaderCircle className="animate-spin" /> : <CreditCard />}
+                            Nâng cấp lên {upgradePlan.name}
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </motion.div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
         </motion.section>
       </main>
     );
@@ -175,8 +317,8 @@ export function PaymentCheckoutPageView({
                 Hoàn tất đăng ký
               </h1>
               <p className="max-w-lg text-sm text-muted-foreground sm:text-base">
-                Gói <span className="font-medium text-foreground">{plan.name}</span> — thanh toán
-                an toàn qua Stripe (thẻ quốc tế).
+                Gói <span className="font-medium text-foreground">{plan.name}</span> — thanh toán an
+                toàn qua Stripe (thẻ quốc tế).
               </p>
             </div>
           </div>
@@ -235,8 +377,8 @@ export function PaymentCheckoutPageView({
               <div className="space-y-1">
                 <p className="text-sm font-medium text-foreground">Thanh toán bằng thẻ</p>
                 <p className="text-sm text-muted-foreground">
-                  Bạn sẽ được chuyển sang trang thanh toán Stripe. Credit gói được cộng tự động
-                  sau khi thanh toán thành công.
+                  Bạn sẽ được chuyển sang trang thanh toán Stripe. Credit gói được cộng tự động sau
+                  khi thanh toán thành công.
                 </p>
               </div>
             </div>
@@ -272,11 +414,7 @@ export function PaymentCheckoutPageView({
           transition={{ duration: 0.5, delay: 0.08 }}
         >
           <div className="-mx-7 -mt-7 aspect-[16/9] overflow-hidden border-b sm:-mx-8 sm:-mt-8">
-            <img
-              src={plan.imageUrl}
-              alt={`Gói ${plan.name}`}
-              className="size-full object-cover"
-            />
+            <img src={plan.imageUrl} alt={`Gói ${plan.name}`} className="size-full object-cover" />
           </div>
           <div className="space-y-1">
             <p className="text-xs font-semibold tracking-[0.16em] text-accent uppercase">

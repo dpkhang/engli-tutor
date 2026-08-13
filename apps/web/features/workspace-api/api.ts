@@ -7,6 +7,8 @@ export type Template = {
   category: string;
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   thumbnailUrl: string | null;
+  content: unknown;
+  system?: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -125,7 +127,12 @@ export const workspaceApi = {
       description?: string;
       category: string;
       status?: Template["status"];
+      content?: unknown;
     }) => workspaceApiClient.post<Template>("/api/templates", input),
+    generate: (input: {
+      description: string;
+      funnel: "LEADS" | "SALES" | "REGISTRATION" | "AWARENESS";
+    }) => workspaceApiClient.post<Template & { creditUsage: { total: number; base: number; complexity: number; minimum: number; maximum: number } }>("/api/templates/generate", input),
     update: (
       id: string,
       input: Partial<Pick<Template, "name" | "description" | "category" | "status">>,

@@ -158,7 +158,11 @@ export function MainBodyView({
               title="Giá rõ ràng theo quy mô chiến dịch."
               description="Bắt đầu miễn phí, nâng cấp khi cần thêm page, domain và workspace."
             />
-            <div className="mt-14 grid gap-6 lg:grid-cols-3">
+            <div
+              className={`mt-14 grid gap-6 ${
+                plans.length === 2 ? "mx-auto w-full max-w-[47.5rem] lg:grid-cols-2" : "lg:grid-cols-3"
+              }`}
+            >
               {plans.map((plan) => (
                 <article
                   key={plan.id}

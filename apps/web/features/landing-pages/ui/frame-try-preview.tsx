@@ -7,9 +7,11 @@ import { applyFrameLayoutToContent } from "@/features/landing-pages/model/frame-
 import {
   FUNNEL_LABEL,
   getPageFrameById,
+  templateToPageFrame,
   type PageFrame,
 } from "@/features/landing-pages/model/page-frames";
 import { DemoLandingRenderer } from "@/features/landing-pages/ui/demo-landing/demo-landing-renderer";
+import { templateHooks } from "@/features/workspace-api/hooks";
 
 type Props = {
   frameId: string;
@@ -18,7 +20,12 @@ type Props = {
 };
 
 export function FrameTryPreview({ frameId, useHref }: Props) {
-  const frame = getPageFrameById(frameId);
+  const templates = templateHooks.useList();
+  const frames = (templates.data ?? []).map(templateToPageFrame).filter((frame) => frame != null);
+  const frame = getPageFrameById(frames, frameId);
+  if (templates.isLoading) {
+    return <div className="grid min-h-[50vh] place-items-center text-sm text-muted-foreground">Đang tải template...</div>;
+  }
   if (!frame) {
     return (
       <div className="mx-auto max-w-lg space-y-4 px-5 py-16 text-center">

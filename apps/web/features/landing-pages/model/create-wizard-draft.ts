@@ -1,5 +1,4 @@
 import type { GenerateLandingPageFormValues } from "./schema";
-import { getPageFrameById } from "./page-frames";
 
 export type CreateWizardDraftMode = "ai" | "manual";
 export type CreateWizardDraftStep = 1 | 2 | 3 | 4;
@@ -47,10 +46,7 @@ function normalizeDraft(input: {
   ai: Partial<GenerateLandingPageFormValues>;
 }): CreateWizardDraft | null {
   if (!isWizardStep(input.step) || !isCreateMode(input.mode) || !input.ai) return null;
-  const frameId =
-    input.selectedFrameId && getPageFrameById(input.selectedFrameId)
-      ? input.selectedFrameId
-      : null;
+  const frameId = input.selectedFrameId ?? null;
   let step = input.step;
   if (step >= 3 && !frameId) step = 2;
 

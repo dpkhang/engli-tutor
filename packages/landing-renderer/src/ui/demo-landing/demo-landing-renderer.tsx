@@ -22,7 +22,12 @@ export function DemoLandingRenderer({ content, landingPageId, slug, publicMode =
   const { primaryColor, secondaryColor } = content.theme;
 
   return (
-    <div className="bg-background text-foreground" style={tokens.style} data-layout-preset={layout.preset}>
+    <div
+      className="isolate bg-background text-foreground"
+      style={tokens.style}
+      data-landing-theme="generated"
+      data-layout-preset={layout.preset}
+    >
       {content.sections.map((section, index) => {
         const variant = resolveSectionVariant(layout, section, index);
         const Component = getSectionComponent(section.type as SectionType, variant);

@@ -51,7 +51,6 @@ import type {
 } from "../../model/schema";
 import {
   FUNNEL_LABEL,
-  PAGE_FRAMES,
   getPageFrameById,
   type PageFrame,
 } from "../../model/page-frames";
@@ -67,6 +66,8 @@ type Props = {
   step: WizardStep;
   onStepChange: (step: WizardStep) => void;
   selectedFrameId: string | null;
+  frames: PageFrame[];
+  framesLoading: boolean;
   onSelectFrame: (id: string) => void;
   frameError: string | null;
   banners: MediaAsset[];
@@ -328,6 +329,8 @@ export function CreateLandingPageView({
   step,
   onStepChange,
   selectedFrameId,
+  frames,
+  framesLoading,
   onSelectFrame,
   frameError,
   banners,
@@ -375,7 +378,7 @@ export function CreateLandingPageView({
   onSubmit,
 }: Props) {
   const [tagInput, setTagInput] = useState("");
-  const selectedFrame = getPageFrameById(selectedFrameId) ?? null;
+  const selectedFrame = getPageFrameById(frames, selectedFrameId) ?? null;
 
   const addTag = () => {
     const value = tagInput.trim().toLocaleLowerCase("vi").replace(/\s+/g, "-");
@@ -669,11 +672,12 @@ export function CreateLandingPageView({
                   </CardHeader>
                   <CardContent>
                     <FrameGallery
-                      frames={PAGE_FRAMES}
+                      frames={frames}
                       selectedId={selectedFrameId}
                       onSelect={onSelectFrame}
                       error={frameError}
                     />
+                    {framesLoading ? <p className="mt-3 text-sm text-muted-foreground">Đang tải template từ server...</p> : null}
                   </CardContent>
                 </Card>
               ) : null}

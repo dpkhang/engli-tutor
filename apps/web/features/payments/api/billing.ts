@@ -40,6 +40,10 @@ export type BillingMe = {
     maximum: number;
     imageSurcharge: number;
   };
+  aiTemplatePricing?: {
+    minimum: number;
+    maximum: number;
+  };
   signupBonus: number;
   ledger: CreditLedgerEntry[];
   subscription: {

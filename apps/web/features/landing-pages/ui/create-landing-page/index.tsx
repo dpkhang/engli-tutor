@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -16,7 +16,7 @@ import {
   useWorkspaceIntegrations,
 } from "../../hooks/use-landing-pages";
 import { useBillingMe } from "@/features/payments/hooks/use-billing";
-import { mediaHooks } from "@/features/workspace-api/hooks";
+import { mediaHooks, templateHooks } from "@/features/workspace-api/hooks";
 import {
   createLandingPageAdvancedSchema,
   generateLandingPageFormSchema,
@@ -24,7 +24,7 @@ import {
   type CreateLandingPageAdvancedValues,
   type GenerateLandingPageFormValues,
 } from "../../model/schema";
-import { frameToLayoutHint, getPageFrameById } from "../../model/page-frames";
+import { frameToLayoutHint, getPageFrameById, templateToPageFrame } from "../../model/page-frames";
 import {
   draftFromServer,
   type CreateWizardDraft,
@@ -55,6 +55,11 @@ export function CreateLandingPage() {
   const integrations = useWorkspaceIntegrations();
   const credits = useBillingMe();
   const media = mediaHooks.useList();
+  const templates = templateHooks.useList();
+  const frames = useMemo(
+    () => (templates.data ?? []).map(templateToPageFrame).filter((frame) => frame != null),
+    [templates.data],
+  );
   const [mode, setMode] = useState<CreateMode>("ai");
   const [step, setStep] = useState<WizardStep>(1);
   const [selectedFrameId, setSelectedFrameId] = useState<string | null>(null);
@@ -109,7 +114,7 @@ export function CreateLandingPage() {
   });
 
   const applyDraft = (draft: CreateWizardDraft, preferQueryFrame: boolean) => {
-    const queryFrame = preferQueryFrame ? getPageFrameById(frameFromQuery) : undefined;
+    const queryFrame = preferQueryFrame ? getPageFrameById(frames, frameFromQuery) : undefined;
     skipSlugAuto.current = true;
     aiForm.reset(draft.ai);
     if (draft.ai.slug) {
@@ -132,7 +137,7 @@ export function CreateLandingPage() {
     let cancelled = false;
 
     async function hydrate() {
-      const queryFrame = getPageFrameById(frameFromQuery);
+      const queryFrame = getPageFrameById(frames, frameFromQuery);
 
       if (queryFrame) {
         setSelectedFrameId(queryFrame.id);
@@ -160,11 +165,11 @@ export function CreateLandingPage() {
 
   useEffect(() => {
     if (!draftReady) return;
-    const frame = getPageFrameById(frameFromQuery);
+    const frame = getPageFrameById(frames, frameFromQuery);
     if (!frame) return;
     setSelectedFrameId(frame.id);
     setMode("ai");
-  }, [frameFromQuery, draftReady]);
+  }, [frameFromQuery, draftReady, frames]);
 
   const aiName = aiForm.watch("name");
   const aiSlug = aiForm.watch("slug");
@@ -353,7 +358,7 @@ export function CreateLandingPage() {
       return;
     }
     if (step === 2) {
-      if (!selectedFrameId || !getPageFrameById(selectedFrameId)) {
+      if (!selectedFrameId || !getPageFrameById(frames, selectedFrameId)) {
         setFrameError("Chọn một khung trang để tiếp tục.");
         window.requestAnimationFrame(() => {
           document.getElementById("frame-selection")?.scrollIntoView({
@@ -376,7 +381,7 @@ export function CreateLandingPage() {
       await onNextStep();
       return;
     }
-    const frame = getPageFrameById(selectedFrameId);
+    const frame = getPageFrameById(frames, selectedFrameId);
     if (!frame) {
       setFrameError("Chọn một khung trang để tiếp tục.");
       setStep(2);
@@ -449,6 +454,8 @@ export function CreateLandingPage() {
           setSubmitError(null);
         }}
         selectedFrameId={selectedFrameId}
+        frames={frames}
+        framesLoading={templates.isLoading}
         onSelectFrame={(id) => {
           setSelectedFrameId(id);
           setFrameError(null);

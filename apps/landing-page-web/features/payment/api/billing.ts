@@ -55,6 +55,11 @@ export const billingApi = {
       period,
       returnOrigin: clientReturnOrigin(),
     }),
+  upgrade: (planId: PaidPlanId) =>
+    marketingApiClient.post<{ url: string }>("/api/billing/upgrade", {
+      planId,
+      returnOrigin: clientReturnOrigin(),
+    }),
   confirm: (sessionId: string) =>
     marketingApiClient.post<{ subscribed?: boolean; planId?: string }>("/api/billing/confirm", {
       sessionId,

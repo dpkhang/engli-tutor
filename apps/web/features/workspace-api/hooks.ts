@@ -29,7 +29,16 @@ function resourceHooks<TItem, TCreate>(
   };
 }
 
-export const templateHooks = resourceHooks("templates", workspaceApi.templates);
+export const templateHooks = {
+  ...resourceHooks("templates", workspaceApi.templates),
+  useGenerate: () => {
+    const client = useQueryClient();
+    return useMutation({
+      mutationFn: workspaceApi.templates.generate,
+      onSuccess: () => client.invalidateQueries({ queryKey: ["templates"] }),
+    });
+  },
+};
 export const mediaHooks = resourceHooks("media", workspaceApi.media);
 export const leadHooks = resourceHooks("leads", workspaceApi.leads);
 export const domainHooks = {
