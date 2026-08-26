@@ -4,10 +4,9 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Timer } from "lucide-react";
 import { Button, cn } from "@landing-page-generator/ui";
+import { useSkillExercises } from "../hooks/use-learning-catalog";
 import {
   LEVELS,
-  getExercisesBySkill,
-  getExercisesGroupedByLevel,
   getSkillMeta,
   isSkillLevel,
   type SkillId,
@@ -21,11 +20,7 @@ export function SkillListPage({ skill }: { skill: SkillId }) {
     levelParam && isSkillLevel(levelParam) ? levelParam : "all";
 
   const meta = getSkillMeta(skill);
-  const groups =
-    activeLevel === "all"
-      ? getExercisesGroupedByLevel(skill)
-      : getExercisesGroupedByLevel(skill).filter((group) => group.level.id === activeLevel);
-  const total = getExercisesBySkill(skill).length;
+  const { loading, groups, total, countsByLevel, source } = useSkillExercises(skill, activeLevel);
 
   if (!meta) return null;
 
@@ -50,7 +45,10 @@ export function SkillListPage({ skill }: { skill: SkillId }) {
               </Button>
             </div>
           ) : null}
-          <p className="text-xs text-muted-foreground">{total} exercises · grouped A2 → A2+ → B1</p>
+          <p className="text-xs text-muted-foreground">
+            {loading ? "Loading exercises…" : `${total} exercises · grouped A2 → A2+ → B1`}
+            {!loading && source === "api" ? " · live curriculum" : null}
+          </p>
         </header>
       </div>
 
@@ -67,7 +65,7 @@ export function SkillListPage({ skill }: { skill: SkillId }) {
           All levels
         </Link>
         {LEVELS.map((level) => {
-          const count = getExercisesBySkill(skill, level.id).length;
+          const count = countsByLevel[level.id] ?? 0;
           return (
             <Link
               key={level.id}
@@ -132,7 +130,7 @@ export function SkillListPage({ skill }: { skill: SkillId }) {
         ))}
       </div>
 
-      {groups.length === 0 ? (
+      {!loading && groups.length === 0 ? (
         <p className="text-sm text-muted-foreground">No exercises for this level.</p>
       ) : null}
     </div>

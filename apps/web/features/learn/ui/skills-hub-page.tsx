@@ -2,12 +2,8 @@
 
 import Link from "next/link";
 import { ArrowRight, BookOpen, Headphones, Mic, PenLine } from "lucide-react";
-import {
-  LEVELS,
-  SKILLS,
-  getExercisesBySkill,
-  type SkillId,
-} from "../model/skill-exercises";
+import { useSkillsCoverage } from "../hooks/use-learning-catalog";
+import { LEVELS, SKILLS, type SkillId } from "../model/skill-exercises";
 
 const ICONS: Record<SkillId, typeof BookOpen> = {
   reading: BookOpen,
@@ -17,6 +13,8 @@ const ICONS: Record<SkillId, typeof BookOpen> = {
 };
 
 export function SkillsHubPage() {
+  const { coverage, loading, source } = useSkillsCoverage();
+
   return (
     <div className="space-y-10">
       <header className="space-y-3">
@@ -29,6 +27,7 @@ export function SkillsHubPage() {
         <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
           Pick a skill, then work through each band: A2 (basic), A2+ (stronger A2), B1 (intermediate). Every
           exercise has content plus a question set.
+          {!loading && source === "api" ? " Curriculum is loaded from the learning API." : null}
         </p>
       </header>
 
@@ -50,7 +49,8 @@ export function SkillsHubPage() {
       <div className="grid gap-4 md:grid-cols-2">
         {SKILLS.map((skill) => {
           const Icon = ICONS[skill.id];
-          const count = getExercisesBySkill(skill.id).length;
+          const stats = coverage?.[skill.id];
+          const count = stats?.total ?? 0;
           return (
             <Link
               key={skill.id}
@@ -75,18 +75,20 @@ export function SkillsHubPage() {
               ) : null}
               <div className="mt-4 flex flex-wrap gap-2">
                 {LEVELS.map((level) => {
-                  const levelCount = getExercisesBySkill(skill.id, level.id).length;
+                  const levelCount = stats?.byLevel[level.id] ?? 0;
                   return (
                     <span
                       key={level.id}
                       className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground"
                     >
-                      {level.id}: {levelCount}
+                      {level.id}: {loading ? "…" : levelCount}
                     </span>
                   );
                 })}
               </div>
-              <p className="mt-3 text-xs font-medium text-accent">{count} exercises</p>
+              <p className="mt-3 text-xs font-medium text-accent">
+                {loading ? "Loading…" : `${count} exercises`}
+              </p>
             </Link>
           );
         })}

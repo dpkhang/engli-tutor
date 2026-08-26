@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -87,6 +87,7 @@ export function SpeakingRoomPage() {
   const [panelOpen, setPanelOpen] = useState(false);
   const [sfxOn, setSfxOn] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const draftInputRef = useRef<HTMLTextAreaElement>(null);
   const turnsRef = useRef(turns);
   const pendingRef = useRef(false);
   const wasRecordingRef = useRef(false);
@@ -100,6 +101,13 @@ export function SpeakingRoomPage() {
   sfxOnRef.current = sfxOn;
 
   const voice = useVoiceInput((text) => setDraft(text));
+
+  useLayoutEffect(() => {
+    const input = draftInputRef.current;
+    if (!input) return;
+    input.style.height = "44px";
+    input.style.height = `${Math.min(Math.max(input.scrollHeight, 44), 112)}px`;
+  }, [draft]);
 
   const sceneMeta = SCENES.find((item) => item.id === scene) ?? SCENES[0];
   const lastAssistant = [...turns].reverse().find((t) => t.role === "assistant");
@@ -471,17 +479,26 @@ export function SpeakingRoomPage() {
                 ? "When you're done, tap again to send"
                 : "Speak naturally — 2 to 4 sentences is enough"}
             </p>
-            <div className="flex w-full items-center gap-2">
-              <input
+            <div className="flex w-full items-end gap-2">
+              <textarea
+                ref={draftInputRef}
+                rows={1}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                placeholder="Type more if needed…"
+                onKeyDown={(e) => {
+                  if (e.key !== "Enter") return;
+                  if (e.shiftKey) return;
+                  e.preventDefault();
+                  if (pending || voice.recording || !draft.trim()) return;
+                  void sendUtterance(draft);
+                }}
+                placeholder="Type your answer…"
                 disabled={pending || voice.recording}
-                className="h-11 flex-1 rounded-2xl border-0 bg-white/[0.06] px-4 text-sm text-white outline-none placeholder:text-white/25 focus:bg-white/[0.09] disabled:opacity-50"
+                className="h-11 max-h-28 min-h-11 flex-1 resize-none overflow-y-auto rounded-2xl border-0 bg-white/[0.06] px-4 py-2.5 text-sm leading-6 text-white outline-none placeholder:text-white/25 focus:bg-white/[0.09] disabled:opacity-50"
               />
               <Button
                 type="button"
-                className="h-11 rounded-2xl border-0 bg-white px-5 font-medium text-[#0b1220] hover:bg-white/92"
+                className="h-11 shrink-0 rounded-2xl border-0 bg-white px-5 font-medium text-[#0b1220] hover:bg-white/92"
                 disabled={pending || voice.recording || !draft.trim()}
                 onClick={() => void sendUtterance(draft)}
               >
@@ -489,7 +506,7 @@ export function SpeakingRoomPage() {
               </Button>
               <Link
                 href="/"
-                className="hidden h-11 items-center gap-1 rounded-2xl px-2 text-[12px] text-white/30 transition hover:text-white/65 sm:inline-flex"
+                className="hidden h-11 shrink-0 items-center gap-1 rounded-2xl px-2 text-[12px] text-white/30 transition hover:text-white/65 sm:inline-flex"
               >
                 <ArrowLeft className="size-3.5" strokeWidth={1.5} />
                 Home

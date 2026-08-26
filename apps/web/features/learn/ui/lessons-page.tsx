@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { Gamepad2, Lightbulb, MessageCircle, Timer } from "lucide-react";
 import { Button, cn } from "@landing-page-generator/ui";
-import { LESSON_PACKS } from "../model/curriculum";
+import { useLessonPacks } from "../hooks/use-learning-catalog";
 
 const SKILL_FILTERS = ["All", "Listening", "Speaking", "Reading", "Writing"] as const;
 
@@ -15,13 +15,14 @@ export function LessonsPage() {
   const activeSkill = SKILL_FILTERS.includes(skillParam as (typeof SKILL_FILTERS)[number])
     ? (skillParam as (typeof SKILL_FILTERS)[number])
     : "All";
+  const { packs, loading, source } = useLessonPacks();
 
   const lessons = useMemo(() => {
-    if (activeSkill === "All") return LESSON_PACKS;
-    return LESSON_PACKS.filter((lesson) =>
+    if (activeSkill === "All") return packs;
+    return packs.filter((lesson) =>
       lesson.skills.includes(activeSkill as "Listening" | "Speaking" | "Reading" | "Writing"),
     );
-  }, [activeSkill]);
+  }, [activeSkill, packs]);
 
   return (
     <div className="space-y-8">
@@ -35,6 +36,7 @@ export function LessonsPage() {
             practice 4 skills
           </Link>{" "}
           for reading/listening passages plus question sets.
+          {!loading && source === "api" ? " Showing integrated lessons from the learning API." : null}
         </p>
       </header>
 
@@ -64,6 +66,8 @@ export function LessonsPage() {
           );
         })}
       </div>
+
+      {loading ? <p className="text-sm text-muted-foreground">Loading lessons…</p> : null}
 
       <div className="grid gap-4 md:grid-cols-2">
         {lessons.map((lesson) => (
@@ -114,7 +118,7 @@ export function LessonsPage() {
         ))}
       </div>
 
-      {lessons.length === 0 ? (
+      {!loading && lessons.length === 0 ? (
         <p className="text-sm text-muted-foreground">No lessons match this filter.</p>
       ) : null}
     </div>

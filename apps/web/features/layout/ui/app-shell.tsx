@@ -7,10 +7,9 @@ import {
   BookOpenCheck,
   ChevronDown,
   Coins,
+  Crown,
   LogOut,
   Menu,
-  MoreHorizontal,
-  UserRound,
   X,
 } from "lucide-react";
 import { authClient, useSession } from "@/lib/auth-client";
@@ -24,10 +23,6 @@ const PRIMARY_NAV = [
   { href: "/skills", label: "4 skills" },
   { href: "/lessons", label: "Path" },
   { href: "/payments", label: "Plans" },
-];
-
-const MORE_LINKS = [
-  { href: "/accounts", label: "Account" },
 ];
 
 function isActivePath(pathname: string, href: string) {
@@ -45,35 +40,33 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const dialog = useActionDialog();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
-  const moreRef = useRef<HTMLDivElement>(null);
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const { data } = useSession();
   const user = data?.user;
   const credits = useBillingMe(Boolean(user));
+  const paidPlan = credits.data?.hasPaidPlan
+    ? credits.data.subscriptionPlans.find(
+        (plan) => plan.id === credits.data?.subscription.planId,
+      )
+    : undefined;
   const displayName = user?.name?.trim() || user?.email?.split("@")[0] || "Account";
   const initials = displayName.slice(0, 1).toUpperCase();
 
   useEffect(() => {
     setAccountOpen(false);
-    setMoreOpen(false);
     setMobileOpen(false);
   }, [pathname]);
 
   useEffect(() => {
-    if (!accountOpen && !moreOpen) return;
+    if (!accountOpen) return;
 
     const closeOnOutsideClick = (event: PointerEvent) => {
       const target = event.target as Node;
-      if (accountOpen && !accountMenuRef.current?.contains(target)) setAccountOpen(false);
-      if (moreOpen && !moreRef.current?.contains(target)) setMoreOpen(false);
+      if (!accountMenuRef.current?.contains(target)) setAccountOpen(false);
     };
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setAccountOpen(false);
-        setMoreOpen(false);
-      }
+      if (event.key === "Escape") setAccountOpen(false);
     };
 
     document.addEventListener("pointerdown", closeOnOutsideClick);
@@ -82,7 +75,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       document.removeEventListener("pointerdown", closeOnOutsideClick);
       document.removeEventListener("keydown", closeOnEscape);
     };
-  }, [accountOpen, moreOpen]);
+  }, [accountOpen]);
 
   if (
     pathname === "/login" ||
@@ -144,51 +137,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   </Link>
                 );
               })}
-
-              <div className="relative" ref={moreRef}>
-                <button
-                  type="button"
-                  className={cn(
-                    "inline-flex items-center gap-1 rounded-full px-3.5 py-2 text-sm font-medium transition-colors",
-                    moreOpen || MORE_LINKS.some((item) => isActivePath(pathname, item.href))
-                      ? "bg-muted text-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                  )}
-                  aria-expanded={moreOpen}
-                  aria-haspopup="menu"
-                  onClick={() => setMoreOpen((open) => !open)}
-                >
-                  More
-                  <MoreHorizontal className="size-3.5" />
-                </button>
-                <AnimatePresence>
-                  {moreOpen ? (
-                    <motion.div
-                      role="menu"
-                      className="absolute top-full left-0 mt-2 w-56 overflow-hidden rounded-2xl border border-border bg-popover p-1.5 shadow-lg"
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 4 }}
-                      transition={{ duration: 0.16 }}
-                    >
-                      {MORE_LINKS.map((item) => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          role="menuitem"
-                          className={cn(
-                            "block rounded-xl px-3 py-2 text-sm transition-colors hover:bg-muted",
-                            isActivePath(pathname, item.href) && "bg-muted font-medium",
-                          )}
-                          onClick={() => setMoreOpen(false)}
-                        >
-                          {item.label}
-                        </Link>
-                      ))}
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
-              </div>
             </nav>
           </div>
 
@@ -216,8 +164,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   aria-expanded={accountOpen}
                   onClick={() => setAccountOpen((open) => !open)}
                 >
-                  <span className="grid size-8 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                  <span
+                    className={cn(
+                      "relative grid size-8 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground",
+                      paidPlan &&
+                        "ring-2 ring-primary ring-offset-2 ring-offset-background shadow-[0_0_18px_-5px_hsl(var(--primary))]",
+                    )}
+                  >
                     {initials}
+                    {paidPlan ? (
+                      <span className="absolute -top-1.5 -left-1.5 grid size-4 place-items-center rounded-full bg-primary text-primary-foreground ring-2 ring-background shadow-sm">
+                        <Crown className="size-2.5 fill-current" strokeWidth={2} />
+                      </span>
+                    ) : null}
                   </span>
                   <span className="hidden max-w-[8rem] truncate text-sm font-medium sm:inline">
                     {displayName}
@@ -245,14 +204,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         <p className="truncate text-xs text-muted-foreground">{user.email}</p>
                       </div>
                       <div className="py-1">
-                        <Link
-                          href="/accounts"
-                          role="menuitem"
-                          className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-muted"
-                        >
-                          <UserRound className="size-4 text-muted-foreground" />
-                          Account
-                        </Link>
                         <Link
                           href="/lessons"
                           role="menuitem"
@@ -292,7 +243,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               aria-label="Mobile menu"
             >
               <div className="mx-auto flex max-w-6xl flex-col gap-1 pb-2">
-                {[...PRIMARY_NAV, ...MORE_LINKS].map((item) => (
+                {PRIMARY_NAV.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}

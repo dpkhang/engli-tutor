@@ -1,11 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-
-function getApiBase() {
-  if (process.env.NEXT_PUBLIC_AUTH_SAME_ORIGIN === "true") return "";
-  return process.env.NEXT_PUBLIC_API_URL ?? "";
-}
+import { tutorApi } from "@/features/tutor-chat/api";
 
 function pickEnglishVoice(): SpeechSynthesisVoice | null {
   if (typeof window === "undefined" || !window.speechSynthesis) return null;
@@ -76,44 +72,28 @@ export function useAiSpeech() {
       const gen = generationRef.current;
 
       try {
-        const response = await fetch(`${getApiBase()}/api/tutor/speak`, {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            Accept: "audio/mpeg, application/json",
-            "Content-Type": "application/json",
-            "X-Client": "pagecraft-workspace",
-          },
-          body: JSON.stringify({ text: cleaned }),
-        });
-
+        const blob = await tutorApi.speak({ text: cleaned });
         if (gen !== generationRef.current) {
           return { source: "ai", stop };
         }
 
-        if (response.ok) {
-          const blob = await response.blob();
-          if (gen !== generationRef.current) {
-            return { source: "ai", stop };
+        const url = URL.createObjectURL(blob);
+        objectUrlRef.current = url;
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        audio.onended = () => {
+          if (objectUrlRef.current === url) {
+            URL.revokeObjectURL(url);
+            objectUrlRef.current = null;
           }
-          const url = URL.createObjectURL(blob);
-          objectUrlRef.current = url;
-          const audio = new Audio(url);
-          audioRef.current = audio;
-          audio.onended = () => {
-            if (objectUrlRef.current === url) {
-              URL.revokeObjectURL(url);
-              objectUrlRef.current = null;
-            }
-            audioRef.current = null;
-            onEnd?.();
-          };
-          audio.onerror = () => {
-            speakBrowser(cleaned, onEnd);
-          };
-          await audio.play();
-          return { source: "ai", stop };
-        }
+          audioRef.current = null;
+          onEnd?.();
+        };
+        audio.onerror = () => {
+          speakBrowser(cleaned, onEnd);
+        };
+        await audio.play();
+        return { source: "ai", stop };
       } catch {
         /* fall through to browser */
       }

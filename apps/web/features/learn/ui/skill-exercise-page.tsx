@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check, Lightbulb, Volume2 } from "lucide-react";
 import { Button, cn } from "@landing-page-generator/ui";
+import { useSkillExercise } from "../hooks/use-learning-catalog";
 import {
-  getExercise,
   getSkillMeta,
   type ChoiceQuestion,
   type OpenQuestion,
@@ -129,7 +129,7 @@ export function SkillExercisePage({
   skill: SkillId;
   exerciseId: string;
 }) {
-  const exercise = getExercise(skill, exerciseId);
+  const { exercise, loading } = useSkillExercise(skill, exerciseId);
   const skillMeta = getSkillMeta(skill);
   const [answers, setAnswers] = useState<Record<string, AnswerState>>({});
   const [showScript, setShowScript] = useState(skill !== "listening");
@@ -140,6 +140,10 @@ export function SkillExercisePage({
       exercise.questions.map((q) => [q.id, { value: "", submitted: false } satisfies AnswerState]),
     );
   }, [exercise]);
+
+  if (loading) {
+    return <p className="text-sm text-muted-foreground">Loading exercise…</p>;
+  }
 
   if (!exercise) {
     return (

@@ -222,7 +222,7 @@ export function TutorChatPage() {
         {demoMode ? (
           <p className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-xs text-accent">
             <Sparkles className="size-3.5" />
-            Running in demo mode (OpenRouter not configured) — chat UI still works.
+            Running in demo mode (OpenAI not configured) — chat UI still works.
           </p>
         ) : null}
       </header>
