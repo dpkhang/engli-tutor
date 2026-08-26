@@ -2,12 +2,15 @@
 
 import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
 import { goToEntry, goToWorkspace } from "@/features/auth/model/session";
-import { PLANS, planCheckoutHref } from "@/features/marketing/model/plans";
+import { planCheckoutHref, plansFromCatalog } from "@/features/marketing/model/plans";
+import { useBillingCatalog } from "@/features/payment/hooks/use-billing-catalog";
 import { MainBodyView } from "./main-body.view";
 
 export function MainBody() {
   const { entryLabel, isLoggedIn } = useAuthSession();
-  const visiblePlans = isLoggedIn ? PLANS.filter((plan) => plan.id !== "starter") : PLANS;
+  const catalog = useBillingCatalog();
+  const plans = plansFromCatalog(catalog.data);
+  const visiblePlans = isLoggedIn ? plans.filter((plan) => plan.id !== "starter") : plans;
 
   return (
     <MainBodyView

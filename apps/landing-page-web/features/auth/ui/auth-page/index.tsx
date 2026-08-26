@@ -69,7 +69,7 @@ export function AuthPage() {
       window.location.assign(returnTo);
     } catch {
       setPending(false);
-      setError("Không thể kết nối máy chủ xác thực. Thử lại.");
+      setError("Could not reach the auth server. Please try again.");
     }
   };
 

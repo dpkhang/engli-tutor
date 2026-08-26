@@ -4,7 +4,7 @@ import { cn } from "@landing-page-generator/ui";
 
 type PageBackLinkProps = {
   href: string;
-  /** Text after “Quay lại ”, e.g. “trang chủ” → “Quay lại trang chủ” */
+  /** Text after “Back to ”, e.g. “home” → “Back to home” */
   label: string;
   className?: string;
 };
@@ -19,7 +19,7 @@ export function PageBackLink({ href, label, className }: PageBackLinkProps) {
       )}
     >
       <ArrowLeft className="size-4 shrink-0" aria-hidden strokeWidth={2} />
-      <span>Quay lại {label}</span>
+      <span>Back to {label}</span>
     </Link>
   );
 }

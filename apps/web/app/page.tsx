@@ -1,5 +1,5 @@
-import { DashboardOverview } from "@/features/dashboard/ui/dashboard-overview";
+import { LearnHome } from "@/features/learn";
 
 export default function HomePage() {
-  return <DashboardOverview />;
+  return <LearnHome />;
 }

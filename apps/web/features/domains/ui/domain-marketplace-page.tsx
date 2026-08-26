@@ -17,10 +17,10 @@ import {
   SelectValue,
 } from "@landing-page-generator/ui";
 import { PageHeader } from "@/features/layout";
-import { domainHooks } from "@/features/workspace-api/hooks";
+import { domainHooks } from "../hooks";
 
 function formatVnd(value: number) {
-  return `${value.toLocaleString("vi-VN")}đ`;
+  return `${value.toLocaleString("en-US")}`;
 }
 
 export function DomainMarketplacePage() {
@@ -45,7 +45,7 @@ export function DomainMarketplacePage() {
         quoteToken: result.quoteToken,
         autoRenew: true,
       });
-      if (!checkout.url) throw new Error("Không tạo được phiên thanh toán domain");
+      if (!checkout.url) throw new Error("Could not create domain checkout session");
       window.location.assign(checkout.url);
     } catch {
       setPurchasingHostname(null);
@@ -59,12 +59,12 @@ export function DomainMarketplacePage() {
           href="/domains"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary"
         >
-          <ArrowLeft className="size-4" /> Danh sách domain
+          <ArrowLeft className="size-4" /> Domain list
         </Link>
         <PageHeader
           eyebrow="Domain marketplace"
-          title="Tìm domain để thuê"
-          description="Kiểm tra tên miền khả dụng, nhận báo giá và đăng ký cho workspace."
+          title="Find a domain to buy"
+          description="Check domain availability, get pricing, and register for the workspace."
         />
       </div>
 
@@ -75,11 +75,11 @@ export function DomainMarketplacePage() {
             onSubmit={searchDomains}
           >
             <div className="grid min-w-0 grid-rows-[1rem_2.25rem] gap-2">
-              <Label htmlFor="domain-search" className="h-4 leading-4">Tên miền mong muốn</Label>
+              <Label htmlFor="domain-search" className="h-4 leading-4">Desired domain</Label>
               <Input
                 id="domain-search"
                 name="domainQuery"
-                placeholder="pagecraft hoặc pagecraft.com"
+                placeholder="pagecraft or pagecraft.com"
                 required
                 autoComplete="off"
                 autoFocus
@@ -87,7 +87,7 @@ export function DomainMarketplacePage() {
               />
             </div>
             <div className="grid grid-rows-[1rem_2.25rem] gap-2">
-              <Label htmlFor="domain-years" className="h-4 leading-4">Thời hạn</Label>
+              <Label htmlFor="domain-years" className="h-4 leading-4">Term</Label>
               <Select value={String(years)} onValueChange={(value) => setYears(Number(value))}>
                 <SelectTrigger id="domain-years" className="w-full">
                   <SelectValue />
@@ -95,7 +95,7 @@ export function DomainMarketplacePage() {
                 <SelectContent position="popper" align="start" className="w-[var(--radix-select-trigger-width)]">
                   {Array.from({ length: 10 }, (_, index) => index + 1).map((value) => (
                     <SelectItem key={value} value={String(value)}>
-                      {value} năm
+                      {value} {value === 1 ? "year" : "years"}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -104,7 +104,7 @@ export function DomainMarketplacePage() {
             <div className="sm:grid sm:grid-rows-[1rem_2.25rem] sm:gap-2">
               <span aria-hidden className="hidden h-4 sm:block" />
               <Button disabled={search.isPending} className="h-9">
-                <Search /> {search.isPending ? "Đang tìm..." : "Tìm domain"}
+                <Search /> {search.isPending ? "Searching..." : "Search domain"}
               </Button>
             </div>
           </form>
@@ -128,9 +128,9 @@ export function DomainMarketplacePage() {
         <section>
           <div className="flex items-center justify-between border-b pb-3 text-sm">
             <h2 className="font-semibold text-foreground">
-              {search.data.results.length} kết quả cho “{search.data.query}”
+              {search.data.results.length} results for “{search.data.query}”
             </h2>
-            <span className="text-xs text-muted-foreground">Giá cho {search.data.years} năm</span>
+            <span className="text-xs text-muted-foreground">Price for {search.data.years} {search.data.years === 1 ? "year" : "years"}</span>
           </div>
           <div className="divide-y">
             {search.data.results.map((result) => (
@@ -143,11 +143,11 @@ export function DomainMarketplacePage() {
                     <p className="truncate text-base font-semibold text-foreground">{result.hostname}</p>
                     {result.premium ? <Badge variant="secondary">Premium</Badge> : null}
                     <Badge variant={result.available ? "default" : "outline"}>
-                      {result.available ? "Có thể đăng ký" : "Đã có chủ"}
+                      {result.available ? "Available to register" : "Taken"}
                     </Badge>
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    .{result.tld} · tự động gia hạn
+                    .{result.tld} · auto-renew
                   </p>
                 </div>
                 <div className="flex items-center justify-between gap-5 sm:justify-end">
@@ -155,7 +155,7 @@ export function DomainMarketplacePage() {
                     <p className="text-lg font-semibold text-foreground">
                       {formatVnd(result.retailPriceVnd)}
                     </p>
-                    <p className="text-[11px] text-muted-foreground">/{result.years} năm</p>
+                    <p className="text-[11px] text-muted-foreground">/{result.years} {result.years === 1 ? "year" : "years"}</p>
                   </div>
                   <Button
                     type="button"
@@ -164,7 +164,7 @@ export function DomainMarketplacePage() {
                     disabled={!result.available || purchase.isPending}
                     onClick={() => void purchaseDomain(result)}
                   >
-                    {purchasingHostname === result.hostname ? "Đang xử lý..." : "Chọn mua"}
+                    {purchasingHostname === result.hostname ? "Processing..." : "Buy"}
                   </Button>
                 </div>
               </div>
@@ -175,7 +175,7 @@ export function DomainMarketplacePage() {
         <div className="border-y border-dashed py-14 text-center">
           <Search className="mx-auto size-7 text-muted-foreground/50" />
           <p className="mt-3 text-sm text-muted-foreground">
-            Nhập tên thương hiệu hoặc domain để bắt đầu tìm kiếm.
+            Enter a brand name or domain to start searching.
           </p>
         </div>
       )}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -12,7 +11,6 @@ import {
   Crown,
   LoaderCircle,
   ReceiptText,
-  Sparkles,
   X,
 } from "lucide-react";
 import {
@@ -46,20 +44,20 @@ import {
 } from "../model/plans";
 
 const REASON_LABEL: Record<string, string> = {
-  SIGNUP_BONUS: "Thưởng đăng ký",
-  PURCHASE: "Nạp credit",
-  SUBSCRIPTION_GRANT: "Credit gói đăng ký",
-  AI_GENERATE: "AI tạo trang",
-  AI_GENERATE_REFUND: "Hoàn credit AI",
-  ADJUST: "Điều chỉnh",
+  SIGNUP_BONUS: "Signup bonus",
+  PURCHASE: "Credit top-up",
+  SUBSCRIPTION_GRANT: "Subscription credits",
+  AI_GENERATE: "Legacy AI usage",
+  AI_GENERATE_REFUND: "Legacy credit refund",
+  ADJUST: "Adjustment",
 };
 
 function formatVnd(value: number) {
-  return `${value.toLocaleString("vi-VN")}đ`;
+  return `${value.toLocaleString("en-US")} VND`;
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" }).format(
+  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(
     new Date(value),
   );
 }
@@ -93,7 +91,7 @@ export default function PaymentsPage() {
           setError(
             err instanceof Error
               ? err.message
-              : "Không đồng bộ được thanh toán. Thử tải lại trang.",
+              : "Couldn't sync payment. Try refreshing the page.",
           );
         }
       } finally {
@@ -111,9 +109,6 @@ export default function PaymentsPage() {
   const hasPaidPlan = data?.hasPaidPlan ?? false;
   const stripeReady = data?.stripeConfigured ?? false;
   const balance = data?.balance ?? 0;
-  const aiCost = data?.aiGenerateCost ?? 10;
-  const aiMaxCost = data?.aiGenerationPricing?.maximum ?? aiCost * 5;
-  const lowCredit = balance < aiMaxCost;
   const activePlanId = currentPlanId(data);
   const activePlan = currentPlanDetails(data);
   const comparePlans = allPlansForCompare(data?.subscriptionPlans ?? []);
@@ -123,7 +118,7 @@ export default function PaymentsPage() {
 
   const redirectCheckout = async (url: string | null) => {
     if (!url) {
-      setError("Stripe không trả về URL thanh toán");
+      setError("Stripe did not return a checkout URL");
       return;
     }
     window.location.assign(url);
@@ -136,7 +131,7 @@ export default function PaymentsPage() {
       const result = await subscribe.mutateAsync({ planId, period });
       await redirectCheckout(result.url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Không tạo được phiên đăng ký");
+      setError(err instanceof Error ? err.message : "Couldn't create subscription session");
     } finally {
       setPending(null);
     }
@@ -149,7 +144,7 @@ export default function PaymentsPage() {
       const result = await upgrade.mutateAsync(planId);
       await redirectCheckout(result.url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Không nâng cấp được gói");
+      setError(err instanceof Error ? err.message : "Couldn't upgrade plan");
     } finally {
       setPending(null);
     }
@@ -162,7 +157,7 @@ export default function PaymentsPage() {
       const result = await topup.mutateAsync(packId);
       await redirectCheckout(result.url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Không tạo được phiên thanh toán");
+      setError(err instanceof Error ? err.message : "Couldn't create payment session");
     } finally {
       setPending(null);
     }
@@ -171,12 +166,12 @@ export default function PaymentsPage() {
   return (
     <div className="space-y-8">
       <PageHeader
-        eyebrow="Billing"
-        title="Thanh toán & credit"
+        eyebrow="Plans"
+        title="Billing & credits"
         description={
           hasPaidPlan
-            ? "Quản lý gói đăng ký, nâng cấp hoặc mua thêm credit khi cần."
-            : "Chọn gói Growth hoặc Scale — mỗi kỳ được cộng credit cố định. Starter miễn phí với 50 credit đăng ký."
+            ? "Manage your plan, upgrade, or buy more credits when you need them."
+            : "Start free — upgrade to Standard/Premium when you need more practice time and learning credits."
         }
       />
 
@@ -184,14 +179,14 @@ export default function PaymentsPage() {
         <Alert>
           <AlertDescription>
             {checkoutType === "subscription"
-              ? "Đăng ký thành công. Credit kỳ đầu sẽ được cộng sau webhook Stripe."
-              : "Thanh toán thành công. Credit sẽ được cộng trong giây lát."}
+              ? "Subscription successful. First-period credits will be added after the Stripe webhook."
+              : "Payment successful. Credits will be added shortly."}
           </AlertDescription>
         </Alert>
       ) : null}
       {checkoutState === "cancel" ? (
         <Alert variant="destructive">
-          <AlertDescription>Đã hủy thanh toán.</AlertDescription>
+          <AlertDescription>Checkout canceled.</AlertDescription>
         </Alert>
       ) : null}
       {error ? (
@@ -205,7 +200,7 @@ export default function PaymentsPage() {
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant={hasPaidPlan ? "default" : "secondary"} className="gap-1">
               {hasPaidPlan ? <Crown className="size-3" /> : null}
-              Gói hiện tại
+              Current plan
             </Badge>
             {hasPaidPlan && data?.subscription.status ? (
               <Badge variant="outline">
@@ -220,7 +215,7 @@ export default function PaymentsPage() {
         </CardHeader>
         <CardContent>
           {billing.isLoading ? (
-            <p className="text-sm text-muted-foreground">Đang tải thông tin gói…</p>
+            <p className="text-sm text-muted-foreground">Loading plan details…</p>
           ) : (
             <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
               <div className="space-y-4">
@@ -228,31 +223,27 @@ export default function PaymentsPage() {
                   <div className="flex items-center gap-2 rounded-xl border px-4 py-3 text-sm">
                     <Coins className="size-4 text-primary" />
                     <div>
-                      <p className="text-xs text-muted-foreground">Số dư credit</p>
+                      <p className="text-xs text-muted-foreground">Credit balance</p>
                       <p className="font-semibold">{balance}</p>
                     </div>
                   </div>
                   {hasPaidPlan && data?.subscription.creditsPerPeriod ? (
                     <div className="rounded-xl border px-4 py-3 text-sm">
-                      <p className="text-xs text-muted-foreground">Credit mỗi kỳ</p>
+                      <p className="text-xs text-muted-foreground">Credits per period</p>
                       <p className="font-semibold">{data.subscription.creditsPerPeriod}</p>
                     </div>
                   ) : (
                     <div className="rounded-xl border px-4 py-3 text-sm">
-                      <p className="text-xs text-muted-foreground">Thưởng đăng ký</p>
-                      <p className="font-semibold">{data?.signupBonus ?? 50} credit</p>
+                      <p className="text-xs text-muted-foreground">Signup bonus</p>
+                      <p className="font-semibold">{data?.signupBonus ?? 50} credits</p>
                     </div>
                   )}
                 </div>
 
                 <dl className="grid gap-3 text-sm sm:grid-cols-2">
-                  <div>
-                    <dt className="text-muted-foreground">AI generate</dt>
-                    <dd className="font-medium">{aiCost}–{aiMaxCost} credit/lần</dd>
-                  </div>
                   {hasPaidPlan && data?.subscription.billingPeriod ? (
                     <div>
-                      <dt className="text-muted-foreground">Chu kỳ</dt>
+                      <dt className="text-muted-foreground">Billing period</dt>
                       <dd className="font-medium">
                         {PERIOD_LABEL[data.subscription.billingPeriod] ??
                           data.subscription.billingPeriod}
@@ -261,41 +252,27 @@ export default function PaymentsPage() {
                   ) : null}
                   {hasPaidPlan && data?.subscription.currentPeriodEnd ? (
                     <div>
-                      <dt className="text-muted-foreground">Gia hạn kỳ tiếp</dt>
+                      <dt className="text-muted-foreground">Next renewal</dt>
                       <dd className="font-medium">{formatDate(data.subscription.currentPeriodEnd)}</dd>
                     </div>
                   ) : null}
                 </dl>
 
-                {lowCredit ? (
-                  <Alert variant="destructive">
-                    <AlertDescription>
-                      Credit sắp hết hoặc không đủ cho AI generate.{" "}
-                      {hasPaidPlan ? "Mua thêm credit bên dưới." : "Đăng ký gói trả phí bên dưới."}
-                    </AlertDescription>
-                  </Alert>
-                ) : null}
-
                 <div className="flex flex-wrap gap-3">
-                  <Button asChild variant="outline">
-                    <Link href="/landing-pages/new">
-                      <Sparkles /> Tạo landing bằng AI
-                    </Link>
-                  </Button>
                   {higherPlans.length > 0 ? (
                     <Button
                       type="button"
                       disabled={!stripeReady || Boolean(pending)}
                       onClick={() => setShowUpgradeOptions(true)}
                     >
-                      <ArrowUpCircle /> Nâng cấp gói
+                      <ArrowUpCircle /> Upgrade plan
                     </Button>
                   ) : null}
                 </div>
               </div>
 
               <div className="space-y-3">
-                <p className="text-sm font-semibold">Phúc lợi đang có</p>
+                <p className="text-sm font-semibold">Current benefits</p>
                 <ul className="space-y-2.5 rounded-xl border bg-muted/30 p-5 text-sm">
                   {activePlan.features.map((feature) => (
                     <li key={feature} className="flex gap-2.5 text-muted-foreground">
@@ -343,18 +320,17 @@ export default function PaymentsPage() {
               variant="ghost"
               size="icon"
               className="absolute top-4 right-4"
-              aria-label="Đóng"
+              aria-label="Close"
               onClick={() => setShowUpgradeOptions(false)}
             >
               <X />
             </Button>
             <div className="space-y-2 pr-12">
               <h2 id="upgrade-dialog-title" className="flex items-center gap-2 text-xl font-semibold">
-                <ArrowUpCircle className="size-5 text-primary" /> Chọn gói muốn nâng cấp
+                <ArrowUpCircle className="size-5 text-primary" /> Choose a plan to upgrade
               </h2>
               <p className="text-sm text-muted-foreground">
-                Chỉ những gói cao hơn {activePlan.name} được hiển thị. Chọn một gói để bắt đầu
-                thanh toán.
+                Only plans higher than {activePlan.name} are shown. Pick one to start checkout.
               </p>
             </div>
             <div className="mt-6 space-y-5">
@@ -368,7 +344,7 @@ export default function PaymentsPage() {
                       variant={period === p ? "default" : "outline"}
                       onClick={() => setPeriod(p)}
                     >
-                      {p === "monthly" ? "Theo tháng" : "Theo năm (−2 tháng)"}
+                      {p === "monthly" ? "Monthly" : "Yearly (−2 months)"}
                     </Button>
                   ))}
                 </div>
@@ -398,17 +374,17 @@ export default function PaymentsPage() {
                     <CardHeader className="space-y-2">
                       <div className="flex items-center justify-between gap-2">
                         <CardTitle className="text-xl">{plan.name}</CardTitle>
-                        {plan.featured ? <Badge variant="secondary">Phổ biến</Badge> : null}
+                        {plan.featured ? <Badge variant="secondary">Popular</Badge> : null}
                       </div>
                       <CardDescription>{plan.description}</CardDescription>
                       <p className="font-[family-name:var(--font-display)] text-2xl tracking-tight">
                         {formatVnd(price)}
                         <span className="ml-1 text-sm font-sans font-normal text-muted-foreground">
-                          {period === "yearly" ? "/ năm" : "/ tháng"}
+                          {period === "yearly" ? "/ year" : "/ month"}
                         </span>
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {plan.creditsPerPeriod} credit/kỳ
+                        {plan.creditsPerPeriod} credits/period
                       </p>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -433,7 +409,7 @@ export default function PaymentsPage() {
                           <LoaderCircle className="animate-spin" />
                         ) : (
                           <>
-                            <CreditCard /> Nâng cấp lên {plan.name}
+                            <CreditCard /> Upgrade to {plan.name}
                           </>
                         )}
                       </Button>
@@ -453,10 +429,10 @@ export default function PaymentsPage() {
           <Card className="shadow-none">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <CreditCard className="size-5 text-primary" /> Mua thêm credit
+                <CreditCard className="size-5 text-primary" /> Buy more credits
               </CardTitle>
               <CardDescription>
-                Dùng khi hết credit giữa kỳ — thanh toán one-time qua thẻ.
+                Use this when you run out mid-period — one-time card payment.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3 sm:grid-cols-3">
@@ -475,7 +451,7 @@ export default function PaymentsPage() {
                     {pending === `top-${pack.id}` ? (
                       <LoaderCircle className="animate-spin" />
                     ) : (
-                      "Mua thêm"
+                      "Buy more"
                     )}
                   </Button>
                 </div>
@@ -488,15 +464,15 @@ export default function PaymentsPage() {
       <Card className="shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ReceiptText className="size-5 text-primary" /> Lịch sử credit
+            <ReceiptText className="size-5 text-primary" /> Credit history
           </CardTitle>
         </CardHeader>
         <CardContent>
           {billing.isLoading ? (
-            <p className="text-sm text-muted-foreground">Đang tải…</p>
+            <p className="text-sm text-muted-foreground">Loading…</p>
           ) : !data?.ledger.length ? (
             <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-              Chưa có giao dịch.
+              No transactions yet.
             </div>
           ) : (
             <ul className="divide-y rounded-xl border">

@@ -6,7 +6,7 @@ export default function PaymentCheckoutRoutePage() {
     <Suspense
       fallback={
         <main className="flex min-h-[100svh] items-center justify-center px-5 pt-24 text-sm text-muted-foreground">
-          Đang tải trang thanh toán...
+          Loading checkout...
         </main>
       }
     >

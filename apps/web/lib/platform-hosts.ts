@@ -1,4 +1,4 @@
-/** Hosts that serve the Pagecraft workspace / marketing / admin — not customer landings. */
+/** Hosts that serve the EngliTutor workspace / marketing / admin — not customer landings. */
 
 const DEFAULT_PLATFORM_HOSTS = [
   "localhost",

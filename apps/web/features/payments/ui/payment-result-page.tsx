@@ -28,11 +28,11 @@ export function PaymentResultPage() {
   const [state, setState] = useState<ResultState>(checkout === "success" ? "processing" : "failed");
   const [message, setMessage] = useState(
     checkout === "success"
-      ? "Hệ thống đang xác nhận giao dịch với Stripe. Vui lòng không đóng trang này."
+      ? "We're confirming your payment with Stripe. Please keep this page open."
       : failureMessage ??
           (checkout === "cancel"
-            ? "Bạn đã hủy thanh toán. Tài khoản chưa bị tính phí và gói hiện tại không thay đổi."
-            : "Giao dịch không hoàn tất. Vui lòng kiểm tra thông tin thanh toán và thử lại."),
+            ? "You canceled checkout. Your account was not charged and your current plan is unchanged."
+            : "Payment did not complete. Please check your payment details and try again."),
   );
   const [confirmedPlanId, setConfirmedPlanId] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(5);
@@ -41,7 +41,7 @@ export function PaymentResultPage() {
     if (checkout !== "success") return;
     if (!sessionId) {
       setState("failed");
-      setMessage("Không tìm thấy mã phiên thanh toán. Vui lòng kiểm tra lại từ trang thanh toán.");
+      setMessage("Payment session id not found. Please try again from the payments page.");
       return;
     }
 
@@ -53,14 +53,14 @@ export function PaymentResultPage() {
         setState("success");
         setMessage(
           checkoutType === "topup"
-            ? "Credit đã được cộng vào tài khoản và có thể sử dụng ngay."
-            : "Gói dịch vụ đã được kích hoạt và quyền lợi đã được cập nhật.",
+            ? "Credits have been added to your account and are ready to use."
+            : "Your plan is active and benefits have been updated.",
         );
       },
       (error: unknown) => {
         if (cancelled) return;
         setState("failed");
-        setMessage(error instanceof Error ? error.message : "Không thể xác nhận thanh toán. Vui lòng thử lại.");
+        setMessage(error instanceof Error ? error.message : "Couldn't confirm payment. Please try again.");
       },
     );
 
@@ -72,7 +72,7 @@ export function PaymentResultPage() {
   useEffect(() => {
     if (state !== "success") return;
     if (countdown <= 0) {
-      router.replace("/landing-pages");
+      router.replace("/skills");
       return;
     }
     const timer = window.setTimeout(() => setCountdown((value) => value - 1), 1_000);
@@ -80,7 +80,7 @@ export function PaymentResultPage() {
   }, [countdown, router, state]);
 
   const packageName = useMemo(
-    () => PLAN_NAMES[confirmedPlanId ?? itemId ?? ""] ?? "gói đã chọn",
+    () => PLAN_NAMES[confirmedPlanId ?? itemId ?? ""] ?? "selected plan",
     [confirmedPlanId, itemId],
   );
 
@@ -105,10 +105,10 @@ export function PaymentResultPage() {
 
           <h1 className="font-[family-name:var(--font-display)] text-3xl tracking-tight">
             {state === "processing"
-              ? "Đang xử lý thanh toán"
+              ? "Processing payment"
               : state === "success"
-                ? "Thanh toán thành công"
-                : "Thanh toán thất bại"}
+                ? "Payment successful"
+                : "Payment failed"}
           </h1>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">{message}</p>
 
@@ -136,14 +136,14 @@ export function PaymentResultPage() {
                       state === "success" ? "text-emerald-700 dark:text-emerald-400" : "text-muted-foreground"
                     }`}
                   >
-                    {state === "success" ? "Gói đã kích hoạt" : "Gói thanh toán chưa hoàn tất"}
+                    {state === "success" ? "Plan activated" : "Checkout not completed"}
                   </p>
                   <p className="mt-1 truncate text-2xl font-bold text-foreground">{packageName}</p>
                 </div>
               </div>
               {state === "success" ? (
                 <p className="mt-4 border-t border-emerald-500/20 pt-3 text-sm text-emerald-800 dark:text-emerald-300">
-                  Quyền lợi của gói đã được cập nhật vào workspace của bạn.
+                  Plan benefits have been applied to your workspace.
                 </p>
               ) : null}
             </div>
@@ -151,17 +151,17 @@ export function PaymentResultPage() {
 
           {state === "success" ? (
             <p className="mt-5 text-sm text-muted-foreground">
-              Tự động quay về quản lý landing sau <strong className="text-foreground">{countdown}s</strong>
+              Redirecting to your exercises in <strong className="text-foreground">{countdown}s</strong>
             </p>
           ) : null}
 
           <div className="mt-6 flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
             <Button asChild>
-              <Link href="/landing-pages">Quay về quản lý landing</Link>
+              <Link href="/skills">Back to exercises</Link>
             </Button>
             {state === "failed" ? (
               <Button asChild variant="outline">
-                <Link href="/payments">Thử thanh toán lại</Link>
+                <Link href="/payments">Try payment again</Link>
               </Button>
             ) : null}
           </div>

@@ -81,16 +81,16 @@ export function PaymentCheckoutPageView({
       <main className="grid min-h-[100svh] place-items-center px-5">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <LoaderCircle className="size-4 animate-spin" />
-          {isFree ? "Đang chuyển tới đăng ký miễn phí…" : "Đang kiểm tra gói của bạn…"}
+          {isFree ? "Redirecting to free signup…" : "Checking your plan…"}
         </div>
       </main>
     );
   }
 
   if (ownedPlan && ownedSubscription) {
-    const periodLabel = ownedSubscription.billingPeriod === "yearly" ? "Theo năm" : "Theo tháng";
+    const periodLabel = ownedSubscription.billingPeriod === "yearly" ? "Yearly" : "Monthly";
     const renewalDate = ownedSubscription.currentPeriodEnd
-      ? new Intl.DateTimeFormat("vi-VN", { dateStyle: "long" }).format(
+      ? new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(
           new Date(ownedSubscription.currentPeriodEnd),
         )
       : null;
@@ -108,10 +108,10 @@ export function PaymentCheckoutPageView({
               <CheckCircle2 className="mt-0.5 size-6 shrink-0 drop-shadow-sm" />
               <div className="max-w-lg">
                 <p className="text-base font-semibold sm:text-lg">
-                  Bạn đã thanh toán gói {ownedPlan.name}
+                  You&apos;re subscribed to {ownedPlan.name}
                 </p>
                 <p className="mt-1 text-sm text-foreground/70">
-                  Gói đang hoạt động và các quyền lợi đã sẵn sàng trong workspace.
+                  Your plan is active and benefits are ready in the workspace.
                 </p>
               </div>
             </div>
@@ -123,7 +123,7 @@ export function PaymentCheckoutPageView({
                   disabled={pending}
                   onClick={() => setShowUpgradeOptions(true)}
                 >
-                  <ArrowUpCircle /> Nâng cấp gói
+                  <ArrowUpCircle /> Upgrade plan
                 </Button>
               ) : null}
               <Button
@@ -131,7 +131,7 @@ export function PaymentCheckoutPageView({
                 variant={upgradePlans.length > 0 ? "outline" : "default"}
                 className="w-full sm:w-auto"
               >
-                <a href={workspaceUrl}>Về workspace</a>
+                <a href={workspaceUrl}>Go to workspace</a>
               </Button>
             </div>
           </div>
@@ -145,13 +145,13 @@ export function PaymentCheckoutPageView({
           <div className="relative mt-6 h-52 overflow-hidden rounded-lg sm:h-64">
             <img
               src={ownedPlan.imageUrl}
-              alt={`Gói ${ownedPlan.name}`}
+              alt={`${ownedPlan.name} plan`}
               className="size-full object-cover"
             />
             <div aria-hidden className="absolute inset-0 bg-black/35" />
             <div className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-7">
               <p className="text-xs font-semibold tracking-[0.14em] text-white/75 uppercase">
-                Gói hiện tại · {periodLabel}
+                Current plan · {periodLabel}
               </p>
               <h1 className="mt-1 font-[family-name:var(--font-display)] text-4xl tracking-tight sm:text-5xl">
                 {ownedPlan.name}
@@ -162,31 +162,31 @@ export function PaymentCheckoutPageView({
 
           <dl className="mt-6 grid grid-cols-2 border-y text-sm sm:grid-cols-4">
             <div className="border-r border-b px-3 py-5 sm:border-b-0 sm:px-5">
-              <dt className="text-xs text-muted-foreground">Chu kỳ</dt>
+              <dt className="text-xs text-muted-foreground">Billing cycle</dt>
               <dd className="mt-1.5 font-semibold text-foreground">{periodLabel}</dd>
             </div>
             <div className="border-b px-3 py-5 sm:border-r sm:border-b-0 sm:px-5">
-              <dt className="text-xs text-muted-foreground">Credit hiện có</dt>
+              <dt className="text-xs text-muted-foreground">Credit balance</dt>
               <dd className="mt-1.5 flex items-center gap-1.5 font-semibold text-foreground">
                 <Coins className="size-4 text-primary" /> {creditBalance ?? 0}
               </dd>
             </div>
             <div className="border-r px-3 py-5 sm:px-5">
-              <dt className="text-xs text-muted-foreground">Credit mỗi kỳ</dt>
+              <dt className="text-xs text-muted-foreground">Credits per period</dt>
               <dd className="mt-1.5 font-semibold text-foreground">
                 {ownedSubscription.creditsPerPeriod}
               </dd>
             </div>
             <div className="px-3 py-5 sm:px-5">
-              <dt className="text-xs text-muted-foreground">Gia hạn tiếp theo</dt>
+              <dt className="text-xs text-muted-foreground">Next renewal</dt>
               <dd className="mt-1.5 font-semibold text-foreground">{renewalDate ?? "—"}</dd>
             </div>
           </dl>
 
           <div className="mt-8">
             <div className="flex items-end justify-between gap-4 border-b pb-3">
-              <h2 className="text-base font-semibold text-foreground">Quyền lợi của gói</h2>
-              <span className="text-xs text-muted-foreground">Đang hoạt động</span>
+              <h2 className="text-base font-semibold text-foreground">Plan benefits</h2>
+              <span className="text-xs text-muted-foreground">Active</span>
             </div>
             <ul className="grid gap-x-8 gap-y-3 pt-5 text-sm sm:grid-cols-2">
               {ownedPlan.features.map((feature) => (
@@ -231,7 +231,7 @@ export function PaymentCheckoutPageView({
                     variant="ghost"
                     size="icon"
                     className="absolute top-4 right-4"
-                    aria-label="Đóng"
+                    aria-label="Close"
                     onClick={() => setShowUpgradeOptions(false)}
                   >
                     <X />
@@ -241,10 +241,10 @@ export function PaymentCheckoutPageView({
                       id="upgrade-dialog-title"
                       className="flex items-center gap-2 text-xl font-semibold"
                     >
-                      <ArrowUpCircle className="size-5 text-primary" /> Chọn gói muốn nâng cấp
+                      <ArrowUpCircle className="size-5 text-primary" /> Choose a plan to upgrade
                     </h2>
                     <p className="text-sm text-muted-foreground">
-                      Chỉ những gói cao hơn {ownedPlan.name} được hiển thị.
+                      Only plans above {ownedPlan.name} are shown.
                     </p>
                   </div>
                   <div
@@ -283,7 +283,7 @@ export function PaymentCheckoutPageView({
                             onClick={() => onUpgrade(upgradePlan.id)}
                           >
                             {pending ? <LoaderCircle className="animate-spin" /> : <CreditCard />}
-                            Nâng cấp lên {upgradePlan.name}
+                            Upgrade to {upgradePlan.name}
                           </Button>
                         </CardContent>
                       </Card>
@@ -299,7 +299,7 @@ export function PaymentCheckoutPageView({
   }
 
   return (
-    <main className="relative min-h-[100svh] bg-[radial-gradient(ellipse_at_top,hsl(158_28%_92%),hsl(var(--background))_55%)] dark:bg-[radial-gradient(ellipse_at_top,hsl(166_24%_15%),hsl(var(--background))_55%)]">
+    <main className="relative min-h-[100svh] bg-[radial-gradient(ellipse_at_top,hsl(214_22%_92%),hsl(var(--background))_55%)] dark:bg-[radial-gradient(ellipse_at_top,hsl(222_28%_14%),hsl(var(--background))_55%)]">
       <div className="mx-auto grid max-w-6xl gap-10 px-5 pt-24 pb-16 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14 lg:pt-28 lg:pb-20">
         <motion.div
           className="space-y-8"
@@ -308,23 +308,23 @@ export function PaymentCheckoutPageView({
           transition={{ duration: 0.45 }}
         >
           <div className="space-y-3">
-            <PageBackLink href={`/payment?plan=${plan.id}`} label="danh sách gói" />
+            <PageBackLink href={`/payment?plan=${plan.id}`} label="plans" />
             <div className="space-y-2">
               <p className="text-xs font-semibold tracking-[0.18em] text-accent uppercase">
-                Thanh toán
+                Checkout
               </p>
               <h1 className="font-[family-name:var(--font-display)] text-3xl tracking-tight text-foreground sm:text-4xl">
-                Hoàn tất đăng ký
+                Complete your subscription
               </h1>
               <p className="max-w-lg text-sm text-muted-foreground sm:text-base">
-                Gói <span className="font-medium text-foreground">{plan.name}</span> — thanh toán an
-                toàn qua Stripe (thẻ quốc tế).
+                <span className="font-medium text-foreground">{plan.name}</span> plan — secure payment
+                via Stripe (international cards).
               </p>
             </div>
           </div>
 
           <div className="space-y-3">
-            <p className="text-sm font-medium text-foreground">Thời hạn gói</p>
+            <p className="text-sm font-medium text-foreground">Billing period</p>
             <div className="grid gap-3 sm:grid-cols-2">
               {BILLING_PERIODS.map((item) => {
                 const active = period === item.id;
@@ -357,7 +357,7 @@ export function PaymentCheckoutPageView({
                       )}
                     >
                       {item.hint}
-                      {item.id === "yearly" ? " · thanh toán một lần" : ""}
+                      {item.id === "yearly" ? " · one-time payment" : ""}
                     </p>
                   </button>
                 );
@@ -375,10 +375,10 @@ export function PaymentCheckoutPageView({
             <div className="flex items-start gap-3">
               <CreditCard className="mt-0.5 size-5 text-accent" />
               <div className="space-y-1">
-                <p className="text-sm font-medium text-foreground">Thanh toán bằng thẻ</p>
+                <p className="text-sm font-medium text-foreground">Pay by card</p>
                 <p className="text-sm text-muted-foreground">
-                  Bạn sẽ được chuyển sang trang thanh toán Stripe. Credit gói được cộng tự động sau
-                  khi thanh toán thành công.
+                  You&apos;ll be redirected to Stripe Checkout. Plan credits are added automatically
+                  after a successful payment.
                 </p>
               </div>
             </div>
@@ -393,32 +393,32 @@ export function PaymentCheckoutPageView({
                 <LoaderCircle className="animate-spin" />
               ) : (
                 <>
-                  <CreditCard /> Thanh toán {billing.label} qua Stripe
+                  <CreditCard /> Pay {billing.label} with Stripe
                 </>
               )}
             </Button>
             <p className="text-center text-xs text-muted-foreground">
-              Đã có tài khoản? Sau khi thanh toán, mở{" "}
+              Already have an account? After paying, open{" "}
               <a href={workspaceUrl} className="underline">
                 workspace
               </a>{" "}
-              để dùng credit.
+              to use your credits.
             </p>
           </div>
         </motion.div>
 
         <motion.aside
-          className="h-fit space-y-6 overflow-hidden rounded-3xl border border-border bg-background p-7 sm:p-8 lg:sticky lg:top-24"
+          className="h-fit space-y-6 overflow-hidden rounded-sm border border-border bg-background p-7 sm:p-8 lg:sticky lg:top-24"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.08 }}
         >
           <div className="-mx-7 -mt-7 aspect-[16/9] overflow-hidden border-b sm:-mx-8 sm:-mt-8">
-            <img src={plan.imageUrl} alt={`Gói ${plan.name}`} className="size-full object-cover" />
+            <img src={plan.imageUrl} alt={`${plan.name} plan`} className="size-full object-cover" />
           </div>
           <div className="space-y-1">
             <p className="text-xs font-semibold tracking-[0.16em] text-accent uppercase">
-              Tóm tắt đơn
+              Order summary
             </p>
             <h2 className="font-[family-name:var(--font-display)] text-2xl text-foreground">
               {plan.name}
@@ -437,7 +437,7 @@ export function PaymentCheckoutPageView({
 
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="text-xs text-muted-foreground">Tổng cộng</p>
+              <p className="text-xs text-muted-foreground">Total</p>
               <p className="font-[family-name:var(--font-display)] text-3xl tracking-tight text-foreground">
                 {billing.label}
               </p>
@@ -446,13 +446,13 @@ export function PaymentCheckoutPageView({
           </div>
 
           <p className="text-xs leading-relaxed text-muted-foreground">
-            Gói trả phí bao gồm credit cố định mỗi kỳ. Bạn có thể mua thêm credit trong workspace
-            khi cần.
+            Paid plans include a fixed credit allowance each period. You can buy more credits in the
+            workspace whenever you need them.
           </p>
 
           <Link href="/payment">
             <Button type="button" variant="outline" className="w-full">
-              Xem tất cả gói
+              View all plans
             </Button>
           </Link>
         </motion.aside>

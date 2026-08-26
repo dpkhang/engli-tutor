@@ -6,7 +6,7 @@ import { Button } from "@landing-page-generator/ui";
 import { motion, type MotionValue } from "motion/react";
 
 const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1600&q=70";
+  "https://images.unsplash.com/photo-1499914485622-a88fac536970?auto=format&fit=crop&w=1800&q=70";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -16,7 +16,7 @@ export type MasterBannerViewProps = {
   imageTransform: MotionValue<string>;
   glowTransform: MotionValue<string>;
   onEntryClick: () => void;
-  onFeaturesClick: () => void;
+  onPracticeClick: () => void;
 };
 
 export function MasterBannerView({
@@ -25,12 +25,12 @@ export function MasterBannerView({
   imageTransform,
   glowTransform,
   onEntryClick,
-  onFeaturesClick,
+  onPracticeClick,
 }: MasterBannerViewProps) {
   return (
     <section
       ref={sectionRef}
-      className="section-snap relative min-h-svh overflow-hidden bg-[#041f1a] [contain:paint]"
+      className="section-snap relative min-h-svh overflow-hidden bg-[#0b1524] [contain:paint]"
     >
       <motion.div
         aria-hidden
@@ -43,69 +43,53 @@ export function MasterBannerView({
           fill
           priority
           quality={70}
-          sizes="(max-width: 768px) 100vw, 1600px"
-          className="object-cover object-center"
+          sizes="(max-width: 768px) 100vw, 1800px"
+          className="object-cover object-[center_40%]"
         />
       </motion.div>
 
       <div
         aria-hidden
-        className="absolute inset-0 bg-[linear-gradient(115deg,rgba(3,28,24,0.84)_0%,rgba(4,40,34,0.7)_38%,rgba(6,45,40,0.48)_62%,rgba(3,22,20,0.64)_100%)]"
+        className="absolute inset-0 bg-[linear-gradient(108deg,rgba(8,16,28,0.93)_0%,rgba(11,21,36,0.8)_40%,rgba(12,24,40,0.52)_70%,rgba(8,14,24,0.7)_100%)]"
       />
       <div
         aria-hidden
-        className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_35%,rgba(52,211,153,0.22),transparent_52%),radial-gradient(ellipse_at_20%_80%,rgba(0,0,0,0.3),transparent_55%)]"
+        className="absolute inset-0 bg-[radial-gradient(ellipse_at_72%_18%,rgba(196,160,90,0.12),transparent_50%)]"
       />
 
-      {/* Static light wash — no infinite opacity loop / no CSS blur filter */}
       <motion.div
         aria-hidden
-        className="pointer-events-none absolute -top-1/4 left-1/4 h-[55vmax] w-[55vmax] rounded-full bg-[radial-gradient(circle,rgba(110,231,183,0.18),transparent_62%)]"
+        className="pointer-events-none absolute -top-1/4 right-0 h-[50vmax] w-[50vmax] rounded-full bg-[radial-gradient(circle,rgba(196,160,90,0.1),transparent_62%)]"
         style={{ transform: glowTransform }}
       />
 
-      <p
-        aria-hidden
-        className="pointer-events-none absolute right-[-4vw] bottom-[-6vh] select-none font-[family-name:var(--font-display)] text-[min(28vw,22rem)] leading-none tracking-[-0.06em] text-white/6"
-      >
-        PC
-      </p>
-
       <div className="relative mx-auto flex min-h-svh max-w-6xl flex-col justify-end px-5 pt-28 pb-16 sm:px-8 sm:pb-20 lg:pb-24">
-        <div className="max-w-3xl">
+        <div className="max-w-2xl">
           <motion.p
-            className="font-[family-name:var(--font-display)] text-[clamp(3.5rem,11vw,8.5rem)] leading-[0.88] tracking-[-0.04em] text-white"
-            initial={{ opacity: 0, y: 24 }}
+            className="text-[clamp(2.85rem,8.5vw,6rem)] leading-[0.92] font-semibold tracking-[-0.04em] text-white"
+            initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease: easeOut }}
           >
-            Pagecraft
+            EngliTutor
           </motion.p>
 
-          <motion.div
-            className="mt-8 h-px w-24 origin-left bg-accent"
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: 0.45, delay: 0.2, ease: "easeOut" }}
-          />
-
           <motion.h1
-            className="mt-7 max-w-2xl text-[clamp(1.35rem,2.6vw,2rem)] leading-tight font-medium text-white/95"
+            className="mt-7 max-w-xl text-[clamp(1.35rem,2.6vw,2rem)] leading-snug font-medium tracking-[-0.02em] text-white/95"
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.15, ease: easeOut }}
+            transition={{ duration: 0.45, delay: 0.12, ease: easeOut }}
           >
-            Landing page tự sinh bởi AI — sẵn sàng chạy chiến dịch trong buổi chiều hôm nay.
+            Practice speaking English with AI every day — and get feedback in Vietnamese.
           </motion.h1>
 
           <motion.p
-            className="mt-4 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg"
+            className="mt-4 max-w-lg text-base leading-relaxed text-white/68 sm:text-lg"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.22, ease: "easeOut" }}
+            transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
           >
-            Mô tả ý tưởng, Pagecraft auto-generate bố cục và nội dung — chỉnh lại rồi publish,
-            không cần dựng trang từ đầu.
+            For A2–B1 professionals who need to speak in meetings, interviews, and at work — not just study theory.
           </motion.p>
 
           <motion.div
@@ -116,7 +100,7 @@ export function MasterBannerView({
           >
             <Button
               size="lg"
-              className="bg-accent text-accent-foreground hover:bg-accent/90"
+              className="h-12 rounded-full border-0 bg-white px-7 text-[15px] font-medium text-[#0b1524] shadow-[0_10px_30px_-12px_rgba(0,0,0,0.45)] hover:bg-white/92"
               type="button"
               onClick={onEntryClick}
             >
@@ -125,11 +109,11 @@ export function MasterBannerView({
             <Button
               size="lg"
               variant="outline"
-              className="border-white/40 bg-transparent text-white shadow-none hover:bg-white/10 hover:text-white dark:border-white/40 dark:bg-transparent dark:text-white dark:hover:bg-white/10 dark:hover:text-white"
+              className="h-12 rounded-full border-white/30 bg-white/10 px-7 text-[15px] font-medium text-white shadow-none backdrop-blur-sm hover:bg-white/16 hover:text-white dark:border-white/30 dark:bg-white/10 dark:text-white dark:hover:bg-white/16 dark:hover:text-white"
               type="button"
-              onClick={onFeaturesClick}
+              onClick={onPracticeClick}
             >
-              Xem tính năng
+              See a sample session
             </Button>
           </motion.div>
         </div>
@@ -138,7 +122,7 @@ export function MasterBannerView({
           aria-hidden
           className="pointer-events-none absolute bottom-8 left-1/2 hidden -translate-x-1/2 md:block"
         >
-          <span className="hero-scroll-cue block h-9 w-px origin-top bg-white/45" />
+          <span className="hero-scroll-cue block h-9 w-px origin-top bg-white/40" />
         </div>
       </div>
     </section>

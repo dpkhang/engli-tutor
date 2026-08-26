@@ -17,7 +17,6 @@
     "@hookform/resolvers": "^5.5.7",
     "@landing-page-generator/api-client": "workspace:*",
     "@landing-page-generator/auth": "workspace:*",
-    "@landing-page-generator/landing-renderer": "workspace:*",
     "@landing-page-generator/ui": "workspace:*",
     "@tanstack/react-query": "^5.101.4",
     "chart.js": "^4.5.1",

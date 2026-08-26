@@ -1,8 +1,8 @@
 import { marketingApiClient } from "@/lib/marketing-api-client";
 
-export type PaidPlanId = "growth" | "scale";
+export type PaidPlanId = string;
 export type BillingPeriod = "monthly" | "yearly";
-export type PlanId = "free" | "starter" | "growth" | "scale";
+export type PlanId = string;
 
 export type CheckoutResponse = {
   url: string | null;
@@ -11,10 +11,9 @@ export type CheckoutResponse = {
 
 export type BillingMe = {
   balance: number;
-  aiGenerateCost: number;
   signupBonus: number;
   subscription: {
-    planId: "free" | "growth" | "scale";
+    planId: string;
     status: string;
     billingPeriod: BillingPeriod | null;
     currentPeriodEnd: string | null;

@@ -3,18 +3,11 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { getMarketingUrl, useSession } from "@/lib/auth-client";
-import { isCustomDomainHost } from "@/lib/platform-hosts";
 
 const LOGIN_PATH = "/login";
 
 function isPublicPath(pathname: string) {
-  if (pathname === LOGIN_PATH || pathname.startsWith("/p/") || pathname === "/domain-unavailable") {
-    return true;
-  }
-  if (typeof window !== "undefined" && isCustomDomainHost(window.location.hostname)) {
-    return true;
-  }
-  return false;
+  return pathname === LOGIN_PATH || pathname === "/domain-unavailable";
 }
 
 function AuthSplash({ message }: { message: string }) {
@@ -25,8 +18,8 @@ function AuthSplash({ message }: { message: string }) {
       aria-live="polite"
     >
       <div className="flex flex-col items-center gap-6 text-center">
-        <div className="font-[family-name:var(--font-display)] text-3xl text-foreground">
-          Pagecraft
+        <div className="text-3xl font-semibold tracking-tight text-foreground">
+          EngliTutor
         </div>
         <div className="h-1 w-28 overflow-hidden rounded-full bg-muted">
           <div className="h-full w-1/2 animate-[splash-progress_1.1s_ease-in-out_infinite] rounded-full bg-primary" />
@@ -74,17 +67,17 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   }, [isLogin, isPublic, isPending, user, pathname]);
 
   if (isPending && !isPublic) {
-    return <AuthSplash message="Đang chuẩn bị workspace..." />;
+    return <AuthSplash message="Preparing workspace..." />;
   }
 
   if (isLogin) {
-    return user ? <AuthSplash message="Đang mở workspace..." /> : <>{children}</>;
+    return user ? <AuthSplash message="Opening workspace..." /> : <>{children}</>;
   }
 
   if (isPublic) return <>{children}</>;
 
-  if (isPending) return <AuthSplash message="Đang chuẩn bị workspace..." />;
-  if (!user) return <AuthSplash message="Đang chuyển tới trang đăng nhập..." />;
+  if (isPending) return <AuthSplash message="Preparing workspace..." />;
+  if (!user) return <AuthSplash message="Redirecting to sign in..." />;
 
   return <>{children}</>;
 }

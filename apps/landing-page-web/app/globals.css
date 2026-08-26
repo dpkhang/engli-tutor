@@ -5,8 +5,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-  --font-display: var(--font-display), "Fraunces", serif;
-  --font-sans: var(--font-sans), "Manrope", sans-serif;
+  --font-display: var(--font-sans), "Plus Jakarta Sans", sans-serif;
+  --font-sans: var(--font-sans), "Plus Jakarta Sans", sans-serif;
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-card: hsl(var(--card));
@@ -36,51 +36,51 @@
 @layer base {
   :root {
     color-scheme: light;
-    /* Cool mist + deep pine + mint accent — not purple / cream-terracotta */
-    --radius: 0.625rem;
-    --background: 160 28% 97%;
-    --foreground: 168 42% 10%;
+    /* Academic ink & chalk — cool paper, oxford navy, brass accent */
+    --radius: 0.85rem;
+    --background: 210 22% 97%;
+    --foreground: 222 38% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 168 42% 10%;
+    --card-foreground: 222 38% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 168 42% 10%;
-    --surface: 158 22% 93%;
-    --primary: 166 58% 28%;
-    --primary-foreground: 150 40% 98%;
-    --secondary: 158 18% 90%;
-    --secondary-foreground: 168 42% 10%;
-    --muted: 158 18% 90%;
-    --muted-foreground: 168 12% 38%;
-    --border: 160 16% 82%;
-    --input: 160 16% 82%;
-    --ring: 166 58% 28%;
-    --accent: 158 72% 42%;
-    --accent-foreground: 168 42% 8%;
-    --destructive: 0 72% 51%;
+    --popover-foreground: 222 38% 12%;
+    --surface: 214 18% 93%;
+    --primary: 222 42% 22%;
+    --primary-foreground: 210 25% 97%;
+    --secondary: 214 16% 90%;
+    --secondary-foreground: 222 38% 12%;
+    --muted: 214 16% 90%;
+    --muted-foreground: 220 12% 40%;
+    --border: 216 14% 82%;
+    --input: 216 14% 82%;
+    --ring: 222 42% 22%;
+    --accent: 36 42% 48%;
+    --accent-foreground: 40 30% 98%;
+    --destructive: 0 68% 48%;
     --destructive-foreground: 0 0% 98%;
   }
 
   .dark {
     color-scheme: dark;
-    --background: 168 34% 7%;
-    --foreground: 150 24% 94%;
-    --card: 168 28% 10%;
-    --card-foreground: 150 24% 94%;
-    --popover: 168 28% 10%;
-    --popover-foreground: 150 24% 94%;
-    --surface: 167 25% 12%;
-    --primary: 158 58% 46%;
-    --primary-foreground: 168 42% 7%;
-    --secondary: 166 20% 16%;
-    --secondary-foreground: 150 24% 94%;
-    --muted: 166 20% 16%;
-    --muted-foreground: 158 12% 66%;
-    --border: 164 17% 22%;
-    --input: 164 17% 24%;
-    --ring: 158 58% 46%;
-    --accent: 158 72% 48%;
-    --accent-foreground: 168 42% 7%;
-    --destructive: 0 62% 48%;
+    --background: 222 32% 8%;
+    --foreground: 210 20% 94%;
+    --card: 222 28% 11%;
+    --card-foreground: 210 20% 94%;
+    --popover: 222 28% 11%;
+    --popover-foreground: 210 20% 94%;
+    --surface: 221 24% 14%;
+    --primary: 210 28% 78%;
+    --primary-foreground: 222 38% 10%;
+    --secondary: 220 18% 16%;
+    --secondary-foreground: 210 20% 94%;
+    --muted: 220 18% 16%;
+    --muted-foreground: 215 12% 64%;
+    --border: 218 16% 22%;
+    --input: 218 16% 24%;
+    --ring: 36 42% 52%;
+    --accent: 36 48% 48%;
+    --accent-foreground: 222 38% 10%;
+    --destructive: 0 58% 46%;
     --destructive-foreground: 0 0% 98%;
   }
 
@@ -106,6 +106,15 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     font-family: var(--font-sans);
+    background-image:
+      radial-gradient(ellipse at 12% 0%, hsl(214 30% 92% / 0.9), transparent 42%),
+      linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
+  }
+
+  .dark body {
+    background-image:
+      radial-gradient(ellipse at 18% 0%, hsl(222 28% 14% / 0.85), transparent 45%),
+      linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
   }
 
   .section-snap {

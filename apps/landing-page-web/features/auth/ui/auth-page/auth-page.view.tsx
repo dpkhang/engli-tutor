@@ -18,7 +18,7 @@ export type AuthPageViewProps = {
 
 export function AuthPageView({ mode, pending, error, onModeChange, onSubmit }: AuthPageViewProps) {
   return (
-    <main className="relative min-h-svh overflow-hidden bg-[radial-gradient(ellipse_at_top_left,hsl(158_30%_90%),hsl(var(--background))_50%)] dark:bg-[radial-gradient(ellipse_at_top_left,hsl(166_24%_15%),hsl(var(--background))_50%)]">
+    <main className="relative min-h-svh overflow-hidden bg-[radial-gradient(ellipse_at_top_left,hsl(214_22%_92%),hsl(var(--background))_52%)] dark:bg-[radial-gradient(ellipse_at_top_left,hsl(222_28%_14%),hsl(var(--background))_52%)]">
       <div className="relative mx-auto grid min-h-svh max-w-6xl items-stretch gap-0 px-5 pt-24 pb-16 sm:px-8 lg:grid-cols-2 lg:gap-12 lg:px-8 lg:pt-20 lg:pb-20">
         <motion.div
           className="flex w-full max-w-md items-center justify-self-center lg:justify-self-start"
@@ -29,12 +29,12 @@ export function AuthPageView({ mode, pending, error, onModeChange, onSubmit }: A
           <div className="w-full space-y-8 border-b border-border pb-10 lg:border-0 lg:pb-0">
             <div className="space-y-2">
               <h1 className="font-[family-name:var(--font-display)] text-3xl tracking-tight text-foreground sm:text-4xl">
-                {mode === "login" ? "Đăng nhập" : "Tạo tài khoản"}
+                {mode === "login" ? "Sign in" : "Create account"}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {mode === "login"
-                  ? "Chào mừng trở lại Pagecraft."
-                  : "Bắt đầu dựng landing page đầu tiên của bạn."}
+                  ? "Welcome back to EngliTutor."
+                  : "Create your profile and start speaking with AI."}
               </p>
             </div>
 
@@ -49,7 +49,7 @@ export function AuthPageView({ mode, pending, error, onModeChange, onSubmit }: A
                 disabled={pending}
                 onClick={() => onModeChange("login")}
               >
-                Đăng nhập
+                Sign in
               </button>
               <button
                 type="button"
@@ -61,7 +61,7 @@ export function AuthPageView({ mode, pending, error, onModeChange, onSubmit }: A
                 disabled={pending}
                 onClick={() => onModeChange("register")}
               >
-                Đăng ký
+                Sign up
               </button>
             </div>
 
@@ -69,17 +69,17 @@ export function AuthPageView({ mode, pending, error, onModeChange, onSubmit }: A
 
             <div className="flex items-center gap-3 text-xs text-muted-foreground">
               <span className="h-px flex-1 bg-border" />
-              <span>đăng nhập bằng email</span>
+              <span>or continue with email</span>
               <span className="h-px flex-1 bg-border" />
             </div>
 
             <form className="space-y-4" onSubmit={onSubmit}>
               {mode === "register" && (
                 <label className="block space-y-2 text-sm">
-                  <span className="font-medium text-foreground">Họ và tên</span>
+                  <span className="font-medium text-foreground">Full name</span>
                   <Input
                     name="name"
-                    placeholder="Nguyễn Văn A"
+                    placeholder="Jane Doe"
                     className="h-11 w-full bg-background"
                     required
                     disabled={pending}
@@ -92,7 +92,7 @@ export function AuthPageView({ mode, pending, error, onModeChange, onSubmit }: A
                 <Input
                   name="email"
                   type="email"
-                  placeholder="ban@congty.com"
+                  placeholder="you@company.com"
                   className="h-11 w-full bg-background"
                   autoComplete="email"
                   required
@@ -101,7 +101,7 @@ export function AuthPageView({ mode, pending, error, onModeChange, onSubmit }: A
               </label>
 
               <label className="block space-y-2 text-sm">
-                <span className="font-medium text-foreground">Mật khẩu</span>
+                <span className="font-medium text-foreground">Password</span>
                 <Input
                   name="password"
                   type="password"
@@ -117,37 +117,41 @@ export function AuthPageView({ mode, pending, error, onModeChange, onSubmit }: A
               {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
               <Button type="submit" className="h-11 w-full" size="lg" disabled={pending}>
-                {pending ? "Đang xử lý..." : mode === "login" ? "Đăng nhập" : "Tạo tài khoản"}
+                {pending ? "Please wait..." : mode === "login" ? "Sign in" : "Create account"}
               </Button>
             </form>
 
             <p className="text-sm text-muted-foreground">
-              Quay lại{" "}
+              Back to{" "}
               <Link href="/" className="font-medium text-primary hover:underline">
-                trang chủ
+                home
               </Link>
             </p>
           </div>
         </motion.div>
 
         <motion.aside
-          className="relative mt-10 hidden overflow-hidden rounded-3xl bg-[linear-gradient(160deg,#06352d,#0a4a3c_45%,#1f8a68)] p-10 text-primary-foreground lg:mt-0 lg:flex lg:min-h-[34rem] lg:flex-col lg:justify-end"
+          className="relative mt-10 hidden overflow-hidden border border-primary/15 bg-primary p-10 text-primary-foreground lg:mt-0 lg:flex lg:min-h-[34rem] lg:flex-col lg:justify-end"
           initial={{ opacity: 0, x: 18 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.55, delay: 0.08 }}
         >
-          <motion.div
+          <div
             aria-hidden
-            className="absolute -top-10 -right-10 h-48 w-48 rounded-full border border-white/15"
-            animate={{ y: [0, 14, 0] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            className="pointer-events-none absolute inset-0 opacity-[0.08]"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(0deg, transparent, transparent 27px, currentColor 28px)",
+            }}
           />
-          <p className="font-[family-name:var(--font-display)] text-4xl leading-tight">
-            Vào workspace và xuất bản trang tiếp theo.
+          <p className="relative text-[11px] font-semibold tracking-[0.2em] text-accent uppercase">
+            CEFR · A2–B1
           </p>
-          <p className="mt-4 max-w-sm text-sm leading-relaxed text-primary-foreground/75">
-            Đăng nhập bằng email để quản lý landing page trong cùng một chỗ. Đăng nhập mạng xã hội
-            sẽ sớm có.
+          <p className="relative mt-4 font-[family-name:var(--font-display)] text-4xl leading-tight">
+            Practice speaking every day, with feedback in Vietnamese.
+          </p>
+          <p className="relative mt-4 max-w-sm text-sm leading-relaxed text-primary-foreground/75">
+            Sign in to open your learning path, manage practice sessions, and continue chatting with your AI tutor.
           </p>
         </motion.aside>
       </div>

@@ -16,7 +16,7 @@ export function useAuthSession() {
     error,
     isLoggedIn,
     entryHref: isLoggedIn ? getAppUrl() : getMarketingAuthHref(),
-    entryLabel: isLoggedIn ? "Mở Workspace" : "Bắt đầu miễn phí",
+    entryLabel: isLoggedIn ? "Open Workspace" : "Start speaking",
     getEntryHref: () => getEntryHref(isLoggedIn),
   };
 }

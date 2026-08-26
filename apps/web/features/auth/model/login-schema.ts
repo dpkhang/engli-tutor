@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 const credentialsSchema = {
-  email: z.string().trim().min(1, "Vui lòng nhập email").email("Email không hợp lệ"),
+  email: z.string().trim().min(1, "Please enter your email").email("Invalid email"),
   password: z
     .string()
-    .min(8, "Mật khẩu tối thiểu 8 ký tự")
-    .max(128, "Mật khẩu tối đa 128 ký tự"),
+    .min(8, "Password must be at least 8 characters")
+    .max(128, "Password must be at most 128 characters"),
 };
 
 export const loginFormSchema = z.discriminatedUnion("mode", [
@@ -19,8 +19,8 @@ export const loginFormSchema = z.discriminatedUnion("mode", [
     name: z
       .string()
       .trim()
-      .min(2, "Họ và tên tối thiểu 2 ký tự")
-      .max(80, "Họ và tên tối đa 80 ký tự"),
+      .min(2, "Full name must be at least 2 characters")
+      .max(80, "Full name must be at most 80 characters"),
     ...credentialsSchema,
   }),
 ]);

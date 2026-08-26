@@ -69,14 +69,14 @@ export function SocialAuthButtonsView({ className }: SocialAuthButtonsViewProps)
             variant="outline"
             className="h-11 justify-start gap-2.5 bg-background px-3 opacity-60"
             disabled
-            title="Sắp ra mắt"
+            title="Coming soon"
           >
             {provider.icon}
             <span className="truncate text-sm font-medium">{provider.label}</span>
           </Button>
         ))}
       </div>
-      <p className="text-center text-xs text-muted-foreground">Đăng nhập mạng xã hội — sắp ra mắt</p>
+      <p className="text-center text-xs text-muted-foreground">Social sign-in — coming soon</p>
     </div>
   );
 }

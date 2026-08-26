@@ -17,7 +17,7 @@ export function useBillingMe(enabled = true) {
       setData(result);
     } catch (err) {
       setData(null);
-      setError(err instanceof Error ? err : new Error("Không tải được thông tin gói"));
+      setError(err instanceof Error ? err : new Error("Could not load plan details"));
     } finally {
       setIsLoading(false);
     }

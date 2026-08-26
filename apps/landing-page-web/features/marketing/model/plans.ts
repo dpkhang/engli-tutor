@@ -1,6 +1,8 @@
-export type PlanId = "starter" | "growth" | "scale";
+import type { BillingCatalog } from "@/features/payment/api/billing";
 
-export type PaidPlanId = Extract<PlanId, "growth" | "scale">;
+export type PlanId = string;
+
+export type PaidPlanId = string;
 
 export type BillingPeriod = "monthly" | "yearly";
 
@@ -23,71 +25,60 @@ export const PLANS: Plan[] = [
     name: "Starter",
     price: "0đ",
     priceValue: 0,
-    period: "mãi mãi",
-    description: "Dùng thử và launch trang đầu tiên — phù hợp cá nhân khám phá Pagecraft.",
+    period: "forever",
+    description: "Limited conversation minutes each day — a good way to explore EngliTutor.",
     imageUrl: "/images/plan-starter.png",
     features: [
-      "50 credit đăng ký (một lần)",
-      "1 landing page đang hoạt động",
-      "Template cơ bản, publish nhanh",
-      "Domain phụ Pagecraft",
+      "Limited AI speaking practice minutes per day",
+      "4-skill placement test (listening–speaking–reading–writing)",
+      "Full CEFR A2–B1 path across all four skills",
+      "Error feedback in Vietnamese",
     ],
-    cta: "Bắt đầu miễn phí",
-    featured: false,
-  },
-  {
-    id: "growth",
-    name: "Growth",
-    price: "299.000đ",
-    priceValue: 299_000,
-    period: "/ tháng",
-    description: "Cho team marketing chạy nhiều chiến dịch và tối ưu chuyển đổi.",
-    imageUrl: "/images/plan-growth.png",
-    features: [
-      "120 credit mỗi kỳ thanh toán",
-      "Tới 10 landing page",
-      "A/B headline & variant copy",
-      "Custom domain riêng",
-      "Analytics cơ bản theo chiến dịch",
-    ],
-    cta: "Chọn Growth",
-    featured: true,
-  },
-  {
-    id: "scale",
-    name: "Scale",
-    price: "799.000đ",
-    priceValue: 799_000,
-    period: "/ tháng",
-    description: "Cho agency và brand cần kiểm soát sâu, nhiều workspace.",
-    imageUrl: "/images/plan-scale.png",
-    features: [
-      "500 credit mỗi kỳ thanh toán",
-      "Không giới hạn landing page",
-      "Workspace team & phân quyền",
-      "Priority support 24/7",
-      "SSO & audit log cơ bản",
-    ],
-    cta: "Chọn Scale",
+    cta: "Start speaking practice",
     featured: false,
   },
 ];
+
+const STARTER_PLAN = PLANS[0]!;
+
+/** Convert the backend billing catalog into the presentation model used by marketing/payment UI. */
+export function plansFromCatalog(catalog: BillingCatalog | null | undefined): Plan[] {
+  if (!catalog) return [STARTER_PLAN];
+  return [
+    STARTER_PLAN,
+    ...catalog.subscriptionPlans.map((plan) => ({
+      id: plan.id,
+      name: plan.name,
+      price: formatVnd(plan.priceVndMonthly),
+      priceValue: plan.priceVndMonthly,
+      period: "/ month",
+      description: plan.description,
+      imageUrl:
+        plan.id === "growth" || plan.id === "scale"
+          ? `/images/plan-${plan.id}.png`
+          : "/images/plan-growth.png",
+      features: plan.features,
+      cta: `Choose ${plan.name}`,
+      featured: Boolean(plan.featured),
+    })),
+  ];
+}
 
 export const BILLING_PERIODS: {
   id: BillingPeriod;
   label: string;
   hint: string;
 }[] = [
-  { id: "monthly", label: "Theo tháng", hint: "Thanh toán hàng tháng" },
-  { id: "yearly", label: "Theo năm", hint: "Tiết kiệm ~2 tháng" },
+  { id: "monthly", label: "Monthly", hint: "Billed every month" },
+  { id: "yearly", label: "Yearly", hint: "Save ~2 months" },
 ];
 
-export function getPlanById(id: string | null | undefined): Plan {
-  return PLANS.find((plan) => plan.id === id) ?? PLANS.find((plan) => plan.featured)!;
+export function getPlanById(id: string | null | undefined, plans: Plan[] = PLANS): Plan {
+  return plans.find((plan) => plan.id === id) ?? plans.find((plan) => plan.featured) ?? plans[0]!;
 }
 
 export function isPaidPlan(id: PlanId): id is PaidPlanId {
-  return id === "growth" || id === "scale";
+  return id !== "starter" && id !== "free";
 }
 
 export function planCheckoutHref(planId: PlanId): string {
@@ -107,7 +98,7 @@ export function getBillingTotal(plan: Plan, period: BillingPeriod): {
   periodLabel: string;
 } {
   if (plan.priceValue === 0) {
-    return { total: 0, label: "0đ", periodLabel: "mãi mãi" };
+    return { total: 0, label: "0đ", periodLabel: "forever" };
   }
 
   if (period === "yearly") {
@@ -115,13 +106,13 @@ export function getBillingTotal(plan: Plan, period: BillingPeriod): {
     return {
       total,
       label: formatVnd(total),
-      periodLabel: "/ năm",
+      periodLabel: "/ year",
     };
   }
 
   return {
     total: plan.priceValue,
     label: formatVnd(plan.priceValue),
-    periodLabel: "/ tháng",
+    periodLabel: "/ month",
   };
 }

@@ -24,23 +24,23 @@ export type PaymentPackagesPageViewProps = {
 };
 
 const STATUS_LABEL: Record<string, string> = {
-  active: "Đang hoạt động",
-  ACTIVE: "Đang hoạt động",
-  past_due: "Quá hạn thanh toán",
-  PAST_DUE: "Quá hạn thanh toán",
-  canceled: "Đã hủy",
-  CANCELED: "Đã hủy",
-  incomplete: "Chưa hoàn tất",
-  INCOMPLETE: "Chưa hoàn tất",
+  active: "Active",
+  ACTIVE: "Active",
+  past_due: "Past due",
+  PAST_DUE: "Past due",
+  canceled: "Canceled",
+  CANCELED: "Canceled",
+  incomplete: "Incomplete",
+  INCOMPLETE: "Incomplete",
 };
 
 const PERIOD_LABEL: Record<string, string> = {
-  monthly: "Theo tháng",
-  yearly: "Theo năm",
+  monthly: "Monthly",
+  yearly: "Yearly",
 };
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium" }).format(new Date(value));
+  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(value));
 }
 
 function currentPlanId(billing: BillingMe | null): PlanId {
@@ -81,16 +81,16 @@ export function PaymentPackagesPageView({
       <main className="grid min-h-[100svh] place-items-center px-5">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <LoaderCircle className="size-4 animate-spin" />
-          Đang mở thông tin gói của bạn…
+          Opening your plan details…
         </div>
       </main>
     );
   }
 
   return (
-    <main className="relative min-h-[100svh] bg-[radial-gradient(ellipse_at_top,hsl(158_28%_92%),hsl(var(--background))_55%)] dark:bg-[radial-gradient(ellipse_at_top,hsl(166_24%_15%),hsl(var(--background))_55%)]">
+    <main className="relative min-h-[100svh] bg-[radial-gradient(ellipse_at_top,hsl(214_22%_92%),hsl(var(--background))_55%)] dark:bg-[radial-gradient(ellipse_at_top,hsl(222_28%_14%),hsl(var(--background))_55%)]">
       <div className="mx-auto max-w-6xl space-y-10 px-5 pt-24 pb-16 sm:px-8 lg:pt-28 lg:pb-20">
-        <PageBackLink href="/" label="trang chủ" />
+        <PageBackLink href="/" label="home" />
 
         <motion.div
           className="mx-auto max-w-2xl space-y-3 text-center"
@@ -99,15 +99,15 @@ export function PaymentPackagesPageView({
           transition={{ duration: 0.45 }}
         >
           <p className="text-xs font-semibold tracking-[0.18em] text-accent uppercase">
-            Gói dịch vụ
+            Plans
           </p>
           <h1 className="font-[family-name:var(--font-display)] text-3xl tracking-tight text-foreground sm:text-4xl">
-            {isLoggedIn && !billingLoading ? "Gói & phúc lợi của bạn" : "Chọn package phù hợp"}
+            {isLoggedIn && !billingLoading ? "Your plan & benefits" : "Choose the right plan"}
           </h1>
           <p className="text-sm text-muted-foreground sm:text-base">
             {isLoggedIn
-              ? "Xem gói đang dùng, credit và quyền lợi. Nâng cấp hoặc đổi gói bất cứ lúc nào."
-              : "So sánh benefit từng gói. Gói trả phí thanh toán qua Stripe — credit cố định mỗi kỳ."}
+              ? "See your current plan, credits, and benefits. Upgrade or switch anytime."
+              : "Compare benefits across plans. Paid plans checkout via Stripe — fixed credits each period."}
           </p>
         </motion.div>
 
@@ -115,33 +115,33 @@ export function PaymentPackagesPageView({
           <Alert>
             <AlertDescription>
               {checkoutType === "subscription"
-                ? "Đăng ký thành công. Credit kỳ đầu sẽ được cộng sau vài giây."
-                : "Thanh toán thành công. Credit sẽ được cộng trong giây lát."}
+                ? "Subscription successful. Your first-period credits will appear in a few seconds."
+                : "Payment successful. Credits will be added shortly."}
             </AlertDescription>
           </Alert>
         ) : null}
         {checkoutState === "cancel" ? (
           <Alert variant="destructive">
-            <AlertDescription>Đã hủy thanh toán trên Stripe.</AlertDescription>
+            <AlertDescription>Checkout was canceled on Stripe.</AlertDescription>
           </Alert>
         ) : null}
 
         {authReady && isLoggedIn ? (
           <motion.section
-            className="rounded-3xl border border-primary/25 bg-background p-6 sm:p-8"
+            className="rounded-sm border border-primary/25 bg-background p-6 sm:p-8"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
             {billingLoading ? (
-              <p className="text-sm text-muted-foreground">Đang tải thông tin gói…</p>
+              <p className="text-sm text-muted-foreground">Loading plan details…</p>
             ) : billing ? (
               <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
                 <div className="space-y-4">
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant={paidPlan ? "default" : "secondary"} className="gap-1">
                       {paidPlan ? <Crown className="size-3" /> : null}
-                      Gói hiện tại
+                      Current plan
                     </Badge>
                     {paidPlan ? (
                       <Badge variant="outline">
@@ -161,19 +161,19 @@ export function PaymentPackagesPageView({
                     <div className="flex items-center gap-2 rounded-xl border px-4 py-3">
                       <Coins className="size-4 text-accent" />
                       <div>
-                        <p className="text-xs text-muted-foreground">Số dư credit</p>
+                        <p className="text-xs text-muted-foreground">Credit balance</p>
                         <p className="font-semibold">{billing.balance}</p>
                       </div>
                     </div>
                     {paidPlan && billing.subscription.creditsPerPeriod > 0 ? (
                       <div className="rounded-xl border px-4 py-3">
-                        <p className="text-xs text-muted-foreground">Credit mỗi kỳ</p>
+                        <p className="text-xs text-muted-foreground">Credits per period</p>
                         <p className="font-semibold">{billing.subscription.creditsPerPeriod}</p>
                       </div>
                     ) : (
                       <div className="rounded-xl border px-4 py-3">
-                        <p className="text-xs text-muted-foreground">Thưởng đăng ký</p>
-                        <p className="font-semibold">{billing.signupBonus} credit</p>
+                        <p className="text-xs text-muted-foreground">Signup bonus</p>
+                        <p className="font-semibold">{billing.signupBonus} credits</p>
                       </div>
                     )}
                   </div>
@@ -182,7 +182,7 @@ export function PaymentPackagesPageView({
                     <dl className="grid gap-2 text-sm sm:grid-cols-2">
                       {billing.subscription.billingPeriod ? (
                         <div>
-                          <dt className="text-muted-foreground">Chu kỳ</dt>
+                          <dt className="text-muted-foreground">Billing cycle</dt>
                           <dd className="font-medium">
                             {PERIOD_LABEL[billing.subscription.billingPeriod] ??
                               billing.subscription.billingPeriod}
@@ -191,7 +191,7 @@ export function PaymentPackagesPageView({
                       ) : null}
                       {billing.subscription.currentPeriodEnd ? (
                         <div>
-                          <dt className="text-muted-foreground">Gia hạn kỳ tiếp</dt>
+                          <dt className="text-muted-foreground">Next renewal</dt>
                           <dd className="font-medium">
                             {formatDate(billing.subscription.currentPeriodEnd)}
                           </dd>
@@ -203,14 +203,14 @@ export function PaymentPackagesPageView({
                   <a href={`${workspaceUrl}/payments`}>
                     <Button type="button" variant="outline" className="gap-2">
                       <ExternalLink className="size-4" />
-                      Quản lý gói trong workspace
+                      Manage plan in workspace
                     </Button>
                   </a>
                 </div>
 
                 <div className="space-y-3">
-                  <p className="text-sm font-semibold text-foreground">Phúc lợi đang có</p>
-                  <ul className="space-y-2.5 rounded-2xl border bg-muted/30 p-5 text-sm">
+                  <p className="text-sm font-semibold text-foreground">Active benefits</p>
+                  <ul className="space-y-2.5 rounded-sm border bg-muted/30 p-5 text-sm">
                     {benefits.map((feature) => (
                       <li key={feature} className="flex gap-2.5 text-muted-foreground">
                         <Check className="mt-0.5 size-4 shrink-0 text-accent" />
@@ -219,13 +219,13 @@ export function PaymentPackagesPageView({
                     ))}
                   </ul>
                   <p className="text-xs text-muted-foreground">
-                    AI generate: {billing.aiGenerateCost} credit/lần
+                    Includes {billing.signupBonus} welcome credits
                   </p>
                 </div>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Không tải được thông tin gói. Thử tải lại trang hoặc đăng nhập lại.
+                Could not load plan details. Try refreshing the page or signing in again.
               </p>
             )}
           </motion.section>
@@ -233,7 +233,7 @@ export function PaymentPackagesPageView({
 
         <div className="space-y-4">
           <h2 className="text-center text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-            {isLoggedIn ? "So sánh các gói" : "Bảng giá"}
+            {isLoggedIn ? "Compare plans" : "Pricing"}
           </h2>
           <div className="grid gap-5 lg:grid-cols-3">
             {plans.map((plan, index) => {
@@ -244,11 +244,11 @@ export function PaymentPackagesPageView({
                 <motion.article
                   key={plan.id}
                   className={cn(
-                    "relative flex flex-col rounded-3xl border p-6 sm:p-7",
+                    "relative flex flex-col rounded-sm border p-6 sm:p-7",
                     isCurrent
-                      ? "border-primary ring-2 ring-primary/20"
+                      ? "border-primary bg-primary text-primary-foreground"
                       : emphasize
-                        ? "border-accent/60 bg-card text-card-foreground ring-1 ring-accent/20 shadow-[0_24px_60px_-28px_rgba(6,53,45,0.28)]"
+                        ? "border-primary/40 bg-card text-card-foreground"
                         : "border-border bg-background",
                   )}
                   initial={{ opacity: 0, y: 18 }}
@@ -256,15 +256,15 @@ export function PaymentPackagesPageView({
                   transition={{ duration: 0.45, delay: 0.06 * index }}
                 >
                   {isCurrent ? (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-[11px] font-semibold tracking-wide text-primary-foreground uppercase">
-                      Đang dùng
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-sm bg-accent px-3 py-0.5 text-[11px] font-semibold tracking-wide text-accent-foreground uppercase">
+                      Current
                     </span>
                   ) : null}
 
                   <div className="-mx-6 -mt-6 mb-5 aspect-[16/9] overflow-hidden border-b sm:-mx-7 sm:-mt-7">
                     <img
                       src={plan.imageUrl}
-                      alt={`Gói ${plan.name}`}
+                      alt={`${plan.name} plan`}
                       className="size-full object-cover"
                     />
                   </div>
@@ -283,14 +283,14 @@ export function PaymentPackagesPageView({
                               : "bg-accent/15 text-accent",
                           )}
                         >
-                          Phổ biến
+                          Popular
                         </span>
                       ) : null}
                     </div>
                     <p
                       className={cn(
                         "text-sm leading-relaxed",
-                        "text-muted-foreground",
+                        isCurrent ? "text-primary-foreground/70" : "text-muted-foreground",
                       )}
                     >
                       {plan.description}
@@ -302,7 +302,7 @@ export function PaymentPackagesPageView({
                     <span
                       className={cn(
                         "ml-1 text-sm font-sans font-normal",
-                        "text-muted-foreground",
+                        isCurrent ? "text-primary-foreground/65" : "text-muted-foreground",
                       )}
                     >
                       {plan.period}
@@ -315,7 +315,7 @@ export function PaymentPackagesPageView({
                         <span className="text-accent">→</span>
                         <span
                           className={
-                            "text-muted-foreground"
+                            isCurrent ? "text-primary-foreground/80" : "text-muted-foreground"
                           }
                         >
                           {feature}
@@ -326,7 +326,7 @@ export function PaymentPackagesPageView({
 
                   {isCurrent ? (
                     <Button type="button" className="mt-8 w-full" variant="secondary" disabled>
-                      Gói hiện tại
+                      Current plan
                     </Button>
                   ) : (
                     <Link href={planHrefs[plan.id]} className="mt-8 block">

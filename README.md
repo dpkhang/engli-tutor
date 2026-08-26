@@ -1,6 +1,6 @@
-# Pagecraft frontend (`fe`)
+# EngliTutor frontend (`fe`)
 
-pnpm workspace: hai app Next.js + ba package dùng chung.
+pnpm workspace: hai app Next.js + ba package dùng chung. Marketing site định vị EngliTutor (AI English tutor); workspace vẫn là dashboard tạo/xuất bản landing page.
 
 ## Workspaces
 

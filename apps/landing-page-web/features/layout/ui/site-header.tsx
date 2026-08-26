@@ -10,16 +10,16 @@ import { motion, AnimatePresence } from "motion/react";
 import { getAppUrl, getAuthHref } from "@/features/auth/model/session";
 
 const GUEST_NAV = [
-  { href: "/#features", label: "Tính năng" },
-  { href: "/#workflow", label: "Quy trình" },
+  { href: "/#for-you", label: "For you" },
+  { href: "/#practice", label: "Sessions" },
+  { href: "/#path", label: "4 skills" },
   { href: "/payment", label: "Pricing" },
-  { href: "/#faq", label: "FAQ" },
 ];
 
 const MEMBER_NAV = [
-  { href: "/#features", label: "Tính năng" },
-  { href: "/#workflow", label: "Quy trình" },
-  { href: "/payment", label: "Gói dịch vụ" },
+  { href: "/#practice", label: "Sessions" },
+  { href: "/#path", label: "4 skills" },
+  { href: "/payment", label: "Plans" },
   { href: "/#faq", label: "FAQ" },
 ];
 
@@ -31,28 +31,23 @@ function WorkspaceMenuCard({ href, className }: { href: string; className?: stri
       href={href}
       role="menuitem"
       className={cn(
-        "group relative block overflow-hidden rounded-2xl px-3.5 py-2.5 text-left text-white outline-none",
-        "bg-[linear-gradient(145deg,#06352d_0%,#0a4a3c_48%,#1f8a68_100%)]",
-        "shadow-[0_14px_36px_-16px_rgba(6,53,45,0.65)] transition-shadow duration-300",
-        "hover:shadow-[0_16px_36px_-14px_rgba(6,53,45,0.7)]",
+        "group relative block overflow-hidden rounded-sm px-3.5 py-2.5 text-left text-primary-foreground outline-none",
+        "bg-primary",
+        "shadow-[0_10px_28px_-18px_rgba(15,23,42,0.55)] transition-opacity duration-300 hover:opacity-95",
         "focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
         className,
       )}
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -top-8 -right-6 size-20 rounded-full bg-accent/25 blur-2xl"
-      />
       <span className="relative flex items-center justify-between gap-3">
         <span className="min-w-0 space-y-0.5">
           <span className="font-[family-name:var(--font-display)] text-base leading-none tracking-tight">
-            Mở Workspace
+            Open Workspace
           </span>
-          <span className="block truncate text-xs text-white/70">
-            Quản lý landing page & xuất bản
+          <span className="block truncate text-xs text-primary-foreground/70">
+            Learning path & practice sessions
           </span>
         </span>
-        <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-white/12 text-white transition-colors duration-300 group-hover:bg-accent group-hover:text-accent-foreground">
+        <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-sm bg-white/10 text-primary-foreground transition-colors duration-300 group-hover:bg-accent group-hover:text-accent-foreground">
           <ArrowUpRight className="size-3.5" strokeWidth={2.25} />
         </span>
       </span>
@@ -118,7 +113,7 @@ export function SiteHeader() {
   const navItems = isLoggedIn ? MEMBER_NAV : GUEST_NAV;
   const appUrl = getAppUrl();
   const authHref = getAuthHref();
-  const displayName = user?.name?.trim() || user?.email?.split("@")[0] || "Tài khoản";
+  const displayName = user?.name?.trim() || user?.email?.split("@")[0] || "Account";
 
   const linkTone = useSolidHeader
     ? "text-muted-foreground hover:text-foreground"
@@ -136,8 +131,8 @@ export function SiteHeader() {
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-[background,box-shadow,backdrop-filter] duration-300",
         useSolidHeader
-          ? "bg-background/88 shadow-[0_8px_30px_-18px_rgba(6,53,45,0.45)] backdrop-blur-md"
-          : "bg-gradient-to-b from-[#041f1a]/75 via-[#041f1a]/35 to-transparent",
+          ? "bg-background/90 shadow-[0_8px_28px_-20px_rgba(15,23,42,0.35)] backdrop-blur-md"
+          : "bg-gradient-to-b from-[#0b1524]/80 via-[#0b1524]/40 to-transparent",
       )}
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -146,7 +141,7 @@ export function SiteHeader() {
       {useSolidHeader ? (
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,hsla(160,28%,97%,0.92),hsla(158,22%,93%,0.55)_70%,hsla(160,28%,97%,0.2))] dark:bg-[linear-gradient(180deg,hsla(168,34%,7%,0.94),hsla(167,25%,12%,0.7)_70%,hsla(168,34%,7%,0.25))]"
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,hsla(210,22%,97%,0.94),hsla(214,18%,93%,0.55)_70%,hsla(210,22%,97%,0.2))] dark:bg-[linear-gradient(180deg,hsla(222,32%,8%,0.94),hsla(221,24%,14%,0.7)_70%,hsla(222,32%,8%,0.25))]"
         />
       ) : null}
 
@@ -158,7 +153,7 @@ export function SiteHeader() {
             useSolidHeader ? "text-foreground" : "text-white",
           )}
         >
-          Pagecraft
+          EngliTutor
         </Link>
 
         <div className="flex items-center justify-end gap-4 md:gap-10">
@@ -188,7 +183,7 @@ export function SiteHeader() {
                 <button
                   type="button"
                   className={cn(
-                    "inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full px-2.5 text-sm shadow-sm transition-colors",
+                    "inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-sm px-2.5 text-sm shadow-sm transition-colors",
                     onHero
                       ? "border border-white/25 bg-white/10 text-white hover:bg-white/16"
                       : "border border-border/80 bg-background/80 text-foreground hover:bg-muted",
@@ -197,7 +192,7 @@ export function SiteHeader() {
                   aria-expanded={menuOpen}
                   aria-haspopup="menu"
                 >
-                  <span className="inline-flex size-6 items-center justify-center rounded-full bg-[linear-gradient(145deg,#0a4a3c,#1f8a68)] text-[10px] font-semibold text-white">
+                  <span className="inline-flex size-6 items-center justify-center rounded-sm bg-primary text-[10px] font-semibold text-primary-foreground">
                     {displayName.slice(0, 1).toUpperCase()}
                   </span>
                   <span className="hidden max-w-[7.5rem] truncate sm:inline">{displayName}</span>
@@ -214,7 +209,7 @@ export function SiteHeader() {
                   {menuOpen ? (
                     <motion.div
                       role="menu"
-                      className="absolute right-0 mt-2 w-[17.5rem] overflow-hidden rounded-2xl border border-border bg-background p-2 shadow-[0_24px_50px_-24px_rgba(6,53,45,0.55)]"
+                    className="absolute right-0 mt-2 w-[17.5rem] overflow-hidden rounded-sm border border-border bg-background p-2 shadow-[0_20px_44px_-24px_rgba(15,23,42,0.45)]"
                       initial={{ opacity: 0, y: 8, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 6, scale: 0.98 }}
@@ -234,7 +229,7 @@ export function SiteHeader() {
                           className="block rounded-xl px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted"
                           onClick={() => setMenuOpen(false)}
                         >
-                          Quản lý gói
+                          Manage plan
                         </Link>
                         <button
                           type="button"
@@ -242,7 +237,7 @@ export function SiteHeader() {
                           className="w-full cursor-pointer rounded-xl px-3 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                           onClick={signOut}
                         >
-                          Đăng xuất
+                          Sign out
                         </button>
                       </div>
                     </motion.div>
@@ -261,18 +256,20 @@ export function SiteHeader() {
                         : "text-muted-foreground hover:bg-muted hover:text-foreground",
                     )}
                   >
-                    Đăng nhập
+                    Sign in
                   </Link>
                 ) : null}
                 <Link href={isAuth || isPayment ? "/" : "/payment"}>
                   <Button
                     size="sm"
                     className={
-                      onHero ? "bg-accent text-accent-foreground hover:bg-accent/90" : undefined
+                      onHero
+                        ? "rounded-full border-0 bg-white/95 px-4 font-medium text-[#0b1524] shadow-sm hover:bg-white"
+                        : "rounded-full font-medium"
                     }
                     type="button"
                   >
-                    {isAuth || isPayment ? "Về trang chủ" : "Dùng thử"}
+                    {isAuth || isPayment ? "Back to home" : "Start speaking"}
                   </Button>
                 </Link>
               </>

@@ -5,13 +5,73 @@
 @source "../../../packages/landing-renderer/src";
 
 @theme inline {
-  --font-display: var(--font-display), "Fraunces", serif;
-  --font-sans: var(--font-sans), "Manrope", sans-serif;
+  --font-display: var(--font-sans), "Plus Jakarta Sans", sans-serif;
+  --font-sans: var(--font-sans), "Plus Jakarta Sans", sans-serif;
 }
 
 @layer base {
+  /* EngliTutor ink & chalk — override shared UI teal tokens for workspace only */
+  :root {
+    color-scheme: light;
+    --radius: 0.85rem;
+    --background: 210 22% 97%;
+    --foreground: 222 38% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 38% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 38% 12%;
+    --surface: 214 18% 93%;
+    --primary: 222 42% 22%;
+    --primary-foreground: 210 25% 97%;
+    --secondary: 214 16% 90%;
+    --secondary-foreground: 222 38% 12%;
+    --muted: 214 16% 90%;
+    --muted-foreground: 220 12% 40%;
+    --border: 216 14% 82%;
+    --input: 216 14% 82%;
+    --ring: 222 42% 22%;
+    --accent: 36 42% 48%;
+    --accent-foreground: 40 30% 98%;
+    --destructive: 0 68% 48%;
+    --destructive-foreground: 0 0% 98%;
+  }
+
+  .dark {
+    color-scheme: dark;
+    --background: 222 32% 8%;
+    --foreground: 210 20% 94%;
+    --card: 222 28% 11%;
+    --card-foreground: 210 20% 94%;
+    --popover: 222 28% 11%;
+    --popover-foreground: 210 20% 94%;
+    --surface: 221 24% 14%;
+    --primary: 210 28% 78%;
+    --primary-foreground: 222 38% 10%;
+    --secondary: 220 18% 16%;
+    --secondary-foreground: 210 20% 94%;
+    --muted: 220 18% 16%;
+    --muted-foreground: 215 12% 64%;
+    --border: 218 16% 22%;
+    --input: 218 16% 24%;
+    --ring: 36 42% 52%;
+    --accent: 36 48% 48%;
+    --accent-foreground: 222 38% 10%;
+    --destructive: 0 58% 46%;
+    --destructive-foreground: 0 0% 98%;
+  }
+
   body {
     font-family: var(--font-sans);
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(ellipse at 12% 0%, hsl(214 30% 92% / 0.9), transparent 42%),
+      linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
+  }
+
+  .dark body {
+    background-image:
+      radial-gradient(ellipse at 18% 0%, hsl(222 28% 14% / 0.85), transparent 45%),
+      linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
   }
 
   a,
@@ -33,45 +93,11 @@
 
 @layer components {
   .workspace-background {
-    background-color: hsl(var(--background));
-    background-image:
-      radial-gradient(circle at 88% 4%, hsl(var(--accent) / 0.12), transparent 27rem),
-      radial-gradient(circle at 8% 96%, hsl(var(--primary) / 0.09), transparent 25rem),
-      linear-gradient(145deg, hsl(var(--background)) 8%, hsl(var(--surface) / 0.72) 100%);
+    background-color: transparent;
   }
 
   .workspace-ambient {
-    opacity: 0.32;
-    background-image: radial-gradient(hsl(var(--foreground) / 0.22) 0.65px, transparent 0.65px);
-    background-size: 18px 18px;
-    mask-image: linear-gradient(to bottom, black, transparent 72%);
-  }
-
-  .dark .workspace-background {
-    background-image:
-      radial-gradient(circle at 86% 2%, hsl(var(--accent) / 0.1), transparent 28rem),
-      radial-gradient(circle at 5% 95%, hsl(var(--primary) / 0.08), transparent 24rem),
-      linear-gradient(145deg, hsl(var(--background)) 10%, hsl(var(--surface) / 0.54) 100%);
-  }
-
-  .dark .workspace-ambient {
-    opacity: 0.2;
-  }
-
-  [data-slot="card"] {
-    transition: border-color 160ms ease;
-  }
-
-  @media (hover: hover) {
-    [data-slot="card"]:hover {
-      border-color: hsl(var(--primary) / 0.22);
-    }
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  [data-slot="card"] {
-    transition: none;
+    display: none;
   }
 }
 
@@ -92,4 +118,54 @@
     animation: none;
     transform: translateX(50%);
   }
+
+  .speaking-aurora,
+  .speaking-aurora-rev,
+  .speaking-breath,
+  .speaking-breath-slow {
+    animation: none !important;
+  }
+}
+
+@keyframes speaking-aurora {
+  0% {
+    transform: translate3d(-4%, -2%, 0) scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate3d(3%, 3%, 0) scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(-4%, -2%, 0) scale(1);
+    opacity: 0.7;
+  }
+}
+
+@keyframes speaking-breath {
+  0%,
+  100% {
+    transform: scale(0.96);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 0.9;
+  }
+}
+
+.speaking-aurora {
+  animation: speaking-aurora 18s ease-in-out infinite;
+}
+
+.speaking-aurora-rev {
+  animation: speaking-aurora 22s ease-in-out infinite reverse;
+}
+
+.speaking-breath {
+  animation: speaking-breath 2.8s ease-in-out infinite;
+}
+
+.speaking-breath-slow {
+  animation: speaking-breath 5.5s ease-in-out infinite;
 }

@@ -4,30 +4,30 @@ export type WorkspacePlanId = "starter" | "growth" | "scale";
 
 export const STARTER_PLAN = {
   id: "starter" as const,
-  name: "Starter",
-  description: "Miễn phí — dùng thử và launch trang đầu tiên.",
+  name: "Free",
+  description: "Limited conversation minutes per day — explore EngliTutor.",
   features: [
-    "50 credit đăng ký (một lần)",
-    "1 landing page đang hoạt động",
-    "Template cơ bản, publish nhanh",
-    "Domain phụ Pagecraft",
+    "Limited AI speaking practice minutes per day",
+    "Placement test & learner profile",
+    "Basic CEFR learning path",
+    "Error feedback in Vietnamese",
   ],
 };
 
 export const STATUS_LABEL: Record<string, string> = {
-  active: "Đang hoạt động",
-  ACTIVE: "Đang hoạt động",
-  past_due: "Quá hạn thanh toán",
-  PAST_DUE: "Quá hạn thanh toán",
-  canceled: "Đã hủy",
-  CANCELED: "Đã hủy",
-  incomplete: "Chưa hoàn tất",
-  INCOMPLETE: "Chưa hoàn tất",
+  active: "Active",
+  ACTIVE: "Active",
+  past_due: "Past due",
+  PAST_DUE: "Past due",
+  canceled: "Canceled",
+  CANCELED: "Canceled",
+  incomplete: "Incomplete",
+  INCOMPLETE: "Incomplete",
 };
 
 export const PERIOD_LABEL: Record<string, string> = {
-  monthly: "Theo tháng",
-  yearly: "Theo năm",
+  monthly: "Monthly",
+  yearly: "Yearly",
 };
 
 export function currentPlanId(data: BillingMe | undefined): WorkspacePlanId {

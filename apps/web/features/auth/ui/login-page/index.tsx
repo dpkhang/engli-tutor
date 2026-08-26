@@ -72,7 +72,7 @@ export function LoginPage() {
       window.location.assign(returnTo);
     } catch {
       setPending(false);
-      setError("Không thể kết nối máy chủ xác thực. Thử lại.");
+      setError("Couldn't reach the auth server. Please try again.");
     }
   });
 
@@ -92,7 +92,6 @@ export function LoginPage() {
       mode={mode}
       pending={pending || sessionPending}
       error={error}
-      marketingUrl={marketingUrl}
       register={form.register}
       errors={form.formState.errors}
       onModeChange={changeMode}

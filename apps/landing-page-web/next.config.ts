@@ -55,12 +55,12 @@ const nextConfig: NextConfig = {
     "@landing-page-generator/ui",
     "@landing-page-generator/auth",
     "@landing-page-generator/api-client",
-    "@landing-page-generator/landing-renderer",
   ],
   turbopack: {
     root: path.join(__dirname, "../.."),
   },
   images: {
+    qualities: [70, 75],
     remotePatterns: [
       {
         protocol: "https",

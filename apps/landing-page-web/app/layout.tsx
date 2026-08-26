@@ -1,29 +1,24 @@
 import type { Metadata } from "next";
-import { Fraunces, Manrope } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const display = Fraunces({
-  subsets: ["latin", "latin-ext"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const sans = Manrope({
-  subsets: ["latin", "latin-ext"],
+const sans = Plus_Jakarta_Sans({
+  subsets: ["latin", "latin-ext", "vietnamese"],
   variable: "--font-sans",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Pagecraft — Landing Page Generator",
-  description: "Tạo và xuất bản landing page quảng bá nhanh chóng",
+  title: "EngliTutor — AI English Tutor",
+  description:
+    "Practice speaking English with AI every day and get feedback in Vietnamese. Built for A2–B1 working professionals.",
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="vi" className={`${display.variable} ${sans.variable}`} suppressHydrationWarning>
+    <html lang="en" className={sans.variable} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{

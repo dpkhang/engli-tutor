@@ -4,26 +4,29 @@ import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
 import { getAppUrl, getAuthHref, getSiteUrl } from "@/features/auth/model/session";
-import { getPlanById, planCheckoutHref, PLANS, type PlanId } from "@/features/marketing/model/plans";
+import { getPlanById, planCheckoutHref, plansFromCatalog, type PlanId } from "@/features/marketing/model/plans";
 import { billingApi } from "@/features/payment/api/billing";
 import { useBillingMe } from "@/features/payment/hooks/use-billing-me";
+import { useBillingCatalog } from "@/features/payment/hooks/use-billing-catalog";
 import { PaymentPackagesPageView } from "./payment-packages-page.view";
 
 export function PaymentPackagesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queriedPlan = searchParams.get("plan");
-  const highlighted = getPlanById(queriedPlan).id;
+  const catalog = useBillingCatalog();
+  const plans = plansFromCatalog(catalog.data);
+  const highlighted = getPlanById(queriedPlan, plans).id;
   const checkoutState = searchParams.get("checkout");
   const checkoutType = searchParams.get("type");
   const sessionId = searchParams.get("session_id");
   const { isLoggedIn, ready: authReady } = useAuthSession();
   const billing = useBillingMe(isLoggedIn);
   const redirectingToCurrentPlan = Boolean(
-    !authReady || (isLoggedIn && (billing.isLoading || billing.data?.hasPaidPlan)),
+    !authReady || catalog.isLoading || (isLoggedIn && (billing.isLoading || billing.data?.hasPaidPlan)),
   );
   const planHrefs = Object.fromEntries(
-    PLANS.map((plan) => {
+    plans.map((plan) => {
       const checkoutHref = planCheckoutHref(plan.id);
       if (isLoggedIn) return [plan.id, checkoutHref];
       if (plan.id === "starter") return [plan.id, getAuthHref("/")];
@@ -59,7 +62,7 @@ export function PaymentPackagesPage() {
 
   return (
     <PaymentPackagesPageView
-      plans={PLANS}
+      plans={plans}
       queriedPlan={queriedPlan}
       highlighted={highlighted}
       checkoutState={checkoutState}

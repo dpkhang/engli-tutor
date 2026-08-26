@@ -80,8 +80,8 @@ export function MasterBanner() {
       imageTransform={imageTransform}
       glowTransform={glowTransform}
       onEntryClick={() => goToEntry(isLoggedIn)}
-      onFeaturesClick={() => {
-        document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
+      onPracticeClick={() => {
+        document.getElementById("practice")?.scrollIntoView({ behavior: "smooth" });
       }}
     />
   );

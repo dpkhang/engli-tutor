@@ -1,31 +1,26 @@
 import type { Metadata } from "next";
-import { Fraunces, Manrope } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import { QueryProvider } from "@/providers/query-provider";
 import { AuthGate } from "@/providers/auth-gate";
 import { AppShell } from "@/features/layout";
 import { ActionDialogProvider } from "@landing-page-generator/ui";
 import "./globals.css";
 
-const display = Fraunces({
-  subsets: ["latin", "latin-ext"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const sans = Manrope({
-  subsets: ["latin", "latin-ext"],
+const sans = Plus_Jakarta_Sans({
+  subsets: ["latin", "latin-ext", "vietnamese"],
   variable: "--font-sans",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Pagecraft Workspace",
-  description: "Quản lý và xuất bản landing page",
+  title: "EngliTutor — Learn English with AI",
+  description:
+    "Practice listening · speaking · reading · writing with AI chat, quick tips, and mini-games every day.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="vi" className={`${display.variable} ${sans.variable}`} suppressHydrationWarning>
+    <html lang="en" className={sans.variable} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{

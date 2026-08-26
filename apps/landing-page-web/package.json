@@ -16,7 +16,6 @@
   "dependencies": {
     "@landing-page-generator/api-client": "workspace:*",
     "@landing-page-generator/auth": "workspace:*",
-    "@landing-page-generator/landing-renderer": "workspace:*",
     "@landing-page-generator/ui": "workspace:*",
     "lucide-react": "^1.28.0",
     "motion": "^12.43.0",

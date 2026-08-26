@@ -8,18 +8,21 @@ import {
   getBillingTotal,
   getPlanById,
   isPaidPlan,
-  PLANS,
+  plansFromCatalog,
   type BillingPeriod,
   type PlanId,
 } from "@/features/marketing/model/plans";
 import { billingApi } from "@/features/payment/api/billing";
 import { useBillingMe } from "@/features/payment/hooks/use-billing-me";
+import { useBillingCatalog } from "@/features/payment/hooks/use-billing-catalog";
 import { PaymentCheckoutPageView } from "./payment-checkout-page.view";
 
 export function PaymentCheckoutPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const plan = useMemo(() => getPlanById(searchParams.get("plan")), [searchParams]);
+  const catalog = useBillingCatalog();
+  const plans = useMemo(() => plansFromCatalog(catalog.data), [catalog.data]);
+  const plan = useMemo(() => getPlanById(searchParams.get("plan"), plans), [searchParams, plans]);
   const [period, setPeriod] = useState<BillingPeriod>("monthly");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,16 +33,17 @@ export function PaymentCheckoutPage() {
   const isFree = plan.priceValue === 0;
   const paidPlan = isPaidPlan(plan.id);
   const ownedPlan = billingMe.data?.hasPaidPlan
-    ? getPlanById(billingMe.data.subscription.planId)
+    ? getPlanById(billingMe.data.subscription.planId, plans)
     : null;
   const upgradePlans = ownedPlan
-    ? PLANS.filter((candidate) => candidate.priceValue > ownedPlan.priceValue).sort(
+    ? plans.filter((candidate) => candidate.priceValue > ownedPlan.priceValue).sort(
         (left, right) => left.priceValue - right.priceValue,
       )
     : [];
 
   useEffect(() => {
-    if (sessionPending) return;
+    if (sessionPending || catalog.isLoading) return;
+    if (catalog.error && searchParams.get("plan") !== "starter") return;
     if (isFree) {
       router.replace(getMarketingAuthHref());
       return;
@@ -48,21 +52,21 @@ export function PaymentCheckoutPage() {
       const returnTo = `${window.location.pathname}${window.location.search}`;
       router.replace(getMarketingAuthHref(returnTo));
     }
-  }, [isFree, session?.user, sessionPending, router]);
+  }, [catalog.error, catalog.isLoading, isFree, searchParams, session?.user, sessionPending, router]);
 
   const onSubscribe = async () => {
     if (!paidPlan) return;
     setError(null);
     setPending(true);
     try {
-      const result = await billingApi.subscribe(plan.id as "growth" | "scale", period);
+      const result = await billingApi.subscribe(plan.id, period);
       if (!result.url) {
-        setError("Stripe không trả về URL thanh toán");
+        setError("Stripe did not return a checkout URL");
         return;
       }
       window.location.assign(result.url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Không tạo được phiên thanh toán");
+      setError(err instanceof Error ? err.message : "Could not create a checkout session");
     } finally {
       setPending(false);
     }
@@ -75,12 +79,12 @@ export function PaymentCheckoutPage() {
     try {
       const result = await billingApi.upgrade(planId);
       if (!result.url) {
-        setError("Stripe không trả về URL nâng cấp");
+        setError("Stripe did not return an upgrade URL");
         return;
       }
       window.location.assign(result.url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Không tạo được phiên nâng cấp");
+      setError(err instanceof Error ? err.message : "Could not create an upgrade session");
     } finally {
       setPending(false);
     }
@@ -93,10 +97,11 @@ export function PaymentCheckoutPage() {
       billing={billing}
       isFree={isFree}
       pending={pending}
-      error={error ?? billingMe.error?.message ?? null}
+      error={error ?? catalog.error?.message ?? billingMe.error?.message ?? null}
       workspaceUrl={getAppUrl()}
       checkingBilling={
         sessionPending ||
+        catalog.isLoading ||
         !session?.user ||
         billingMe.isLoading ||
         (!billingMe.data && !billingMe.error)

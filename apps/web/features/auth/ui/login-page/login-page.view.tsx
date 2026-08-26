@@ -12,7 +12,6 @@ export type LoginPageViewProps = {
   mode: AuthMode;
   pending: boolean;
   error: string | null;
-  marketingUrl: string;
   register: UseFormRegister<LoginFormValues>;
   errors: FieldErrors<LoginFormValues>;
   onModeChange: (mode: AuthMode) => void;
@@ -23,7 +22,6 @@ export function LoginPageView({
   mode,
   pending,
   error,
-  marketingUrl,
   register,
   errors,
   onModeChange,
@@ -32,13 +30,13 @@ export function LoginPageView({
   return (
     <main className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center space-y-8">
       <div className="space-y-2">
-        <h1 className="font-[family-name:var(--font-display)] text-3xl tracking-tight text-foreground">
-          {mode === "login" ? "Đăng nhập" : "Tạo tài khoản"}
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+          {mode === "login" ? "Sign in" : "Create account"}
         </h1>
         <p className="text-sm text-muted-foreground">
           {mode === "login"
-            ? "Vào workspace để quản lý landing page."
-            : "Tạo tài khoản để bắt đầu xuất bản trang."}
+            ? "Welcome back to EngliTutor Workspace."
+            : "Create an account to manage pages and your learning path."}
         </p>
       </div>
 
@@ -53,7 +51,7 @@ export function LoginPageView({
           disabled={pending}
           onClick={() => onModeChange("login")}
         >
-          Đăng nhập
+          Sign in
         </button>
         <button
           type="button"
@@ -65,16 +63,16 @@ export function LoginPageView({
           disabled={pending}
           onClick={() => onModeChange("register")}
         >
-          Đăng ký
+          Sign up
         </button>
       </div>
 
       <form className="space-y-2.5" onSubmit={onSubmit} noValidate>
         {mode === "register" ? (
           <label className="block space-y-1.5 text-sm">
-            <span className="font-medium text-foreground">Họ và tên</span>
+            <span className="font-medium text-foreground">Full name</span>
             <Input
-              placeholder="Nguyễn Văn A"
+              placeholder="Jane Doe"
               disabled={pending}
               aria-invalid={Boolean(errors.name)}
               {...register("name")}
@@ -89,7 +87,7 @@ export function LoginPageView({
           <span className="font-medium text-foreground">Email</span>
           <Input
             type="email"
-            placeholder="ban@congty.com"
+            placeholder="you@company.com"
             autoComplete="email"
             disabled={pending}
             aria-invalid={Boolean(errors.email)}
@@ -101,7 +99,7 @@ export function LoginPageView({
         </label>
 
         <label className="block space-y-1.5 text-sm">
-          <span className="font-medium text-foreground">Mật khẩu</span>
+          <span className="font-medium text-foreground">Password</span>
           <Input
             type="password"
             placeholder="••••••••"
@@ -121,18 +119,14 @@ export function LoginPageView({
 
         <div className="pt-1.5">
           <Button type="submit" className="w-full" size="lg" disabled={pending}>
-            {pending ? "Đang xử lý..." : mode === "login" ? "Đăng nhập" : "Tạo tài khoản"}
+            {pending ? "Please wait..." : mode === "login" ? "Sign in" : "Create account"}
           </Button>
         </div>
       </form>
 
       <p className="text-sm text-muted-foreground">
-        <a href={marketingUrl} className="font-medium text-primary hover:underline">
-          ← Về trang marketing
-        </a>
-        {" · "}
         <Link href="/" className="font-medium text-primary hover:underline">
-          Workspace
+          ← Back to home
         </Link>
       </p>
     </main>

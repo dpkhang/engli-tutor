@@ -20,9 +20,6 @@ importers:
       '@landing-page-generator/auth':
         specifier: workspace:*
         version: link:../../packages/auth
-      '@landing-page-generator/landing-renderer':
-        specifier: workspace:*
-        version: link:../../packages/landing-renderer
       '@landing-page-generator/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -75,9 +72,6 @@ importers:
       '@landing-page-generator/auth':
         specifier: workspace:*
         version: link:../../packages/auth
-      '@landing-page-generator/landing-renderer':
-        specifier: workspace:*
-        version: link:../../packages/landing-renderer
       '@landing-page-generator/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -149,28 +143,6 @@ importers:
       '@types/node':
         specifier: ^26.1.2
         version: 26.1.2
-      '@types/react':
-        specifier: ^19.2.17
-        version: 19.2.17
-      react:
-        specifier: ^19.2.8
-        version: 19.2.8
-      typescript:
-        specifier: ~5.9.3
-        version: 5.9.3
-
-  packages/landing-renderer:
-    dependencies:
-      '@landing-page-generator/ui':
-        specifier: workspace:*
-        version: link:../ui
-      lucide-react:
-        specifier: ^1.28.0
-        version: 1.28.0(react@19.2.8)
-      zod:
-        specifier: ^4.4.3
-        version: 4.4.3
-    devDependencies:
       '@types/react':
         specifier: ^19.2.17
         version: 19.2.17

@@ -25,7 +25,7 @@ export function ModulePlaceholder({
         eyebrow={eyebrow}
         title={title}
         description={description}
-        action={<Badge variant="secondary">UI ready · chờ API</Badge>}
+        action={<Badge variant="secondary">UI ready · awaiting API</Badge>}
       />
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {capabilities.map((item) => (
@@ -39,7 +39,7 @@ export function ModulePlaceholder({
                 <p className="mt-1 text-sm leading-6 text-muted-foreground">{item.description}</p>
               </div>
               <Button type="button" variant="ghost" size="sm" className="-ml-3" disabled>
-                Thiết lập <ArrowRight />
+                Set up <ArrowRight />
               </Button>
             </CardContent>
           </Card>
@@ -48,8 +48,7 @@ export function ModulePlaceholder({
       <div className="flex items-start gap-3 rounded-xl border border-dashed bg-card p-5 text-sm text-muted-foreground">
         <DatabaseZap className="mt-0.5 size-5 shrink-0 text-primary" />
         <p>
-          Module đã có route và navigation. Cần bổ sung database model cùng API tương ứng trước khi
-          bật thao tác lưu dữ liệu.
+          This module already has a route and navigation. Add the matching database model and API before enabling data writes.
         </p>
       </div>
     </div>

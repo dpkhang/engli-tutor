@@ -10,8 +10,8 @@ import {
   Card,
   CardContent,
 } from "@landing-page-generator/ui";
-import { domainHooks } from "@/features/workspace-api/hooks";
-import type { Domain } from "@/features/workspace-api/api";
+import { domainHooks } from "../hooks";
+import type { Domain } from "../api";
 
 function CopyField({ label, value }: { label: string; value: string }) {
   const [copied, setCopied] = useState(false);
@@ -33,7 +33,7 @@ function CopyField({ label, value }: { label: string; value: string }) {
           }}
         >
           {copied ? <Check /> : <Copy />}
-          {copied ? "Đã chép" : "Copy"}
+          {copied ? "Copied" : "Copy"}
         </Button>
       </div>
     </div>
@@ -58,17 +58,17 @@ export function DomainVerificationPanel({
       <Card className="shadow-none">
         <CardContent className="space-y-3 py-4">
           <p className="text-sm text-muted-foreground">
-            Domain thuê được xác minh tự động sau thanh toán. Dùng nút kiểm tra DNS/SSL nếu vẫn
-            đang chờ.
+            Purchased domains are verified automatically after payment. Use the DNS/SSL check button if still
+            pending.
           </p>
           <div className="flex gap-2">
             <Button size="sm" disabled={verify.isPending} onClick={() => verify.mutate(domain.id)}>
               {verify.isPending ? <LoaderCircle className="animate-spin" /> : <RefreshCw />}
-              Kiểm tra trạng thái
+              Check status
             </Button>
             {onClose ? (
               <Button size="sm" variant="ghost" onClick={onClose}>
-                Đóng
+                Close
               </Button>
             ) : null}
           </div>
@@ -84,7 +84,7 @@ export function DomainVerificationPanel({
           <ShieldCheck className="mt-0.5 size-4 text-primary" />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-sm font-semibold">Xác minh — {domain.hostname}</p>
+              <p className="text-sm font-semibold">Verify — {domain.hostname}</p>
               {instructions ? (
                 <Badge variant="outline">
                   {isSubdomain ? "Subdomain · CNAME" : "Apex · TXT"}
@@ -93,14 +93,14 @@ export function DomainVerificationPanel({
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
               {isSubdomain
-                ? "Chỉ cần 1 bản ghi CNAME trỏ subdomain về Pagecraft."
-                : "Domain gốc cần TXT. Nên dùng subdomain (lp.brand.com) cho đơn giản hơn."}
+                ? "Only one CNAME record is needed to point the subdomain to Pagecraft."
+                : "Apex domains need TXT. Prefer a subdomain (lp.brand.com) for simpler setup."}
             </p>
           </div>
         </div>
 
         {verification.isLoading ? (
-          <p className="text-sm text-muted-foreground">Đang tải hướng dẫn DNS…</p>
+          <p className="text-sm text-muted-foreground">Loading DNS instructions…</p>
         ) : null}
         {verification.error ? (
           <Alert variant="destructive">
@@ -117,7 +117,7 @@ export function DomainVerificationPanel({
                     {record.type} · {record.purpose}
                   </p>
                   <Badge variant={record.required ? "default" : "secondary"}>
-                    {record.required ? "Bắt buộc" : "Tuỳ chọn"}
+                    {record.required ? "Required" : "Optional"}
                   </Badge>
                 </div>
                 <CopyField label="Host / Name (FQDN)" value={record.host} />
@@ -130,7 +130,7 @@ export function DomainVerificationPanel({
                 <li key={note}>{note}</li>
               ))}
               {instructions.skipDns ? (
-                <li>Môi trường hiện tại đang bật DOMAIN_VERIFY_SKIP_DNS (bỏ qua DNS thật).</li>
+                <li>This environment has DOMAIN_VERIFY_SKIP_DNS enabled (skips real DNS).</li>
               ) : null}
             </ul>
           </div>
@@ -149,7 +149,7 @@ export function DomainVerificationPanel({
             onClick={() => verify.mutate(domain.id)}
           >
             {verify.isPending ? <LoaderCircle className="animate-spin" /> : <ShieldCheck />}
-            {isSubdomain ? "Xác minh CNAME" : "Xác minh TXT"}
+            {isSubdomain ? "Verify CNAME" : "Verify TXT"}
           </Button>
           <Button
             size="sm"
@@ -157,11 +157,11 @@ export function DomainVerificationPanel({
             disabled={verification.isFetching}
             onClick={() => void verification.refetch()}
           >
-            <RefreshCw /> Làm mới hướng dẫn
+            <RefreshCw /> Refresh instructions
           </Button>
           {onClose ? (
             <Button size="sm" variant="ghost" onClick={onClose}>
-              Đóng
+              Close
             </Button>
           ) : null}
         </div>

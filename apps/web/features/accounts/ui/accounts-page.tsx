@@ -22,9 +22,9 @@ export default function AccountsPage() {
 
   const signOut = async () => {
     const accepted = await dialog.confirm({
-      title: "Đăng xuất?",
-      description: "Bạn sẽ cần đăng nhập lại để tiếp tục quản lý workspace.",
-      confirmLabel: "Đăng xuất",
+      title: "Sign out?",
+      description: "You'll need to sign in again to continue managing the workspace.",
+      confirmLabel: "Sign out",
       tone: "danger",
     });
     if (!accepted) return;
@@ -34,21 +34,21 @@ export default function AccountsPage() {
   return (
     <div className="space-y-8">
       <PageHeader
-        eyebrow="Cá nhân"
-        title="Tài khoản"
-        description="Xem thông tin hồ sơ, trạng thái bảo mật và phiên đăng nhập hiện tại."
+        eyebrow="Personal"
+        title="Account"
+        description="View your profile, security status, and current sign-in session."
       />
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <Card className="shadow-none">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <UserRound className="size-5 text-primary" /> Hồ sơ
+              <UserRound className="size-5 text-primary" /> Profile
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="account-name">Họ và tên</Label>
+              <Label htmlFor="account-name">Full name</Label>
               <Input id="account-name" value={user?.name ?? ""} readOnly />
             </div>
             <div className="space-y-2">
@@ -56,7 +56,7 @@ export default function AccountsPage() {
               <Input id="account-email" value={user?.email ?? ""} readOnly />
             </div>
             <p className="text-xs text-muted-foreground">
-              API cập nhật hồ sơ chưa được bật. Thông tin hiện lấy trực tiếp từ phiên Better Auth.
+              Profile update API is not enabled yet. Details are loaded from your Better Auth session.
             </p>
           </CardContent>
         </Card>
@@ -65,7 +65,7 @@ export default function AccountsPage() {
           <Card className="shadow-none">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ShieldCheck className="size-5 text-primary" /> Bảo mật
+                <ShieldCheck className="size-5 text-primary" /> Security
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
@@ -73,18 +73,18 @@ export default function AccountsPage() {
                 <span className="flex items-center gap-2 text-muted-foreground">
                   <Mail className="size-4" /> Email
                 </span>
-                <Badge variant="secondary">Đã liên kết</Badge>
+                <Badge variant="secondary">Linked</Badge>
               </div>
               <div className="flex items-center justify-between gap-3">
                 <span className="flex items-center gap-2 text-muted-foreground">
-                  <KeyRound className="size-4" /> Mật khẩu
+                  <KeyRound className="size-4" /> Password
                 </span>
-                <Badge variant="outline">Đang sử dụng</Badge>
+                <Badge variant="outline">In use</Badge>
               </div>
             </CardContent>
           </Card>
           <Button type="button" variant="outline" className="w-full" onClick={() => void signOut()}>
-            Đăng xuất khỏi phiên này
+            Sign out of this session
           </Button>
         </div>
       </div>
