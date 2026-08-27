@@ -494,7 +494,7 @@ export function SpeakingRoomPage() {
                 }}
                 placeholder="Type your answer…"
                 disabled={pending || voice.recording}
-                className="h-11 max-h-28 min-h-11 flex-1 resize-none overflow-y-auto rounded-2xl border-0 bg-white/[0.06] px-4 py-2.5 text-sm leading-6 text-white outline-none placeholder:text-white/25 focus:bg-white/[0.09] disabled:opacity-50"
+                className="h-11 max-h-28 min-h-11 flex-1 resize-none overflow-y-auto rounded-2xl border-0 bg-white/[0.06] px-4 py-2.5 text-sm leading-6 text-white outline-none placeholder:text-white/25 focus:bg-white/[0.09] focus-visible:ring-[3px] focus-visible:ring-primary/50 disabled:opacity-50"
               />
               <Button
                 type="button"

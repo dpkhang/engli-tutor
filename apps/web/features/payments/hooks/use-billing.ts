@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { billingApi, type SubscriptionPlan, type TopupPack } from "../api/billing";
+import { billingApi, type BillingMe, type SubscriptionPlan, type TopupPack } from "../api/billing";
 
 export const billingMeQueryKey = ["billing", "me"] as const;
 
@@ -10,6 +10,8 @@ export function useBillingMe(enabled = true) {
     queryKey: billingMeQueryKey,
     queryFn: billingApi.me,
     enabled,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 }
 
@@ -54,8 +56,15 @@ export function useConfirmCheckout() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (sessionId: string) => billingApi.confirm(sessionId),
-    onSuccess: async () => {
+    onSuccess: async (result) => {
+      if (typeof result.balanceAfter === "number") {
+        queryClient.setQueryData(billingMeQueryKey, (current: BillingMe | undefined) => {
+          if (!current) return current;
+          return { ...current, balance: result.balanceAfter! };
+        });
+      }
       await queryClient.invalidateQueries({ queryKey: billingMeQueryKey });
+      await queryClient.refetchQueries({ queryKey: billingMeQueryKey });
     },
   });
 }

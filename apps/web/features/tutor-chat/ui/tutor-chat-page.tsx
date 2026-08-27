@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   LoaderCircle,
@@ -87,6 +87,13 @@ export function TutorChatPage() {
   const voice = useVoiceInput((text) => {
     setDraft(text);
   });
+
+  useLayoutEffect(() => {
+    const input = inputRef.current;
+    if (!input) return;
+    input.style.height = "0px";
+    input.style.height = `${Math.min(Math.max(input.scrollHeight, 44), 144)}px`;
+  }, [draft]);
 
   useEffect(() => {
     const scenarioParam = searchParams.get("scenario");
@@ -383,7 +390,7 @@ export function TutorChatPage() {
                   : "Type or tap mic to record English… (Enter to send)"
               }
               disabled={pending || voice.recording}
-              className="max-h-36 min-h-11 flex-1 resize-y rounded-2xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 disabled:opacity-60"
+              className="max-h-36 min-h-11 flex-1 resize-none overflow-y-auto rounded-2xl border border-border bg-background px-4 py-2.5 text-sm leading-6 outline-none focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/40 disabled:opacity-60"
             />
             <Button
               type="submit"

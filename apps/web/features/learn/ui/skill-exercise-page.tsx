@@ -90,7 +90,7 @@ function QuestionCard({
           disabled={showResult}
           onChange={(event) => onChange(event.target.value)}
           placeholder="Type your answer in English…"
-          className="w-full resize-y rounded-xl border border-border bg-background px-3.5 py-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 disabled:opacity-70"
+          className="w-full resize-y rounded-xl border border-border bg-background px-3.5 py-3 text-sm outline-none focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/40 disabled:opacity-70"
         />
       )}
 

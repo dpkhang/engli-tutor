@@ -3,9 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { Check, CircleX, LoaderCircle } from "lucide-react";
 import { Button, Card, CardContent } from "@landing-page-generator/ui";
-import { billingApi } from "../api/billing";
+import { billingApi, type BillingMe } from "../api/billing";
+import { billingMeQueryKey } from "../hooks/use-billing";
 
 type ResultState = "processing" | "success" | "failed";
 
@@ -19,6 +21,7 @@ const PLAN_NAMES: Record<string, string> = {
 
 export function PaymentResultPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const checkout = searchParams.get("checkout");
   const sessionId = searchParams.get("session_id");
@@ -35,6 +38,7 @@ export function PaymentResultPage() {
             : "Payment did not complete. Please check your payment details and try again."),
   );
   const [confirmedPlanId, setConfirmedPlanId] = useState<string | null>(null);
+  const [balanceAfter, setBalanceAfter] = useState<number | null>(null);
   const [countdown, setCountdown] = useState(5);
 
   useEffect(() => {
@@ -46,38 +50,52 @@ export function PaymentResultPage() {
     }
 
     let cancelled = false;
-    billingApi.confirm(sessionId).then(
-      (result) => {
+    (async () => {
+      try {
+        const result = await billingApi.confirm(sessionId);
         if (cancelled) return;
-        setConfirmedPlanId(result.planId ?? null);
+
+        setConfirmedPlanId(result.planId ?? itemId ?? null);
+        if (typeof result.balanceAfter === "number") {
+          setBalanceAfter(result.balanceAfter);
+          queryClient.setQueryData(billingMeQueryKey, (current: BillingMe | undefined) => {
+            if (!current) return current;
+            return { ...current, balance: result.balanceAfter! };
+          });
+        }
+
+        await queryClient.invalidateQueries({ queryKey: billingMeQueryKey });
+        await queryClient.refetchQueries({ queryKey: billingMeQueryKey });
+
         setState("success");
         setMessage(
           checkoutType === "topup"
-            ? "Credits have been added to your account and are ready to use."
+            ? typeof result.balanceAfter === "number"
+              ? `Credits have been added. Your new balance is ${result.balanceAfter}.`
+              : "Credits have been added to your account and are ready to use."
             : "Your plan is active and benefits have been updated.",
         );
-      },
-      (error: unknown) => {
+      } catch (error: unknown) {
         if (cancelled) return;
         setState("failed");
         setMessage(error instanceof Error ? error.message : "Couldn't confirm payment. Please try again.");
-      },
-    );
+      }
+    })();
 
     return () => {
       cancelled = true;
     };
-  }, [checkout, checkoutType, sessionId]);
+  }, [checkout, checkoutType, itemId, queryClient, sessionId]);
 
   useEffect(() => {
     if (state !== "success") return;
     if (countdown <= 0) {
-      router.replace("/skills");
+      router.replace(checkoutType === "topup" ? "/payments" : "/skills");
       return;
     }
     const timer = window.setTimeout(() => setCountdown((value) => value - 1), 1_000);
     return () => window.clearTimeout(timer);
-  }, [countdown, router, state]);
+  }, [checkoutType, countdown, router, state]);
 
   const packageName = useMemo(
     () => PLAN_NAMES[confirmedPlanId ?? itemId ?? ""] ?? "selected plan",
@@ -136,14 +154,25 @@ export function PaymentResultPage() {
                       state === "success" ? "text-emerald-700 dark:text-emerald-400" : "text-muted-foreground"
                     }`}
                   >
-                    {state === "success" ? "Plan activated" : "Checkout not completed"}
+                    {state === "success"
+                      ? checkoutType === "topup"
+                        ? "Credits added"
+                        : "Plan activated"
+                      : "Checkout not completed"}
                   </p>
                   <p className="mt-1 truncate text-2xl font-bold text-foreground">{packageName}</p>
+                  {state === "success" && balanceAfter != null ? (
+                    <p className="mt-1 text-sm font-medium text-emerald-800 dark:text-emerald-300">
+                      New balance: {balanceAfter} credits
+                    </p>
+                  ) : null}
                 </div>
               </div>
               {state === "success" ? (
                 <p className="mt-4 border-t border-emerald-500/20 pt-3 text-sm text-emerald-800 dark:text-emerald-300">
-                  Plan benefits have been applied to your workspace.
+                  {checkoutType === "topup"
+                    ? "Your header credit balance has been updated."
+                    : "Plan benefits have been applied to your workspace."}
                 </p>
               ) : null}
             </div>
@@ -151,13 +180,15 @@ export function PaymentResultPage() {
 
           {state === "success" ? (
             <p className="mt-5 text-sm text-muted-foreground">
-              Redirecting to your exercises in <strong className="text-foreground">{countdown}s</strong>
+              Redirecting in <strong className="text-foreground">{countdown}s</strong>
             </p>
           ) : null}
 
           <div className="mt-6 flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
             <Button asChild>
-              <Link href="/skills">Back to exercises</Link>
+              <Link href={checkoutType === "topup" ? "/payments" : "/skills"}>
+                {checkoutType === "topup" ? "Back to billing" : "Back to exercises"}
+              </Link>
             </Button>
             {state === "failed" ? (
               <Button asChild variant="outline">
