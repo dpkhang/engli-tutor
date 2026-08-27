@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, Lightbulb, Volume2 } from "lucide-react";
+import { ArrowLeft, Check, Lightbulb, RotateCcw, Volume2 } from "lucide-react";
 import { Button, cn } from "@landing-page-generator/ui";
 import { useSkillExercise } from "../hooks/use-learning-catalog";
 import {
@@ -13,9 +13,8 @@ import {
   type SkillQuestion,
 } from "../model/skill-exercises";
 
-type AnswerState = {
+type AnswerDraft = {
   value: string;
-  submitted: boolean;
   correct?: boolean;
 };
 
@@ -39,43 +38,55 @@ function speakText(text: string) {
 function QuestionCard({
   index,
   question,
-  state,
+  value,
+  correct,
+  locked,
   onChange,
-  onSubmit,
 }: {
   index: number;
   question: SkillQuestion;
-  state: AnswerState;
+  value: string;
+  correct?: boolean;
+  locked: boolean;
   onChange: (value: string) => void;
-  onSubmit: () => void;
 }) {
-  const showResult = state.submitted;
-
   return (
     <article className="space-y-4 rounded-2xl border border-border bg-card p-5">
-      <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-        Question {index + 1}
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          Question {index + 1}
+        </p>
+        {locked ? (
+          <span
+            className={cn(
+              "rounded-full px-2.5 py-1 text-[11px] font-medium",
+              correct ? "bg-accent/15 text-accent" : "bg-destructive/10 text-destructive",
+            )}
+          >
+            {correct ? "Correct" : "Review"}
+          </span>
+        ) : null}
+      </div>
       <h3 className="text-base font-semibold tracking-tight text-foreground">{question.prompt}</h3>
 
       {question.kind === "choice" ? (
         <div className="space-y-2">
           {(question as ChoiceQuestion).options.map((option, optionIndex) => {
-            const selected = state.value === String(optionIndex);
+            const selected = value === String(optionIndex);
             const isCorrect = optionIndex === (question as ChoiceQuestion).correctIndex;
             return (
               <button
                 key={option}
                 type="button"
-                disabled={showResult}
+                disabled={locked}
                 onClick={() => onChange(String(optionIndex))}
                 className={cn(
                   "flex w-full rounded-xl border px-3.5 py-3 text-left text-sm transition-colors",
-                  selected && !showResult && "border-primary bg-primary/8",
-                  showResult && isCorrect && "border-accent bg-accent/10",
-                  showResult && selected && !isCorrect && "border-destructive/50 bg-destructive/5",
-                  !selected && !showResult && "border-border hover:border-primary/30",
-                  showResult && "cursor-default",
+                  selected && !locked && "border-primary bg-primary/8",
+                  locked && isCorrect && "border-accent bg-accent/10",
+                  locked && selected && !isCorrect && "border-destructive/50 bg-destructive/5",
+                  !selected && !locked && "border-border hover:border-primary/30",
+                  locked && "cursor-default",
                 )}
               >
                 {option}
@@ -86,28 +97,19 @@ function QuestionCard({
       ) : (
         <textarea
           rows={4}
-          value={state.value}
-          disabled={showResult}
+          value={value}
+          disabled={locked}
           onChange={(event) => onChange(event.target.value)}
           placeholder="Type your answer in English…"
           className="w-full resize-y rounded-xl border border-border bg-background px-3.5 py-3 text-sm outline-none focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/40 disabled:opacity-70"
         />
       )}
 
-      {!showResult ? (
-        <Button
-          type="button"
-          className="rounded-full"
-          disabled={!state.value.trim()}
-          onClick={onSubmit}
-        >
-          Check
-        </Button>
-      ) : (
+      {locked ? (
         <div className="space-y-3 rounded-xl border border-accent/25 bg-accent/8 px-4 py-3">
           <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <Check className="size-4 text-accent" />
-            {state.correct ? "On track / correct" : "Review the hint"}
+            {correct ? "On track / correct" : "Review the hint"}
           </p>
           <p className="text-sm leading-relaxed text-muted-foreground">{question.explainVi}</p>
           {question.kind === "open" ? (
@@ -117,7 +119,7 @@ function QuestionCard({
             </p>
           ) : null}
         </div>
-      )}
+      ) : null}
     </article>
   );
 }
@@ -131,13 +133,14 @@ export function SkillExercisePage({
 }) {
   const { exercise, loading } = useSkillExercise(skill, exerciseId);
   const skillMeta = getSkillMeta(skill);
-  const [answers, setAnswers] = useState<Record<string, AnswerState>>({});
+  const [answers, setAnswers] = useState<Record<string, AnswerDraft>>({});
+  const [submitted, setSubmitted] = useState(false);
   const [showScript, setShowScript] = useState(skill !== "listening");
 
-  const initialAnswers = useMemo(() => {
+  const emptyAnswers = useMemo(() => {
     if (!exercise) return {};
     return Object.fromEntries(
-      exercise.questions.map((q) => [q.id, { value: "", submitted: false } satisfies AnswerState]),
+      exercise.questions.map((q) => [q.id, { value: "" } satisfies AnswerDraft]),
     );
   }, [exercise]);
 
@@ -156,24 +159,39 @@ export function SkillExercisePage({
     );
   }
 
-  const stateFor = (id: string): AnswerState =>
-    answers[id] ?? initialAnswers[id] ?? { value: "", submitted: false };
+  const valueFor = (id: string) => answers[id]?.value ?? emptyAnswers[id]?.value ?? "";
+  const answeredCount = exercise.questions.filter((q) => valueFor(q.id).trim()).length;
+  const allAnswered = answeredCount === exercise.questions.length;
+  const correctCount = submitted
+    ? exercise.questions.filter((q) => answers[q.id]?.correct).length
+    : 0;
 
-  const submittedCount = exercise.questions.filter((q) => stateFor(q.id).submitted).length;
-  const correctCount = exercise.questions.filter((q) => stateFor(q.id).correct).length;
-
-  const submitQuestion = (question: SkillQuestion) => {
-    const current = stateFor(question.id);
-    let correct = false;
-    if (question.kind === "choice") {
-      correct = Number(current.value) === question.correctIndex;
-    } else {
-      correct = scoreOpen(current.value, question);
-    }
+  const setAnswerValue = (id: string, value: string) => {
+    if (submitted) return;
     setAnswers((prev) => ({
       ...prev,
-      [question.id]: { ...current, submitted: true, correct },
+      [id]: { value },
     }));
+  };
+
+  const submitAll = () => {
+    if (!allAnswered || submitted) return;
+    const next: Record<string, AnswerDraft> = {};
+    for (const question of exercise.questions) {
+      const value = valueFor(question.id);
+      const correct =
+        question.kind === "choice"
+          ? Number(value) === question.correctIndex
+          : scoreOpen(value, question);
+      next[question.id] = { value, correct };
+    }
+    setAnswers(next);
+    setSubmitted(true);
+  };
+
+  const tryAgain = () => {
+    setAnswers(emptyAnswers);
+    setSubmitted(false);
   };
 
   return (
@@ -239,44 +257,67 @@ export function SkillExercisePage({
         <div className="flex items-end justify-between gap-3">
           <h2 className="text-xl font-semibold tracking-tight">Questions</h2>
           <p className="text-sm text-muted-foreground">
-            Done {submittedCount}/{exercise.questions.length}
-            {submittedCount > 0 ? ` · ${correctCount} correct` : null}
+            {submitted
+              ? `${correctCount}/${exercise.questions.length} correct`
+              : `Answered ${answeredCount}/${exercise.questions.length}`}
           </p>
         </div>
+        <p className="text-sm text-muted-foreground">
+          Choose or type every answer, then submit once at the bottom.
+        </p>
 
         {exercise.questions.map((question, index) => (
           <QuestionCard
             key={question.id}
             index={index}
             question={question}
-            state={stateFor(question.id)}
-            onChange={(value) =>
-              setAnswers((prev) => ({
-                ...prev,
-                [question.id]: {
-                  ...stateFor(question.id),
-                  value,
-                  submitted: false,
-                  correct: undefined,
-                },
-              }))
-            }
-            onSubmit={() => submitQuestion(question)}
+            value={valueFor(question.id)}
+            correct={answers[question.id]?.correct}
+            locked={submitted}
+            onChange={(value) => setAnswerValue(question.id, value)}
           />
         ))}
       </section>
 
-      {submittedCount === exercise.questions.length ? (
+      {!submitted ? (
+        <div className="sticky bottom-4 z-10 rounded-2xl border border-border bg-background/95 p-4 shadow-lg backdrop-blur">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              {allAnswered
+                ? "All questions answered — ready to submit."
+                : `Answer ${exercise.questions.length - answeredCount} more question${
+                    exercise.questions.length - answeredCount === 1 ? "" : "s"
+                  } to submit.`}
+            </p>
+            <Button
+              type="button"
+              className="h-11 rounded-full px-6"
+              disabled={!allAnswered}
+              onClick={submitAll}
+            >
+              Submit all answers
+            </Button>
+          </div>
+        </div>
+      ) : (
         <div className="rounded-2xl border border-primary/20 bg-primary px-6 py-8 text-primary-foreground">
           <p className="text-[11px] font-medium tracking-[0.18em] text-accent uppercase">Complete</p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight">
             You got {correctCount}/{exercise.questions.length} correct
           </h2>
           <p className="mt-2 max-w-xl text-sm text-primary-foreground/75">
-            Review the explanations, then practice another skill or open AI chat on the same topic.
+            Review the explanations above, then try again or practice another skill.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
-            <Button asChild className="rounded-full border-0 bg-white text-[#0b1524] hover:bg-white/90">
+            <Button
+              type="button"
+              className="rounded-full border-0 bg-white text-[#0b1524] hover:bg-white/90"
+              onClick={tryAgain}
+            >
+              <RotateCcw className="size-4" />
+              Try again
+            </Button>
+            <Button asChild className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25">
               <Link href={`/skills/${skill}`}>More in this skill</Link>
             </Button>
             <Button
@@ -288,7 +329,7 @@ export function SkillExercisePage({
             </Button>
           </div>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
