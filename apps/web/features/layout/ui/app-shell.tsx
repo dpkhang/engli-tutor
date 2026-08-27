@@ -4,12 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BookOpenCheck,
   ChevronDown,
   Coins,
   Crown,
   LogOut,
   Menu,
+  Settings,
+  UserRound,
   X,
 } from "lucide-react";
 import { authClient, useSession } from "@/lib/auth-client";
@@ -205,12 +206,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       </div>
                       <div className="py-1">
                         <Link
-                          href="/lessons"
+                          href="/accounts"
                           role="menuitem"
                           className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-muted"
                         >
-                          <BookOpenCheck className="size-4 text-muted-foreground" />
-                          Lesson path
+                          <UserRound className="size-4 text-muted-foreground" />
+                          Account
+                        </Link>
+                        <Link
+                          href="/settings"
+                          role="menuitem"
+                          className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-muted"
+                        >
+                          <Settings className="size-4 text-muted-foreground" />
+                          Settings
                         </Link>
                       </div>
                       <div className="border-t border-border pt-1">
