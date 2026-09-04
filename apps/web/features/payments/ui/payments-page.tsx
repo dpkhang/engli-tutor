@@ -87,13 +87,14 @@ export default function PaymentsPage() {
           await confirmCheckout.mutateAsync(sessionId);
         }
       } catch (err) {
-        if (!cancelled) {
-          setError(
-            err instanceof Error
-              ? err.message
-              : "Couldn't sync payment. Try refreshing the page.",
-          );
-        }
+        if (cancelled) return;
+        const latest = await billing.refetch();
+        if (latest.data?.hasPaidPlan && checkoutType !== "topup") return;
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Couldn't sync payment. Try refreshing the page.",
+        );
       } finally {
         if (!cancelled) await billing.refetch();
       }

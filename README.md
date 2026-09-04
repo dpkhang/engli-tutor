@@ -52,7 +52,7 @@ cp apps/landing-page-web/.env.local.example apps/landing-page-web/.env.local
 
 | Variable | Purpose |
 | --- | --- |
-| `NEXT_PUBLIC_API_URL` | Backend origin (hoặc Render URL) |
+| `NEXT_PUBLIC_API_URL` | Backend origin (Fly API URL) |
 | `NEXT_PUBLIC_MARKETING_URL` | Marketing site origin |
 
 Browser gọi `/api/*` same-origin; Next proxy/route forward tới `NEXT_PUBLIC_API_URL` để cookie first-party.
@@ -68,18 +68,15 @@ Browser gọi `/api/*` same-origin; Next proxy/route forward tới `NEXT_PUBLIC_
 ### Production (`pagecraft-ai.site`)
 
 ```text
-# Workspace
-NEXT_PUBLIC_API_URL=https://landing-generator-be.onrender.com
+# Workspace + Marketing (GitLab CI / Vercel)
+NEXT_PUBLIC_API_URL=https://englitutor-api.fly.dev
 NEXT_PUBLIC_MARKETING_URL=https://pagecraft-ai.site
-
-# Marketing
-NEXT_PUBLIC_API_URL=https://landing-generator-be.onrender.com
 NEXT_PUBLIC_APP_URL=https://app.pagecraft-ai.site
 NEXT_PUBLIC_SITE_URL=https://pagecraft-ai.site
 ```
 
-Backend cần khớp `WEB_ORIGIN`, `LANDING_ORIGIN`, `AUTH_COOKIE_DOMAIN=.pagecraft-ai.site`.  
-Ưu tiên `APP_URL=https://app.pagecraft-ai.site` khi auth callback đi qua first-party proxy.
+Backend (Fly) cần khớp `WEB_ORIGIN`, `LANDING_ORIGIN`, `AUTH_COOKIE_DOMAIN=.pagecraft-ai.site`.  
+Ưu tiên `APP_URL=https://app.pagecraft-ai.site` khi auth đi qua first-party FE proxy.
 
 ## AI landing + hero image
 

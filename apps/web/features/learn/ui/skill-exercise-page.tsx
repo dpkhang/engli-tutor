@@ -1,9 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check, Lightbulb, RotateCcw, Volume2 } from "lucide-react";
 import { Button, cn } from "@landing-page-generator/ui";
+import { DataLoadingState } from "@/features/layout";
+import { getAutoPlayListening } from "@/features/settings/model/preferences";
+import { useAiSpeech } from "@/features/speaking-lab/hooks/use-ai-speech";
 import { useSkillExercise } from "../hooks/use-learning-catalog";
 import {
   getSkillMeta,
@@ -26,15 +29,6 @@ function scoreOpen(answer: string, question: OpenQuestion): boolean {
   return keys.every((key) => normalized.includes(key.toLowerCase()));
 }
 
-function speakText(text: string) {
-  if (typeof window === "undefined" || !window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
-  utterance.rate = 0.92;
-  window.speechSynthesis.speak(utterance);
-}
-
 function QuestionCard({
   index,
   question,
@@ -51,7 +45,7 @@ function QuestionCard({
   onChange: (value: string) => void;
 }) {
   return (
-    <article className="space-y-4 rounded-2xl border border-border bg-card p-5">
+    <article className="min-w-0 space-y-4 rounded-2xl border border-border bg-card p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
           Question {index + 1}
@@ -133,9 +127,16 @@ export function SkillExercisePage({
 }) {
   const { exercise, loading } = useSkillExercise(skill, exerciseId);
   const skillMeta = getSkillMeta(skill);
+  const { speak, stop } = useAiSpeech();
   const [answers, setAnswers] = useState<Record<string, AnswerDraft>>({});
   const [submitted, setSubmitted] = useState(false);
   const [showScript, setShowScript] = useState(skill !== "listening");
+
+  useEffect(() => {
+    if (loading || !exercise?.material.speakable || !getAutoPlayListening()) return;
+    void speak(exercise.material.body);
+    return () => stop();
+  }, [exercise?.id, exercise?.material.speakable, exercise?.material.body, loading, speak, stop]);
 
   const emptyAnswers = useMemo(() => {
     if (!exercise) return {};
@@ -145,7 +146,13 @@ export function SkillExercisePage({
   }, [exercise]);
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">Loading exercise…</p>;
+    return (
+      <DataLoadingState
+        title="Preparing your exercise"
+        description="Loading the questions, tips, and learning materials."
+        cards={3}
+      />
+    );
   }
 
   if (!exercise) {
@@ -195,7 +202,7 @@ export function SkillExercisePage({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="w-full min-w-0 max-w-full space-y-8 overflow-x-clip">
       <div className="space-y-4">
         <Button variant="ghost" size="sm" asChild className="-ml-2 text-muted-foreground">
           <Link href={`/skills/${skill}`}>
@@ -214,7 +221,7 @@ export function SkillExercisePage({
         </header>
       </div>
 
-      <section className="space-y-4 rounded-2xl border border-border bg-card p-5 sm:p-6">
+      <section className="min-w-0 space-y-4 rounded-2xl border border-border bg-card p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold tracking-tight">{exercise.material.title}</h2>
           <div className="flex flex-wrap gap-2">
@@ -223,7 +230,7 @@ export function SkillExercisePage({
                 type="button"
                 variant="outline"
                 className="rounded-full"
-                onClick={() => speakText(exercise.material.body)}
+                onClick={() => void speak(exercise.material.body)}
               >
                 <Volume2 className="size-4" />
                 Listen
@@ -253,10 +260,10 @@ export function SkillExercisePage({
         )}
       </section>
 
-      <section className="space-y-4">
+      <section className="min-w-0 space-y-4">
         <div className="flex items-end justify-between gap-3">
           <h2 className="text-xl font-semibold tracking-tight">Questions</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="shrink-0 text-sm text-muted-foreground">
             {submitted
               ? `${correctCount}/${exercise.questions.length} correct`
               : `Answered ${answeredCount}/${exercise.questions.length}`}
@@ -280,27 +287,35 @@ export function SkillExercisePage({
       </section>
 
       {!submitted ? (
-        <div className="sticky bottom-4 z-10 rounded-2xl border border-border bg-background/95 p-4 shadow-lg backdrop-blur">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">
-              {allAnswered
-                ? "All questions answered — ready to submit."
-                : `Answer ${exercise.questions.length - answeredCount} more question${
-                    exercise.questions.length - answeredCount === 1 ? "" : "s"
-                  } to submit.`}
-            </p>
-            <Button
-              type="button"
-              className="h-11 rounded-full px-6"
-              disabled={!allAnswered}
-              onClick={submitAll}
-            >
-              Submit all answers
-            </Button>
+        <>
+          <div className="h-24" aria-hidden />
+          <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20">
+            {/* Full-bleed background (edge to edge) */}
+            <div className="w-full border-t border-border bg-background/95 shadow-[0_-12px_40px_-20px_rgba(15,23,42,0.35)] backdrop-blur">
+              <div className="pointer-events-auto mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <p className="min-w-0 flex-1 text-sm text-muted-foreground">
+                  {allAnswered
+                    ? "All questions answered — ready to submit."
+                    : `Answer ${exercise.questions.length - answeredCount} more question${
+                        exercise.questions.length - answeredCount === 1 ? "" : "s"
+                      } to submit.`}
+                </p>
+                <Button
+                  type="button"
+                  className="h-11 w-full shrink-0 rounded-full px-6 sm:w-auto"
+                  disabled={!allAnswered}
+                  onClick={submitAll}
+                >
+                  Submit all answers
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="rounded-2xl border border-primary/20 bg-primary px-6 py-8 text-primary-foreground">
+        </>
+      ) : null}
+
+      {submitted ? (
+        <div className="min-w-0 rounded-2xl border border-primary/20 bg-primary px-6 py-8 text-primary-foreground">
           <p className="text-[11px] font-medium tracking-[0.18em] text-accent uppercase">Complete</p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight">
             You got {correctCount}/{exercise.questions.length} correct
@@ -329,7 +344,7 @@ export function SkillExercisePage({
             </Button>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

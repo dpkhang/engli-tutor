@@ -1,5 +1,5 @@
-import { AccountsPage } from "@/features/accounts";
+import { redirect } from "next/navigation";
 
-export default function AccountsRoutePage() {
-  return <AccountsPage />;
+export default function AccountsRedirectPage() {
+  redirect("/settings/account");
 }

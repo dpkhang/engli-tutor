@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { Gamepad2, Lightbulb, MessageCircle, Timer } from "lucide-react";
 import { Button, cn } from "@landing-page-generator/ui";
+import { DataLoadingState } from "@/features/layout";
 import { useLessonPacks } from "../hooks/use-learning-catalog";
 
 const SKILL_FILTERS = ["All", "Listening", "Speaking", "Reading", "Writing"] as const;
@@ -67,9 +68,15 @@ export function LessonsPage() {
         })}
       </div>
 
-      {loading ? <p className="text-sm text-muted-foreground">Loading lessons…</p> : null}
+      {loading ? (
+        <DataLoadingState
+          title="Loading lesson packs"
+          description="Finding the right activities for your current level."
+          cards={4}
+        />
+      ) : null}
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className={cn("grid gap-4 md:grid-cols-2", loading && "hidden")}>
         {lessons.map((lesson) => (
           <article
             key={lesson.id}

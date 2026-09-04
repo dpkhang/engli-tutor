@@ -1,5 +1,5 @@
-import { SettingsPage } from "@/features/settings";
+import { AppearanceSettings } from "@/features/settings";
 
-export default function SettingsRoutePage() {
-  return <SettingsPage />;
+export default function SettingsAppearancePage() {
+  return <AppearanceSettings />;
 }

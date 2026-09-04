@@ -51,10 +51,11 @@ export function PaymentResultPage() {
 
     let cancelled = false;
     (async () => {
-      try {
-        const result = await billingApi.confirm(sessionId);
-        if (cancelled) return;
-
+      const applySuccess = (result: {
+        planId?: string | null;
+        balanceAfter?: number;
+        topup?: boolean;
+      }) => {
         setConfirmedPlanId(result.planId ?? itemId ?? null);
         if (typeof result.balanceAfter === "number") {
           setBalanceAfter(result.balanceAfter);
@@ -63,10 +64,6 @@ export function PaymentResultPage() {
             return { ...current, balance: result.balanceAfter! };
           });
         }
-
-        await queryClient.invalidateQueries({ queryKey: billingMeQueryKey });
-        await queryClient.refetchQueries({ queryKey: billingMeQueryKey });
-
         setState("success");
         setMessage(
           checkoutType === "topup"
@@ -75,8 +72,35 @@ export function PaymentResultPage() {
               : "Credits have been added to your account and are ready to use."
             : "Your plan is active and benefits have been updated.",
         );
+      };
+
+      try {
+        const result = await billingApi.confirm(sessionId);
+        if (cancelled) return;
+        applySuccess(result);
+        try {
+          await queryClient.invalidateQueries({ queryKey: billingMeQueryKey });
+          await queryClient.refetchQueries({ queryKey: billingMeQueryKey });
+        } catch {
+          /* Payment already confirmed — don't flip the success screen. */
+        }
       } catch (error: unknown) {
         if (cancelled) return;
+        try {
+          const me = await billingApi.me();
+          if (cancelled) return;
+          const paid = checkoutType !== "topup" && me.hasPaidPlan;
+          if (paid) {
+            applySuccess({
+              planId: me.subscription.planId,
+              balanceAfter: me.balance,
+              topup: checkoutType === "topup",
+            });
+            return;
+          }
+        } catch {
+          /* Fall through to the confirm error. */
+        }
         setState("failed");
         setMessage(error instanceof Error ? error.message : "Couldn't confirm payment. Please try again.");
       }

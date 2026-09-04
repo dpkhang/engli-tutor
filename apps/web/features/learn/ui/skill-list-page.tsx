@@ -1,9 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Timer } from "lucide-react";
 import { Button, cn } from "@landing-page-generator/ui";
+import { DataLoadingState } from "@/features/layout";
+import { getPreferredLevel } from "@/features/settings/model/preferences";
 import { useSkillExercises } from "../hooks/use-learning-catalog";
 import {
   LEVELS,
@@ -16,8 +19,18 @@ import {
 export function SkillListPage({ skill }: { skill: SkillId }) {
   const searchParams = useSearchParams();
   const levelParam = searchParams.get("level");
+  const [preferredLevel, setPreferredLevel] = useState<SkillLevel | null>(null);
+
+  useEffect(() => {
+    setPreferredLevel(getPreferredLevel());
+  }, []);
+
   const activeLevel: SkillLevel | "all" =
-    levelParam && isSkillLevel(levelParam) ? levelParam : "all";
+    levelParam === "all"
+      ? "all"
+      : levelParam && isSkillLevel(levelParam)
+        ? levelParam
+        : (preferredLevel ?? "all");
 
   const meta = getSkillMeta(skill);
   const { loading, groups, total, countsByLevel, source } = useSkillExercises(skill, activeLevel);
@@ -54,7 +67,7 @@ export function SkillListPage({ skill }: { skill: SkillId }) {
 
       <div className="flex flex-wrap gap-2">
         <Link
-          href={`/skills/${skill}`}
+          href={`/skills/${skill}?level=all`}
           className={cn(
             "rounded-full border px-3.5 py-2 text-sm font-medium transition-colors",
             activeLevel === "all"
@@ -85,6 +98,13 @@ export function SkillListPage({ skill }: { skill: SkillId }) {
       </div>
 
       <div className="space-y-10">
+        {loading ? (
+          <DataLoadingState
+            title="Loading exercises"
+            description={`Preparing ${meta.labelEn.toLowerCase()} practice for this level.`}
+            cards={3}
+          />
+        ) : null}
         {groups.map(({ level, exercises }) => (
           <section key={level.id} className="space-y-4">
             <div className="space-y-1 border-b border-border pb-3">

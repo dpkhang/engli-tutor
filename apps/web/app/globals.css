@@ -113,10 +113,37 @@
   }
 }
 
+@keyframes loading-sheen {
+  from {
+    transform: translateX(-140%);
+  }
+  to {
+    transform: translateX(240%);
+  }
+}
+
+.loading-sheen {
+  position: relative;
+}
+
+.loading-sheen::after {
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  content: "";
+  background: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.055), transparent);
+  animation: loading-sheen 1.8s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   [class*="splash-progress"] {
     animation: none;
     transform: translateX(50%);
+  }
+
+  .loading-sheen::after {
+    animation: none;
+    display: none;
   }
 
   .speaking-aurora,

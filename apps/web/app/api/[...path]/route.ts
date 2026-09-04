@@ -26,7 +26,7 @@ function isLocalDevHost(hostname: string) {
   );
 }
 
-/** Local BFF → Render: present a production origin Render already trusts. */
+/** Local BFF → API: present a production origin the API already trusts. */
 function rewriteOriginForUpstream(headers: Headers, hostname: string) {
   headers.delete("sec-fetch-site");
   headers.delete("sec-fetch-mode");
@@ -83,7 +83,7 @@ function adaptSetCookieForBrowser(raw: string, hostname: string, https: boolean)
 async function proxy(request: NextRequest, context: RouteContext) {
   const { path } = await context.params;
   const apiUrl = (
-    process.env.NEXT_PUBLIC_API_URL ?? "https://landing-generator-be.onrender.com"
+    process.env.NEXT_PUBLIC_API_URL ?? "https://englitutor-api.fly.dev"
   ).replace(/\/$/, "");
   const upstream = new URL(`/api/${path.join("/")}`, apiUrl);
   upstream.search = request.nextUrl.search;

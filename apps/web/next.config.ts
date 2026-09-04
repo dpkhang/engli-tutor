@@ -1,7 +1,7 @@
 import path from "node:path";
 import type { NextConfig } from "next";
 
-const DEFAULT_API_URL = "https://landing-generator-be.onrender.com";
+const DEFAULT_API_URL = "https://englitutor-api.fly.dev";
 
 const apiUrl = (process.env.NEXT_PUBLIC_API_URL?.trim() || DEFAULT_API_URL).replace(/\/$/, "");
 
@@ -13,7 +13,7 @@ if (!process.env.NEXT_PUBLIC_API_URL?.trim()) {
 
 // Always proxy API calls through the frontend origin. This keeps auth cookies
 // first-party on both Vercel domains and localhost while the upstream can still
-// be the production Render API.
+// be the production Fly API.
 const useSameOriginProxy = true;
 
 const nextConfig: NextConfig = {
@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
     root: path.join(__dirname, "../.."),
   },
   // Proxy lives in app/api/[...path]/route.ts (rewrites would bypass it and
-  // forward browser Origin → Render INVALID_ORIGIN for local domains).
+  // forward browser Origin → API INVALID_ORIGIN for local domains).
 };
 
 export default nextConfig;

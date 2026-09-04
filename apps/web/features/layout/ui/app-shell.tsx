@@ -206,7 +206,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       </div>
                       <div className="py-1">
                         <Link
-                          href="/accounts"
+                          href="/settings/account"
                           role="menuitem"
                           className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-muted"
                         >
@@ -273,7 +273,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </AnimatePresence>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">{children}</main>
+      <main className="mx-auto w-full min-w-0 max-w-6xl px-4 py-8 sm:px-6 sm:py-10">{children}</main>
     </div>
   );
 }

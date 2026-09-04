@@ -4,7 +4,7 @@ export type PagecraftAuthClient = ReturnType<typeof createAuthClient>;
 
 /**
  * Create Better Auth client.
- * - With `baseURL`: talk to API directly (local FE → Render).
+ * - With `baseURL`: talk to API directly (local FE → Fly/API host).
  * - Without: same-origin `/api/auth` (Vercel rewrite → API; first-party cookies).
  */
 export function createPagecraftAuthClient(baseURL?: string): PagecraftAuthClient {

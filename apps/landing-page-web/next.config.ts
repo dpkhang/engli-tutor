@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 
 /** Baked into the client bundle. Prefer CI/Vercel env; fallback keeps prod deploys working. */
 const isProdBuild = process.env.NODE_ENV === "production";
-const DEFAULT_API_URL = "https://landing-generator-be.onrender.com";
+const DEFAULT_API_URL = "https://englitutor-api.fly.dev";
 const DEFAULT_APP_URL = isProdBuild
   ? "https://app.pagecraft-ai.site"
   : "http://localhost:3000";
@@ -69,7 +69,7 @@ const nextConfig: NextConfig = {
     ],
   },
   // Proxy lives in app/api/[...path]/route.ts (rewrites would bypass it and
-  // forward browser Origin → Render INVALID_ORIGIN for local domains).
+  // forward browser Origin → API INVALID_ORIGIN for local domains).
 };
 
 export default nextConfig;
