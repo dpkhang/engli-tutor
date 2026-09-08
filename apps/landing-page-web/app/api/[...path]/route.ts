@@ -26,20 +26,12 @@ function isLocalDevHost(hostname: string) {
   );
 }
 
-/** Local BFF → API: present a production origin the API already trusts. */
-function rewriteOriginForUpstream(headers: Headers, hostname: string) {
+/** Drop browser CORS metadata; keep Origin so Better Auth can match trustedOrigins. */
+function stripBrowserFetchMetadata(headers: Headers) {
   headers.delete("sec-fetch-site");
   headers.delete("sec-fetch-mode");
   headers.delete("sec-fetch-dest");
   headers.delete("sec-fetch-user");
-
-  if (!isLocalDevHost(hostname)) return;
-
-  const trusted = (
-    process.env.NEXT_PUBLIC_PROXY_ORIGIN?.trim() || "https://app.pagecraft-ai.site"
-  ).replace(/\/$/, "");
-  headers.set("origin", trusted);
-  headers.set("referer", `${trusted}/`);
 }
 
 function adaptLocalHttpRequestCookies(headers: Headers) {
@@ -70,7 +62,7 @@ function adaptSetCookieForLocal(raw: string, https: boolean): string {
 async function proxy(request: NextRequest, context: RouteContext) {
   const { path } = await context.params;
   const apiUrl = (
-    process.env.NEXT_PUBLIC_API_URL ?? "https://englitutor-api.fly.dev"
+    process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"
   ).replace(/\/$/, "");
   const upstream = new URL(`/api/${path.join("/")}`, apiUrl);
   upstream.search = request.nextUrl.search;
@@ -78,7 +70,7 @@ async function proxy(request: NextRequest, context: RouteContext) {
   const headers = new Headers(request.headers);
   headers.delete("host");
   headers.delete("content-length");
-  rewriteOriginForUpstream(headers, request.nextUrl.hostname);
+  stripBrowserFetchMetadata(headers);
 
   const local = isLocalDevHost(request.nextUrl.hostname);
   const https = request.nextUrl.protocol === "https:";

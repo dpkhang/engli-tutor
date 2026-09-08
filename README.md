@@ -52,7 +52,7 @@ cp apps/landing-page-web/.env.local.example apps/landing-page-web/.env.local
 
 | Variable | Purpose |
 | --- | --- |
-| `NEXT_PUBLIC_API_URL` | Backend origin (Fly API URL) |
+| `NEXT_PUBLIC_API_URL` | Backend origin (AWS App Runner URL) |
 | `NEXT_PUBLIC_MARKETING_URL` | Marketing site origin |
 
 Browser gọi `/api/*` same-origin; Next proxy/route forward tới `NEXT_PUBLIC_API_URL` để cookie first-party.
@@ -69,7 +69,7 @@ Browser gọi `/api/*` same-origin; Next proxy/route forward tới `NEXT_PUBLIC_
 
 ```text
 # Workspace + Marketing (GitLab CI / Vercel)
-NEXT_PUBLIC_API_URL=https://englitutor-api.fly.dev
+NEXT_PUBLIC_API_URL=https://YOUR_SERVICE.ap-southeast-1.awsapprunner.com
 NEXT_PUBLIC_MARKETING_URL=https://pagecraft-ai.site
 NEXT_PUBLIC_APP_URL=https://app.pagecraft-ai.site
 NEXT_PUBLIC_SITE_URL=https://pagecraft-ai.site

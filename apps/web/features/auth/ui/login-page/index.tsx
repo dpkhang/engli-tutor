@@ -28,10 +28,17 @@ export function LoginPage() {
   const [mode, setMode] = useState<AuthMode>("login");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // useSession().isPending is true during SSR and false on the first client
+  // paint, which would otherwise mismatch the submit button label/disabled.
+  const [hydrated, setHydrated] = useState(false);
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: { mode: "login", name: "", email: "", password: "" },
   });
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   useEffect(() => {
     if (sessionPending || !data?.user) return;
@@ -90,7 +97,7 @@ export function LoginPage() {
   return (
     <LoginPageView
       mode={mode}
-      pending={pending || sessionPending}
+      pending={pending || (hydrated && sessionPending)}
       error={error}
       register={form.register}
       errors={form.formState.errors}

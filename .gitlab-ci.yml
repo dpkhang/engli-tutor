@@ -160,13 +160,13 @@ build:landing:
 #   VERCEL_PROJECT_ID_LANDING
 #   VERCEL_PROJECT_ID_WEB
 # App public URLs (forwarded to Vercel build via --build-env on deploy):
-#   landing: NEXT_PUBLIC_API_URL=https://englitutor-api.fly.dev
+#   landing: NEXT_PUBLIC_API_URL=https://pkbc7gf23n.ap-southeast-1.awsapprunner.com
 #            NEXT_PUBLIC_APP_URL=https://app.pagecraft-ai.site
 #            NEXT_PUBLIC_SITE_URL=https://pagecraft-ai.site
-#   web:     NEXT_PUBLIC_API_URL=https://englitutor-api.fly.dev
+#   web:     NEXT_PUBLIC_API_URL=https://pkbc7gf23n.ap-southeast-1.awsapprunner.com
 #            NEXT_PUBLIC_MARKETING_URL=https://pagecraft-ai.site
 # Set these in GitLab CI/CD Variables (same names). Redeploy after changing.
-# Missing NEXT_PUBLIC_API_URL → fallback https://englitutor-api.fly.dev (baked at build).
+# Missing NEXT_PUBLIC_API_URL → fallback http://localhost:3001 (baked at build).
 
 .vercel_deploy:
   image: node:22-bookworm

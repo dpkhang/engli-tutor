@@ -1,9 +1,11 @@
 import path from "node:path";
 import type { NextConfig } from "next";
 
-/** Baked into the client bundle. Prefer CI/Vercel env; fallback keeps prod deploys working. */
+/** Baked into the client bundle. Prefer CI/Vercel env; local fallback is the API on :3001. */
 const isProdBuild = process.env.NODE_ENV === "production";
-const DEFAULT_API_URL = "https://englitutor-api.fly.dev";
+const DEFAULT_API_URL = isProdBuild
+  ? "https://pkbc7gf23n.ap-southeast-1.awsapprunner.com"
+  : "http://localhost:3001";
 const DEFAULT_APP_URL = isProdBuild
   ? "https://app.pagecraft-ai.site"
   : "http://localhost:3000";

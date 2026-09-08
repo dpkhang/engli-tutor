@@ -1,19 +1,22 @@
 import path from "node:path";
 import type { NextConfig } from "next";
 
-const DEFAULT_API_URL = "https://englitutor-api.fly.dev";
+const DEFAULT_API_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://pkbc7gf23n.ap-southeast-1.awsapprunner.com"
+    : "http://localhost:3001";
 
 const apiUrl = (process.env.NEXT_PUBLIC_API_URL?.trim() || DEFAULT_API_URL).replace(/\/$/, "");
 
 if (!process.env.NEXT_PUBLIC_API_URL?.trim()) {
   console.warn(
-    `[web] NEXT_PUBLIC_API_URL unset — using ${DEFAULT_API_URL}. Set it in Vercel/GitLab for production.`,
+    `[web] NEXT_PUBLIC_API_URL unset — using ${DEFAULT_API_URL}. Set it in Vercel/GitLab to the AWS App Runner URL.`,
   );
 }
 
 // Always proxy API calls through the frontend origin. This keeps auth cookies
 // first-party on both Vercel domains and localhost while the upstream can still
-// be the production Fly API.
+// be the production AWS App Runner API.
 const useSameOriginProxy = true;
 
 const nextConfig: NextConfig = {
