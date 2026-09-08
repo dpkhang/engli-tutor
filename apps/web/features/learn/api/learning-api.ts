@@ -1,10 +1,13 @@
 import type {
   LearningExercise,
+  LearningGame,
+  LearningGameSummary,
   LearningIntegratedLesson,
   LearningLevel,
   LearningMeta,
   LearningSkill,
 } from "./types";
+import type { LessonPack } from "../model/curriculum";
 
 function getApiBase() {
   if (process.env.NEXT_PUBLIC_AUTH_SAME_ORIGIN === "true") return "";
@@ -61,4 +64,13 @@ export const learningApi = {
 
   getIntegratedLesson: (id: string) =>
     softGet<LearningIntegratedLesson>(`/api/learning/integrated-lessons/${id}`),
+
+  listLessons: () =>
+    softGet<{ data: LessonPack[]; total: number }>("/api/learning/lessons"),
+
+  listGames: () =>
+    softGet<{ data: LearningGameSummary[]; total: number }>("/api/learning/games"),
+
+  getGame: (id: string, lesson?: string) =>
+    softGet<LearningGame>(`/api/learning/games/${id}${toQuery({ lesson })}`),
 };

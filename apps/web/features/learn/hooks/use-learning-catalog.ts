@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { learningApi } from "../api/learning-api";
-import { mapIntegratedLesson, mapLearningExercise } from "../api/map-exercise";
+import { mapIntegratedLesson, mapLearningExercise, mapLearningGame } from "../api/map-exercise";
+import type { LearningGame, LearningGameSummary } from "../api/types";
 import { LESSON_PACKS, type LessonPack } from "../model/curriculum";
+import { GAMES_CATALOG, getFallbackGame } from "../model/games";
 import {
   getExercise as getLocalExercise,
   getExercisesBySkill,
@@ -190,11 +192,18 @@ export function useLessonPacks() {
     let cancelled = false;
 
     void (async () => {
-      const result = await learningApi.listIntegratedLessons();
+      const [packsResult, integrated] = await Promise.all([
+        learningApi.listLessons(),
+        learningApi.listIntegratedLessons(),
+      ]);
       if (cancelled) return;
 
-      if (result?.data?.length) {
-        setPacks(result.data.map(mapIntegratedLesson));
+      const fromApi = [
+        ...(packsResult?.data ?? []),
+        ...(integrated?.data ?? []).map(mapIntegratedLesson),
+      ];
+      if (fromApi.length) {
+        setPacks(fromApi);
         setSource("api");
         return;
       }
@@ -212,5 +221,74 @@ export function useLessonPacks() {
     loading: source === "loading",
     source: source === "loading" ? "local" : source,
     packs,
+  };
+}
+
+export function useGames() {
+  const [games, setGames] = useState<LearningGameSummary[] | null>(null);
+  const [source, setSource] = useState<LoadState>("loading");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      const result = await learningApi.listGames();
+      if (cancelled) return;
+      if (result?.data?.length) {
+        setGames(result.data);
+        setSource("api");
+        return;
+      }
+      setGames(
+        GAMES_CATALOG.map((game) => ({
+          ...game,
+          roundCount: getFallbackGame(game.id)?.rounds.length ?? 0,
+        })),
+      );
+      setSource("local");
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return {
+    loading: source === "loading" || !games,
+    source: source === "loading" ? "local" : source,
+    games: games ?? [],
+  };
+}
+
+export function useGame(slug: string, lesson?: string | null) {
+  const [game, setGame] = useState<LearningGame | null | undefined>(undefined);
+  const [source, setSource] = useState<LoadState>("loading");
+
+  useEffect(() => {
+    let cancelled = false;
+    setSource("loading");
+    setGame(undefined);
+
+    void (async () => {
+      const remote = await learningApi.getGame(slug, lesson ?? undefined);
+      if (cancelled) return;
+      if (remote?.rounds?.length) {
+        setGame(mapLearningGame(remote));
+        setSource("api");
+        return;
+      }
+      setGame(getFallbackGame(slug, lesson) ?? null);
+      setSource("local");
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug, lesson]);
+
+  return {
+    loading: game === undefined,
+    source: source === "loading" ? "local" : source,
+    game: game ?? null,
   };
 }

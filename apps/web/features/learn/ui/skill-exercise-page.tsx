@@ -45,7 +45,7 @@ function QuestionCard({
   onChange: (value: string) => void;
 }) {
   return (
-    <article className="min-w-0 space-y-4 rounded-2xl border border-border bg-card p-5">
+    <article className="min-w-0 space-y-4 rounded-[1.35rem] border border-border/70 bg-card p-5 transition-shadow hover:shadow-md sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
           Question {index + 1}
@@ -75,11 +75,13 @@ function QuestionCard({
                 disabled={locked}
                 onClick={() => onChange(String(optionIndex))}
                 className={cn(
-                  "flex w-full rounded-xl border px-3.5 py-3 text-left text-sm transition-colors",
-                  selected && !locked && "border-primary bg-primary/8",
-                  locked && isCorrect && "border-accent bg-accent/10",
+                  "flex w-full rounded-xl border px-4 py-3.5 text-left text-sm transition-all",
+                  selected && !locked && "border-primary bg-primary/8 ring-2 ring-primary/10",
+                  locked && isCorrect && "border-emerald-400 bg-emerald-50 dark:bg-emerald-400/10",
                   locked && selected && !isCorrect && "border-destructive/50 bg-destructive/5",
-                  !selected && !locked && "border-border hover:border-primary/30",
+                  !selected &&
+                    !locked &&
+                    "border-border hover:border-primary/50 hover:bg-primary/5",
                   locked && "cursor-default",
                 )}
               >
@@ -118,13 +120,7 @@ function QuestionCard({
   );
 }
 
-export function SkillExercisePage({
-  skill,
-  exerciseId,
-}: {
-  skill: SkillId;
-  exerciseId: string;
-}) {
+export function SkillExercisePage({ skill, exerciseId }: { skill: SkillId; exerciseId: string }) {
   const { exercise, loading } = useSkillExercise(skill, exerciseId);
   const skillMeta = getSkillMeta(skill);
   const { speak, stop } = useAiSpeech();
@@ -209,19 +205,27 @@ export function SkillExercisePage({
             <ArrowLeft /> {skillMeta?.labelVi ?? skill}
           </Link>
         </Button>
-        <header className="space-y-2">
-          <p className="text-[11px] font-medium tracking-[0.18em] text-accent uppercase">
-            {exercise.level} · {exercise.duration}
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{exercise.title}</h1>
-          <p className="flex gap-2 text-sm text-muted-foreground">
-            <Lightbulb className="mt-0.5 size-4 shrink-0 text-accent" />
-            <span>{exercise.tip}</span>
-          </p>
+        <header className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-primary to-primary/80 px-6 py-8 text-primary-foreground sm:px-9 sm:py-10">
+          <div
+            aria-hidden
+            className="absolute -right-10 -top-16 size-52 rounded-full border-[28px] border-white/[0.07]"
+          />
+          <div className="relative">
+            <p className="text-[11px] font-semibold tracking-[0.18em] text-primary-foreground/70 uppercase">
+              {exercise.level} · {exercise.duration}
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+              {exercise.title}
+            </h1>
+            <p className="mt-4 flex max-w-2xl gap-2 text-sm text-white/70">
+              <Lightbulb className="mt-0.5 size-4 shrink-0 text-amber-300" />
+              <span>{exercise.tip}</span>
+            </p>
+          </div>
         </header>
       </div>
 
-      <section className="min-w-0 space-y-4 rounded-2xl border border-border bg-card p-5 sm:p-6">
+      <section className="min-w-0 space-y-4 rounded-[1.5rem] border border-border/70 bg-gradient-to-br from-sky-500/8 via-card to-card p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold tracking-tight">{exercise.material.title}</h2>
           <div className="flex flex-wrap gap-2">
@@ -250,7 +254,7 @@ export function SkillExercisePage({
         </div>
 
         {showScript ? (
-          <pre className="whitespace-pre-wrap rounded-xl bg-muted/60 px-4 py-4 font-sans text-sm leading-relaxed text-foreground">
+          <pre className="whitespace-pre-wrap rounded-xl border border-border/50 bg-background/70 px-4 py-4 font-sans text-sm leading-relaxed text-foreground">
             {exercise.material.body}
           </pre>
         ) : (
@@ -262,15 +266,28 @@ export function SkillExercisePage({
 
       <section className="min-w-0 space-y-4">
         <div className="flex items-end justify-between gap-3">
-          <h2 className="text-xl font-semibold tracking-tight">Questions</h2>
+          <div>
+            <p className="text-xs font-semibold tracking-wider text-primary uppercase">Your turn</p>
+            <h2 className="mt-1 text-xl font-semibold tracking-tight">
+              Take it one question at a time
+            </h2>
+          </div>
           <p className="shrink-0 text-sm text-muted-foreground">
             {submitted
               ? `${correctCount}/${exercise.questions.length} correct`
               : `Answered ${answeredCount}/${exercise.questions.length}`}
           </p>
         </div>
+        <div className="h-2 overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full rounded-full bg-primary transition-[width]"
+            style={{
+              width: `${exercise.questions.length ? (answeredCount / exercise.questions.length) * 100 : 0}%`,
+            }}
+          />
+        </div>
         <p className="text-sm text-muted-foreground">
-          Choose or type every answer, then submit once at the bottom.
+          Choose or type every answer. You can review everything before submitting.
         </p>
 
         {exercise.questions.map((question, index) => (
@@ -315,8 +332,10 @@ export function SkillExercisePage({
       ) : null}
 
       {submitted ? (
-        <div className="min-w-0 rounded-2xl border border-primary/20 bg-primary px-6 py-8 text-primary-foreground">
-          <p className="text-[11px] font-medium tracking-[0.18em] text-accent uppercase">Complete</p>
+        <div className="min-w-0 overflow-hidden rounded-[1.75rem] border border-primary/20 bg-gradient-to-br from-primary to-primary/80 px-6 py-8 text-primary-foreground">
+          <p className="text-[11px] font-semibold tracking-[0.18em] text-primary-foreground/70 uppercase">
+            Nice work!
+          </p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight">
             You got {correctCount}/{exercise.questions.length} correct
           </h2>
@@ -332,7 +351,10 @@ export function SkillExercisePage({
               <RotateCcw className="size-4" />
               Try again
             </Button>
-            <Button asChild className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25">
+            <Button
+              asChild
+              className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25"
+            >
               <Link href={`/skills/${skill}`}>More in this skill</Link>
             </Button>
             <Button

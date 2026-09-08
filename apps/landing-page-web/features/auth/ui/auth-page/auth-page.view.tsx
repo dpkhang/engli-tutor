@@ -1,159 +1,334 @@
 "use client";
 
-import type { FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import type { FieldErrors, UseFormRegister } from "react-hook-form";
+import {
+  ArrowRight,
+  Eye,
+  EyeOff,
+  LoaderCircle,
+  LockKeyhole,
+  Mail,
+  Mic2,
+  ShieldCheck,
+  Sparkles,
+  UserRound,
+  WandSparkles,
+} from "lucide-react";
 import { Button, Input } from "@landing-page-generator/ui";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import type { AuthFormValues } from "../../model/auth-schema";
 import { SocialAuthButtons } from "../social-auth-buttons";
 
 export type AuthMode = "login" | "register";
-
-export type AuthPageViewProps = {
+type Props = {
   mode: AuthMode;
   pending: boolean;
   error: string | null;
+  register: UseFormRegister<AuthFormValues>;
+  errors: FieldErrors<AuthFormValues>;
   onModeChange: (mode: AuthMode) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 };
 
-export function AuthPageView({ mode, pending, error, onModeChange, onSubmit }: AuthPageViewProps) {
+function FieldMessage({ id, message }: { id: string; message?: string }) {
   return (
-    <main className="relative min-h-svh overflow-hidden bg-[radial-gradient(ellipse_at_top_left,hsl(214_22%_92%),hsl(var(--background))_52%)] dark:bg-[radial-gradient(ellipse_at_top_left,hsl(222_28%_14%),hsl(var(--background))_52%)]">
-      <div className="relative mx-auto grid min-h-svh max-w-6xl items-stretch gap-0 px-5 pt-24 pb-16 sm:px-8 lg:grid-cols-2 lg:gap-12 lg:px-8 lg:pt-20 lg:pb-20">
-        <motion.div
-          className="flex w-full max-w-md items-center justify-self-center lg:justify-self-start"
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+    <p
+      id={id}
+      className="min-h-4 pt-1 text-xs leading-4 text-rose-500"
+      role={message ? "alert" : undefined}
+    >
+      {message ?? ""}
+    </p>
+  );
+}
+
+export function AuthPageView({
+  mode,
+  pending,
+  error,
+  register,
+  errors,
+  onModeChange,
+  onSubmit,
+}: Props) {
+  const [showPassword, setShowPassword] = useState(false);
+  const isLogin = mode === "login";
+  const inputClass =
+    "h-12 rounded-xl border-slate-200 bg-white/80 pl-11 shadow-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/15 dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20";
+
+  return (
+    <main className="relative min-h-svh overflow-hidden bg-slate-950 font-sans">
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,rgba(99,102,241,.38),transparent_35%),radial-gradient(circle_at_88%_88%,rgba(14,165,233,.24),transparent_35%),linear-gradient(135deg,#080b18_0%,#111735_48%,#080b18_100%)]"
+      />
+      <div
+        aria-hidden
+        className="absolute -top-32 left-1/2 h-80 w-[46rem] -translate-x-1/2 rounded-full bg-violet-500/15 blur-[110px]"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 opacity-[0.035] [background-image:linear-gradient(white_1px,transparent_1px),linear-gradient(90deg,white_1px,transparent_1px)] [background-size:56px_56px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]"
+      />
+
+      <header className="absolute inset-x-0 top-0 z-20 mx-auto flex max-w-7xl items-center justify-between px-5 py-6 sm:px-8 lg:px-12">
+        <Link
+          href="/"
+          className="group inline-flex items-center gap-2.5 text-sm font-semibold tracking-wide text-white"
         >
-          <div className="w-full space-y-8 border-b border-border pb-10 lg:border-0 lg:pb-0">
-            <div className="space-y-2">
-              <h1 className="font-[family-name:var(--font-display)] text-3xl tracking-tight text-foreground sm:text-4xl">
-                {mode === "login" ? "Sign in" : "Create account"}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {mode === "login"
-                  ? "Welcome back to EngliTutor."
-                  : "Create your profile and start speaking with AI."}
-              </p>
+          <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-indigo-400 to-violet-600 shadow-lg shadow-indigo-500/25 transition-transform group-hover:-rotate-6">
+            <Sparkles className="size-4" />
+          </span>
+          <span className="text-base">EngliTutor</span>
+        </Link>
+        <Link
+          href="/"
+          className="hidden text-sm text-white/55 transition-colors hover:text-white sm:block"
+        >
+          Back to home
+        </Link>
+      </header>
+
+      <div className="relative z-10 mx-auto grid min-h-svh max-w-7xl items-center gap-10 px-5 pt-24 pb-8 sm:px-8 lg:grid-cols-[1fr_31rem] lg:px-12 lg:py-28">
+        <motion.section
+          className="hidden pr-6 lg:block"
+          initial={{ opacity: 0, x: -24 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-indigo-200 backdrop-blur-xl">
+            <WandSparkles className="size-3.5" /> Your personal AI English coach
+          </div>
+          <h1 className="max-w-2xl text-5xl font-semibold leading-[1.07] tracking-[-0.045em] text-white xl:text-6xl">
+            Make every conversation feel{" "}
+            <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-sky-300 bg-clip-text text-transparent">
+              effortless.
+            </span>
+          </h1>
+          <p className="mt-6 max-w-xl text-base leading-7 text-slate-300/75">
+            Build real speaking confidence with practice that adapts to you, instant Vietnamese
+            feedback, and progress you can feel.
+          </p>
+
+          <div className="relative mt-10 max-w-xl rounded-[1.6rem] border border-white/10 bg-white/[0.06] p-3 shadow-2xl shadow-black/30 backdrop-blur-2xl">
+            <div className="rounded-[1.15rem] border border-white/10 bg-[#0d1227]/90 p-5">
+              <div className="mb-5 flex items-center justify-between border-b border-white/8 pb-4">
+                <div className="flex items-center gap-3">
+                  <span className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-violet-400 to-indigo-600">
+                    <Sparkles className="size-4 text-white" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-medium text-white">Daily speaking session</p>
+                    <p className="text-xs text-white/40">Workplace conversations · 8 min</p>
+                  </div>
+                </div>
+                <span className="flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-2.5 py-1 text-[11px] font-medium text-emerald-300">
+                  <span className="size-1.5 rounded-full bg-emerald-400" />
+                  Live
+                </span>
+              </div>
+              <div className="space-y-3">
+                <div className="max-w-[82%] rounded-2xl rounded-tl-md bg-white/[0.07] px-4 py-3 text-sm leading-6 text-white/75">
+                  How would you introduce your idea in tomorrow&apos;s meeting?
+                </div>
+                <div className="ml-auto max-w-[78%] rounded-2xl rounded-tr-md bg-indigo-500 px-4 py-3 text-sm leading-6 text-white">
+                  I&apos;d start by explaining the problem our customers face...
+                </div>
+              </div>
+              <div className="mt-5 flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.04] p-3">
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="grid size-9 place-items-center rounded-full bg-white text-indigo-600"
+                >
+                  <Mic2 className="size-4" />
+                </button>
+                <div className="flex flex-1 items-center gap-1">
+                  {[3, 6, 9, 5, 12, 8, 4, 10, 6, 3, 7, 4].map((height, index) => (
+                    <span
+                      key={index}
+                      className="w-1 rounded-full bg-indigo-300/60"
+                      style={{ height }}
+                    />
+                  ))}
+                </div>
+                <span className="text-xs text-white/35">Tap to speak</span>
+              </div>
             </div>
+            <motion.div
+              className="absolute -right-7 -bottom-7 flex items-center gap-3 rounded-2xl border border-white/15 bg-white/95 px-4 py-3 shadow-2xl shadow-black/25"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <span className="grid size-8 place-items-center rounded-full bg-emerald-100">
+                <ShieldCheck className="size-4 text-emerald-600" />
+              </span>
+              <div>
+                <p className="text-xs font-semibold text-slate-900">Great clarity!</p>
+                <p className="text-[11px] text-slate-500">Pronunciation +12%</p>
+              </div>
+            </motion.div>
+          </div>
+        </motion.section>
 
-            <div className="grid grid-cols-2 gap-2 rounded-lg bg-muted p-1">
-              <button
-                type="button"
-                className={`cursor-pointer rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                  mode === "login"
-                    ? "bg-background text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-                disabled={pending}
-                onClick={() => onModeChange("login")}
-              >
-                Sign in
-              </button>
-              <button
-                type="button"
-                className={`cursor-pointer rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                  mode === "register"
-                    ? "bg-background text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-                disabled={pending}
-                onClick={() => onModeChange("register")}
-              >
-                Sign up
-              </button>
-            </div>
-
-            <SocialAuthButtons mode={mode} disabled={pending} />
-
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-              <span className="h-px flex-1 bg-border" />
-              <span>or continue with email</span>
-              <span className="h-px flex-1 bg-border" />
-            </div>
-
-            <form className="space-y-4" onSubmit={onSubmit}>
-              {mode === "register" && (
-                <label className="block space-y-2 text-sm">
-                  <span className="font-medium text-foreground">Full name</span>
-                  <Input
-                    name="name"
-                    placeholder="Jane Doe"
-                    className="h-11 w-full bg-background"
-                    required
-                    disabled={pending}
-                  />
-                </label>
-              )}
-
-              <label className="block space-y-2 text-sm">
-                <span className="font-medium text-foreground">Email</span>
-                <Input
-                  name="email"
-                  type="email"
-                  placeholder="you@company.com"
-                  className="h-11 w-full bg-background"
-                  autoComplete="email"
-                  required
-                  disabled={pending}
-                />
-              </label>
-
-              <label className="block space-y-2 text-sm">
-                <span className="font-medium text-foreground">Password</span>
-                <Input
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  className="h-11 w-full bg-background"
-                  autoComplete={mode === "login" ? "current-password" : "new-password"}
-                  minLength={8}
-                  required
-                  disabled={pending}
-                />
-              </label>
-
-              {error ? <p className="text-sm text-destructive">{error}</p> : null}
-
-              <Button type="submit" className="h-11 w-full" size="lg" disabled={pending}>
-                {pending ? "Please wait..." : mode === "login" ? "Sign in" : "Create account"}
-              </Button>
-            </form>
-
-            <p className="text-sm text-muted-foreground">
-              Back to{" "}
-              <Link href="/" className="font-medium text-primary hover:underline">
-                home
-              </Link>
+        <motion.section
+          className="mx-auto w-full max-w-[31rem] rounded-[1.75rem] border border-white/40 bg-white/[0.96] p-6 shadow-[0_30px_90px_rgba(0,0,0,.4)] backdrop-blur-2xl sm:p-9 dark:border-white/10 dark:bg-slate-950/80"
+          initial={{ opacity: 0, y: 20, scale: 0.985 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.48, delay: 0.08 }}
+        >
+          <div className="mb-7">
+            <p className="mb-2 text-xs font-semibold tracking-[0.14em] text-indigo-600 uppercase dark:text-indigo-300">
+              {isLogin ? "Welcome back" : "Let’s get started"}
+            </p>
+            <h2 className="text-3xl font-semibold tracking-[-0.035em] text-slate-950 dark:text-white">
+              {isLogin ? "Sign in to your account" : "Create your account"}
+            </h2>
+            <p className="mt-2.5 text-sm leading-6 text-slate-500 dark:text-slate-400">
+              {isLogin ? "Continue where you left off." : "Start speaking more confidently today."}
             </p>
           </div>
-        </motion.div>
 
-        <motion.aside
-          className="relative mt-10 hidden overflow-hidden border border-primary/15 bg-primary p-10 text-primary-foreground lg:mt-0 lg:flex lg:min-h-[34rem] lg:flex-col lg:justify-end"
-          initial={{ opacity: 0, x: 18 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.55, delay: 0.08 }}
-        >
           <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-[0.08]"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(0deg, transparent, transparent 27px, currentColor 28px)",
-            }}
-          />
-          <p className="relative text-[11px] font-semibold tracking-[0.2em] text-accent uppercase">
-            CEFR · A2–B1
-          </p>
-          <p className="relative mt-4 font-[family-name:var(--font-display)] text-4xl leading-tight">
-            Practice speaking every day, with feedback in Vietnamese.
-          </p>
-          <p className="relative mt-4 max-w-sm text-sm leading-relaxed text-primary-foreground/75">
-            Sign in to open your learning path, manage practice sessions, and continue chatting with your AI tutor.
-          </p>
-        </motion.aside>
+            className="mb-5 grid grid-cols-2 rounded-xl bg-slate-100 p-1 dark:bg-white/[0.06]"
+            role="tablist"
+            aria-label="Authentication mode"
+          >
+            {(["login", "register"] as const).map((item) => (
+              <button
+                key={item}
+                type="button"
+                role="tab"
+                aria-selected={mode === item}
+                disabled={pending}
+                onClick={() => onModeChange(item)}
+                className={`rounded-[.6rem] px-3 py-2.5 text-sm font-semibold transition-all ${mode === item ? "bg-white text-slate-950 shadow-sm dark:bg-white/10 dark:text-white" : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white"}`}
+              >
+                {item === "login" ? "Sign in" : "Sign up"}
+              </button>
+            ))}
+          </div>
+
+          <SocialAuthButtons mode={mode} disabled={pending} />
+          <div className="my-5 flex items-center gap-3 text-[10px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
+            <span className="h-px flex-1 bg-slate-200 dark:bg-white/10" />
+            <span>or continue with email</span>
+            <span className="h-px flex-1 bg-slate-200 dark:bg-white/10" />
+          </div>
+
+          <form className="space-y-0.5" onSubmit={onSubmit} noValidate aria-busy={pending}>
+            <AnimatePresence initial={false}>
+              {!isLogin && (
+                <motion.label
+                  className="block overflow-hidden text-sm"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                >
+                  <span className="mb-1.5 block font-medium text-slate-700 dark:text-slate-200">
+                    Full name
+                  </span>
+                  <div className="relative">
+                    <UserRound className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
+                    <Input
+                      placeholder="Your full name"
+                      autoComplete="name"
+                      disabled={pending}
+                      aria-invalid={Boolean(errors.name)}
+                      aria-describedby="name-error"
+                      className={inputClass}
+                      {...register("name")}
+                    />
+                  </div>
+                  <FieldMessage id="name-error" message={errors.name?.message} />
+                </motion.label>
+              )}
+            </AnimatePresence>
+            <label className="block text-sm">
+              <span className="mb-1.5 block font-medium text-slate-700 dark:text-slate-200">
+                Email address
+              </span>
+              <div className="relative">
+                <Mail className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
+                <Input
+                  type="email"
+                  inputMode="email"
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  disabled={pending}
+                  aria-invalid={Boolean(errors.email)}
+                  aria-describedby="email-error"
+                  className={inputClass}
+                  {...register("email")}
+                />
+              </div>
+              <FieldMessage id="email-error" message={errors.email?.message} />
+            </label>
+            <label className="block text-sm">
+              <span className="mb-1.5 block font-medium text-slate-700 dark:text-slate-200">
+                Password
+              </span>
+              <div className="relative">
+                <LockKeyhole className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Minimum 8 characters"
+                  autoComplete={isLogin ? "current-password" : "new-password"}
+                  disabled={pending}
+                  aria-invalid={Boolean(errors.password)}
+                  aria-describedby="password-error"
+                  className={`${inputClass} pr-11`}
+                  {...register("password")}
+                />
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={() => setShowPassword((value) => !value)}
+                  className="absolute top-1/2 right-3 grid size-7 -translate-y-1/2 place-items-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-white"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
+              <FieldMessage id="password-error" message={errors.password?.message} />
+            </label>
+
+            <p
+              className="min-h-5 text-sm leading-5 text-rose-500"
+              role={error ? "alert" : undefined}
+            >
+              {error ?? ""}
+            </p>
+            <Button
+              type="submit"
+              className="mt-2 h-12 w-full rounded-xl border-0 bg-gradient-to-r from-indigo-600 to-violet-600 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all hover:brightness-110"
+              size="lg"
+              disabled={pending}
+            >
+              {pending ? (
+                <>
+                  <LoaderCircle className="size-4 animate-spin" />
+                  <span>{isLogin ? "Signing you in…" : "Creating account…"}</span>
+                </>
+              ) : (
+                <>
+                  <span>{isLogin ? "Continue" : "Create account"}</span>
+                  <ArrowRight className="size-4" />
+                </>
+              )}
+            </Button>
+            <span className="sr-only" aria-live="polite">
+              {pending ? "Your request is being processed" : ""}
+            </span>
+          </form>
+          <div className="mt-6 flex items-center justify-center gap-2 text-[11px] text-slate-400 dark:text-slate-500">
+            <ShieldCheck className="size-3.5" />
+            Secure, encrypted authentication
+          </div>
+        </motion.section>
       </div>
     </main>
   );

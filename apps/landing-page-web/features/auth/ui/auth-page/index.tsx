@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { authClient, authErrorMessage, useSession } from "@/lib/auth-client";
 import { getAppUrl, getSiteUrl } from "@/features/auth/model/session";
+import { authFormSchema, type AuthFormValues, type AuthPayload } from "../../model/auth-schema";
 import { AuthPageView, type AuthMode } from "./auth-page.view";
 
 function resolveReturnTo(raw: string | null): string {
@@ -26,28 +29,31 @@ export function AuthPage() {
   const [mode, setMode] = useState<AuthMode>("login");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
+  const form = useForm<AuthFormValues, unknown, AuthPayload>({
+    resolver: zodResolver(authFormSchema),
+    defaultValues: { mode: "login", name: "", email: "", password: "" },
+    mode: "onTouched",
+    reValidateMode: "onChange",
+  });
+
+  useEffect(() => setHydrated(true), []);
 
   useEffect(() => {
     if (sessionPending || !data?.user) return;
     window.location.replace(returnTo);
   }, [sessionPending, data?.user, returnTo]);
 
-  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const onSubmit = form.handleSubmit(async (values) => {
     setError(null);
     setPending(true);
 
-    const form = new FormData(event.currentTarget);
-    const email = String(form.get("email") ?? "").trim();
-    const password = String(form.get("password") ?? "");
-    const name = String(form.get("name") ?? "").trim();
-
     try {
-      if (mode === "register") {
+      if (values.mode === "register") {
         const result = await authClient.signUp.email({
-          email,
-          password,
-          name: name || email.split("@")[0] || "User",
+          email: values.email,
+          password: values.password,
+          name: values.name,
         });
         if (result.error) {
           setError(authErrorMessage(result.error));
@@ -56,8 +62,8 @@ export function AuthPage() {
         }
       } else {
         const result = await authClient.signIn.email({
-          email,
-          password,
+          email: values.email,
+          password: values.password,
         });
         if (result.error) {
           setError(authErrorMessage(result.error));
@@ -71,17 +77,29 @@ export function AuthPage() {
       setPending(false);
       setError("Could not reach the auth server. Please try again.");
     }
+  });
+
+  const changeMode = (nextMode: AuthMode) => {
+    if (pending || nextMode === mode) return;
+    setMode(nextMode);
+    setError(null);
+    form.reset({
+      mode: nextMode,
+      name: "",
+      email: form.getValues("email"),
+      password: "",
+    });
   };
 
   return (
     <AuthPageView
       mode={mode}
-      pending={pending || sessionPending}
+      pending={pending || (hydrated && sessionPending)}
       error={error}
-      onModeChange={setMode}
-      onSubmit={(event) => {
-        void onSubmit(event);
-      }}
+      register={form.register}
+      errors={form.formState.errors}
+      onModeChange={changeMode}
+      onSubmit={onSubmit}
     />
   );
 }

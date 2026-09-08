@@ -1,48 +1,88 @@
 "use client";
 
 import Link from "next/link";
-import { MessageCircle, Sparkles } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, Coffee, Mail, Mic2, Sparkles, Users } from "lucide-react";
 import { Button } from "@landing-page-generator/ui";
 import { LESSON_PACKS } from "../model/curriculum";
 
 const SCENARIOS = [
-  { id: "interview", label: "Interview", body: "Behavioral, project, self-intro" },
-  { id: "standup", label: "Stand-up", body: "Yesterday / today / blockers" },
-  { id: "smalltalk", label: "Small talk", body: "Light office conversation" },
-  { id: "email", label: "Email", body: "Read & write short emails" },
-  { id: "free", label: "Free form", body: "You choose the topic" },
+  {
+    id: "interview",
+    label: "Interview",
+    body: "Share your story with confidence",
+    icon: BriefcaseBusiness,
+    color: "bg-violet-100 text-violet-700 dark:bg-violet-400/15 dark:text-violet-300",
+  },
+  {
+    id: "standup",
+    label: "Team stand-up",
+    body: "Talk about plans and progress",
+    icon: Users,
+    color: "bg-sky-100 text-sky-700 dark:bg-sky-400/15 dark:text-sky-300",
+  },
+  {
+    id: "smalltalk",
+    label: "Small talk",
+    body: "Enjoy an easy office conversation",
+    icon: Coffee,
+    color: "bg-amber-100 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300",
+  },
+  {
+    id: "email",
+    label: "Email",
+    body: "Write clear, natural messages",
+    icon: Mail,
+    color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-300",
+  },
+  {
+    id: "free",
+    label: "Choose your topic",
+    body: "Talk about anything on your mind",
+    icon: Mic2,
+    color: "bg-rose-100 text-rose-700 dark:bg-rose-400/15 dark:text-rose-300",
+  },
 ] as const;
 
 export function StartPracticePage() {
   return (
-    <div className="mx-auto max-w-3xl space-y-10">
-      <header className="space-y-3">
-        <p className="text-[11px] font-medium tracking-[0.18em] text-accent uppercase">
-          Start practice
-        </p>
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          Choose a chat scenario with AI
-        </h1>
-        <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
-          No more landing-page builder. Pick a scenario or a lesson pack — EngliTutor will converse and give
-          feedback.
-        </p>
+    <div className="mx-auto max-w-4xl space-y-10 pb-8">
+      <header className="relative overflow-hidden rounded-[2rem] bg-primary px-6 py-9 text-primary-foreground sm:px-10 sm:py-11">
+        <div
+          aria-hidden
+          className="absolute right-0 top-0 size-56 rounded-full bg-violet-500/25 blur-3xl"
+        />
+        <div className="relative">
+          <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium">
+            <Sparkles className="size-3.5 text-amber-300" />
+            Your AI tutor is ready
+          </p>
+          <h1 className="mt-5 max-w-xl text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">
+            What shall we talk about?
+          </h1>
+          <p className="mt-3 max-w-xl text-sm leading-6 text-white/65 sm:text-base">
+            Pick a situation that feels useful—or simply talk about your day. There are no wrong
+            choices here.
+          </p>
+        </div>
       </header>
 
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold tracking-tight">By scenario</h2>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <h2 className="text-xl font-semibold tracking-tight">Choose a conversation</h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {SCENARIOS.map((item) => (
             <Link
               key={item.id}
               href={`/practice?scenario=${item.id}`}
-              className="rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary/35"
+              className="group rounded-2xl border border-border/70 bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-transparent hover:shadow-lg"
             >
-              <p className="font-semibold tracking-tight">{item.label}</p>
+              <span className={`grid size-10 place-items-center rounded-xl ${item.color}`}>
+                <item.icon className="size-4" />
+              </span>
+              <p className="mt-4 font-semibold tracking-tight">{item.label}</p>
               <p className="mt-1 text-sm text-muted-foreground">{item.body}</p>
               <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
-                <MessageCircle className="size-4" />
-                Open chat
+                Let&apos;s talk{" "}
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
               </span>
             </Link>
           ))}
@@ -52,14 +92,14 @@ export function StartPracticePage() {
       <section className="space-y-4">
         <div className="flex items-center gap-2">
           <Sparkles className="size-4 text-accent" />
-          <h2 className="text-lg font-semibold tracking-tight">Or pick a ready lesson pack</h2>
+          <h2 className="text-xl font-semibold tracking-tight">Prefer a guided lesson?</h2>
         </div>
-        <ul className="divide-y divide-border border-y border-border">
+        <ul className="overflow-hidden rounded-2xl border border-border/70 bg-card">
           {LESSON_PACKS.slice(0, 4).map((lesson) => (
             <li key={lesson.id}>
               <Link
                 href={`/practice?scenario=${lesson.scenario}&lesson=${lesson.id}`}
-                className="flex items-center justify-between gap-4 py-4"
+                className="group flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-muted/50"
               >
                 <div>
                   <p className="text-sm font-semibold">{lesson.title}</p>
@@ -67,7 +107,7 @@ export function StartPracticePage() {
                     {lesson.level} · {lesson.duration} · {lesson.skills.join(" · ")}
                   </p>
                 </div>
-                <span className="text-sm font-medium text-primary">Practice</span>
+                <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-foreground" />
               </Link>
             </li>
           ))}

@@ -30,8 +30,7 @@ const STARTERS: Record<TutorScenario, string> = {
     "Hi! I'm EngliTutor. Let's practice a job interview. Tell me briefly about yourself and your current role.",
   standup:
     "Good morning! Let's do a quick standup. What did you finish yesterday, and what's on your plate today?",
-  smalltalk:
-    "Hey! How's your week going so far? Feel free to answer in a few short sentences.",
+  smalltalk: "Hey! How's your week going so far? Feel free to answer in a few short sentences.",
   email:
     "Let's practice work writing. Describe the email you need — who it's for and what you want them to do.",
   free: "Hi! I'm ready to practice English with you. What topic would you like to talk about today?",
@@ -80,7 +79,8 @@ export function TutorChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [demoMode, setDemoMode] = useState(false);
   const [pendingAudioUrl, setPendingAudioUrl] = useState<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const messageListRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const lesson = lessonId ? LESSON_PACKS.find((item) => item.id === lessonId) : undefined;
 
@@ -110,7 +110,17 @@ export function TutorChatPage() {
   }, [searchParams]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    if (messages.length <= 1 && !pending) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      messageListRef.current?.scrollTo({
+        top: messageListRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+      composerRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
   }, [messages, pending]);
 
   useEffect(() => {
@@ -143,10 +153,7 @@ export function TutorChatPage() {
     if (!text || pending || voice.recording) return;
 
     const audioUrl = pendingAudioUrl ?? undefined;
-    const nextMessages: ChatMessage[] = [
-      ...messages,
-      { role: "user", content: text, audioUrl },
-    ];
+    const nextMessages: ChatMessage[] = [...messages, { role: "user", content: text, audioUrl }];
     setMessages(nextMessages);
     setDraft("");
     setPendingAudioUrl(null);
@@ -174,16 +181,21 @@ export function TutorChatPage() {
 
   return (
     <div className="flex min-h-[calc(100svh-8rem)] flex-col gap-5">
-      <header className="space-y-3">
-        <p className="text-[11px] font-medium tracking-[0.18em] text-accent uppercase">
-          Practice with AI
+      <header className="relative space-y-4 overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-primary to-primary/80 px-5 py-6 text-primary-foreground sm:px-7 sm:py-7">
+        <div
+          aria-hidden
+          className="absolute -right-12 -top-16 size-52 rounded-full border-[26px] border-white/[0.07]"
+        />
+        <p className="relative inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.18em] text-primary-foreground/70 uppercase">
+          <Sparkles className="size-3.5 text-amber-300" />
+          Your judgment-free practice space
         </p>
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="max-w-2xl space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          <div className="relative max-w-2xl space-y-2">
+            <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
               {lesson ? lesson.title : "Chat EngliTutor"}
             </h1>
-            <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+            <p className="text-sm leading-relaxed text-white/70 sm:text-base">
               {lesson
                 ? `${lesson.skills.join(" · ")} · ${lesson.duration} · ${lesson.focus}`
                 : "Type or record English — AI replies in English and suggests corrections in Vietnamese."}
@@ -191,8 +203,7 @@ export function TutorChatPage() {
           </div>
           <Button
             type="button"
-            variant="outline"
-            className="h-10 rounded-full"
+            className="relative h-10 rounded-full border-0 bg-white text-primary hover:bg-white/90"
             onClick={() => resetChat(scenario)}
           >
             <RefreshCw className="size-4" />
@@ -209,15 +220,15 @@ export function TutorChatPage() {
               className={cn(
                 "rounded-full border px-3.5 py-2 text-left text-sm transition-colors",
                 scenario === item.id
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground",
+                  ? "border-white bg-white text-primary"
+                  : "border-white/15 bg-white/[0.06] text-white/65 hover:bg-white/10 hover:text-white",
               )}
             >
               <span className="font-medium">{item.label}</span>
               <span
                 className={cn(
                   "ml-2 hidden text-xs sm:inline",
-                  scenario === item.id ? "text-primary-foreground/70" : "text-muted-foreground",
+                  scenario === item.id ? "text-primary/70" : "text-white/40",
                 )}
               >
                 {item.hint}
@@ -234,9 +245,9 @@ export function TutorChatPage() {
         ) : null}
       </header>
 
-      <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-[0_24px_60px_-40px_rgba(15,23,42,0.35)]">
+      <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-border/70 bg-card shadow-[0_24px_60px_-35px_rgba(79,70,229,0.28)]">
         <div className="flex items-center gap-2 border-b border-border px-4 py-3 sm:px-5">
-          <span className="grid size-9 place-items-center rounded-full bg-primary text-primary-foreground">
+          <span className="grid size-9 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm">
             <MessageCircle className="size-4" />
           </span>
           <div className="min-w-0">
@@ -247,7 +258,10 @@ export function TutorChatPage() {
           </div>
         </div>
 
-        <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-5">
+        <div
+          ref={messageListRef}
+          className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-5"
+        >
           {messages.map((message, index) => {
             const isUser = message.role === "user";
             const { english, tip } = isUser
@@ -279,10 +293,7 @@ export function TutorChatPage() {
                     <audio
                       controls
                       src={message.audioUrl}
-                      className={cn(
-                        "h-9 max-w-full",
-                        isUser ? "accent-white" : undefined,
-                      )}
+                      className={cn("h-9 max-w-full", isUser ? "accent-white" : undefined)}
                     />
                   ) : null}
                   {tip ? (
@@ -303,11 +314,9 @@ export function TutorChatPage() {
               </div>
             </div>
           ) : null}
-
-          <div ref={bottomRef} />
         </div>
 
-        <div className="border-t border-border p-3 sm:p-4">
+        <div ref={composerRef} className="scroll-mb-4 border-t border-border p-3 sm:p-4">
           {error || voice.error ? (
             <p className="mb-2 text-sm text-destructive">{error || voice.error}</p>
           ) : null}
@@ -320,7 +329,10 @@ export function TutorChatPage() {
               </span>
               Recording… speak English, then tap stop.
               {!voice.speechSupported ? (
-                <span className="text-muted-foreground"> (No STT in this browser — type after listening back)</span>
+                <span className="text-muted-foreground">
+                  {" "}
+                  (No STT in this browser — type after listening back)
+                </span>
               ) : null}
             </div>
           ) : null}
@@ -371,7 +383,11 @@ export function TutorChatPage() {
               }
               onClick={() => void voice.toggle()}
             >
-              {voice.recording ? <Square className="size-4 fill-current" /> : <Mic className="size-4" />}
+              {voice.recording ? (
+                <Square className="size-4 fill-current" />
+              ) : (
+                <Mic className="size-4" />
+              )}
             </Button>
             <textarea
               ref={inputRef}
@@ -398,7 +414,11 @@ export function TutorChatPage() {
               disabled={pending || voice.recording || !draft.trim()}
               className="h-11 shrink-0 rounded-full px-5"
             >
-              {pending ? <LoaderCircle className="size-4 animate-spin" /> : <Send className="size-4" />}
+              {pending ? (
+                <LoaderCircle className="size-4 animate-spin" />
+              ) : (
+                <Send className="size-4" />
+              )}
               Send
             </Button>
           </form>
