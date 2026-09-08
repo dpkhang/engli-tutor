@@ -1,5 +1,12 @@
 export type LearningSkill = "reading" | "listening" | "speaking" | "writing";
 export type LearningLevel = "A2" | "A2+" | "B1";
+export type LearningGameId =
+  | "speed-reply"
+  | "fix-sentence"
+  | "listen-order"
+  | "rewrite-race"
+  | "word-match"
+  | "keyword-hunt";
 
 export type LearningQuestion =
   | {
@@ -17,7 +24,62 @@ export type LearningQuestion =
       keywords: string[];
       sampleAnswer: string;
       explanation: string;
+    }
+  | {
+      id: string;
+      kind: "order";
+      prompt: string;
+      items: string[];
+      correctOrder: number[];
+      explanation: string;
+    }
+  | {
+      id: string;
+      kind: "match";
+      prompt: string;
+      pairs: Array<{ left: string; right: string }>;
+      explanation: string;
+    }
+  | {
+      id: string;
+      kind: "fix";
+      prompt: string;
+      options: string[];
+      correctIndex: number;
+      explanation: string;
+    }
+  | {
+      id: string;
+      kind: "hunt";
+      prompt: string;
+      options: string[];
+      correctWords: string[];
+      explanation: string;
     };
+
+export type LearningGameRound = {
+  id: string;
+  level: LearningLevel;
+  seconds: number;
+  lessonIds?: string[];
+  hearAgainMax?: number;
+  maxWords?: number;
+  material?: { title: string; body: string; speakable?: boolean };
+  question: LearningQuestion;
+};
+
+export type LearningGame = {
+  id: LearningGameId;
+  title: string;
+  body: string;
+  skill: LearningSkill;
+  durationMinutes: number;
+  howToPlay: string;
+  relatedSkill: LearningSkill;
+  rounds: LearningGameRound[];
+};
+
+export type LearningGameSummary = Omit<LearningGame, "rounds"> & { roundCount: number };
 
 export type LearningExercise = {
   id: string;
@@ -35,6 +97,8 @@ export type LearningMeta = {
   skills: LearningSkill[];
   levels: LearningLevel[];
   totalExercises: number;
+  totalGames?: number;
+  games?: LearningGameId[];
   coverage: Array<{
     skill: LearningSkill;
     levels: Array<{ level: LearningLevel; exerciseCount: number }>;
