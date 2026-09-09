@@ -17,6 +17,7 @@ const PLAN_NAMES: Record<string, string> = {
   "boost-100": "Boost 100",
   "boost-500": "Boost 500",
   "boost-1500": "Boost 1500",
+  custom: "Custom top-up",
 };
 
 export function PaymentResultPage() {

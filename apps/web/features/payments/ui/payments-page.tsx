@@ -25,6 +25,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Input,
   cn,
   useLockScroll,
 } from "@landing-page-generator/ui";
@@ -47,9 +48,9 @@ import {
 const REASON_LABEL: Record<string, string> = {
   SIGNUP_BONUS: "Signup bonus",
   PURCHASE: "Credit top-up",
-  SUBSCRIPTION_GRANT: "Subscription credits",
-  AI_GENERATE: "Legacy AI usage",
-  AI_GENERATE_REFUND: "Legacy credit refund",
+  SUBSCRIPTION_GRANT: "Plan practice credits",
+  AI_GENERATE: "AI practice session",
+  AI_GENERATE_REFUND: "AI practice credit refund",
   ADJUST: "Adjustment",
 };
 
@@ -77,6 +78,7 @@ export default function PaymentsPage() {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
   const [showUpgradeOptions, setShowUpgradeOptions] = useState(false);
+  const [customCredits, setCustomCredits] = useState(200);
 
   useEffect(() => {
     if (checkoutState !== "success") return;
@@ -150,11 +152,12 @@ export default function PaymentsPage() {
     }
   };
 
-  const onTopup = async (packId: TopupPack["id"]) => {
+  const onTopup = async (pack: TopupPack) => {
     setError(null);
-    setPending(`top-${packId}`);
+    setPending(`top-${pack.id}`);
     try {
-      const result = await topup.mutateAsync(packId);
+      const credits = pack.isCustom ? customCredits : undefined;
+      const result = await topup.mutateAsync({ packId: pack.id, credits });
       await redirectCheckout(result.url);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't create payment session");
@@ -185,7 +188,7 @@ export default function PaymentsPage() {
           </h1>
           <p className="mt-4 max-w-xl text-sm leading-6 text-primary-foreground/70 sm:text-base">
             {hasPaidPlan
-              ? "Your learning plan, credits and payment activity—all in one simple place."
+              ? "Your learning plan, practice time and payment activity—all in one simple place."
               : "Start free and upgrade whenever you want more time to speak, practise and grow."}
           </p>
         </div>
@@ -195,8 +198,8 @@ export default function PaymentsPage() {
         <Alert>
           <AlertDescription>
             {checkoutType === "subscription"
-              ? "Subscription successful. First-period credits will be added after the Stripe webhook."
-              : "Payment successful. Credits will be added shortly."}
+              ? "Your learning plan is active. Practice credits will be available shortly."
+              : "Payment successful. Your practice credits will be available shortly."}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -244,19 +247,19 @@ export default function PaymentsPage() {
                       <Coins className="size-4 text-primary" />
                     </span>
                     <div>
-                      <p className="text-xs text-muted-foreground">Credit balance</p>
+                      <p className="text-xs text-muted-foreground">Practice credits</p>
                       <p className="font-semibold">{balance}</p>
                     </div>
                   </div>
                   {hasPaidPlan && data?.subscription.creditsPerPeriod ? (
                     <div className="rounded-2xl border border-border/70 bg-muted/30 px-4 py-3 text-sm">
-                      <p className="text-xs text-muted-foreground">Credits per period</p>
+                      <p className="text-xs text-muted-foreground">Practice credits per period</p>
                       <p className="font-semibold">{data.subscription.creditsPerPeriod}</p>
                     </div>
                   ) : (
                     <div className="rounded-2xl border border-border/70 bg-muted/30 px-4 py-3 text-sm">
-                      <p className="text-xs text-muted-foreground">Signup bonus</p>
-                      <p className="font-semibold">{data?.signupBonus ?? 50} credits</p>
+                      <p className="text-xs text-muted-foreground">Welcome practice credits</p>
+                      <p className="font-semibold">{data?.signupBonus ?? 50} practice credits</p>
                     </div>
                   )}
                 </div>
@@ -289,7 +292,7 @@ export default function PaymentsPage() {
                       disabled={!stripeReady || Boolean(pending)}
                       onClick={() => setShowUpgradeOptions(true)}
                     >
-                      <ArrowUpCircle /> Upgrade plan
+                      <ArrowUpCircle /> {hasPaidPlan ? "Upgrade plan" : "Explore plans"}
                     </Button>
                   ) : null}
                 </div>
@@ -362,7 +365,9 @@ export default function PaymentsPage() {
                   <ArrowUpCircle className="size-5 text-primary" /> Unlock more practice
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Only plans higher than {activePlan.name} are shown. Pick one to start checkout.
+                  {hasPaidPlan
+                    ? `Choose the next step beyond ${activePlan.name}.`
+                    : "Choose how much speaking practice and guidance you need."}
                 </p>
               </div>
               <div className="mt-6 space-y-5">
@@ -419,7 +424,7 @@ export default function PaymentsPage() {
                             </span>
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {plan.creditsPerPeriod} credits/period
+                            {plan.creditsPerPeriod} practice credits per period
                           </p>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -444,7 +449,7 @@ export default function PaymentsPage() {
                               <LoaderCircle className="animate-spin" />
                             ) : (
                               <>
-                                <CreditCard /> Upgrade to {plan.name}
+                                <CreditCard /> {hasPaidPlan ? "Upgrade to" : "Choose"} {plan.name}
                               </>
                             )}
                           </Button>
@@ -470,33 +475,63 @@ export default function PaymentsPage() {
                 Top up your practice time
               </CardTitle>
               <CardDescription>
-                Use this when you run out mid-period — one-time card payment.
+                Add extra conversation and exercise time without changing your current plan.
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-3 sm:grid-cols-3">
-              {(data?.topupPacks ?? []).map((pack) => (
-                <div
-                  key={pack.id}
-                  className="group rounded-2xl border border-border/70 bg-gradient-to-br from-amber-500/8 to-card p-5 transition-all hover:-translate-y-0.5 hover:shadow-md"
-                >
-                  <p className="text-sm font-semibold">{pack.name}</p>
-                  <p className="mt-2 text-xl font-bold">{pack.credits}</p>
-                  <p className="text-xs text-muted-foreground">credits</p>
-                  <p className="mt-2 text-sm">{formatVnd(pack.priceVnd)}</p>
-                  <Button
-                    className="mt-4 w-full rounded-full"
-                    variant="outline"
-                    disabled={!stripeReady || Boolean(pending)}
-                    onClick={() => void onTopup(pack.id)}
+            <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {(data?.topupPacks ?? []).map((pack) => {
+                const min = pack.minCredits ?? 50;
+                const max = pack.maxCredits ?? 5_000;
+                const unit = pack.unitPriceVnd ?? 0;
+                const price = pack.isCustom ? customCredits * unit : pack.priceVnd;
+                const invalidCustom = pack.isCustom && (customCredits < min || customCredits > max);
+
+                return (
+                  <div
+                    key={pack.id}
+                    className="group rounded-2xl border border-border/70 bg-gradient-to-br from-amber-500/8 to-card p-5 transition-all hover:-translate-y-0.5 hover:shadow-md"
                   >
-                    {pending === `top-${pack.id}` ? (
-                      <LoaderCircle className="animate-spin" />
+                    <p className="text-sm font-semibold">{pack.name}</p>
+                    {pack.description ? (
+                      <p className="mt-1 text-xs text-muted-foreground">{pack.description}</p>
+                    ) : null}
+                    {pack.isCustom ? (
+                      <div className="mt-3 space-y-2">
+                        <Input
+                          type="number"
+                          min={min}
+                          max={max}
+                          step={10}
+                          value={customCredits}
+                          onChange={(event) => setCustomCredits(Number(event.target.value) || min)}
+                          aria-label="Custom credit amount"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {min.toLocaleString("en-US")}–{max.toLocaleString("en-US")} credits
+                        </p>
+                      </div>
                     ) : (
-                      "Buy more"
+                      <>
+                        <p className="mt-2 text-xl font-bold">{pack.credits}</p>
+                        <p className="text-xs text-muted-foreground">practice credits</p>
+                      </>
                     )}
-                  </Button>
-                </div>
-              ))}
+                    <p className="mt-2 text-sm">{formatVnd(price)}</p>
+                    <Button
+                      className="mt-4 w-full rounded-full"
+                      variant="outline"
+                      disabled={!stripeReady || Boolean(pending) || invalidCustom || price <= 0}
+                      onClick={() => void onTopup(pack)}
+                    >
+                      {pending === `top-${pack.id}` ? (
+                        <LoaderCircle className="animate-spin" />
+                      ) : (
+                        pack.cta || (pack.isCustom ? "Buy custom amount" : "Buy more")
+                      )}
+                    </Button>
+                  </div>
+                );
+              })}
             </CardContent>
           </Card>
         </div>

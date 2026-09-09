@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "react-phone-number-input/style.css";
 @import "@landing-page-generator/ui/globals.css";
 
 @source "../../../packages/ui/src";
@@ -92,6 +93,40 @@
 }
 
 @layer components {
+  .account-phone-input.PhoneInput {
+    height: 2.25rem;
+    border: 1px solid hsl(var(--input));
+    border-radius: var(--radius-md);
+    background: transparent;
+    padding: 0 0.75rem;
+    transition:
+      border-color 150ms,
+      box-shadow 150ms;
+  }
+
+  .account-phone-input.PhoneInput:focus-within {
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.4);
+  }
+
+  .account-phone-input .PhoneInputCountry {
+    margin-right: 0.65rem;
+  }
+
+  .account-phone-input .PhoneInputInput {
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    color: hsl(var(--foreground));
+    font-size: 0.875rem;
+    outline: 0;
+  }
+
+  .account-phone-input[data-invalid="true"] {
+    border-color: hsl(var(--destructive));
+    box-shadow: 0 0 0 3px hsl(var(--destructive) / 0.2);
+  }
+
   .workspace-background {
     background-color: transparent;
   }
@@ -152,6 +187,13 @@
   .speaking-breath-slow {
     animation: none !important;
   }
+
+  .speak-infinity-text {
+    animation: none !important;
+    background: none;
+    color: inherit;
+    -webkit-text-fill-color: currentColor;
+  }
 }
 
 @keyframes speaking-aurora {
@@ -195,4 +237,31 @@
 
 .speaking-breath-slow {
   animation: speaking-breath 5.5s ease-in-out infinite;
+}
+
+@keyframes speak-infinity-shine {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+.speak-infinity-text {
+  background-image: linear-gradient(
+    90deg,
+    hsl(var(--primary-foreground) / 0.62) 0%,
+    hsl(var(--primary-foreground) / 0.62) 38%,
+    #fff 50%,
+    hsl(var(--primary-foreground) / 0.55) 52%,
+    hsl(var(--primary-foreground) / 0.62) 62%,
+    hsl(var(--primary-foreground) / 0.62) 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: speak-infinity-shine 2.4s linear infinite;
 }

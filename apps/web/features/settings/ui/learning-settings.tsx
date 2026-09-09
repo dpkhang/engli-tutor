@@ -6,6 +6,7 @@ import { Target, Volume2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, Label, cn } from "@landing-page-generator/ui";
 import { LEVELS, type SkillLevel } from "@/features/learn/model/skill-exercises";
 import { accountApi } from "@/features/accounts/api";
+import { queryKeys } from "@/lib/query";
 import {
   SPEECH_RATES,
   getAutoPlayListening,
@@ -27,7 +28,7 @@ type LearningView = {
 
 export function LearningSettings() {
   const profileQuery = useQuery({
-    queryKey: ["account"],
+    queryKey: queryKeys.account,
     queryFn: accountApi.get,
   });
   const [view, setView] = useState<LearningView | null>(null);
