@@ -63,8 +63,11 @@ export const billingApi = {
       planId,
       returnOrigin: clientReturnOrigin(),
     }),
-  confirm: (sessionId: string) =>
-    marketingApiClient.post<{ subscribed?: boolean; planId?: string }>("/api/billing/confirm", {
-      sessionId,
-    }),
+  confirm: (input: { sessionId?: string; planId?: string }) =>
+    marketingApiClient.post<{
+      subscribed?: boolean;
+      upgraded?: boolean;
+      planId?: string;
+      balanceAfter?: number;
+    }>("/api/billing/confirm", input),
 };

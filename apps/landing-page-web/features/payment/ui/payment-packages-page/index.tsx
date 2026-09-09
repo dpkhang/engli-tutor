@@ -20,6 +20,7 @@ export function PaymentPackagesPage() {
   const checkoutState = searchParams.get("checkout");
   const checkoutType = searchParams.get("type");
   const sessionId = searchParams.get("session_id");
+  const itemId = searchParams.get("item");
   const { isLoggedIn, ready: authReady } = useAuthSession();
   const billing = useBillingMe(isLoggedIn);
   const redirectingToCurrentPlan = Boolean(
@@ -40,7 +41,8 @@ export function PaymentPackagesPage() {
     let cancelled = false;
     (async () => {
       try {
-        if (sessionId) await billingApi.confirm(sessionId);
+        if (sessionId) await billingApi.confirm({ sessionId });
+        else if (checkoutType === "upgrade" && itemId) await billingApi.confirm({ planId: itemId });
       } catch {
         // Webhook may already have applied; still refetch below.
       } finally {
@@ -52,13 +54,14 @@ export function PaymentPackagesPage() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync once per success redirect
-  }, [checkoutState, sessionId, isLoggedIn]);
+  }, [checkoutState, checkoutType, itemId, sessionId, isLoggedIn]);
 
   useEffect(() => {
+    if (checkoutState === "success") return;
     if (!billing.data?.hasPaidPlan) return;
     const currentPlan = billing.data.subscription.planId;
     router.replace(`/payment/checkout?plan=${currentPlan}`);
-  }, [billing.data, router]);
+  }, [billing.data, checkoutState, router]);
 
   return (
     <PaymentPackagesPageView

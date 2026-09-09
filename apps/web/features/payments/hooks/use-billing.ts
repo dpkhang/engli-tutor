@@ -57,7 +57,7 @@ export function useTopupCheckout() {
 export function useConfirmCheckout() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (sessionId: string) => billingApi.confirm(sessionId),
+    mutationFn: (input: { sessionId?: string; planId?: string }) => billingApi.confirm(input),
     onSuccess: async (result) => {
       if (typeof result.balanceAfter === "number") {
         queryClient.setQueryData(billingMeQueryKey, (current: BillingMe | undefined) => {

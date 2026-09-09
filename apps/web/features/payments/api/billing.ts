@@ -84,14 +84,13 @@ export const billingApi = {
       ...(typeof credits === "number" ? { credits } : {}),
       returnOrigin: typeof window !== "undefined" ? window.location.origin : undefined,
     }),
-  confirm: (sessionId: string) =>
+  confirm: (input: { sessionId?: string; planId?: string }) =>
     workspaceApiClient.post<{
       subscribed?: boolean;
+      upgraded?: boolean;
       topup?: boolean;
       planId?: string | null;
       balanceAfter?: number;
       creditsAdded?: number;
-    }>("/api/billing/confirm", {
-      sessionId,
-    }),
+    }>("/api/billing/confirm", input),
 };
