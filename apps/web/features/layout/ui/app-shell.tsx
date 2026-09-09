@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -18,8 +18,11 @@ import {
 } from "lucide-react";
 import { authClient, useSession } from "@/lib/auth-client";
 import { Button, cn, ThemeToggle, useActionDialog } from "@landing-page-generator/ui";
+import { useQueryClient } from "@tanstack/react-query";
+import { useSignOutLoading } from "./sign-out-loading";
 import { AnimatePresence, motion } from "motion/react";
 import { useBillingMe } from "@/features/payments/hooks/use-billing";
+import { FloatingTranslate } from "@/features/translate";
 
 const PRIMARY_NAV = [
   { href: "/", label: "Today" },
@@ -46,10 +49,17 @@ function isActivePath(pathname: string, href: string) {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const dialog = useActionDialog();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
+  const { beginSignOut, endSignOut } = useSignOutLoading();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [aiToolsOpen, setAiToolsOpen] = useState(true);
+  const [translateOpen, setTranslateOpen] = useState(false);
   const [aiLauncherExpanded, setAiLauncherExpanded] = useState(false);
+  const [clipAiTools, setClipAiTools] = useState(false);
+  const aiDockActionRef = useRef<"idle" | "open-tools" | "show-pill">("idle");
+  const aiToolsInnerRef = useRef<HTMLDivElement>(null);
+  const [aiToolsHeight, setAiToolsHeight] = useState(0);
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const { data } = useSession();
   const user = data?.user;
@@ -63,6 +73,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setAccountOpen(false);
     setMobileOpen(false);
+    setTranslateOpen(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -84,12 +95,35 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     };
   }, [accountOpen]);
 
-  useEffect(() => {
-    if (aiToolsOpen) return;
+  useLayoutEffect(() => {
+    const node = aiToolsInnerRef.current;
+    if (!node) return;
+    setAiToolsHeight(node.scrollHeight);
+  }, [aiToolsOpen, pathname]);
 
-    const timer = window.setTimeout(() => setAiLauncherExpanded(true), 300);
+  useEffect(() => {
+    if (aiDockActionRef.current !== "open-tools") return;
+    if (aiLauncherExpanded || aiToolsOpen) return;
+
+    const timer = window.setTimeout(() => {
+      aiDockActionRef.current = "idle";
+      setAiToolsOpen(true);
+    }, 300);
+
     return () => window.clearTimeout(timer);
-  }, [aiToolsOpen]);
+  }, [aiLauncherExpanded, aiToolsOpen]);
+
+  useEffect(() => {
+    if (aiDockActionRef.current !== "show-pill") return;
+    if (aiToolsOpen || aiLauncherExpanded) return;
+
+    const timer = window.setTimeout(() => {
+      aiDockActionRef.current = "idle";
+      setAiLauncherExpanded(true);
+    }, 320);
+
+    return () => window.clearTimeout(timer);
+  }, [aiToolsOpen, aiLauncherExpanded]);
 
   if (
     pathname === "/login" ||
@@ -110,8 +144,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     });
     if (!accepted) return;
     setAccountOpen(false);
-    void authClient.signOut().then(() => window.location.assign("/login"));
+    beginSignOut();
+    try {
+      queryClient.clear();
+      await authClient.signOut();
+      window.location.assign("/login");
+    } catch {
+      endSignOut();
+    }
   };
+
+  const raiseFabForExerciseBar = /^\/skills\/[^/]+\/[^/]+/.test(pathname);
 
   return (
     <div className="workspace-background relative min-h-svh">
@@ -292,32 +335,40 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </AnimatePresence>
       </header>
 
-      <motion.div
-        className={cn(
-          "pointer-events-none fixed z-30 flex w-40 flex-col items-end",
-          pathname.startsWith("/skills/") ? "bottom-24" : "bottom-5 sm:bottom-6",
-        )}
-        style={{ right: "max(1rem, calc((100vw - 72rem) / 2 + 1.5rem))" }}
-        initial={{ opacity: 0, y: 12, scale: 0.92 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ type: "spring", stiffness: 320, damping: 24 }}
+      <div
+        className="pointer-events-none fixed z-[60] flex w-max max-w-[calc(100vw-2rem)] flex-col items-end"
+        style={{
+          right: "max(1rem, env(safe-area-inset-right, 0px))",
+          bottom: raiseFabForExerciseBar
+            ? "max(6rem, calc(env(safe-area-inset-bottom, 0px) + 5.5rem))"
+            : "max(1.25rem, env(safe-area-inset-bottom, 0px))",
+        }}
       >
+        <div className="pointer-events-none absolute bottom-[calc(100%+0.75rem)] right-0">
+          <FloatingTranslate open={translateOpen} onOpenChange={setTranslateOpen} />
+        </div>
+
         <motion.button
           type="button"
           onClick={() => {
             if (aiToolsOpen) {
+              aiDockActionRef.current = "show-pill";
+              setClipAiTools(true);
               setAiToolsOpen(false);
               return;
             }
+            aiDockActionRef.current = "open-tools";
             setAiLauncherExpanded(false);
-            setAiToolsOpen(true);
           }}
           className={cn(
-            "pointer-events-auto relative flex h-12 items-center overflow-hidden rounded-full shadow-[0_10px_28px_-8px_hsl(var(--primary)/0.65)] transition-[width,background-color,color,border-color] duration-300 ease-in-out",
+            "pointer-events-auto relative flex h-12 max-w-[calc(100vw-2rem)] items-center overflow-hidden rounded-full shadow-[0_10px_28px_-8px_hsl(var(--primary)/0.65)] transition-[background-color,color,border-color] duration-300 ease-out",
             aiLauncherExpanded
-              ? "w-40 justify-between bg-primary px-4 text-primary-foreground hover:bg-primary/90"
-              : "w-12 justify-center border border-border bg-card text-muted-foreground hover:text-foreground",
+              ? "justify-between border border-transparent bg-primary text-primary-foreground hover:bg-primary/90"
+              : "justify-center border border-border bg-card text-muted-foreground hover:text-foreground",
           )}
+          initial={false}
+          animate={{ width: aiLauncherExpanded ? 160 : 48 }}
+          transition={{ width: { duration: 0.3, ease: [0.22, 1, 0.36, 1] } }}
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.94 }}
           aria-expanded={aiToolsOpen}
@@ -331,18 +382,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               rotate: aiLauncherExpanded ? 45 : 0,
               scale: aiLauncherExpanded ? 0.7 : 1,
             }}
-            transition={{ duration: aiLauncherExpanded ? 0.06 : 0.15 }}
+            transition={{ duration: aiLauncherExpanded ? 0.08 : 0.18 }}
           >
             <X className="size-4" />
           </motion.span>
 
           <span className="absolute inset-0 flex items-center justify-between gap-3 px-4 whitespace-nowrap">
             <motion.span
-              className="text-sm font-semibold"
+              className="speak-infinity-text text-sm font-semibold"
               animate={{ opacity: aiLauncherExpanded ? 1 : 0 }}
               transition={{
                 delay: aiLauncherExpanded ? 0.22 : 0,
-                duration: aiLauncherExpanded ? 0.08 : 0.04,
+                duration: aiLauncherExpanded ? 0.16 : 0.1,
               }}
             >
               Speak with AI
@@ -353,8 +404,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 scale: aiLauncherExpanded ? 1 : 0.8,
               }}
               transition={{
-                delay: aiLauncherExpanded ? 0.08 : 0,
-                duration: 0.12,
+                delay: aiLauncherExpanded ? 0.22 : 0,
+                duration: 0.16,
               }}
             >
               <Sparkles className="size-5 shrink-0" />
@@ -362,61 +413,91 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </span>
         </motion.button>
 
-        <AnimatePresence initial={false}>
-          {aiToolsOpen ? (
-            <motion.div
-              key="ai-tools"
-              className="w-full overflow-hidden"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{
-                height: { duration: 0.28, ease: [0.4, 0, 0.2, 1] },
-                opacity: { duration: 0.18 },
-              }}
+        <motion.div
+          initial={false}
+          animate={{
+            height: aiToolsOpen ? aiToolsHeight : 0,
+            opacity: aiToolsOpen ? 1 : 0,
+          }}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          onAnimationComplete={() => {
+            if (aiToolsOpen) {
+              setClipAiTools(false);
+              return;
+            }
+            if (aiDockActionRef.current !== "show-pill") return;
+            aiDockActionRef.current = "idle";
+            setAiLauncherExpanded(true);
+          }}
+          className={cn(
+            "w-max min-w-13",
+            clipAiTools || !aiToolsOpen ? "overflow-hidden" : "overflow-visible",
+          )}
+          aria-hidden={!aiToolsOpen}
+        >
+          <div
+            ref={aiToolsInnerRef}
+            className="pointer-events-none flex flex-col items-end gap-2 pt-2"
+          >
+            <Link
+              href="/speaking"
+              tabIndex={aiToolsOpen ? 0 : -1}
+              className="pointer-events-auto group flex h-13 max-w-[calc(100vw-2rem)] items-center justify-end rounded-full bg-primary px-2.5 text-primary-foreground shadow-[0_12px_32px_-10px_hsl(var(--primary)/0.7)] transition-colors hover:bg-primary/90"
+              aria-label="Start speaking with AI"
             >
-              <div className="pointer-events-auto flex flex-col items-end gap-2 pt-2">
-                <Link
-                  href="/speaking"
-                  className="group flex h-13 w-13 items-center justify-end gap-2.5 overflow-hidden rounded-full bg-primary px-2.5 text-sm font-semibold whitespace-nowrap text-primary-foreground shadow-[0_12px_32px_-10px_hsl(var(--primary)/0.7)] transition-[width,transform,background-color] duration-300 hover:w-[10rem] hover:-translate-y-0.5 hover:bg-primary/90 focus-visible:w-[10rem]"
-                  aria-label="Start speaking with AI"
-                >
-                  <span className="max-w-0 translate-x-2 overflow-hidden opacity-0 transition-all duration-300 group-hover:max-w-28 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:max-w-28 group-focus-visible:translate-x-0 group-focus-visible:opacity-100">
+              <span className="grid grid-cols-[0fr] transition-[grid-template-columns] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:grid-cols-[1fr] group-focus-visible:grid-cols-[1fr]">
+                <span className="min-w-0 overflow-hidden">
+                  <span className="block whitespace-nowrap pr-2.5 text-sm font-semibold opacity-0 transition-opacity duration-200 delay-0 group-hover:opacity-100 group-hover:delay-200 group-focus-visible:opacity-100 group-focus-visible:delay-200">
                     Speak with AI
                   </span>
-                  <span className="grid size-8 shrink-0 place-items-center rounded-full bg-white/15">
-                    <Mic2 className="size-4" />
+                </span>
+              </span>
+              <span className="grid size-8 shrink-0 place-items-center rounded-full bg-white/15">
+                <Mic2 className="size-4" />
+              </span>
+            </Link>
+
+            <Link
+              href="/practice"
+              tabIndex={aiToolsOpen ? 0 : -1}
+              className="pointer-events-auto group relative flex h-13 max-w-[calc(100vw-2rem)] items-center justify-end rounded-full border border-border bg-card px-2.5 text-foreground shadow-lg transition-colors hover:border-primary/30"
+              aria-label="Open AI tutor chat"
+            >
+              <span className="grid grid-cols-[0fr] transition-[grid-template-columns] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:grid-cols-[1fr] group-focus-visible:grid-cols-[1fr]">
+                <span className="min-w-0 overflow-hidden">
+                  <span className="block whitespace-nowrap pr-2.5 text-sm font-semibold opacity-0 transition-opacity duration-200 delay-0 group-hover:opacity-100 group-hover:delay-200 group-focus-visible:opacity-100 group-focus-visible:delay-200">
+                    Chat with AI
                   </span>
-                </Link>
+                </span>
+              </span>
+              <span className="relative grid size-8 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+                <MessageCircle className="size-4" />
+                <Sparkles className="absolute -right-0.5 -top-0.5 size-2.5 text-amber-400" />
+              </span>
+              <span
+                className="absolute right-1 top-1 size-2 rounded-full border-2 border-card bg-emerald-400"
+                aria-hidden
+              />
+            </Link>
+          </div>
+        </motion.div>
+      </div>
 
-                {pathname !== "/practice" ? (
-                  <Link
-                    href="/practice"
-                    className="group relative flex h-13 w-13 items-center justify-end gap-2.5 overflow-hidden rounded-full border border-border bg-card px-2.5 text-sm font-semibold whitespace-nowrap text-foreground shadow-lg transition-[width,transform,border-color] duration-300 hover:w-[9.75rem] hover:-translate-y-0.5 hover:border-primary/30 focus-visible:w-[9.75rem]"
-                    aria-label="Open AI tutor chat"
-                  >
-                    <span className="max-w-0 translate-x-2 overflow-hidden opacity-0 transition-all duration-300 group-hover:max-w-24 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:max-w-24 group-focus-visible:translate-x-0 group-focus-visible:opacity-100">
-                      Chat with AI
-                    </span>
-                    <span className="relative grid size-8 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
-                      <MessageCircle className="size-4" />
-                      <Sparkles className="absolute -right-0.5 -top-0.5 size-2.5 text-amber-400" />
-                    </span>
-                    <span
-                      className="absolute right-1 top-1 size-2 rounded-full border-2 border-card bg-emerald-400"
-                      aria-hidden
-                    />
-                  </Link>
-                ) : null}
-              </div>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
-      </motion.div>
-
-      <main className="mx-auto w-full min-w-0 max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-        {children}
-      </main>
+      <div
+        className={cn(
+          "transition-[padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+          translateOpen && "lg:pr-[30rem]",
+        )}
+      >
+        <main
+          className={cn(
+            "mx-auto w-full min-w-0 max-w-6xl px-4 py-8 transition-opacity duration-200 sm:px-6 sm:py-10",
+            translateOpen && "max-lg:pointer-events-none max-lg:invisible",
+          )}
+        >
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

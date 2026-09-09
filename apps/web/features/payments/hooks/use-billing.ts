@@ -1,9 +1,10 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { billingApi, type BillingMe, type SubscriptionPlan, type TopupPack } from "../api/billing";
+import { billingApi, type BillingMe, type SubscriptionPlan } from "../api/billing";
+import { queryKeys } from "@/lib/query";
 
-export const billingMeQueryKey = ["billing", "me"] as const;
+export const billingMeQueryKey = queryKeys.billing.me;
 
 export function useBillingMe(enabled = true) {
   return useQuery({
@@ -27,7 +28,7 @@ export function useSubscribe() {
     }) => billingApi.subscribe(planId, period),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: billingMeQueryKey });
-      await queryClient.invalidateQueries({ queryKey: ["credits", "me"] });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.billing.credits });
     },
   });
 }
@@ -45,7 +46,8 @@ export function useUpgradePlan() {
 export function useTopupCheckout() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (packId: TopupPack["id"]) => billingApi.topup(packId),
+    mutationFn: ({ packId, credits }: { packId: string; credits?: number }) =>
+      billingApi.topup(packId, credits),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: billingMeQueryKey });
     },

@@ -1,18 +1,32 @@
 import type { BillingMe, SubscriptionPlan } from "../api/billing";
 
-export type WorkspacePlanId = "starter" | "growth" | "scale";
+export type WorkspacePlanId = string;
 
-export const STARTER_PLAN = {
-  id: "starter" as const,
+const FALLBACK_STARTER: SubscriptionPlan = {
+  id: "starter",
   name: "Free",
-  description: "Limited conversation minutes per day — explore EngliTutor.",
+  description: "Build a simple daily English habit and discover how AI practice works for you.",
+  priceVndMonthly: 0,
+  creditsPerPeriod: 0,
   features: [
-    "Limited AI speaking practice minutes per day",
-    "Placement test & learner profile",
-    "Basic CEFR learning path",
-    "Error feedback in Vietnamese",
+    "Daily AI speaking practice",
+    "Listening, speaking, reading and writing exercises",
+    "Starter A2–B1 learning path",
+    "English corrections explained in Vietnamese",
   ],
+  benefits: [
+    "Daily AI speaking practice",
+    "Listening, speaking, reading and writing exercises",
+    "Starter A2–B1 learning path",
+    "English corrections explained in Vietnamese",
+  ],
+  cta: "Start speaking practice",
+  imageUrl: "/images/plan-starter.png",
+  featured: false,
+  isFree: true,
 };
+
+export const STARTER_PLAN = FALLBACK_STARTER;
 
 export const STATUS_LABEL: Record<string, string> = {
   active: "Active",
@@ -30,8 +44,20 @@ export const PERIOD_LABEL: Record<string, string> = {
   yearly: "Yearly",
 };
 
+function planBullets(plan: Pick<SubscriptionPlan, "benefits" | "features">): string[] {
+  if (plan.benefits?.length) return plan.benefits;
+  return plan.features ?? [];
+}
+
+function isFreePlan(plan: Pick<SubscriptionPlan, "id" | "priceVndMonthly" | "isFree">): boolean {
+  return Boolean(plan.isFree) || plan.priceVndMonthly <= 0 || plan.id === "starter" || plan.id === "free";
+}
+
 export function currentPlanId(data: BillingMe | undefined): WorkspacePlanId {
-  if (!data?.hasPaidPlan) return "starter";
+  if (!data?.hasPaidPlan) {
+    const free = data?.subscriptionPlans.find((plan) => isFreePlan(plan));
+    return free?.id ?? "starter";
+  }
   return data.subscription.planId === "free" ? "starter" : data.subscription.planId;
 }
 
@@ -42,24 +68,20 @@ export function currentPlanDetails(data: BillingMe | undefined): {
   features: string[];
 } {
   const id = currentPlanId(data);
-  if (id === "starter") return STARTER_PLAN;
-
-  const fromApi = data?.subscriptionPlans.find((p) => p.id === id);
+  const fromApi = data?.subscriptionPlans.find((plan) => plan.id === id);
   if (fromApi) {
     return {
       id,
       name: fromApi.name,
       description: fromApi.description,
-      features: fromApi.features,
+      features: planBullets(fromApi),
     };
   }
-
+  if (id === "starter") return STARTER_PLAN;
   return { id, name: id, description: "", features: [] };
 }
 
-export function allPlansForCompare(
-  subscriptionPlans: SubscriptionPlan[],
-): Array<{
+export function allPlansForCompare(subscriptionPlans: SubscriptionPlan[]): Array<{
   id: WorkspacePlanId;
   name: string;
   description: string;
@@ -69,25 +91,31 @@ export function allPlansForCompare(
   featured?: boolean;
   isFree: boolean;
 }> {
-  return [
-    {
-      id: "starter",
-      name: STARTER_PLAN.name,
-      description: STARTER_PLAN.description,
-      priceVndMonthly: 0,
-      creditsPerPeriod: 0,
-      features: STARTER_PLAN.features,
-      isFree: true,
-    },
-    ...subscriptionPlans.map((plan) => ({
-      id: plan.id,
-      name: plan.name,
-      description: plan.description,
-      priceVndMonthly: plan.priceVndMonthly,
-      creditsPerPeriod: plan.creditsPerPeriod,
-      features: plan.features,
-      featured: plan.featured,
-      isFree: false,
-    })),
-  ];
+  const mapped = subscriptionPlans.map((plan) => ({
+    id: plan.id,
+    name: plan.name,
+    description: plan.description,
+    priceVndMonthly: plan.priceVndMonthly,
+    creditsPerPeriod: plan.creditsPerPeriod,
+    features: planBullets(plan),
+    featured: plan.featured,
+    isFree: isFreePlan(plan),
+  }));
+
+  if (!mapped.some((plan) => plan.isFree)) {
+    return [
+      {
+        id: STARTER_PLAN.id,
+        name: STARTER_PLAN.name,
+        description: STARTER_PLAN.description,
+        priceVndMonthly: 0,
+        creditsPerPeriod: STARTER_PLAN.creditsPerPeriod,
+        features: STARTER_PLAN.features,
+        isFree: true,
+      },
+      ...mapped,
+    ];
+  }
+
+  return mapped;
 }

@@ -28,7 +28,11 @@ export type BillingMe = {
     priceVndMonthly: number;
     creditsPerPeriod: number;
     features: string[];
+    benefits?: string[];
+    cta?: string;
+    imageUrl?: string;
     featured?: boolean;
+    isFree?: boolean;
   }>;
   stripeConfigured: boolean;
 };

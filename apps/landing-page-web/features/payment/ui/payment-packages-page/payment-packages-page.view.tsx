@@ -52,6 +52,7 @@ function planBenefits(plan: Plan | undefined, billing: BillingMe | null): string
   if (plan?.features.length) return plan.features;
   if (billing?.hasPaidPlan) {
     const fromApi = billing.subscriptionPlans.find((p) => p.id === billing.subscription.planId);
+    if (fromApi?.benefits?.length) return fromApi.benefits;
     if (fromApi?.features.length) return fromApi.features;
   }
   return [];

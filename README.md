@@ -54,6 +54,7 @@ cp apps/landing-page-web/.env.local.example apps/landing-page-web/.env.local
 | --- | --- |
 | `NEXT_PUBLIC_API_URL` | Backend origin (AWS App Runner URL) |
 | `NEXT_PUBLIC_MARKETING_URL` | Marketing site origin |
+| `GOOGLE_MAPS_API_KEY` | Server-only key for Google Places address autocomplete |
 
 Browser gọi `/api/*` same-origin; Next proxy/route forward tới `NEXT_PUBLIC_API_URL` để cookie first-party.
 

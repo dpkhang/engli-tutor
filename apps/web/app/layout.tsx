@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { QueryProvider } from "@/providers/query-provider";
 import { AuthGate } from "@/providers/auth-gate";
-import { AppShell, GlobalNavigationLoading } from "@/features/layout";
+import { AppShell, GlobalNavigationLoading, SignOutLoadingProvider } from "@/features/layout";
 import { ActionDialogProvider } from "@landing-page-generator/ui";
 import "./globals.css";
 
@@ -32,12 +32,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body suppressHydrationWarning>
         <QueryProvider>
           <ActionDialogProvider>
-            <Suspense fallback={null}>
-              <GlobalNavigationLoading />
-            </Suspense>
-            <AuthGate>
-              <AppShell>{children}</AppShell>
-            </AuthGate>
+            <SignOutLoadingProvider>
+              <Suspense fallback={null}>
+                <GlobalNavigationLoading />
+              </Suspense>
+              <AuthGate>
+                <AppShell>{children}</AppShell>
+              </AuthGate>
+            </SignOutLoadingProvider>
           </ActionDialogProvider>
         </QueryProvider>
       </body>

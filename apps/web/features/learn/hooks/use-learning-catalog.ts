@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { CACHE_TIMES, queryKeys } from "@/lib/query";
 import { learningApi } from "../api/learning-api";
 import { mapIntegratedLesson, mapLearningExercise, mapLearningGame } from "../api/map-exercise";
 import type { LearningGame, LearningGameSummary } from "../api/types";
@@ -16,38 +18,126 @@ import {
   type SkillLevel,
 } from "../model/skill-exercises";
 
-type LoadState = "loading" | "api" | "local";
+type Cached<T> = { source: "api" | "local"; data: T };
+
+function isCacheMiss(query: { data: unknown; isPending: boolean }) {
+  return query.data === undefined && query.isPending;
+}
+
+const catalogQuery = {
+  staleTime: 0,
+  gcTime: CACHE_TIMES.gc,
+  refetchOnMount: true as const,
+};
+
+async function fetchSkillExercises(skill: SkillId): Promise<Cached<SkillExercise[]>> {
+  const result = await learningApi.listExercises({ skill });
+  if (result?.data?.length) {
+    return { source: "api", data: result.data.map(mapLearningExercise) };
+  }
+  return { source: "local", data: getExercisesBySkill(skill) };
+}
+
+async function fetchSkillExercise(
+  skill: SkillId,
+  exerciseId: string,
+): Promise<Cached<SkillExercise | null>> {
+  const remote = await learningApi.getExercise(exerciseId);
+  if (remote && remote.skill === skill) {
+    return { source: "api", data: mapLearningExercise(remote) };
+  }
+  return { source: "local", data: getLocalExercise(skill, exerciseId) ?? null };
+}
+
+async function fetchSkillsCoverage(): Promise<
+  Cached<Record<SkillId, { total: number; byLevel: Record<SkillLevel, number> }>>
+> {
+  const meta = await learningApi.meta();
+  if (meta?.coverage?.length) {
+    const data = Object.fromEntries(
+      meta.coverage.map((row) => [
+        row.skill,
+        {
+          total: row.levels.reduce((sum, item) => sum + item.exerciseCount, 0),
+          byLevel: Object.fromEntries(
+            row.levels.map((item) => [item.level, item.exerciseCount]),
+          ) as Record<SkillLevel, number>,
+        },
+      ]),
+    ) as Record<SkillId, { total: number; byLevel: Record<SkillLevel, number> }>;
+    return { source: "api", data };
+  }
+
+  const data = Object.fromEntries(
+    (["reading", "listening", "speaking", "writing"] as SkillId[]).map((skill) => {
+      const exercises = getExercisesBySkill(skill);
+      return [
+        skill,
+        {
+          total: exercises.length,
+          byLevel: Object.fromEntries(
+            LEVELS.map((level) => [
+              level.id,
+              exercises.filter((exercise) => exercise.level === level.id).length,
+            ]),
+          ) as Record<SkillLevel, number>,
+        },
+      ];
+    }),
+  ) as Record<SkillId, { total: number; byLevel: Record<SkillLevel, number> }>;
+  return { source: "local", data };
+}
+
+async function fetchLessonPacks(): Promise<Cached<LessonPack[]>> {
+  const [packsResult, integrated] = await Promise.all([
+    learningApi.listLessons(),
+    learningApi.listIntegratedLessons(),
+  ]);
+  const fromApi = [
+    ...(packsResult?.data ?? []),
+    ...(integrated?.data ?? []).map(mapIntegratedLesson),
+  ];
+  if (fromApi.length) return { source: "api", data: fromApi };
+  return { source: "local", data: LESSON_PACKS };
+}
+
+async function fetchGames(): Promise<Cached<LearningGameSummary[]>> {
+  const result = await learningApi.listGames();
+  if (result?.data?.length) return { source: "api", data: result.data };
+  return {
+    source: "local",
+    data: GAMES_CATALOG.map((game) => ({
+      ...game,
+      roundCount: getFallbackGame(game.id)?.rounds.length ?? 0,
+    })),
+  };
+}
+
+async function fetchGame(
+  slug: string,
+  lesson?: string | null,
+): Promise<Cached<LearningGame | null>> {
+  const remote = await learningApi.getGame(slug, lesson ?? undefined);
+  if (remote?.rounds?.length) {
+    return { source: "api", data: mapLearningGame(remote) };
+  }
+  return { source: "local", data: getFallbackGame(slug, lesson) ?? null };
+}
 
 export function useSkillExercises(skill: SkillId, level?: SkillLevel | "all") {
-  const [remote, setRemote] = useState<SkillExercise[] | null>(null);
-  const [source, setSource] = useState<LoadState>("loading");
+  const query = useQuery({
+    queryKey: queryKeys.learning.exercises(skill),
+    queryFn: () => fetchSkillExercises(skill),
+    ...catalogQuery,
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    setSource("loading");
-
-    void (async () => {
-      const result = await learningApi.listExercises({ skill });
-      if (cancelled) return;
-      if (result?.data?.length) {
-        setRemote(result.data.map(mapLearningExercise));
-        setSource("api");
-        return;
-      }
-      setRemote(null);
-      setSource("local");
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [skill]);
+  const remote = query.data?.source === "api" ? query.data.data : null;
+  const list = query.data?.data ?? getExercisesBySkill(skill);
 
   const exercises = useMemo(() => {
-    const list = remote ?? getExercisesBySkill(skill);
     if (!level || level === "all") return list;
     return list.filter((exercise) => exercise.level === level);
-  }, [remote, skill, level]);
+  }, [list, level]);
 
   const groups = useMemo(() => {
     if (remote) {
@@ -64,231 +154,108 @@ export function useSkillExercises(skill: SkillId, level?: SkillLevel | "all") {
     return groups.filter((group) => group.level.id === level);
   }, [groups, level]);
 
-  const countsByLevel = useMemo(() => {
-    const list = remote ?? getExercisesBySkill(skill);
-    return Object.fromEntries(
-      LEVELS.map((levelMeta) => [
-        levelMeta.id,
-        list.filter((exercise) => exercise.level === levelMeta.id).length,
-      ]),
-    ) as Record<SkillLevel, number>;
-  }, [remote, skill]);
+  const countsByLevel = useMemo(
+    () =>
+      Object.fromEntries(
+        LEVELS.map((levelMeta) => [
+          levelMeta.id,
+          list.filter((exercise) => exercise.level === levelMeta.id).length,
+        ]),
+      ) as Record<SkillLevel, number>,
+    [list],
+  );
 
   return {
-    loading: source === "loading",
-    source: source === "loading" ? "local" : source,
+    loading: isCacheMiss(query),
+    fetching: query.isFetching,
+    source: query.data?.source ?? "local",
     exercises,
     groups: filteredGroups,
-    total: (remote ?? getExercisesBySkill(skill)).length,
+    total: list.length,
     countsByLevel,
   };
 }
 
 export function useSkillExercise(skill: SkillId, exerciseId: string) {
-  const [exercise, setExercise] = useState<SkillExercise | null | undefined>(undefined);
-  const [source, setSource] = useState<LoadState>("loading");
-
-  useEffect(() => {
-    let cancelled = false;
-    setSource("loading");
-    setExercise(undefined);
-
-    void (async () => {
-      const remote = await learningApi.getExercise(exerciseId);
-      if (cancelled) return;
-
-      if (remote && remote.skill === skill) {
-        setExercise(mapLearningExercise(remote));
-        setSource("api");
-        return;
-      }
-
-      const local = getLocalExercise(skill, exerciseId) ?? null;
-      setExercise(local);
-      setSource("local");
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [skill, exerciseId]);
+  const queryClient = useQueryClient();
+  const query = useQuery({
+    queryKey: queryKeys.learning.exercise(skill, exerciseId),
+    queryFn: () => fetchSkillExercise(skill, exerciseId),
+    ...catalogQuery,
+    placeholderData: () => {
+      const cached = queryClient.getQueryData<Cached<SkillExercise[]>>(
+        queryKeys.learning.exercises(skill),
+      );
+      if (!cached) return undefined;
+      const found = cached.data.find((item) => item.id === exerciseId);
+      return found ? { source: cached.source, data: found } : undefined;
+    },
+  });
 
   return {
-    loading: exercise === undefined,
-    source: source === "loading" ? "local" : source,
-    exercise: exercise ?? null,
+    loading: isCacheMiss(query),
+    fetching: query.isFetching,
+    source: query.data?.source ?? "local",
+    exercise: query.data?.data ?? null,
   };
 }
 
 export function useSkillsCoverage() {
-  const [coverage, setCoverage] = useState<Record<
-    SkillId,
-    { total: number; byLevel: Record<SkillLevel, number> }
-  > | null>(null);
-  const [source, setSource] = useState<LoadState>("loading");
-
-  useEffect(() => {
-    let cancelled = false;
-
-    void (async () => {
-      const meta = await learningApi.meta();
-      if (cancelled) return;
-
-      if (meta?.coverage?.length) {
-        const next = Object.fromEntries(
-          meta.coverage.map((row) => [
-            row.skill,
-            {
-              total: row.levels.reduce((sum, item) => sum + item.exerciseCount, 0),
-              byLevel: Object.fromEntries(
-                row.levels.map((item) => [item.level, item.exerciseCount]),
-              ) as Record<SkillLevel, number>,
-            },
-          ]),
-        ) as Record<SkillId, { total: number; byLevel: Record<SkillLevel, number> }>;
-        setCoverage(next);
-        setSource("api");
-        return;
-      }
-
-      const local = Object.fromEntries(
-        (["reading", "listening", "speaking", "writing"] as SkillId[]).map((skill) => {
-          const exercises = getExercisesBySkill(skill);
-          return [
-            skill,
-            {
-              total: exercises.length,
-              byLevel: Object.fromEntries(
-                LEVELS.map((level) => [
-                  level.id,
-                  exercises.filter((exercise) => exercise.level === level.id).length,
-                ]),
-              ) as Record<SkillLevel, number>,
-            },
-          ];
-        }),
-      ) as Record<SkillId, { total: number; byLevel: Record<SkillLevel, number> }>;
-      setCoverage(local);
-      setSource("local");
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const query = useQuery({
+    queryKey: queryKeys.learning.meta,
+    queryFn: fetchSkillsCoverage,
+    ...catalogQuery,
+  });
 
   return {
-    loading: source === "loading" || !coverage,
-    source: source === "loading" ? "local" : source,
-    coverage,
+    loading: isCacheMiss(query),
+    fetching: query.isFetching,
+    source: query.data?.source ?? "local",
+    coverage: query.data?.data ?? null,
   };
 }
 
 export function useLessonPacks() {
-  const [packs, setPacks] = useState<LessonPack[]>(LESSON_PACKS);
-  const [source, setSource] = useState<LoadState>("loading");
-
-  useEffect(() => {
-    let cancelled = false;
-
-    void (async () => {
-      const [packsResult, integrated] = await Promise.all([
-        learningApi.listLessons(),
-        learningApi.listIntegratedLessons(),
-      ]);
-      if (cancelled) return;
-
-      const fromApi = [
-        ...(packsResult?.data ?? []),
-        ...(integrated?.data ?? []).map(mapIntegratedLesson),
-      ];
-      if (fromApi.length) {
-        setPacks(fromApi);
-        setSource("api");
-        return;
-      }
-
-      setPacks(LESSON_PACKS);
-      setSource("local");
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const query = useQuery({
+    queryKey: queryKeys.learning.lessons,
+    queryFn: fetchLessonPacks,
+    ...catalogQuery,
+  });
 
   return {
-    loading: source === "loading",
-    source: source === "loading" ? "local" : source,
-    packs,
+    loading: isCacheMiss(query),
+    fetching: query.isFetching,
+    source: query.data?.source ?? "local",
+    packs: query.data?.data ?? LESSON_PACKS,
   };
 }
 
 export function useGames() {
-  const [games, setGames] = useState<LearningGameSummary[] | null>(null);
-  const [source, setSource] = useState<LoadState>("loading");
-
-  useEffect(() => {
-    let cancelled = false;
-
-    void (async () => {
-      const result = await learningApi.listGames();
-      if (cancelled) return;
-      if (result?.data?.length) {
-        setGames(result.data);
-        setSource("api");
-        return;
-      }
-      setGames(
-        GAMES_CATALOG.map((game) => ({
-          ...game,
-          roundCount: getFallbackGame(game.id)?.rounds.length ?? 0,
-        })),
-      );
-      setSource("local");
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const query = useQuery({
+    queryKey: queryKeys.learning.games,
+    queryFn: fetchGames,
+    ...catalogQuery,
+  });
 
   return {
-    loading: source === "loading" || !games,
-    source: source === "loading" ? "local" : source,
-    games: games ?? [],
+    loading: isCacheMiss(query),
+    fetching: query.isFetching,
+    source: query.data?.source ?? "local",
+    games: query.data?.data ?? [],
   };
 }
 
 export function useGame(slug: string, lesson?: string | null) {
-  const [game, setGame] = useState<LearningGame | null | undefined>(undefined);
-  const [source, setSource] = useState<LoadState>("loading");
-
-  useEffect(() => {
-    let cancelled = false;
-    setSource("loading");
-    setGame(undefined);
-
-    void (async () => {
-      const remote = await learningApi.getGame(slug, lesson ?? undefined);
-      if (cancelled) return;
-      if (remote?.rounds?.length) {
-        setGame(mapLearningGame(remote));
-        setSource("api");
-        return;
-      }
-      setGame(getFallbackGame(slug, lesson) ?? null);
-      setSource("local");
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [slug, lesson]);
+  const query = useQuery({
+    queryKey: queryKeys.learning.game(slug, lesson),
+    queryFn: () => fetchGame(slug, lesson),
+    ...catalogQuery,
+  });
 
   return {
-    loading: game === undefined,
-    source: source === "loading" ? "local" : source,
-    game: game ?? null,
+    loading: isCacheMiss(query),
+    fetching: query.isFetching,
+    source: query.data?.source ?? "local",
+    game: query.data?.data ?? null,
   };
 }

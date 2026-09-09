@@ -43,25 +43,27 @@ const STARTER_PLAN = PLANS[0]!;
 
 /** Convert the backend billing catalog into the presentation model used by marketing/payment UI. */
 export function plansFromCatalog(catalog: BillingCatalog | null | undefined): Plan[] {
-  if (!catalog) return [STARTER_PLAN];
-  return [
-    STARTER_PLAN,
-    ...catalog.subscriptionPlans.map((plan) => ({
+  if (!catalog?.subscriptionPlans.length) return [STARTER_PLAN];
+
+  const mapped = catalog.subscriptionPlans.map((plan) => {
+    const isFree = Boolean(plan.isFree) || plan.priceVndMonthly <= 0 || plan.id === "starter";
+    const benefits = plan.benefits?.length ? plan.benefits : plan.features;
+    return {
       id: plan.id,
       name: plan.name,
       price: formatVnd(plan.priceVndMonthly),
       priceValue: plan.priceVndMonthly,
-      period: "/ month",
+      period: isFree ? "forever" : "/ month",
       description: plan.description,
-      imageUrl:
-        plan.id === "growth" || plan.id === "scale"
-          ? `/images/plan-${plan.id}.png`
-          : "/images/plan-growth.png",
-      features: plan.features,
-      cta: `Choose ${plan.name}`,
+      imageUrl: plan.imageUrl || (plan.id === "scale" ? "/images/plan-scale.png" : `/images/plan-${plan.id}.png`),
+      features: benefits,
+      cta: plan.cta || (isFree ? "Start speaking practice" : `Choose ${plan.name}`),
       featured: Boolean(plan.featured),
-    })),
-  ];
+    } satisfies Plan;
+  });
+
+  if (mapped.some((plan) => plan.priceValue <= 0)) return mapped;
+  return [STARTER_PLAN, ...mapped];
 }
 
 export const BILLING_PERIODS: {

@@ -16,20 +16,30 @@ export type CreditLedgerEntry = {
 };
 
 export type SubscriptionPlan = {
-  id: "growth" | "scale";
+  id: string;
   name: string;
   description: string;
   priceVndMonthly: number;
   creditsPerPeriod: number;
   features: string[];
+  benefits?: string[];
+  cta?: string;
+  imageUrl?: string;
   featured?: boolean;
+  isFree?: boolean;
 };
 
 export type TopupPack = {
-  id: "boost-100" | "boost-500" | "boost-1500";
+  id: string;
   name: string;
+  description?: string;
   credits: number;
   priceVnd: number;
+  unitPriceVnd?: number;
+  minCredits?: number;
+  maxCredits?: number;
+  isCustom?: boolean;
+  cta?: string;
 };
 
 export type BillingMe = {
@@ -37,7 +47,7 @@ export type BillingMe = {
   signupBonus: number;
   ledger: CreditLedgerEntry[];
   subscription: {
-    planId: "free" | "growth" | "scale";
+    planId: string;
     status: string;
     billingPeriod: "monthly" | "yearly" | null;
     currentPeriodEnd: string | null;
@@ -68,9 +78,10 @@ export const billingApi = {
       planId,
       returnOrigin: typeof window !== "undefined" ? window.location.origin : undefined,
     }),
-  topup: (packId: TopupPack["id"]) =>
+  topup: (packId: string, credits?: number) =>
     workspaceApiClient.post<CheckoutResponse>("/api/billing/topup", {
       packId,
+      ...(typeof credits === "number" ? { credits } : {}),
       returnOrigin: typeof window !== "undefined" ? window.location.origin : undefined,
     }),
   confirm: (sessionId: string) =>
