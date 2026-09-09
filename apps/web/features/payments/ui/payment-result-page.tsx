@@ -12,8 +12,8 @@ import { billingMeQueryKey } from "../hooks/use-billing";
 type ResultState = "processing" | "success" | "failed";
 
 const PLAN_NAMES: Record<string, string> = {
-  growth: "Growth",
-  scale: "Scale",
+  growth: "Standard",
+  scale: "Premium",
   "boost-100": "Boost 100",
   "boost-500": "Boost 500",
   "boost-1500": "Boost 1500",
@@ -44,7 +44,7 @@ export function PaymentResultPage() {
 
   useEffect(() => {
     if (checkout !== "success") return;
-    if (!sessionId) {
+    if (!sessionId && !(checkoutType === "upgrade" && itemId)) {
       setState("failed");
       setMessage("Payment session id not found. Please try again from the payments page.");
       return;
@@ -71,12 +71,20 @@ export function PaymentResultPage() {
             ? typeof result.balanceAfter === "number"
               ? `Credits have been added. Your new balance is ${result.balanceAfter}.`
               : "Credits have been added to your account and are ready to use."
-            : "Your plan is active and benefits have been updated.",
+            : checkoutType === "upgrade"
+              ? typeof result.balanceAfter === "number"
+                ? `Your plan is upgraded. New balance: ${result.balanceAfter} credits.`
+                : "Your plan is upgraded and extra practice credits have been added."
+              : "Your plan is active and benefits have been updated.",
         );
       };
 
       try {
-        const result = await billingApi.confirm(sessionId);
+        const result = await billingApi.confirm(
+          checkoutType === "upgrade" && !sessionId
+            ? { planId: itemId ?? undefined }
+            : { sessionId: sessionId ?? undefined },
+        );
         if (cancelled) return;
         applySuccess(result);
         try {
@@ -90,8 +98,10 @@ export function PaymentResultPage() {
         try {
           const me = await billingApi.me();
           if (cancelled) return;
-          const paid = checkoutType !== "topup" && me.hasPaidPlan;
-          if (paid) {
+          const upgraded =
+            checkoutType === "upgrade" && Boolean(itemId) && me.subscription.planId === itemId;
+          const paid = checkoutType !== "topup" && checkoutType !== "upgrade" && me.hasPaidPlan;
+          if (upgraded || paid) {
             applySuccess({
               planId: me.subscription.planId,
               balanceAfter: me.balance,
@@ -182,7 +192,9 @@ export function PaymentResultPage() {
                     {state === "success"
                       ? checkoutType === "topup"
                         ? "Credits added"
-                        : "Plan activated"
+                        : checkoutType === "upgrade"
+                          ? "Plan upgraded"
+                          : "Plan activated"
                       : "Checkout not completed"}
                   </p>
                   <p className="mt-1 truncate text-2xl font-bold text-foreground">{packageName}</p>
@@ -197,7 +209,9 @@ export function PaymentResultPage() {
                 <p className="mt-4 border-t border-emerald-500/20 pt-3 text-sm text-emerald-800 dark:text-emerald-300">
                   {checkoutType === "topup"
                     ? "Your header credit balance has been updated."
-                    : "Plan benefits have been applied to your workspace."}
+                    : checkoutType === "upgrade"
+                      ? "The extra credits from your new plan are ready to use."
+                      : "Plan benefits have been applied to your workspace."}
                 </p>
               ) : null}
             </div>

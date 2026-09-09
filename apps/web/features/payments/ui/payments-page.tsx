@@ -87,7 +87,7 @@ export default function PaymentsPage() {
     (async () => {
       try {
         if (sessionId) {
-          await confirmCheckout.mutateAsync(sessionId);
+          await confirmCheckout.mutateAsync({ sessionId });
         }
       } catch (err) {
         if (cancelled) return;
