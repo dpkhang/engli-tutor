@@ -1,6 +1,6 @@
 import { workspaceApiClient } from "@/lib/workspace-api-client";
 
-export type TranslateDirection = "en-vi" | "vi-en";
+export type TranslateDirection = "en-vi";
 export type TranslateKind = "word" | "sentence";
 
 export type TranslateSense = {
@@ -39,13 +39,20 @@ export type TranslateResult = {
   } | null;
   tips: string[];
   demo: boolean;
+  source?: "dictionary" | "ai" | "demo";
 };
 
 export const translateApi = {
-  lookup: (input: { text: string; direction: TranslateDirection; focusWord?: string }) =>
+  lookup: (input: { text: string; direction: TranslateDirection; focusWord?: string; mode?: "full" | "dictionary" }) =>
     workspaceApiClient.post<TranslateResult>("/api/tutor/translate", {
       text: input.text,
       direction: input.direction,
       ...(input.focusWord ? { focusWord: input.focusWord } : {}),
+      ...(input.mode ? { mode: input.mode } : {}),
+    }),
+  prefetch: (input: { direction: TranslateDirection; words: string[] }) =>
+    workspaceApiClient.post<{ results: Record<string, TranslateResult> }>("/api/tutor/translate/batch", {
+      direction: input.direction,
+      words: input.words,
     }),
 };

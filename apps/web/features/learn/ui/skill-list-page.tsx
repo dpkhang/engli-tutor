@@ -71,7 +71,7 @@ export function SkillListPage({ skill }: { skill: SkillId }) {
               </div>
             ) : null}
             <p className="mt-4 text-xs text-white/50">
-              {loading ? "Loading exercises…" : `${total} exercises · grouped A2 → A2+ → B1`}
+              {loading ? "Loading exercises…" : `${total} exercises · grouped A2 → B1 → TOEIC → IELTS`}
               {!loading && source === "api" ? " · live curriculum" : null}
             </p>
           </div>

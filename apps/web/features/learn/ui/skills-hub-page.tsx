@@ -53,7 +53,7 @@ export function SkillsHubPage() {
             Four skills. One more confident you.
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70 sm:text-base">
-            Choose what feels useful today. Every short exercise moves you forward from A2 to B1.
+            Choose what feels useful today. Every short exercise moves you forward — from A2 and B1 to TOEIC and IELTS.
             {!loading && source === "api" ? " Fresh activities are ready for you." : ""}
           </p>
         </div>

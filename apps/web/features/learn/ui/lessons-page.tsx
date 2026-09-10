@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { Gamepad2, Lightbulb, MessageCircle, Timer } from "lucide-react";
+import { Gamepad2, Lightbulb, MessageCircle, Search, Timer, X } from "lucide-react";
 import { Button, cn } from "@landing-page-generator/ui";
 import { DataLoadingState } from "@/features/layout";
 import { useLessonPacks } from "../hooks/use-learning-catalog";
@@ -13,17 +13,27 @@ const SKILL_FILTERS = ["All", "Listening", "Speaking", "Reading", "Writing"] as 
 export function LessonsPage() {
   const searchParams = useSearchParams();
   const skillParam = searchParams.get("skill");
+  const query = searchParams.get("q")?.trim() ?? "";
   const activeSkill = SKILL_FILTERS.includes(skillParam as (typeof SKILL_FILTERS)[number])
     ? (skillParam as (typeof SKILL_FILTERS)[number])
     : "All";
   const { packs, loading, source } = useLessonPacks();
 
   const lessons = useMemo(() => {
-    if (activeSkill === "All") return packs;
-    return packs.filter((lesson) =>
-      lesson.skills.includes(activeSkill as "Listening" | "Speaking" | "Reading" | "Writing"),
-    );
-  }, [activeSkill, packs]);
+    const term = query.toLowerCase();
+    return packs.filter((lesson) => {
+      const matchesSkill =
+        activeSkill === "All" ||
+        lesson.skills.includes(activeSkill as "Listening" | "Speaking" | "Reading" | "Writing");
+      const matchesQuery =
+        !term ||
+        [lesson.title, lesson.focus, lesson.tip, lesson.level, ...lesson.skills]
+          .join(" ")
+          .toLowerCase()
+          .includes(term);
+      return matchesSkill && matchesQuery;
+    });
+  }, [activeSkill, packs, query]);
 
   return (
     <div className="space-y-8 pb-8">
@@ -53,31 +63,55 @@ export function LessonsPage() {
         </div>
       </header>
 
-      <div className="flex flex-wrap gap-2">
-        <Link
-          href="/skills"
-          className="rounded-full border border-accent/40 bg-accent/10 px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent/15"
-        >
-          4-skill exercises →
-        </Link>
-        {SKILL_FILTERS.map((skill) => {
-          const href = skill === "All" ? "/lessons" : `/lessons?skill=${encodeURIComponent(skill)}`;
-          const active = activeSkill === skill;
-          return (
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <form className="relative w-full max-w-md" action="/lessons">
+          <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            name="q"
+            defaultValue={query}
+            placeholder="Search lessons by topic, skill, or level…"
+            className="h-11 w-full rounded-full border border-border bg-card pr-10 pl-10 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-3 focus:ring-primary/15"
+          />
+          {query ? (
             <Link
-              key={skill}
-              href={href}
-              className={cn(
-                "rounded-full border px-3.5 py-2 text-sm font-medium transition-colors",
-                active
-                  ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                  : "border-border bg-card text-muted-foreground hover:text-foreground",
-              )}
+              href="/lessons"
+              className="absolute top-1/2 right-2.5 grid size-7 -translate-y-1/2 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+              aria-label="Clear lesson search"
             >
-              {skill}
+              <X className="size-3.5" />
             </Link>
-          );
-        })}
+          ) : null}
+        </form>
+
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/skills"
+            className="rounded-full border border-accent/40 bg-accent/10 px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent/15"
+          >
+            4-skill exercises →
+          </Link>
+          {SKILL_FILTERS.map((skill) => {
+            const params = new URLSearchParams();
+            if (skill !== "All") params.set("skill", skill);
+            if (query) params.set("q", query);
+            const href = params.size ? `/lessons?${params.toString()}` : "/lessons";
+            const active = activeSkill === skill;
+            return (
+              <Link
+                key={skill}
+                href={href}
+                className={cn(
+                  "rounded-full border px-3.5 py-2 text-sm font-medium transition-colors",
+                  active
+                    ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                    : "border-border bg-card text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {skill}
+              </Link>
+            );
+          })}
+        </div>
       </div>
 
       {loading ? (
@@ -160,7 +194,15 @@ export function LessonsPage() {
       </div>
 
       {!loading && lessons.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No lessons match this filter.</p>
+        <div className="rounded-2xl border border-dashed border-border bg-card/60 px-6 py-10 text-center">
+          <p className="font-semibold">No lessons found</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Try another keyword or clear the active filters.
+          </p>
+          <Button asChild variant="outline" className="mt-4 rounded-full">
+            <Link href="/lessons">Clear search</Link>
+          </Button>
+        </div>
       ) : null}
     </div>
   );

@@ -22,7 +22,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useSignOutLoading } from "./sign-out-loading";
 import { AnimatePresence, motion } from "motion/react";
 import { useBillingMe } from "@/features/payments/hooks/use-billing";
-import { FloatingTranslate } from "@/features/translate";
+import {
+  FloatingTranslate,
+  TranslateSessionProvider,
+  useTranslateSession,
+} from "@/features/translate";
+import { LessonSearch } from "./lesson-search";
 
 const PRIMARY_NAV = [
   { href: "/", label: "Today" },
@@ -47,6 +52,39 @@ function isActivePath(pathname: string, href: string) {
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  return (
+    <TranslateSessionProvider>
+      <AppShellFrame>{children}</AppShellFrame>
+    </TranslateSessionProvider>
+  );
+}
+
+function TranslateRouteReset() {
+  const pathname = usePathname();
+  const { setOpen } = useTranslateSession();
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname, setOpen]);
+  return null;
+}
+
+function TranslateMainPad({ children }: { children: React.ReactNode }) {
+  const { open } = useTranslateSession();
+  return (
+    <div className={cn(open && "lg:pr-[30rem]")}>
+      <main
+        className={cn(
+          "mx-auto w-full min-w-0 max-w-6xl px-4 py-8 sm:px-6 sm:py-10",
+          open && "max-lg:pointer-events-none max-lg:invisible",
+        )}
+      >
+        {children}
+      </main>
+    </div>
+  );
+}
+
+function AppShellFrame({ children }: { children: React.ReactNode }) {
   const dialog = useActionDialog();
   const pathname = usePathname();
   const queryClient = useQueryClient();
@@ -54,7 +92,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [aiToolsOpen, setAiToolsOpen] = useState(true);
-  const [translateOpen, setTranslateOpen] = useState(false);
   const [aiLauncherExpanded, setAiLauncherExpanded] = useState(false);
   const [clipAiTools, setClipAiTools] = useState(false);
   const aiDockActionRef = useRef<"idle" | "open-tools" | "show-pill">("idle");
@@ -73,7 +110,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setAccountOpen(false);
     setMobileOpen(false);
-    setTranslateOpen(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -154,10 +190,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const raiseFabForExerciseBar = /^\/skills\/[^/]+\/[^/]+/.test(pathname);
+  const isPracticeExercise = /^\/skills\/[^/]+\/[^/]+/.test(pathname);
+  const raiseFabForExerciseBar = isPracticeExercise;
 
   return (
     <div className="workspace-background relative min-h-svh">
+      <TranslateRouteReset />
       <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
@@ -204,6 +242,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-1.5">
+            <LessonSearch />
             {user ? (
               <Button
                 variant="outline"
@@ -344,9 +383,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             : "max(1.25rem, env(safe-area-inset-bottom, 0px))",
         }}
       >
-        <div className="pointer-events-none absolute bottom-[calc(100%+0.75rem)] right-0">
-          <FloatingTranslate open={translateOpen} onOpenChange={setTranslateOpen} />
-        </div>
+        {isPracticeExercise ? (
+          <div className="pointer-events-none absolute bottom-[calc(100%+0.75rem)] right-0">
+            <FloatingTranslate />
+          </div>
+        ) : null}
 
         <motion.button
           type="button"
@@ -483,21 +524,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </motion.div>
       </div>
 
-      <div
-        className={cn(
-          "transition-[padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-          translateOpen && "lg:pr-[30rem]",
-        )}
-      >
-        <main
-          className={cn(
-            "mx-auto w-full min-w-0 max-w-6xl px-4 py-8 transition-opacity duration-200 sm:px-6 sm:py-10",
-            translateOpen && "max-lg:pointer-events-none max-lg:invisible",
-          )}
-        >
-          {children}
-        </main>
-      </div>
+      <TranslateMainPad>{children}</TranslateMainPad>
     </div>
   );
 }

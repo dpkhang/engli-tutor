@@ -26,6 +26,7 @@ function notifyPreferences() {
 export function getPreferredLevel(): SkillLevel | null {
   if (typeof window === "undefined") return null;
   const stored = localStorage.getItem(LEVEL_STORAGE_KEY);
+  if (stored === "A2+") return "TOEIC";
   return stored && isSkillLevel(stored) ? stored : null;
 }
 
