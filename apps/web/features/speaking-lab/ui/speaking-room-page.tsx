@@ -60,7 +60,7 @@ const SCENES: {
   },
 ];
 
-const LEVELS: TutorLevel[] = ["A2", "A2+", "B1"];
+const LEVELS: TutorLevel[] = ["A2", "B1", "TOEIC", "IELTS"];
 
 type Turn = TutorChatMessage & { audioUrl?: string };
 
@@ -75,7 +75,7 @@ function splitCoach(content: string): { english: string; tip: string | null } {
 
 export function SpeakingRoomPage() {
   const [scene, setScene] = useState<TutorScenario>("interview");
-  const [level, setLevel] = useState<TutorLevel>("A2+");
+  const [level, setLevel] = useState<TutorLevel>("B1");
   const [turns, setTurns] = useState<Turn[]>([{ role: "assistant", content: SCENES[0].opener }]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);

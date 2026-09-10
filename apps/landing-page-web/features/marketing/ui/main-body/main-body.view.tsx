@@ -85,7 +85,7 @@ const STORIES = [
   {
     quote: "Short enough after work. AI flags exactly what I keep forgetting — I don't have to relearn whole lessons.",
     name: "Hà Phạm",
-    role: "Product Ops · A2+",
+    role: "Product Ops · B1",
   },
 ];
 
@@ -198,7 +198,7 @@ export function MainBodyView({
               <div className="flex items-center justify-between border-b border-border px-4 py-3">
                 <div>
                   <p className="text-sm font-semibold text-foreground">Session · 4 skills</p>
-                  <p className="text-xs text-muted-foreground">Listen → Read → Speak → Write · A2+</p>
+                  <p className="text-xs text-muted-foreground">Listen → Read → Speak → Write · TOEIC · IELTS</p>
                 </div>
                 <span className="rounded-full bg-accent/15 px-2.5 py-1 text-[11px] font-medium text-accent">
                   Live AI

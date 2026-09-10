@@ -1,5 +1,5 @@
 export type LearningSkill = "reading" | "listening" | "speaking" | "writing";
-export type LearningLevel = "A2" | "A2+" | "B1";
+export type LearningLevel = "A2" | "B1" | "TOEIC" | "IELTS";
 export type LearningGameId =
   | "speed-reply"
   | "fix-sentence"

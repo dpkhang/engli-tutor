@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Check, Lightbulb, RotateCcw, Volume2 } from "lucide-react";
 import { Button, cn } from "@landing-page-generator/ui";
 import { DataLoadingState } from "@/features/layout";
+import { ClickableTranslateText } from "@/features/translate";
 import { getAutoPlayListening } from "@/features/settings/model/preferences";
 import { useAiSpeech } from "@/features/speaking-lab/hooks/use-ai-speech";
 import { useSkillExercise } from "../hooks/use-learning-catalog";
@@ -255,7 +256,7 @@ export function SkillExercisePage({ skill, exerciseId }: { skill: SkillId; exerc
 
         {showScript ? (
           <pre className="whitespace-pre-wrap rounded-xl border border-border/50 bg-background/70 px-4 py-4 font-sans text-sm leading-relaxed text-foreground">
-            {exercise.material.body}
+            <ClickableTranslateText text={exercise.material.body} />
           </pre>
         ) : (
           <p className="text-sm text-muted-foreground">

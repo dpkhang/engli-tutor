@@ -1,7 +1,7 @@
 export type SkillId = "reading" | "listening" | "speaking" | "writing";
 
-/** CEFR bands used across EngliTutor skill drills */
-export type SkillLevel = "A2" | "A2+" | "B1";
+/** Practice tracks used across EngliTutor skill drills */
+export type SkillLevel = "A2" | "B1" | "TOEIC" | "IELTS";
 
 export type LevelMeta = {
   id: SkillLevel;
@@ -16,14 +16,19 @@ export const LEVELS: LevelMeta[] = [
     blurb: "Short sentences, familiar vocabulary, clear tasks.",
   },
   {
-    id: "A2+",
-    labelVi: "Strong A2",
-    blurb: "More detail, light office situations.",
-  },
-  {
     id: "B1",
     labelVi: "Intermediate",
     blurb: "Longer reading/listening, structured answers.",
+  },
+  {
+    id: "TOEIC",
+    labelVi: "TOEIC",
+    blurb: "Workplace English: emails, meetings, and practical listening.",
+  },
+  {
+    id: "IELTS",
+    labelVi: "IELTS",
+    blurb: "Exam tasks: headings, talks, cue cards, and short essays.",
   },
 ];
 
@@ -147,7 +152,7 @@ If you cannot come, message An before 10:00.`,
     id: "read-jd-frontend",
     skill: "reading",
     title: "Read a Frontend JD",
-    level: "A2+",
+    level: "TOEIC",
     duration: "12 min",
     tip: "Skim the title and requirements first, then read the details.",
     material: {
@@ -314,7 +319,7 @@ I have no blockers right now, but I may need the API document from Hung later.`,
     id: "listen-interview-q",
     skill: "listening",
     title: "Listen to an interview question",
-    level: "A2+",
+    level: "TOEIC",
     duration: "12 min",
     tip: "Listen for keywords: tell me about / challenging / recently.",
     material: {
@@ -450,7 +455,7 @@ Include: your name, current role, years of experience, and one strength.`,
     id: "speak-standup-turn",
     skill: "speaking",
     title: "Give a stand-up update",
-    level: "A2+",
+    level: "TOEIC",
     duration: "10 min",
     tip: "Yesterday / Today / Blockers — one sentence each.",
     material: {
@@ -570,7 +575,7 @@ Task: Write a short reply that:
     id: "write-slack-update",
     skill: "writing",
     title: "Write a Slack update",
-    level: "A2+",
+    level: "TOEIC",
     duration: "12 min",
     tip: "1 message = status + next step.",
     material: {
@@ -646,6 +651,124 @@ Write a short follow-up email to the team with:
         options: ["Love,", "Thx!!!", "Best,", "See ya,"],
         correctIndex: 2,
         explainVi: "“Best,” or “Thanks,” fit workplace email.",
+      },
+    ],
+  },
+  {
+    id: "read-ielts-focus-time",
+    skill: "reading",
+    title: "IELTS reading: Protecting focus time",
+    level: "IELTS",
+    duration: "18 min",
+    tip: "Match headings first, then scan for numbers.",
+    material: {
+      title: "Protecting focus time at work",
+      body: `A Many knowledge workers say their calendar is the biggest barrier to deep work. Interruptions make simple tasks take longer.
+
+B Some teams keep two mornings each week free of internal meetings, or a 90-minute quiet period after stand-up.
+
+C Tools help only if leaders stop expecting instant replies. Overlapping “urgent” reviews create the same problem.
+
+D Treating focus time as a real deliverable leads to clearer progress notes and fewer late-night catch-up sessions.`,
+    },
+    questions: [
+      {
+        id: "ielts-r1",
+        kind: "choice",
+        prompt: "Matching headings — Paragraph B. Best heading?",
+        options: [
+          "Hiring more designers",
+          "Shared calendar rules that protect quiet work",
+          "Why stand-ups should last one hour",
+          "Removing all software tools",
+        ],
+        correctIndex: 1,
+        explainVi: "Paragraph B is about agreed focus blocks on the shared calendar.",
+      },
+      {
+        id: "ielts-r2",
+        kind: "open",
+        prompt: "Short answer (≤3 words): What is the biggest barrier to deep work?",
+        expectKeywords: ["calendar"],
+        sampleAnswer: "their calendar",
+        explainVi: "Paragraph A: the calendar is the biggest barrier.",
+      },
+    ],
+  },
+  {
+    id: "listen-ielts-library",
+    skill: "listening",
+    title: "IELTS listening: Library orientation",
+    level: "IELTS",
+    duration: "12 min",
+    tip: "Listen for numbers: how many, how long, which room.",
+    material: {
+      title: "Orientation talk — university library",
+      speakable: true,
+      body: `Students can take out up to eight books for three weeks. The silent floor is on level three. Tomorrow at 4 p.m. there is a workshop on finding journal articles in Room B12.`,
+    },
+    questions: [
+      {
+        id: "ielts-l1",
+        kind: "choice",
+        prompt: "How many books can students borrow?",
+        options: ["Five", "Eight", "Twelve", "Twenty"],
+        correctIndex: 1,
+        explainVi: "Up to eight books.",
+      },
+      {
+        id: "ielts-l2",
+        kind: "open",
+        prompt: "Which room is the workshop in?",
+        expectKeywords: ["b12"],
+        sampleAnswer: "Room B12",
+        explainVi: "Room B12, next to the help desk.",
+      },
+    ],
+  },
+  {
+    id: "speak-ielts-cue-card",
+    skill: "speaking",
+    title: "IELTS Speaking: A skill you learned",
+    level: "IELTS",
+    duration: "12 min",
+    tip: "Cover every bullet: what / when / how you use it / why it is useful.",
+    material: {
+      title: "Cue card",
+      body: `Describe a useful skill you learned. Say what it was, when you learned it, how you use it now, and why it is useful. Speak for 1–2 minutes.`,
+    },
+    questions: [
+      {
+        id: "ielts-s1",
+        kind: "open",
+        prompt: "Give your 1–2 minute answer.",
+        expectKeywords: ["learned", "useful"],
+        sampleAnswer:
+          "I learned to write clearer emails last year. I put the request in the first sentence. I use that every day, and people reply faster.",
+        explainVi: "Name the skill, a time, current use, and a benefit.",
+      },
+    ],
+  },
+  {
+    id: "write-ielts-opinion",
+    skill: "writing",
+    title: "IELTS Writing: Hybrid work",
+    level: "IELTS",
+    duration: "18 min",
+    tip: "State a position, give two reasons, mention one drawback, conclude.",
+    material: {
+      title: "Essay prompt",
+      body: `Do the advantages of a hybrid working week outweigh the disadvantages? Write at least 180 words.`,
+    },
+    questions: [
+      {
+        id: "ielts-w1",
+        kind: "open",
+        prompt: "Write your essay.",
+        expectKeywords: ["hybrid", "because"],
+        sampleAnswer:
+          "I believe the advantages of a hybrid week outweigh the disadvantages. Office days help new staff learn faster, while remote days protect deep work. The main risk is weaker informal chat, so teams should set core office days. Overall a planned hybrid week keeps both focus and teamwork.",
+        explainVi: "Answer the question directly, then support with reasons.",
       },
     ],
   },

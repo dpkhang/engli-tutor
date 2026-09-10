@@ -15,7 +15,7 @@ export const LESSON_PACKS: LessonPack[] = [
   {
     id: "interview-frontend",
     title: "Frontend interview",
-    level: "A2+",
+    level: "TOEIC",
     duration: "25 min",
     skills: ["Listening", "Speaking", "Reading", "Writing"],
     tip: "Describe projects with Past Simple: worked / built / fixed.",

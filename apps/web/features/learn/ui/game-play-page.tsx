@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button, cn } from "@landing-page-generator/ui";
 import { DataLoadingState } from "@/features/layout";
+import { ClickableTranslateText } from "@/features/translate";
 import { useAiSpeech } from "@/features/speaking-lab/hooks/use-ai-speech";
 import { useVoiceInput } from "@/features/tutor-chat/hooks/use-voice-input";
 import { LESSON_PACKS } from "../model/curriculum";
@@ -444,7 +445,7 @@ function RoundPlay({
             </div>
           ) : (
             <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground">
-              {round.material.body}
+              <ClickableTranslateText text={round.material.body} />
             </pre>
           )}
         </div>

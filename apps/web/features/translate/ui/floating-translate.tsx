@@ -1,9 +1,9 @@
 "use client";
 
+import { type TranslateDirection, type TranslateResult } from "../api";
 import { type FormEvent, useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import {
-  ArrowLeftRight,
   Check,
   Copy,
   Languages,
@@ -16,7 +16,39 @@ import {
 } from "lucide-react";
 import { Button, cn } from "@landing-page-generator/ui";
 import { ApiError } from "@landing-page-generator/api-client";
-import { translateApi, type TranslateDirection, type TranslateResult } from "../api";
+import { lookupTranslation } from "../model/translate-lookup";
+import { getCachedLookup } from "../model/translate-cache";
+import { useTranslateSession } from "../model/translate-session";
+
+function mergeWord(
+  current: TranslateResult["word"],
+  incoming: TranslateResult["word"],
+): TranslateResult["word"] {
+  if (!incoming) return current;
+  if (!current) return incoming;
+  return {
+    ...incoming,
+    phonetic: incoming.phonetic || current.phonetic,
+    headword: incoming.headword || current.headword,
+    partOfSpeech: incoming.partOfSpeech || current.partOfSpeech,
+    level: incoming.level || current.level,
+    senses: incoming.senses.length ? incoming.senses : current.senses,
+    collocations: incoming.collocations.length ? incoming.collocations : current.collocations,
+  };
+}
+
+function mergeWordWithSentence(current: TranslateResult | null, contextual: TranslateResult): TranslateResult {
+  if (!current) return contextual;
+  return {
+    ...current,
+    sentence: contextual.sentence ?? current.sentence,
+    word: mergeWord(current.word, contextual.word),
+    alternatives: contextual.alternatives.length ? contextual.alternatives : current.alternatives,
+    usageNote: contextual.usageNote || current.usageNote,
+    tips: contextual.tips.length ? contextual.tips : current.tips,
+    paraphrase: contextual.paraphrase || current.paraphrase,
+  };
+}
 
 function errorMessage(error: unknown) {
   if (error instanceof ApiError) return error.message;
@@ -24,59 +56,45 @@ function errorMessage(error: unknown) {
   return "Translation is unavailable right now. Please try again.";
 }
 
-const DIRECTION_LABEL: Record<
-  TranslateDirection,
-  { from: string; to: string; placeholder: string }
-> = {
-  "en-vi": {
-    from: "English",
-    to: "Vietnamese",
-    placeholder: "Enter an English word, phrase, or sentence…",
-  },
-  "vi-en": {
-    from: "Vietnamese",
-    to: "English",
-    placeholder: "Enter Vietnamese text to translate…",
-  },
-};
+const DIRECTION: TranslateDirection = "en-vi";
 
-type FloatingTranslateProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-};
-
-export function FloatingTranslate({ open, onOpenChange }: FloatingTranslateProps) {
+export function FloatingTranslate() {
+  const { open, setOpen, pickedWord, pickNonce, activeSentence } = useTranslateSession();
   const reduceMotion = useReducedMotion();
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [direction, setDirection] = useState<TranslateDirection>("en-vi");
   const [text, setText] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<TranslateResult | null>(null);
   const [copied, setCopied] = useState(false);
+  const [contextPending, setContextPending] = useState(false);
+  const contextRequestRef = useRef(0);
 
   useEffect(() => {
     if (!open) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onOpenChange(false);
+      if (event.key === "Escape") setOpen(false);
     };
     document.addEventListener("keydown", closeOnEscape);
     return () => {
       document.removeEventListener("keydown", closeOnEscape);
     };
-  }, [onOpenChange, open]);
+  }, [open, setOpen]);
 
-  const swapDirection = () => {
-    setDirection((current) => (current === "en-vi" ? "vi-en" : "en-vi"));
-    if (result?.translation) setText(result.translation);
-    setResult(null);
-    setError(null);
-  };
+  useEffect(() => {
+    if (!open) return;
+    const frame = window.requestAnimationFrame(() => {
+      inputRef.current?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [open]);
 
   const clear = () => {
+    contextRequestRef.current += 1;
     setText("");
     setResult(null);
     setError(null);
+    setContextPending(false);
     inputRef.current?.focus();
   };
 
@@ -96,49 +114,100 @@ export function FloatingTranslate({ open, onOpenChange }: FloatingTranslateProps
     window.speechSynthesis.speak(utterance);
   };
 
-  const submit = async () => {
-    const query = text.trim();
-    if (!query || pending) return;
-    setPending(true);
+  const submit = async (nextText?: string) => {
+    const query = (nextText ?? text).trim();
+    if (!query) return null;
+    if (pending && nextText == null) return null;
+    setText(query);
     setError(null);
     setCopied(false);
+    const cached = getCachedLookup(DIRECTION, query);
+    if (cached) {
+      setResult(cached);
+      setPending(false);
+      if (!cached.word?.phonetic) {
+        void lookupTranslation({ text: query, direction: DIRECTION })
+          .then((next) => {
+            if (next.word?.phonetic) setResult(next);
+          })
+          .catch(() => undefined);
+      }
+      return cached;
+    }
+    setPending(true);
     try {
-      setResult(await translateApi.lookup({ text: query, direction }));
+      const next = await lookupTranslation({ text: query, direction: DIRECTION });
+      setResult(next);
+      return next;
     } catch (lookupError) {
       setError(errorMessage(lookupError));
+      return null;
     } finally {
       setPending(false);
     }
   };
+
+  const loadSentenceContext = async (sentence: string, word: string) => {
+    const requestId = ++contextRequestRef.current;
+    const cachedContext = getCachedLookup(DIRECTION, sentence, word);
+    if (cachedContext) {
+      setResult((current) => mergeWordWithSentence(current, cachedContext));
+      setContextPending(false);
+      return;
+    }
+    setContextPending(true);
+    try {
+      const contextual = await lookupTranslation({
+        text: sentence,
+        direction: DIRECTION,
+        focusWord: word,
+      });
+      if (requestId !== contextRequestRef.current) return;
+      setResult((current) => mergeWordWithSentence(current, contextual));
+    } catch {
+      if (requestId !== contextRequestRef.current) return;
+    } finally {
+      if (requestId === contextRequestRef.current) setContextPending(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!open || !pickedWord || pickNonce === 0) return;
+    setError(null);
+    void (async () => {
+      const sentence = activeSentence?.trim() ?? "";
+      const sameAsWord = sentence.toLowerCase() === pickedWord.trim().toLowerCase();
+      const wordLookup = submit(pickedWord);
+      const contextLookup =
+        sentence && !sameAsWord ? loadSentenceContext(sentence, pickedWord) : Promise.resolve();
+      await Promise.all([wordLookup, contextLookup]);
+      if (!sentence || sameAsWord) setContextPending(false);
+    })();
+    inputRef.current?.focus({ preventScroll: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- push from practice clicks
+  }, [pickNonce]);
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
     void submit();
   };
 
-  const labels = DIRECTION_LABEL[direction];
-  const englishAudio = direction === "vi-en" ? result?.translation : result?.query;
+  const englishAudio = result?.query;
 
   return (
     <div className="pointer-events-none relative">
-      <AnimatePresence initial={false}>
-        {open ? (
-          <motion.div
-            key="translate-drawer"
-            className="pointer-events-auto fixed top-16 right-0 bottom-0 z-[60] flex w-full transform-gpu flex-col overflow-hidden overscroll-contain border-t border-l border-border/80 bg-card shadow-[-16px_0_40px_-28px_rgba(15,23,42,0.28)] lg:max-w-[30rem]"
-            initial={reduceMotion ? false : { x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{
-              duration: reduceMotion ? 0 : 0.24,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-            onAnimationComplete={() => {
-              if (open) inputRef.current?.focus({ preventScroll: true });
-            }}
-            role="dialog"
-            aria-label="Professional English and Vietnamese translator"
-          >
+      <div
+        className={cn(
+          "fixed top-16 right-0 bottom-0 z-[60] flex w-full flex-col overflow-hidden overscroll-contain border-t border-l border-border/80 bg-card shadow-[-16px_0_40px_-28px_rgba(15,23,42,0.28)] lg:max-w-[30rem]",
+          "transform-gpu will-change-transform",
+          reduceMotion ? "" : "transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
+          open ? "pointer-events-auto translate-x-0" : "pointer-events-none translate-x-full",
+        )}
+        role="dialog"
+        aria-hidden={!open}
+        aria-label="Professional English and Vietnamese translator"
+        inert={!open ? true : undefined}
+      >
             <div className="flex items-center justify-between gap-3 border-b border-border/70 bg-gradient-to-r from-primary/10 to-transparent px-4 py-3.5">
               <div className="flex items-center gap-2.5">
                 <span className="grid size-9 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
@@ -159,7 +228,7 @@ export function FloatingTranslate({ open, onOpenChange }: FloatingTranslateProps
               <button
                 type="button"
                 className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
-                onClick={() => onOpenChange(false)}
+                onClick={() => setOpen(false)}
                 aria-label="Close translate"
               >
                 <X className="size-4" />
@@ -167,22 +236,9 @@ export function FloatingTranslate({ open, onOpenChange }: FloatingTranslateProps
             </div>
 
             <form className="space-y-3 p-4" onSubmit={onSubmit}>
-              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 rounded-xl bg-muted/60 p-1">
-                <span className="px-2 text-center text-xs font-semibold text-foreground">
-                  {labels.from}
-                </span>
-                <button
-                  type="button"
-                  onClick={swapDirection}
-                  className="grid size-8 place-items-center rounded-lg bg-card text-primary shadow-sm transition-transform hover:rotate-180"
-                  aria-label="Swap translation direction"
-                  title="Swap languages"
-                >
-                  <ArrowLeftRight className="size-3.5" />
-                </button>
-                <span className="px-2 text-center text-xs font-semibold text-foreground">
-                  {labels.to}
-                </span>
+              <div className="grid grid-cols-2 items-center gap-2 rounded-xl bg-muted/60 p-1">
+                <span className="px-2 text-center text-xs font-semibold text-foreground">English</span>
+                <span className="px-2 text-center text-xs font-semibold text-foreground">Vietnamese</span>
               </div>
 
               <div className="relative">
@@ -202,7 +258,7 @@ export function FloatingTranslate({ open, onOpenChange }: FloatingTranslateProps
                   }}
                   rows={4}
                   maxLength={2000}
-                  placeholder={labels.placeholder}
+                  placeholder="Enter an English word, phrase, or sentence…"
                   className="w-full resize-none rounded-xl border border-input bg-background/60 px-3 py-3 pb-8 text-sm leading-6 shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/20"
                 />
                 <div className="absolute right-2.5 bottom-2 flex items-center gap-2 text-[10px] text-muted-foreground">
@@ -244,7 +300,7 @@ export function FloatingTranslate({ open, onOpenChange }: FloatingTranslateProps
                 )}
               </Button>
               <p className="text-center text-[10px] text-muted-foreground">
-                Press ⌘/Ctrl + Enter to translate
+                Click a word in the passage to look it up · ⌘/Ctrl + Enter
               </p>
             </form>
 
@@ -286,6 +342,14 @@ export function FloatingTranslate({ open, onOpenChange }: FloatingTranslateProps
                       </button>
                     </div>
                   </div>
+                  <p className="mt-2 text-sm font-semibold tracking-tight text-foreground">
+                    {result.word?.headword || result.query}
+                  </p>
+                  {result.word?.phonetic ? (
+                    <p className="mt-1 font-mono text-[13px] leading-5 text-muted-foreground">
+                      {result.word.phonetic}
+                    </p>
+                  ) : null}
                   <p className="mt-2 text-base leading-7 font-semibold text-foreground">
                     {result.translation}
                   </p>
@@ -333,11 +397,44 @@ export function FloatingTranslate({ open, onOpenChange }: FloatingTranslateProps
                   </section>
                 ) : null}
 
+                {activeSentence && pickedWord && activeSentence.trim().toLowerCase() !== pickedWord.trim().toLowerCase() ? (
+                  <section className="space-y-2">
+                    <p className="text-[10px] font-bold tracking-[0.14em] text-muted-foreground uppercase">
+                      In this sentence
+                    </p>
+                    <p className="rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5 text-xs leading-5 text-foreground">
+                      “
+                      {(() => {
+                        const sentence = activeSentence.trim();
+                        const word = pickedWord.trim();
+                        const index = sentence.toLowerCase().indexOf(word.toLowerCase());
+                        if (index < 0) return sentence;
+                        return (
+                          <>
+                            {sentence.slice(0, index)}
+                            <span className="rounded-sm bg-primary px-[0.15em] font-semibold text-primary-foreground">
+                              {sentence.slice(index, index + word.length)}
+                            </span>
+                            {sentence.slice(index + word.length)}
+                          </>
+                        );
+                      })()}
+                      ”
+                    </p>
+                    {contextPending ? (
+                      <div className="space-y-2">
+                        <div className="h-3 w-32 animate-pulse rounded bg-muted" />
+                        <div className="h-12 animate-pulse rounded-xl bg-muted/70" />
+                      </div>
+                    ) : null}
+                  </section>
+                ) : null}
+
                 {result.sentence ? (
                   <section className="space-y-3">
                     <div>
                       <p className="text-[10px] font-bold tracking-[0.14em] text-muted-foreground uppercase">
-                        Understand the sentence
+                        Meaning in this sentence
                       </p>
                       <p className="mt-1.5 text-xs leading-5">{result.sentence.meaningVi}</p>
                     </div>
@@ -390,12 +487,18 @@ export function FloatingTranslate({ open, onOpenChange }: FloatingTranslateProps
                       ) : null}
                     </div>
                     <p className="mt-2 text-sm font-semibold">
-                      {result.word.headword}{" "}
-                      <span className="font-normal text-muted-foreground">
-                        {result.word.phonetic}{" "}
-                        {result.word.partOfSpeech ? `· ${result.word.partOfSpeech}` : ""}
-                      </span>
+                      {result.word.headword}
+                      {result.word.partOfSpeech ? (
+                        <span className="ml-1.5 font-normal text-muted-foreground">
+                          · {result.word.partOfSpeech}
+                        </span>
+                      ) : null}
                     </p>
+                    {result.word.phonetic ? (
+                      <p className="mt-1 font-mono text-[13px] leading-5 text-muted-foreground">
+                        {result.word.phonetic}
+                      </p>
+                    ) : null}
                     <div className="mt-2 space-y-2">
                       {result.word.senses.map((sense, index) => (
                         <div key={index} className="text-xs leading-5">
@@ -446,9 +549,11 @@ export function FloatingTranslate({ open, onOpenChange }: FloatingTranslateProps
 
                 <div className="flex items-center justify-between border-t border-border pt-3">
                   <p className="text-[10px] text-muted-foreground">
-                    {result.demo
-                      ? "Demo mode · configure OpenAI for live translations"
-                      : "AI can make mistakes · verify important content"}
+                    {result.source === "dictionary"
+                      ? "From dictionary · no AI used"
+                      : result.demo
+                        ? "Demo mode · configure OpenAI for live translations"
+                        : "Saved or AI result · verify important content"}
                   </p>
                   <button
                     type="button"
@@ -461,13 +566,11 @@ export function FloatingTranslate({ open, onOpenChange }: FloatingTranslateProps
                 </div>
               </div>
             ) : null}
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      </div>
 
       <motion.button
         type="button"
-        onClick={() => onOpenChange(!open)}
+        onClick={() => setOpen(!open)}
         className={cn(
           "pointer-events-auto grid size-12 place-items-center rounded-full border border-border bg-card text-foreground shadow-lg transition-colors",
           open

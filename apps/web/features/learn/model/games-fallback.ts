@@ -146,7 +146,7 @@ export const FALLBACK_GAMES: LearningGame[] = [
       ),
       round(
         "sr-blocker",
-        "A2+",
+        "TOEIC",
         15,
         open(
           "sr-blocker-q",
@@ -185,7 +185,7 @@ export const FALLBACK_GAMES: LearningGame[] = [
       round("fx-weekend", "A2", 20, fix("fx-weekend-q", "Office small talk — which line sounds friendly?", ["Weekend good?", "How was your weekend?"], 1, "How was your weekend? is the usual opener."), { lessonIds: ["office-smalltalk"] }),
       round("fx-accept", "A2", 20, fix("fx-accept-q", "Someone asks to meet tomorrow at 3 PM. Which reply is polite and clear?", ["Maybe.", "Sure, that works for me."], 1, "This phrase clearly accepts the request."), { lessonIds: ["office-smalltalk", "work-email"] }),
       round("fx-question", "A2", 20, fix("fx-question-q", "Which question is grammatically correct?", ["Meeting is online?", "Is the meeting online?"], 1, "Use be before the subject in a question."), { lessonIds: ["work-email"] }),
-      round("fx-review", "A2+", 20, fix("fx-review-q", "Which request sounds natural in chat?", ["Please to review the PR.", "Could you review the PR before 4 PM?"], 1, "Could you is a polite request form."), { lessonIds: ["work-email"] }),
+      round("fx-review", "TOEIC", 20, fix("fx-review-q", "Which request sounds natural in chat?", ["Please to review the PR.", "Could you review the PR before 4 PM?"], 1, "Could you is a polite request form."), { lessonIds: ["work-email"] }),
       round("fx-ask", "B1", 20, fix("fx-ask-q", "Which sentence best asks for a decision?", ["Tell me later.", "Could you approve Option A by Wednesday?"], 1, "Name the option and the deadline."), { lessonIds: ["work-email"] }),
     ],
   },
@@ -219,7 +219,7 @@ export const FALLBACK_GAMES: LearningGame[] = [
       ),
       round(
         "lo-interview",
-        "A2+",
+        "TOEIC",
         90,
         order("lo-interview-q", "Listen, then order the three things the interviewer wants.", [
           "What the problem was",
@@ -238,7 +238,7 @@ export const FALLBACK_GAMES: LearningGame[] = [
       ),
       round(
         "lo-customer",
-        "A2+",
+        "TOEIC",
         90,
         order("lo-customer-q", "Listen, then order the customer's requests.", [
           "Replace the hero image with the photo sent yesterday.",
@@ -332,7 +332,7 @@ export const FALLBACK_GAMES: LearningGame[] = [
       ),
       round(
         "rr-status",
-        "A2+",
+        "TOEIC",
         90,
         open("rr-status-q", "Rewrite this status update. Keep the facts, cut the noise.", ["fixed", "review", "4 PM"], "I fixed the login bug and tested it on two mobile devices. Could you review the PR before 4 PM?", "Status + evidence + request."),
         {
@@ -411,7 +411,7 @@ export const FALLBACK_GAMES: LearningGame[] = [
       ),
       round(
         "wm-office",
-        "A2+",
+        "TOEIC",
         60,
         match("wm-office-q", "Match each word to its sentence.", [
           { left: "shuttle", right: "The company will offer a ______ bus from the metro." },
@@ -474,7 +474,7 @@ export const FALLBACK_GAMES: LearningGame[] = [
       ),
       round(
         "kh-customer",
-        "A2+",
+        "TOEIC",
         45,
         hunt("kh-customer-q", "Listen, then tap the 5 words from the customer call.", [
           "landing", "hero", "signup", "preview", "Monday",
