@@ -9,26 +9,24 @@ import type { LearningGameId } from "../api/types";
 
 export function GamesHubPage() {
   const { games, loading, source } = useGames();
-  const cards = games.length
-    ? games
-    : GAMES_CATALOG.map((game) => ({ ...game, roundCount: 0 }));
+  const cards = games.length ? games : GAMES_CATALOG.map((game) => ({ ...game, roundCount: 0 }));
 
   return (
     <div className="space-y-10 pb-8">
-      <header className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-rose-500 to-orange-400 px-6 py-9 text-white sm:px-10 sm:py-11">
+      <header className="workspace-hero-accent relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-rose-500 to-orange-400 px-5 py-6 text-white sm:rounded-[2rem] sm:px-10 sm:py-11">
         <div
           aria-hidden
-          className="absolute -right-12 -top-16 size-56 rounded-full border-[28px] border-white/10"
+          className="absolute -right-12 -top-16 hidden size-56 rounded-full border-[28px] border-white/10 sm:block"
         />
         <div className="relative">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-medium">
+          <span className="hidden items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-medium sm:inline-flex">
             <Sparkles className="size-3.5 text-amber-200" />
             Learn by playing
           </span>
-          <h1 className="mt-5 max-w-xl text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">
+          <h1 className="max-w-xl text-xl font-semibold tracking-[-0.035em] sm:mt-5 sm:text-4xl">
             Mini-games for everyday English
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-white/80 sm:text-base">
+          <p className="mt-3 hidden max-w-2xl text-sm leading-6 text-white/80 sm:block sm:text-base">
             One to three minutes each. Hear, match, fix, then say it — the same language in a new
             shape.
             {!loading && source === "api" ? " Fresh rounds are ready." : ""}
@@ -70,7 +68,8 @@ export function GamesHubPage() {
                 {game.roundCount ? `${game.roundCount} rounds` : game.howToPlay}
               </p>
               <span className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-primary">
-                Play <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                Play{" "}
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
               </span>
             </Link>
           );

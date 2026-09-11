@@ -3,7 +3,11 @@
 import { useLayoutEffect, useState } from "react";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, Label } from "@landing-page-generator/ui";
-import { applyThemePreference, getThemePreference, type ThemePreference } from "../model/preferences";
+import {
+  applyThemePreference,
+  getThemePreference,
+  type ThemePreference,
+} from "../model/preferences";
 import { ChoiceChip } from "./choice-chip";
 import { SettingsPanel } from "./settings-panel";
 
@@ -27,8 +31,8 @@ export function AppearanceSettings() {
 
   return (
     <SettingsPanel ready={theme !== null}>
-      <Card className="shadow-none">
-        <CardHeader>
+      <Card className="rounded-[1.5rem] shadow-none">
+        <CardHeader className="p-5 sm:p-6">
           <CardTitle className="flex items-center gap-2">
             {theme === "dark" ? (
               <Moon className="size-5 text-primary" />
@@ -40,9 +44,9 @@ export function AppearanceSettings() {
             Theme
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-3 p-5 pt-0 sm:p-6 sm:pt-0">
           <Label>Color mode</Label>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {THEME_OPTIONS.map((option) => {
               const Icon = option.icon;
               return (
@@ -57,7 +61,9 @@ export function AppearanceSettings() {
               );
             })}
           </div>
-          <p className="text-xs text-muted-foreground">System follows your device light/dark setting.</p>
+          <p className="text-xs text-muted-foreground">
+            System follows your device light/dark setting.
+          </p>
         </CardContent>
       </Card>
     </SettingsPanel>

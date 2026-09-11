@@ -45,19 +45,19 @@ export function SkillListPage({ skill }: { skill: SkillId }) {
             <ArrowLeft /> All skills
           </Link>
         </Button>
-        <header className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-primary to-primary/80 px-6 py-8 text-primary-foreground sm:px-9 sm:py-10">
+        <header className="workspace-hero-accent relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-primary to-primary/80 px-5 py-6 text-primary-foreground sm:rounded-[1.75rem] sm:px-9 sm:py-10">
           <div
             aria-hidden
-            className="absolute -right-12 -top-16 size-52 rounded-full border-[26px] border-white/[0.07]"
+            className="absolute -right-12 -top-16 hidden size-52 rounded-full border-[26px] border-white/[0.07] sm:block"
           />
           <div className="relative">
-            <p className="text-[11px] font-semibold tracking-[0.18em] text-primary-foreground/70 uppercase">
+            <p className="hidden text-[11px] font-semibold tracking-[0.18em] text-primary-foreground/70 uppercase sm:block">
               {meta.labelEn}
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+            <h1 className="text-xl font-semibold tracking-tight sm:mt-2 sm:text-4xl">
               {meta.labelVi}
             </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70 sm:text-base">
+            <p className="mt-3 hidden max-w-2xl text-sm leading-6 text-white/70 sm:block sm:text-base">
               {meta.blurb}
             </p>
             {skill === "speaking" ? (
@@ -70,8 +70,10 @@ export function SkillListPage({ skill }: { skill: SkillId }) {
                 </Button>
               </div>
             ) : null}
-            <p className="mt-4 text-xs text-white/50">
-              {loading ? "Loading exercises…" : `${total} exercises · grouped A2 → B1 → TOEIC → IELTS`}
+            <p className="mt-4 hidden text-xs text-white/50 sm:block">
+              {loading
+                ? "Loading exercises…"
+                : `${total} exercises · grouped A2 → B1 → TOEIC → IELTS`}
               {!loading && source === "api" ? " · live curriculum" : null}
             </p>
           </div>

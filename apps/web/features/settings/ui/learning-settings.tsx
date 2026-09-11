@@ -72,17 +72,18 @@ export function LearningSettings() {
     <SettingsPanel ready={view !== null}>
       {view ? (
         <>
-          <Card className="shadow-none">
-            <CardHeader>
+          <Card className="rounded-[1.5rem] shadow-none">
+            <CardHeader className="p-5 sm:p-6">
               <CardTitle className="flex items-center gap-2">
                 <Target className="size-5 text-primary" /> Preferred level
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 p-5 pt-0 sm:p-6 sm:pt-0">
               <p className="text-sm text-muted-foreground">
-                Skills opens this band first. You can still switch to any level on the practice page.
+                Skills opens this band first. You can still switch to any level on the practice
+                page.
               </p>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                 {LEVELS.map((item) => (
                   <ChoiceChip
                     key={item.id}
@@ -94,23 +95,25 @@ export function LearningSettings() {
                   </ChoiceChip>
                 ))}
               </div>
-              {levelSaving ? <p className="text-xs text-muted-foreground">Saving to your account…</p> : null}
+              {levelSaving ? (
+                <p className="text-xs text-muted-foreground">Saving to your account…</p>
+              ) : null}
             </CardContent>
           </Card>
 
-          <Card className="shadow-none">
-            <CardHeader>
+          <Card className="rounded-[1.5rem] shadow-none">
+            <CardHeader className="p-5 sm:p-6">
               <CardTitle className="flex items-center gap-2">
                 <Volume2 className="size-5 text-primary" /> Listening & speech
               </CardTitle>
             </CardHeader>
-            <CardContent className="grid gap-6 sm:grid-cols-2">
+            <CardContent className="grid gap-5 p-5 pt-0 sm:grid-cols-2 sm:gap-6 sm:p-6 sm:pt-0">
               <div className="space-y-3">
                 <Label>Playback speed</Label>
                 <p className="text-sm text-muted-foreground">
                   Applies to Listen on exercises and AI tutor speech.
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
                   {(Object.keys(SPEECH_RATES) as SpeechRateId[]).map((id) => (
                     <ChoiceChip
                       key={id}
@@ -124,7 +127,9 @@ export function LearningSettings() {
                     </ChoiceChip>
                   ))}
                 </div>
-                <p className="text-xs text-muted-foreground">{SPEECH_RATES[view.speechRate].hint}</p>
+                <p className="text-xs text-muted-foreground">
+                  {SPEECH_RATES[view.speechRate].hint}
+                </p>
               </div>
               <div className="space-y-3">
                 <Label htmlFor="autoplay-listening">Auto-play listening audio</Label>

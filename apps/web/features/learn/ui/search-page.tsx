@@ -34,29 +34,36 @@ export function SearchPage() {
 
   return (
     <div className="space-y-7 pb-10">
-      <section className="relative overflow-hidden rounded-[2rem] border border-primary/15 bg-gradient-to-br from-primary/12 via-card to-accent/10 px-6 py-8 sm:px-9">
-        <Sparkles className="absolute top-7 right-8 size-7 text-primary/25" aria-hidden />
-        <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+      <section className="relative overflow-hidden rounded-[1.5rem] border border-primary/15 bg-gradient-to-br from-primary/12 via-card to-accent/10 px-5 py-6 sm:rounded-[2rem] sm:px-9 sm:py-8">
+        <Sparkles
+          className="absolute top-7 right-8 hidden size-7 text-primary/25 sm:block"
+          aria-hidden
+        />
+        <p className="hidden text-xs font-semibold tracking-[0.16em] text-primary uppercase sm:block">
           Discover your next lesson
         </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Search learning content</h1>
-        <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+        <h1 className="text-xl font-semibold tracking-tight sm:mt-2 sm:text-3xl">
+          Search learning content
+        </h1>
+        <p className="mt-2 hidden max-w-xl text-sm leading-6 text-muted-foreground sm:block">
           Find lessons by topic, skill, level, or a real-life situation you want to practise.
         </p>
 
-        <form action="/search" className="relative mt-6 max-w-2xl">
-          <Search className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground" />
-          <input
-            key={query}
-            name="q"
-            defaultValue={query}
-            autoFocus
-            placeholder="Try “interview”, “speaking”, or “B1”…"
-            className="h-13 w-full rounded-full border border-border bg-background pr-28 pl-12 text-sm shadow-sm outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-3 focus:ring-primary/15"
-          />
+        <form action="/search" className="mt-6 grid max-w-2xl gap-2 sm:relative sm:block">
+          <div className="relative">
+            <Search className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground" />
+            <input
+              key={query}
+              name="q"
+              defaultValue={query}
+              autoFocus
+              placeholder="Try “interview”, “speaking”, or “B1”…"
+              className="h-13 w-full rounded-full border border-border bg-background pr-4 pl-12 text-sm shadow-sm outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-3 focus:ring-primary/15 sm:pr-28"
+            />
+          </div>
           <Button
             type="submit"
-            className="absolute top-1/2 right-1.5 h-10 -translate-y-1/2 rounded-full px-5"
+            className="h-11 w-full rounded-full px-5 sm:absolute sm:top-1/2 sm:right-1.5 sm:h-10 sm:w-auto sm:-translate-y-1/2"
           >
             Search
           </Button>
@@ -64,7 +71,7 @@ export function SearchPage() {
       </section>
 
       {query ? (
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <h2 className="text-xl font-semibold tracking-tight">Results for “{query}”</h2>
             {!loading ? (

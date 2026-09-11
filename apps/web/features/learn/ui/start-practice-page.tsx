@@ -46,20 +46,20 @@ const SCENARIOS = [
 export function StartPracticePage() {
   return (
     <div className="mx-auto max-w-4xl space-y-10 pb-8">
-      <header className="relative overflow-hidden rounded-[2rem] bg-primary px-6 py-9 text-primary-foreground sm:px-10 sm:py-11">
+      <header className="workspace-hero-accent relative overflow-hidden rounded-[1.5rem] bg-primary px-5 py-6 text-primary-foreground sm:rounded-[2rem] sm:px-10 sm:py-11">
         <div
           aria-hidden
-          className="absolute right-0 top-0 size-56 rounded-full bg-violet-500/25 blur-3xl"
+          className="absolute right-0 top-0 hidden size-56 rounded-full bg-violet-500/25 blur-3xl sm:block"
         />
         <div className="relative">
-          <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium">
+          <p className="hidden items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium sm:inline-flex">
             <Sparkles className="size-3.5 text-amber-300" />
             Your AI tutor is ready
           </p>
-          <h1 className="mt-5 max-w-xl text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">
+          <h1 className="max-w-xl text-xl font-semibold tracking-[-0.035em] sm:mt-5 sm:text-4xl">
             What shall we talk about?
           </h1>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-white/65 sm:text-base">
+          <p className="mt-3 hidden max-w-xl text-sm leading-6 text-white/65 sm:block sm:text-base">
             Pick a situation that feels useful—or simply talk about your day. There are no wrong
             choices here.
           </p>

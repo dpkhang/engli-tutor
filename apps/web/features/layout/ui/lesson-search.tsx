@@ -83,7 +83,7 @@ export function LessonSearch() {
       </button>
 
       {open ? (
-        <div className="absolute top-[calc(100%+0.65rem)] right-0 z-[70] w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-border bg-popover text-popover-foreground shadow-xl">
+        <div className="fixed top-[4.5rem] right-4 left-4 z-[70] overflow-hidden rounded-2xl border border-border bg-popover text-popover-foreground shadow-xl sm:absolute sm:top-[calc(100%+0.65rem)] sm:right-0 sm:left-auto sm:w-[min(24rem,calc(100vw-2rem))]">
           <form
             className="flex items-center gap-2 border-b border-border px-3"
             onSubmit={(event) => {

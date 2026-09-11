@@ -195,22 +195,22 @@ export default function AccountsPage({ embedded = false }: { embedded?: boolean 
   const ready = form !== null;
 
   const body = form ? (
-    <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+    <div className="grid gap-5 sm:gap-6 lg:grid-cols-[1.4fr_1fr]">
       <form
-        className="space-y-6"
+        className="space-y-5 sm:space-y-6"
         onSubmit={(event) => {
           event.preventDefault();
           if (!form.name.trim() || save.isPending) return;
           save.mutate();
         }}
       >
-        <Card className="shadow-none">
-          <CardHeader>
+        <Card className="rounded-[1.5rem] shadow-none">
+          <CardHeader className="p-5 sm:p-6">
             <CardTitle className="flex items-center gap-2">
               <UserRound className="size-5 text-primary" /> Profile
             </CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-5 sm:grid-cols-2">
+          <CardContent className="grid gap-5 p-5 pt-0 [&_input]:h-11 [&_input]:text-base sm:grid-cols-2 sm:p-6 sm:pt-0 sm:[&_input]:h-9 sm:[&_input]:text-sm">
             <Field id="account-name" label="Full name">
               <Input
                 id="account-name"
@@ -239,7 +239,7 @@ export default function AccountsPage({ embedded = false }: { embedded?: boolean 
             >
               <PhoneInput
                 id="account-phone"
-                className="account-phone-input"
+                className="account-phone-input !h-11 sm:!h-9"
                 data-invalid={Boolean(form.phone) && !isValidPhoneNumber(form.phone)}
                 value={form.phone || undefined}
                 defaultCountry="VN"
@@ -299,13 +299,13 @@ export default function AccountsPage({ embedded = false }: { embedded?: boolean 
           </CardContent>
         </Card>
 
-        <Card className="shadow-none">
-          <CardHeader>
+        <Card className="rounded-[1.5rem] shadow-none">
+          <CardHeader className="p-5 sm:p-6">
             <CardTitle className="flex items-center gap-2">
               <Target className="size-5 text-primary" /> Learning profile
             </CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-5 sm:grid-cols-2">
+          <CardContent className="grid gap-5 p-5 pt-0 [&_input]:h-11 [&_input]:text-base sm:grid-cols-2 sm:p-6 sm:pt-0 sm:[&_input]:h-9 sm:[&_input]:text-sm">
             <Field id="account-language" label="Native language">
               <div className="relative">
                 <Languages className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -369,9 +369,10 @@ export default function AccountsPage({ embedded = false }: { embedded?: boolean 
           </Alert>
         ) : null}
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="sticky bottom-3 z-20 -mx-1 flex flex-col-reverse items-stretch gap-2 rounded-2xl border border-border bg-background/95 p-2 shadow-lg backdrop-blur sm:static sm:mx-0 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none sm:backdrop-blur-none">
           <Button
             type="submit"
+            className="h-11 w-full sm:w-auto"
             disabled={
               !form.name.trim() ||
               !dirty ||
@@ -387,13 +388,13 @@ export default function AccountsPage({ embedded = false }: { embedded?: boolean 
       </form>
 
       <div className="space-y-6">
-        <Card className="shadow-none">
-          <CardHeader>
+        <Card className="rounded-[1.5rem] shadow-none">
+          <CardHeader className="p-5 sm:p-6">
             <CardTitle className="flex items-center gap-2">
               <ShieldCheck className="size-5 text-primary" /> Security
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 text-sm">
+          <CardContent className="space-y-4 p-5 pt-0 text-sm sm:p-6 sm:pt-0">
             <div className="flex items-center justify-between gap-3">
               <span className="flex items-center gap-2 text-muted-foreground">
                 <Mail className="size-4" /> Email

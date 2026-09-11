@@ -29,18 +29,18 @@ export function SettingsShell({ children }: { children: ReactNode }) {
   }, [queryClient, router]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5 sm:space-y-8">
       <PageHeader
         eyebrow="Personal"
         title="Settings"
         description={section?.description ?? "Manage your EngliTutor workspace."}
       />
 
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-10">
-        <aside className="lg:sticky lg:top-24 lg:w-56 lg:shrink-0">
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-10">
+        <aside className="sticky top-16 z-30 -mx-4 border-y border-border/70 bg-background/95 py-2 backdrop-blur-md sm:-mx-6 sm:px-2 lg:top-24 lg:mx-0 lg:w-56 lg:shrink-0 lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
           <nav
             aria-label="Settings"
-            className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0"
+            className="scrollbar-none flex snap-x gap-1 overflow-x-auto px-4 lg:flex-col lg:overflow-visible lg:px-0"
           >
             {SETTINGS_NAV.map((item) => {
               const Icon = item.icon;
@@ -51,7 +51,7 @@ export function SettingsShell({ children }: { children: ReactNode }) {
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "inline-flex shrink-0 items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                    "inline-flex h-11 shrink-0 snap-start items-center gap-2 rounded-xl px-3.5 text-sm font-medium transition-colors lg:h-auto lg:gap-2.5 lg:px-3 lg:py-2.5",
                     active
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
