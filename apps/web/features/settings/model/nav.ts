@@ -26,7 +26,7 @@ export const SETTINGS_NAV: SettingsSection[] = [
   {
     href: "/settings",
     label: "Appearance",
-    description: "Theme for the workspace",
+    description: "Theme, color, text size, and motion",
     icon: Monitor,
     match: "exact",
   },

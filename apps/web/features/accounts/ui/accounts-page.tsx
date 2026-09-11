@@ -18,9 +18,6 @@ import {
   AlertDescription,
   Badge,
   Button,
-  Card,
-  CardContent,
-  CardHeader,
   CardTitle,
   Input,
   Label,
@@ -41,6 +38,7 @@ import { accountApi, type AccountProfile } from "../api";
 import { queryKeys } from "@/lib/query";
 import { setPreferredLevel } from "@/features/settings/model/preferences";
 import { SettingsPanel } from "@/features/settings";
+import { SettingsCard, SettingsCardContent, SettingsCardHeader } from "@/features/settings/ui/settings-card";
 import { AddressAutocomplete } from "./address-autocomplete";
 
 type ProfileForm = {
@@ -90,7 +88,7 @@ function Field({
   children: ReactNode;
 }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       <Label htmlFor={id}>{label}</Label>
       {children}
       {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
@@ -195,22 +193,22 @@ export default function AccountsPage({ embedded = false }: { embedded?: boolean 
   const ready = form !== null;
 
   const body = form ? (
-    <div className="grid gap-5 sm:gap-6 lg:grid-cols-[1.4fr_1fr]">
+    <div className="grid items-start gap-4 lg:grid-cols-[1.4fr_1fr]">
       <form
-        className="space-y-5 sm:space-y-6"
+        className="space-y-4"
         onSubmit={(event) => {
           event.preventDefault();
           if (!form.name.trim() || save.isPending) return;
           save.mutate();
         }}
       >
-        <Card className="rounded-[1.5rem] shadow-none">
-          <CardHeader className="p-5 sm:p-6">
+        <SettingsCard>
+          <SettingsCardHeader>
             <CardTitle className="flex items-center gap-2">
               <UserRound className="size-5 text-primary" /> Profile
             </CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-5 p-5 pt-0 [&_input]:h-11 [&_input]:text-base sm:grid-cols-2 sm:p-6 sm:pt-0 sm:[&_input]:h-9 sm:[&_input]:text-sm">
+          </SettingsCardHeader>
+          <SettingsCardContent className="grid gap-4 [&_input]:h-11 [&_input]:text-base sm:grid-cols-2 sm:[&_input]:h-9 sm:[&_input]:text-sm">
             <Field id="account-name" label="Full name">
               <Input
                 id="account-name"
@@ -296,16 +294,16 @@ export default function AccountsPage({ embedded = false }: { embedded?: boolean 
                 />
               </div>
             </Field>
-          </CardContent>
-        </Card>
+          </SettingsCardContent>
+        </SettingsCard>
 
-        <Card className="rounded-[1.5rem] shadow-none">
-          <CardHeader className="p-5 sm:p-6">
+        <SettingsCard>
+          <SettingsCardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="size-5 text-primary" /> Learning profile
             </CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-5 p-5 pt-0 [&_input]:h-11 [&_input]:text-base sm:grid-cols-2 sm:p-6 sm:pt-0 sm:[&_input]:h-9 sm:[&_input]:text-sm">
+          </SettingsCardHeader>
+          <SettingsCardContent className="grid gap-4 [&_input]:h-11 [&_input]:text-base sm:grid-cols-2 sm:[&_input]:h-9 sm:[&_input]:text-sm">
             <Field id="account-language" label="Native language">
               <div className="relative">
                 <Languages className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -343,7 +341,7 @@ export default function AccountsPage({ embedded = false }: { embedded?: boolean 
                 </SelectContent>
               </Select>
             </Field>
-            <div className="space-y-2 sm:col-span-2">
+            <div className="space-y-1.5 sm:col-span-2">
               <Label htmlFor="account-goal">Learning goal</Label>
               <textarea
                 id="account-goal"
@@ -360,8 +358,8 @@ export default function AccountsPage({ embedded = false }: { embedded?: boolean 
               />
               <p className="text-xs text-muted-foreground">{form.learningGoal.length}/280</p>
             </div>
-          </CardContent>
-        </Card>
+          </SettingsCardContent>
+        </SettingsCard>
 
         {saveError ? (
           <Alert variant="destructive">
@@ -387,14 +385,14 @@ export default function AccountsPage({ embedded = false }: { embedded?: boolean 
         </div>
       </form>
 
-      <div className="space-y-6">
-        <Card className="rounded-[1.5rem] shadow-none">
-          <CardHeader className="p-5 sm:p-6">
+      <div className="space-y-4">
+        <SettingsCard>
+          <SettingsCardHeader>
             <CardTitle className="flex items-center gap-2">
               <ShieldCheck className="size-5 text-primary" /> Security
             </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 p-5 pt-0 text-sm sm:p-6 sm:pt-0">
+          </SettingsCardHeader>
+          <SettingsCardContent className="space-y-3 text-sm">
             <div className="flex items-center justify-between gap-3">
               <span className="flex items-center gap-2 text-muted-foreground">
                 <Mail className="size-4" /> Email
@@ -409,8 +407,8 @@ export default function AccountsPage({ embedded = false }: { embedded?: boolean 
               </span>
               <Badge variant="outline">In use</Badge>
             </div>
-          </CardContent>
-        </Card>
+          </SettingsCardContent>
+        </SettingsCard>
         <Button type="button" variant="outline" className="w-full" onClick={() => void signOut()}>
           Sign out of this session
         </Button>
@@ -419,7 +417,7 @@ export default function AccountsPage({ embedded = false }: { embedded?: boolean 
   ) : null;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {embedded ? null : (
         <PageHeader
           eyebrow="Personal"

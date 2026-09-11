@@ -16,7 +16,7 @@ import {
   UserRound,
   WandSparkles,
 } from "lucide-react";
-import { Button, Input } from "@landing-page-generator/ui";
+import { Button, Input, SegmentedSwitch } from "@landing-page-generator/ui";
 import { AnimatePresence, motion } from "motion/react";
 import type { AuthFormValues } from "../../model/auth-schema";
 import { SocialAuthButtons } from "../social-auth-buttons";
@@ -192,25 +192,17 @@ export function AuthPageView({
             </p>
           </div>
 
-          <div
-            className="mb-5 grid grid-cols-2 rounded-xl bg-slate-100 p-1 dark:bg-white/[0.06]"
-            role="tablist"
-            aria-label="Authentication mode"
-          >
-            {(["login", "register"] as const).map((item) => (
-              <button
-                key={item}
-                type="button"
-                role="tab"
-                aria-selected={mode === item}
-                disabled={pending}
-                onClick={() => onModeChange(item)}
-                className={`rounded-[.6rem] px-3 py-2.5 text-sm font-semibold transition-all ${mode === item ? "bg-white text-slate-950 shadow-sm dark:bg-white/10 dark:text-white" : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white"}`}
-              >
-                {item === "login" ? "Sign in" : "Sign up"}
-              </button>
-            ))}
-          </div>
+          <SegmentedSwitch
+            value={mode}
+            onChange={onModeChange}
+            disabled={pending}
+            ariaLabel="Authentication mode"
+            className="mb-5"
+            options={[
+              { id: "login", label: "Sign in" },
+              { id: "register", label: "Sign up" },
+            ]}
+          />
 
           <SocialAuthButtons mode={mode} disabled={pending} />
           <div className="my-5 flex items-center gap-3 text-[10px] font-semibold tracking-[0.16em] text-slate-400 uppercase">

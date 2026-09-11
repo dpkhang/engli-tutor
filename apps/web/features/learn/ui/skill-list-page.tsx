@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Timer } from "lucide-react";
 import { Button, cn } from "@landing-page-generator/ui";
 import { DataLoadingState } from "@/features/layout";
-import { getPreferredLevel } from "@/features/settings/model/preferences";
+import { accountApi } from "@/features/accounts/api";
+import { CACHE_TIMES, queryKeys } from "@/lib/query";
 import { useSkillExercises } from "../hooks/use-learning-catalog";
 import {
   LEVELS,
@@ -19,11 +20,12 @@ import {
 export function SkillListPage({ skill }: { skill: SkillId }) {
   const searchParams = useSearchParams();
   const levelParam = searchParams.get("level");
-  const [preferredLevel, setPreferredLevel] = useState<SkillLevel | null>(null);
-
-  useEffect(() => {
-    setPreferredLevel(getPreferredLevel());
-  }, []);
+  const profileQuery = useQuery({
+    queryKey: queryKeys.account,
+    queryFn: accountApi.get,
+    staleTime: CACHE_TIMES.session,
+  });
+  const preferredLevel = profileQuery.data?.targetLevel ?? null;
 
   const activeLevel: SkillLevel | "all" =
     levelParam === "all"

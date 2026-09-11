@@ -6,9 +6,6 @@ import {
   Alert,
   AlertDescription,
   Button,
-  Card,
-  CardContent,
-  CardHeader,
   CardTitle,
   Input,
   Label,
@@ -16,6 +13,7 @@ import {
 } from "@landing-page-generator/ui";
 import { ApiError } from "@landing-page-generator/api-client";
 import { authClient, authErrorMessage } from "@/lib/auth-client";
+import { SettingsCard, SettingsCardContent, SettingsCardHeader } from "./settings-card";
 
 export function SecuritySettings() {
   const dialog = useActionDialog();
@@ -70,15 +68,15 @@ export function SecuritySettings() {
   };
 
   return (
-    <Card className="rounded-[1.5rem] shadow-none">
-      <CardHeader className="p-5 sm:p-6">
+    <SettingsCard>
+      <SettingsCardHeader>
         <CardTitle className="flex items-center gap-2">
           <KeyRound className="size-5 text-primary" /> Password
         </CardTitle>
-      </CardHeader>
-      <CardContent className="p-5 pt-0 sm:p-6 sm:pt-0">
-        <form className="space-y-4" onSubmit={(event) => void changePassword(event)}>
-          <div className="space-y-2">
+      </SettingsCardHeader>
+      <SettingsCardContent>
+        <form className="space-y-3" onSubmit={(event) => void changePassword(event)}>
+          <div className="space-y-1.5">
             <Label htmlFor="current-password">Current password</Label>
             <Input
               id="current-password"
@@ -90,7 +88,7 @@ export function SecuritySettings() {
               className="h-11 text-base sm:h-9 sm:text-sm"
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="new-password">New password</Label>
             <Input
               id="new-password"
@@ -103,7 +101,7 @@ export function SecuritySettings() {
               className="h-11 text-base sm:h-9 sm:text-sm"
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="confirm-password">Confirm new password</Label>
             <Input
               id="confirm-password"
@@ -134,7 +132,7 @@ export function SecuritySettings() {
             {passwordPending ? "Updating..." : "Update password"}
           </Button>
         </form>
-      </CardContent>
-    </Card>
+      </SettingsCardContent>
+    </SettingsCard>
   );
 }

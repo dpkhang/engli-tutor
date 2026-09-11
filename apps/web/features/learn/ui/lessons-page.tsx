@@ -170,7 +170,7 @@ export function LessonsPage() {
               </p>
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-2">
+            <div className="mt-auto flex flex-wrap gap-2 pt-6">
               <Button
                 asChild
                 className="h-10 rounded-full bg-primary px-5 text-primary-foreground hover:bg-primary/90"

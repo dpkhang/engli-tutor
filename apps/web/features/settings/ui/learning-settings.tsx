@@ -3,7 +3,7 @@
 import { useLayoutEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Target, Volume2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, Label, cn } from "@landing-page-generator/ui";
+import { CardTitle, Label, SegmentedSwitch, cn } from "@landing-page-generator/ui";
 import { LEVELS, type SkillLevel } from "@/features/learn/model/skill-exercises";
 import { accountApi } from "@/features/accounts/api";
 import { queryKeys } from "@/lib/query";
@@ -18,6 +18,7 @@ import {
   type SpeechRateId,
 } from "../model/preferences";
 import { ChoiceChip } from "./choice-chip";
+import { SettingsCard, SettingsCardContent, SettingsCardHeader } from "./settings-card";
 import { SettingsPanel } from "./settings-panel";
 
 type LearningView = {
@@ -72,13 +73,13 @@ export function LearningSettings() {
     <SettingsPanel ready={view !== null}>
       {view ? (
         <>
-          <Card className="rounded-[1.5rem] shadow-none">
-            <CardHeader className="p-5 sm:p-6">
+          <SettingsCard>
+            <SettingsCardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Target className="size-5 text-primary" /> Preferred level
               </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 p-5 pt-0 sm:p-6 sm:pt-0">
+            </SettingsCardHeader>
+            <SettingsCardContent className="space-y-2.5">
               <p className="text-sm text-muted-foreground">
                 Skills opens this band first. You can still switch to any level on the practice
                 page.
@@ -98,40 +99,38 @@ export function LearningSettings() {
               {levelSaving ? (
                 <p className="text-xs text-muted-foreground">Saving to your account…</p>
               ) : null}
-            </CardContent>
-          </Card>
+            </SettingsCardContent>
+          </SettingsCard>
 
-          <Card className="rounded-[1.5rem] shadow-none">
-            <CardHeader className="p-5 sm:p-6">
+          <SettingsCard>
+            <SettingsCardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Volume2 className="size-5 text-primary" /> Listening & speech
               </CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-5 p-5 pt-0 sm:grid-cols-2 sm:gap-6 sm:p-6 sm:pt-0">
-              <div className="space-y-3">
+            </SettingsCardHeader>
+            <SettingsCardContent className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
                 <Label>Playback speed</Label>
                 <p className="text-sm text-muted-foreground">
                   Applies to Listen on exercises and AI tutor speech.
                 </p>
-                <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
-                  {(Object.keys(SPEECH_RATES) as SpeechRateId[]).map((id) => (
-                    <ChoiceChip
-                      key={id}
-                      active={view.speechRate === id}
-                      onClick={() => {
-                        setSpeechRateId(id);
-                        setView((current) => (current ? { ...current, speechRate: id } : current));
-                      }}
-                    >
-                      {SPEECH_RATES[id].label}
-                    </ChoiceChip>
-                  ))}
-                </div>
+                <SegmentedSwitch
+                  value={view.speechRate}
+                  onChange={(id) => {
+                    setSpeechRateId(id);
+                    setView((current) => (current ? { ...current, speechRate: id } : current));
+                  }}
+                  ariaLabel="Playback speed"
+                  options={(Object.keys(SPEECH_RATES) as SpeechRateId[]).map((id) => ({
+                    id,
+                    label: SPEECH_RATES[id].label,
+                  }))}
+                />
                 <p className="text-xs text-muted-foreground">
                   {SPEECH_RATES[view.speechRate].hint}
                 </p>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Label htmlFor="autoplay-listening">Auto-play listening audio</Label>
                 <p className="text-sm text-muted-foreground">
                   Start audio automatically when you open a listening exercise.
@@ -155,8 +154,8 @@ export function LearningSettings() {
                   />
                 </button>
               </div>
-            </CardContent>
-          </Card>
+            </SettingsCardContent>
+          </SettingsCard>
         </>
       ) : null}
     </SettingsPanel>

@@ -4,6 +4,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import { QueryProvider } from "@/providers/query-provider";
 import { AuthGate } from "@/providers/auth-gate";
 import { AppShell, GlobalNavigationLoading, SignOutLoadingProvider } from "@/features/layout";
+import { AppearanceProvider } from "@/features/settings/ui/appearance-runtime";
 import { ActionDialogProvider } from "@landing-page-generator/ui";
 import "./globals.css";
 
@@ -25,22 +26,24 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('pagecraft-theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);document.documentElement.style.colorScheme=d?'dark':'light'}catch(e){}})()`,
+            __html: `(function(){try{var r=document.documentElement;var t=localStorage.getItem('pagecraft-theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);r.classList.toggle('dark',d);r.style.colorScheme=d?'dark':'light';var a=localStorage.getItem('englitutor-accent');if(a)r.setAttribute('data-accent',a);var s=localStorage.getItem('englitutor-text-size');if(s)r.setAttribute('data-text-size',s);var m=localStorage.getItem('englitutor-reduce-motion');if(m)r.setAttribute('data-reduce-motion',m);r.classList.toggle('reduce-motion',m==='on')}catch(e){}})()`,
           }}
         />
       </head>
       <body suppressHydrationWarning>
         <QueryProvider>
-          <ActionDialogProvider>
-            <SignOutLoadingProvider>
-              <Suspense fallback={null}>
-                <GlobalNavigationLoading />
-              </Suspense>
-              <AuthGate>
-                <AppShell>{children}</AppShell>
-              </AuthGate>
-            </SignOutLoadingProvider>
-          </ActionDialogProvider>
+          <AppearanceProvider>
+            <ActionDialogProvider>
+              <SignOutLoadingProvider>
+                <Suspense fallback={null}>
+                  <GlobalNavigationLoading />
+                </Suspense>
+                <AuthGate>
+                  <AppShell>{children}</AppShell>
+                </AuthGate>
+              </SignOutLoadingProvider>
+            </ActionDialogProvider>
+          </AppearanceProvider>
         </QueryProvider>
       </body>
     </html>

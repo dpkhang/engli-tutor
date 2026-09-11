@@ -76,6 +76,14 @@ export function LoginPage() {
       // Reload after the auth response commits its Set-Cookie header. Checking
       // getSession here can still return the anonymous client cache and report a
       // false cookie failure; AuthGate verifies the fresh session on navigation.
+      if (values.mode === "register") {
+        const next =
+          returnTo.startsWith("/") && !returnTo.startsWith("//") && returnTo !== "/onboarding"
+            ? `/onboarding?returnTo=${encodeURIComponent(returnTo)}`
+            : "/onboarding";
+        window.location.assign(next);
+        return;
+      }
       window.location.assign(returnTo);
     } catch {
       setPending(false);

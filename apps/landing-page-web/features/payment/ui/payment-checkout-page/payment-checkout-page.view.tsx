@@ -14,10 +14,12 @@ import {
 import {
   Alert,
   AlertDescription,
+  BillingPeriodSwitch,
   Button,
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
   cn,
@@ -26,8 +28,6 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { PageBackLink } from "@/features/layout";
 import {
-  BILLING_PERIODS,
-  getBillingTotal,
   type BillingPeriod,
   type Plan,
   type PlanId,
@@ -267,7 +267,7 @@ export function PaymentCheckoutPageView({
                             </span>
                           </p>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent>
                           <ul className="space-y-2 text-sm text-muted-foreground">
                             {upgradePlan.features.map((feature) => (
                               <li key={feature} className="flex gap-2">
@@ -276,6 +276,8 @@ export function PaymentCheckoutPageView({
                               </li>
                             ))}
                           </ul>
+                        </CardContent>
+                        <CardFooter>
                           <Button
                             type="button"
                             className="w-full"
@@ -285,7 +287,7 @@ export function PaymentCheckoutPageView({
                             {pending ? <LoaderCircle className="animate-spin" /> : <CreditCard />}
                             Upgrade to {upgradePlan.name}
                           </Button>
-                        </CardContent>
+                        </CardFooter>
                       </Card>
                     ))}
                   </div>
@@ -325,44 +327,12 @@ export function PaymentCheckoutPageView({
 
           <div className="space-y-3">
             <p className="text-sm font-medium text-foreground">Billing period</p>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {BILLING_PERIODS.map((item) => {
-                const active = period === item.id;
-                const preview = getBillingTotal(plan, item.id);
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => onPeriodChange(item.id)}
-                    className={cn(
-                      "cursor-pointer rounded-xl border px-4 py-4 text-left transition-colors",
-                      active
-                        ? "border-accent bg-foreground text-primary-foreground"
-                        : "border-border bg-background hover:border-accent/50",
-                    )}
-                  >
-                    <p className="text-sm font-semibold">{item.label}</p>
-                    <p
-                      className={cn(
-                        "mt-1 font-[family-name:var(--font-display)] text-xl",
-                        active ? "text-primary-foreground" : "text-foreground",
-                      )}
-                    >
-                      {preview.label}
-                    </p>
-                    <p
-                      className={cn(
-                        "mt-1 text-xs",
-                        active ? "text-primary-foreground/65" : "text-muted-foreground",
-                      )}
-                    >
-                      {item.hint}
-                      {item.id === "yearly" ? " · one-time payment" : ""}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
+            <BillingPeriodSwitch value={period} onChange={onPeriodChange} />
+            <p className="text-xs text-muted-foreground">
+              {period === "yearly"
+                ? "Billed once a year · save 2 months"
+                : "Billed every month. Switch to yearly to save 2 months."}
+            </p>
           </div>
 
           {error ? (

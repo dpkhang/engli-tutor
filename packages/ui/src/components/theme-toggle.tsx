@@ -10,7 +10,16 @@ export function ThemeToggle({ className }: { className?: string }) {
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
-    setTheme(document.documentElement.classList.contains("dark") ? "dark" : "light");
+    const sync = () => {
+      setTheme(document.documentElement.classList.contains("dark") ? "dark" : "light");
+    };
+    sync();
+    window.addEventListener("pagecraft-theme", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("pagecraft-theme", sync);
+      window.removeEventListener("storage", sync);
+    };
   }, []);
 
   const toggleTheme = () => {
@@ -18,6 +27,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     document.documentElement.classList.toggle("dark", nextTheme === "dark");
     document.documentElement.style.colorScheme = nextTheme;
     localStorage.setItem("pagecraft-theme", nextTheme);
+    window.dispatchEvent(new Event("pagecraft-theme"));
     setTheme(nextTheme);
   };
 

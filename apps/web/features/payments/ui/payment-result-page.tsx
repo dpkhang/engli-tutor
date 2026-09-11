@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { Check, CircleX, LoaderCircle } from "lucide-react";
 import { Button, Card, CardContent } from "@landing-page-generator/ui";
+import { peekWelcomePending, clearWelcomePending, WELCOME_PATH } from "@/features/onboarding/model/onboarding";
 import { billingApi, type BillingMe } from "../api/billing";
 import { billingMeQueryKey } from "../hooks/use-billing";
 
@@ -43,8 +44,12 @@ export function PaymentResultPage() {
   const [countdown, setCountdown] = useState(5);
 
   useEffect(() => {
-    if (checkout !== "success") return;
+    if (checkout !== "success") {
+      clearWelcomePending();
+      return;
+    }
     if (!sessionId && !(checkoutType === "upgrade" && itemId)) {
+      clearWelcomePending();
       setState("failed");
       setMessage("Payment session id not found. Please try again from the payments page.");
       return;
@@ -64,6 +69,10 @@ export function PaymentResultPage() {
             if (!current) return current;
             return { ...current, balance: result.balanceAfter! };
           });
+        }
+        if (peekWelcomePending()) {
+          router.replace(WELCOME_PATH);
+          return;
         }
         setState("success");
         setMessage(
@@ -120,10 +129,14 @@ export function PaymentResultPage() {
     return () => {
       cancelled = true;
     };
-  }, [checkout, checkoutType, itemId, queryClient, sessionId]);
+  }, [checkout, checkoutType, itemId, queryClient, router, sessionId]);
 
   useEffect(() => {
     if (state !== "success") return;
+    if (peekWelcomePending()) {
+      router.replace(WELCOME_PATH);
+      return;
+    }
     if (countdown <= 0) {
       router.replace(checkoutType === "topup" ? "/payments" : "/skills");
       return;
