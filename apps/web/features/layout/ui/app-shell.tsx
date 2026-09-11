@@ -51,28 +51,6 @@ function isActivePath(pathname: string, href: string) {
   return pathname.startsWith(href);
 }
 
-const APP_PATH_PREFIXES = [
-  "/skills",
-  "/games",
-  "/lessons",
-  "/payments",
-  "/practice",
-  "/speaking",
-  "/login",
-  "/accounts",
-  "/settings",
-  "/search",
-  "/domains",
-  "/domain-unavailable",
-] as const;
-
-function isKnownAppPath(pathname: string) {
-  if (pathname === "/") return true;
-  return APP_PATH_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  );
-}
-
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <TranslateSessionProvider>
@@ -110,7 +88,7 @@ function TranslateMainPad({
           "mx-auto w-full min-w-0 max-w-6xl overflow-x-clip px-4 pt-8 sm:px-6 sm:pt-10",
           compact
             ? "pb-10 sm:pb-16"
-            : "pb-[calc(6rem+env(safe-area-inset-bottom))] sm:pb-24",
+            : "pb-[calc(6rem+env(safe-area-inset-bottom))] sm:pb-24 group-has-[[data-not-found]]/shell:pb-10 group-has-[[data-not-found]]/shell:sm:pb-16",
         )}
       >
         {children}
@@ -198,6 +176,8 @@ function AppShellFrame({ children }: { children: React.ReactNode }) {
 
   if (
     pathname === "/login" ||
+    pathname === "/onboarding" ||
+    pathname === "/welcome" ||
     pathname === "/speaking" ||
     pathname.startsWith("/demo/") ||
     pathname === "/domain-unavailable" ||
@@ -227,10 +207,9 @@ function AppShellFrame({ children }: { children: React.ReactNode }) {
 
   const isPracticeExercise = /^\/skills\/[^/]+\/[^/]+/.test(pathname);
   const raiseFabForExerciseBar = isPracticeExercise;
-  const showAiDock = isKnownAppPath(pathname);
 
   return (
-    <div className="workspace-background relative min-h-svh">
+    <div className="workspace-background group/shell relative min-h-svh">
       <TranslateRouteReset />
       <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
@@ -410,9 +389,8 @@ function AppShellFrame({ children }: { children: React.ReactNode }) {
         </AnimatePresence>
       </header>
 
-      {showAiDock ? (
       <div
-        className="pointer-events-none fixed z-[60] flex w-max max-w-[calc(100vw-2rem)] flex-col items-end"
+        className="pointer-events-none fixed z-[60] flex w-max max-w-[calc(100vw-2rem)] flex-col items-end group-has-[[data-not-found]]/shell:hidden"
         style={{
           right: "max(1rem, env(safe-area-inset-right, 0px))",
           bottom: raiseFabForExerciseBar
@@ -560,9 +538,8 @@ function AppShellFrame({ children }: { children: React.ReactNode }) {
           </div>
         </motion.div>
       </div>
-      ) : null}
 
-      <TranslateMainPad compact={!showAiDock}>{children}</TranslateMainPad>
+      <TranslateMainPad>{children}</TranslateMainPad>
     </div>
   );
 }

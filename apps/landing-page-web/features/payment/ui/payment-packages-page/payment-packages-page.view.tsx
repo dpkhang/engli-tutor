@@ -326,11 +326,11 @@ export function PaymentPackagesPageView({
                   </ul>
 
                   {isCurrent ? (
-                    <Button type="button" className="mt-8 w-full" variant="secondary" disabled>
+                    <Button type="button" className="mt-auto w-full" variant="secondary" disabled>
                       Current plan
                     </Button>
                   ) : (
-                    <Link href={planHrefs[plan.id]} className="mt-8 block">
+                    <Link href={planHrefs[plan.id]} className="mt-auto block pt-8">
                       <Button
                         type="button"
                         className={cn(

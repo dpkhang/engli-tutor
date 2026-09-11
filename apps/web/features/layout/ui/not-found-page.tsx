@@ -48,7 +48,10 @@ export function NotFoundPage({
   actions?: NotFoundAction[];
 }) {
   return (
-    <div className="relative mx-auto flex min-h-[min(36rem,calc(100svh-10rem))] w-full max-w-2xl flex-col items-center justify-center px-1 py-6 text-center sm:py-10">
+    <div
+      data-not-found
+      className="relative mx-auto flex min-h-[min(36rem,calc(100svh-10rem))] w-full max-w-2xl flex-col items-center justify-center px-1 py-6 text-center sm:py-10"
+    >
       <div
         aria-hidden
         className="workspace-hero-accent relative mb-8 flex h-36 w-full max-w-md items-center justify-center overflow-hidden rounded-[1.75rem] bg-primary text-primary-foreground shadow-xl shadow-primary/20 sm:h-44 sm:rounded-[2rem]"

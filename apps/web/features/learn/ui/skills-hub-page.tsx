@@ -69,7 +69,7 @@ export function SkillsHubPage() {
             <Link
               key={skill.id}
               href={`/skills/${skill.id}`}
-              className={`group relative overflow-hidden rounded-[1.5rem] border border-border/70 bg-gradient-to-br ${theme.gradient} via-card to-card p-6 transition-all hover:-translate-y-1 hover:border-transparent hover:shadow-xl`}
+              className={`group relative flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-border/70 bg-gradient-to-br ${theme.gradient} via-card to-card p-6 transition-all hover:-translate-y-1 hover:border-transparent hover:shadow-xl`}
             >
               <div className="flex items-start justify-between">
                 <span className={`grid size-12 place-items-center rounded-2xl ${theme.color}`}>
@@ -82,7 +82,7 @@ export function SkillsHubPage() {
               </p>
               <h2 className="mt-1 text-2xl font-semibold tracking-tight">{skill.labelEn}</h2>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">{skill.blurb}</p>
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-auto flex flex-wrap gap-2 pt-5">
                 {LEVELS.map((level) => (
                   <span
                     key={level.id}

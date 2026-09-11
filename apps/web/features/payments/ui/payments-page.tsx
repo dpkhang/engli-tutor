@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion, useDragControls } from "motion/react";
 import {
@@ -28,6 +29,7 @@ import {
   Input,
   cn,
   useLockScroll,
+  BillingPeriodSwitch,
 } from "@landing-page-generator/ui";
 import {
   useBillingMe,
@@ -80,6 +82,11 @@ export default function PaymentsPage() {
   const [pending, setPending] = useState<string | null>(null);
   const [showUpgradeOptions, setShowUpgradeOptions] = useState(false);
   const [customCredits, setCustomCredits] = useState(200);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (checkoutState !== "success") return;
@@ -317,28 +324,32 @@ export default function PaymentsPage() {
         </CardContent>
       </Card>
 
-      <AnimatePresence>
-        {showUpgradeOptions && higherPlans.length > 0 ? (
-          <motion.div
-            className="fixed inset-0 z-[100] flex items-end bg-black/45 lg:grid lg:place-items-center lg:overflow-y-auto lg:p-4 lg:backdrop-blur-[2px]"
-            role="presentation"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
-            onMouseDown={(event) => {
-              if (event.target === event.currentTarget) setShowUpgradeOptions(false);
-            }}
-          >
+      {mounted
+        ? createPortal(
+            <AnimatePresence>
+              {showUpgradeOptions && higherPlans.length > 0 ? (
+                <motion.div
+                  className="fixed inset-0 z-[100] flex h-[100dvh] min-h-[100dvh] w-full items-end bg-black/45 md:grid md:place-items-center md:overflow-y-auto md:p-4 md:backdrop-blur-[2px]"
+                  role="presentation"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.18, ease: "easeOut" }}
+                  onMouseDown={(event) => {
+                    if (event.target === event.currentTarget) setShowUpgradeOptions(false);
+                  }}
+                >
             <motion.div
               role="dialog"
               aria-modal="true"
               aria-labelledby="upgrade-dialog-title"
               className={cn(
-                "absolute inset-x-0 bottom-0 flex h-[85dvh] max-h-[calc(100dvh-env(safe-area-inset-top)-0.75rem)] w-full flex-col overflow-hidden rounded-t-[1.75rem] border border-white/50 bg-popover text-popover-foreground shadow-2xl lg:relative lg:inset-auto lg:my-auto lg:h-auto lg:max-h-[calc(100dvh-2rem)] lg:rounded-[1.75rem]",
-                higherPlans.length <= 1 && "lg:max-w-md",
-                higherPlans.length === 2 && "lg:max-w-3xl",
-                higherPlans.length >= 3 && "lg:max-w-5xl",
+                "flex w-full flex-col overflow-hidden border border-white/50 bg-popover text-popover-foreground shadow-2xl",
+                "max-md:absolute max-md:inset-x-0 max-md:bottom-0 max-md:h-[85dvh] max-md:max-h-[calc(100dvh-env(safe-area-inset-top)-0.75rem)] max-md:rounded-t-[1.75rem]",
+                "md:relative md:h-auto md:max-h-[calc(100dvh-2rem)] md:rounded-[1.75rem]",
+                higherPlans.length <= 1 && "md:max-w-md",
+                higherPlans.length === 2 && "md:max-w-3xl",
+                higherPlans.length >= 3 && "md:max-w-5xl",
               )}
               initial={{ opacity: 0, y: 16, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -358,9 +369,9 @@ export default function PaymentsPage() {
               }}
             >
               <div
-                className="relative shrink-0 touch-none cursor-grab border-b border-border bg-popover px-4 pt-7 pb-4 active:cursor-grabbing sm:px-8 sm:pt-8 sm:pb-5 lg:cursor-default"
+                className="relative shrink-0 touch-none cursor-grab border-b border-border bg-popover px-4 pt-7 pb-4 active:cursor-grabbing sm:px-8 sm:pt-8 sm:pb-5 md:cursor-default"
                 onPointerDown={(event) => {
-                  if (window.innerWidth >= 1024) return;
+                  if (window.innerWidth >= 768) return;
                   if ((event.target as HTMLElement).closest("button")) return;
                   sheetDragControls.start(event);
                 }}
@@ -396,29 +407,19 @@ export default function PaymentsPage() {
                   </p>
                 </div>
               </div>
-              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:space-y-5 sm:px-8 sm:pt-5 sm:pb-8">
+              <div className="min-h-0 space-y-4 overflow-y-auto overscroll-contain px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] max-md:flex-1 sm:space-y-5 sm:px-8 sm:pt-5 sm:pb-6">
                 {!hasPaidPlan ? (
-                  <div className="grid grid-cols-2 rounded-full bg-muted p-1">
-                    {(["monthly", "yearly"] as const).map((p) => (
-                      <Button
-                        key={p}
-                        type="button"
-                        size="sm"
-                        variant={period === p ? "default" : "outline"}
-                        className="w-full rounded-full border-0"
-                        onClick={() => setPeriod(p)}
-                      >
-                        {p === "monthly" ? "Monthly" : "Yearly (−2 months)"}
-                      </Button>
-                    ))}
-                  </div>
+                  <BillingPeriodSwitch
+                    value={period}
+                    onChange={setPeriod}
+                  />
                 ) : null}
                 <div
                   className={cn(
-                    "grid gap-4",
+                    "grid items-stretch gap-4",
                     higherPlans.length === 1 && "grid-cols-1",
-                    higherPlans.length === 2 && "md:grid-cols-2",
-                    higherPlans.length >= 3 && "md:grid-cols-2 lg:grid-cols-3",
+                    higherPlans.length === 2 && "sm:grid-cols-2",
+                    higherPlans.length >= 3 && "sm:grid-cols-2 lg:grid-cols-3",
                   )}
                 >
                   {higherPlans.map((plan) => {
@@ -428,41 +429,41 @@ export default function PaymentsPage() {
                         : plan.priceVndMonthly;
 
                     return (
-                      <Card
+                      <article
                         key={plan.id}
                         className={cn(
-                          "relative overflow-hidden rounded-[1.25rem] shadow-none",
+                          "relative flex h-full flex-col rounded-[1.25rem] border bg-card p-5",
                           plan.featured &&
                             "border-primary/50 bg-primary/[0.03] ring-1 ring-primary/15",
                         )}
                       >
-                        <CardHeader className="space-y-2 p-4 sm:p-6">
-                          <div className="flex items-center justify-between gap-2">
-                            <CardTitle className="text-xl">{plan.name}</CardTitle>
-                            {plan.featured ? (
-                              <Badge className="rounded-full">Most popular</Badge>
-                            ) : null}
-                          </div>
-                          <CardDescription>{plan.description}</CardDescription>
-                          <p className="break-words font-[family-name:var(--font-display)] text-xl tracking-tight sm:text-2xl">
-                            {formatVnd(price)}
-                            <span className="ml-1 text-sm font-sans font-normal text-muted-foreground">
-                              {period === "yearly" ? "/ year" : "/ month"}
-                            </span>
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {plan.creditsPerPeriod} practice credits per period
-                          </p>
-                        </CardHeader>
-                        <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
-                          <ul className="space-y-2 text-sm text-muted-foreground">
-                            {plan.features.map((feature) => (
-                              <li key={feature} className="flex gap-2">
-                                <Check className="mt-0.5 size-4 shrink-0 text-primary" />
-                                {feature}
-                              </li>
-                            ))}
-                          </ul>
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="text-xl font-semibold">{plan.name}</h3>
+                          {plan.featured ? (
+                            <Badge className="rounded-full">Most popular</Badge>
+                          ) : null}
+                        </div>
+                        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                          {plan.description}
+                        </p>
+                        <p className="mt-4 break-words font-[family-name:var(--font-display)] text-xl tracking-tight sm:text-2xl">
+                          {formatVnd(price)}
+                          <span className="ml-1 text-sm font-sans font-normal text-muted-foreground">
+                            {period === "yearly" ? "/ year" : "/ month"}
+                          </span>
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {plan.creditsPerPeriod} practice credits per period
+                        </p>
+                        <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                          {plan.features.map((feature) => (
+                            <li key={feature} className="flex gap-2">
+                              <Check className="mt-0.5 size-4 shrink-0 text-primary" />
+                              {feature}
+                            </li>
+                          ))}
+                        </ul>
+                        <div className="mt-auto pt-5">
                           <Button
                             className="h-11 w-full rounded-full"
                             disabled={!stripeReady || Boolean(pending)}
@@ -480,16 +481,19 @@ export default function PaymentsPage() {
                               </>
                             )}
                           </Button>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </article>
                     );
                   })}
                 </div>
               </div>
             </motion.div>
           </motion.div>
-        ) : null}
-      </AnimatePresence>
+              ) : null}
+            </AnimatePresence>,
+            document.body,
+          )
+        : null}
 
       {hasPaidPlan ? (
         <div>
@@ -516,7 +520,7 @@ export default function PaymentsPage() {
                 return (
                   <div
                     key={pack.id}
-                    className="group rounded-2xl border border-border/70 bg-gradient-to-br from-amber-500/8 to-card p-5 transition-all hover:-translate-y-0.5 hover:shadow-md"
+                    className="group flex h-full flex-col rounded-2xl border border-border/70 bg-gradient-to-br from-amber-500/8 to-card p-5 transition-all hover:-translate-y-0.5 hover:shadow-md"
                   >
                     <p className="text-sm font-semibold">{pack.name}</p>
                     {pack.description ? (
@@ -545,7 +549,7 @@ export default function PaymentsPage() {
                     )}
                     <p className="mt-2 text-sm">{formatVnd(price)}</p>
                     <Button
-                      className="mt-4 w-full rounded-full"
+                      className="mt-auto w-full rounded-full"
                       variant="outline"
                       disabled={!stripeReady || Boolean(pending) || invalidCustom || price <= 0}
                       onClick={() => void onTopup(pack)}

@@ -49,7 +49,7 @@ export function GamesHubPage() {
             <Link
               key={game.id}
               href={`/games/${game.id}`}
-              className={`group relative overflow-hidden rounded-[1.5rem] border border-border/70 bg-gradient-to-br ${theme.wash} via-card to-card p-6 transition-all hover:-translate-y-1 hover:border-transparent hover:shadow-xl`}
+              className={`group relative flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-border/70 bg-gradient-to-br ${theme.wash} via-card to-card p-6 transition-all hover:-translate-y-1 hover:border-transparent hover:shadow-xl`}
             >
               <div className="flex items-start justify-between gap-3">
                 <span className={`grid size-11 place-items-center rounded-2xl ${theme.badge}`}>
@@ -63,11 +63,11 @@ export function GamesHubPage() {
               <h2 className="mt-5 text-xl font-semibold tracking-tight group-hover:text-primary">
                 {game.title}
               </h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{game.body}</p>
+              <p className="mt-2 flex-1 text-sm leading-6 text-muted-foreground">{game.body}</p>
               <p className="mt-4 text-xs text-muted-foreground">
                 {game.roundCount ? `${game.roundCount} rounds` : game.howToPlay}
               </p>
-              <span className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-primary">
+              <span className="mt-auto inline-flex items-center gap-1 pt-5 text-sm font-medium text-primary">
                 Play{" "}
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
               </span>

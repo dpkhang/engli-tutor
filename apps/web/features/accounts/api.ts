@@ -14,6 +14,7 @@ export type AccountProfile = {
   nativeLanguage: string | null;
   targetLevel: SkillLevel | null;
   learningGoal: string | null;
+  welcomeSeenAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -27,6 +28,7 @@ export type UpdateAccountInput = {
   nativeLanguage?: string;
   targetLevel?: SkillLevel | "";
   learningGoal?: string;
+  welcomeSeen?: boolean;
 };
 
 export const accountApi = {

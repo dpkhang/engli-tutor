@@ -31,6 +31,11 @@ export {
 export { Separator } from "./components/separator";
 export { ThemeToggle } from "./components/theme-toggle";
 export {
+  SegmentedSwitch,
+  BillingPeriodSwitch,
+  type SegmentedOption,
+} from "./components/segmented-switch";
+export {
   ActionDialogProvider,
   useActionDialog,
   type DialogOptions,

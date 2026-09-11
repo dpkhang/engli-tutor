@@ -29,14 +29,14 @@ export function SettingsShell({ children }: { children: ReactNode }) {
   }, [queryClient, router]);
 
   return (
-    <div className="space-y-5 sm:space-y-8">
+    <div className="space-y-4 sm:space-y-5">
       <PageHeader
         eyebrow="Personal"
         title="Settings"
         description={section?.description ?? "Manage your EngliTutor workspace."}
       />
 
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-10">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
         <aside className="sticky top-16 z-30 -mx-4 border-y border-border/70 bg-background/95 py-2 backdrop-blur-md sm:-mx-6 sm:px-2 lg:top-24 lg:mx-0 lg:w-56 lg:shrink-0 lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
           <nav
             aria-label="Settings"
@@ -65,7 +65,7 @@ export function SettingsShell({ children }: { children: ReactNode }) {
           </nav>
         </aside>
 
-        <div className="min-w-0 flex-1 space-y-6">
+        <div className="min-w-0 flex-1 space-y-4">
           <Suspense fallback={<SettingsContentLoading />}>{children}</Suspense>
         </div>
       </div>

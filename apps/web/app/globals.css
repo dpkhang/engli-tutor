@@ -97,6 +97,64 @@
   ::selection {
     background: hsl(var(--accent) / 0.28);
   }
+
+  html[data-text-size="comfortable"] {
+    font-size: 106.25%;
+  }
+
+  html[data-text-size="large"] {
+    font-size: 118.75%;
+  }
+
+  html[data-accent="sky"] {
+    --primary: 201 90% 44%;
+    --ring: 201 90% 44%;
+  }
+
+  html[data-accent="teal"] {
+    --primary: 173 70% 36%;
+    --ring: 173 70% 36%;
+  }
+
+  html[data-accent="emerald"] {
+    --primary: 156 64% 36%;
+    --ring: 156 64% 36%;
+  }
+
+  html[data-accent="rose"] {
+    --primary: 348 78% 52%;
+    --ring: 348 78% 52%;
+  }
+
+  html[data-accent="amber"] {
+    --primary: 32 94% 48%;
+    --ring: 32 94% 48%;
+  }
+
+  html.dark[data-accent="sky"] {
+    --primary: 199 88% 58%;
+    --ring: 199 88% 58%;
+  }
+
+  html.dark[data-accent="teal"] {
+    --primary: 172 62% 48%;
+    --ring: 172 62% 48%;
+  }
+
+  html.dark[data-accent="emerald"] {
+    --primary: 152 58% 48%;
+    --ring: 152 58% 48%;
+  }
+
+  html.dark[data-accent="rose"] {
+    --primary: 348 72% 62%;
+    --ring: 348 72% 62%;
+  }
+
+  html.dark[data-accent="amber"] {
+    --primary: 36 90% 56%;
+    --ring: 36 90% 56%;
+  }
 }
 
 @layer components {
@@ -238,29 +296,69 @@
   animation: loading-sheen 1.8s ease-in-out infinite;
 }
 
+html.reduce-motion [class*="splash-progress"] {
+  animation: none;
+  transform: translateX(50%);
+}
+
+html.reduce-motion .not-found-tile {
+  animation: none;
+}
+
+html.reduce-motion .loading-sheen::after {
+  animation: none;
+  display: none;
+}
+
+html.reduce-motion .speaking-aurora,
+html.reduce-motion .speaking-aurora-rev,
+html.reduce-motion .speaking-breath,
+html.reduce-motion .speaking-breath-slow {
+  animation: none !important;
+}
+
+html.reduce-motion .onboarding-orb,
+html.reduce-motion .onboarding-orb-alt,
+html.reduce-motion .onboarding-orb-pulse {
+  animation: none !important;
+}
+
+html.reduce-motion .speak-infinity-text {
+  animation: none !important;
+  background: none;
+  color: inherit;
+  -webkit-text-fill-color: currentColor;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  [class*="splash-progress"] {
+  html:not([data-reduce-motion="off"]) [class*="splash-progress"] {
     animation: none;
     transform: translateX(50%);
   }
 
-  .not-found-tile {
+  html:not([data-reduce-motion="off"]) .not-found-tile {
     animation: none;
   }
 
-  .loading-sheen::after {
+  html:not([data-reduce-motion="off"]) .loading-sheen::after {
     animation: none;
     display: none;
   }
 
-  .speaking-aurora,
-  .speaking-aurora-rev,
-  .speaking-breath,
-  .speaking-breath-slow {
+  html:not([data-reduce-motion="off"]) .speaking-aurora,
+  html:not([data-reduce-motion="off"]) .speaking-aurora-rev,
+  html:not([data-reduce-motion="off"]) .speaking-breath,
+  html:not([data-reduce-motion="off"]) .speaking-breath-slow {
     animation: none !important;
   }
 
-  .speak-infinity-text {
+  html:not([data-reduce-motion="off"]) .onboarding-orb,
+  html:not([data-reduce-motion="off"]) .onboarding-orb-alt,
+  html:not([data-reduce-motion="off"]) .onboarding-orb-pulse {
+    animation: none !important;
+  }
+
+  html:not([data-reduce-motion="off"]) .speak-infinity-text {
     animation: none !important;
     background: none;
     color: inherit;
@@ -309,6 +407,48 @@
 
 .speaking-breath-slow {
   animation: speaking-breath 5.5s ease-in-out infinite;
+}
+
+@keyframes onboarding-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(6%, 8%, 0) scale(1.12);
+  }
+}
+
+@keyframes onboarding-drift-alt {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.05);
+  }
+  50% {
+    transform: translate3d(-8%, -6%, 0) scale(1.18);
+  }
+}
+
+@keyframes onboarding-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.onboarding-orb {
+  animation: onboarding-drift 16s ease-in-out infinite;
+}
+
+.onboarding-orb-alt {
+  animation: onboarding-drift-alt 22s ease-in-out infinite;
+}
+
+.onboarding-orb-pulse {
+  animation: onboarding-pulse 8s ease-in-out infinite;
 }
 
 @keyframes speak-infinity-shine {

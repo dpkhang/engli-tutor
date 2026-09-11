@@ -119,7 +119,7 @@ export function SearchPage() {
               <p className="mt-4 text-xs font-medium text-muted-foreground">
                 {lesson.skills.join(" · ")}
               </p>
-              <Button asChild className="mt-5 w-full rounded-full">
+              <Button asChild className="mt-auto w-full rounded-full">
                 <Link href={`/practice?scenario=${lesson.scenario}&lesson=${lesson.id}`}>
                   Start lesson <ArrowRight className="size-4" />
                 </Link>
