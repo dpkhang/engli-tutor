@@ -1,7 +1,13 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { GamePlayPage } from "@/features/learn/ui/game-play-page";
-import { isGameId } from "@/features/learn/model/games";
+import { GAMES_CATALOG, isGameId } from "@/features/learn/model/games";
+
+export function generateStaticParams() {
+  return GAMES_CATALOG.map((game) => ({ slug: game.id }));
+}
+
+export const dynamicParams = false;
 
 export default async function GamePlayRoutePage({
   params,

@@ -72,6 +72,35 @@ const hunt = (
   explanation,
 });
 
+const choice = (
+  id: string,
+  prompt: string,
+  options: string[],
+  correctIndex: number,
+  explanation: string,
+): LearningQuestion => ({
+  id,
+  kind: "choice",
+  prompt,
+  options,
+  correctIndex,
+  explanation,
+});
+
+const spell = (
+  id: string,
+  prompt: string,
+  answer: string,
+  explanation: string,
+): LearningQuestion => ({
+  id,
+  kind: "spell",
+  prompt,
+  letters: [...answer.toUpperCase().replace(/[^A-Z]/g, "")],
+  answer: answer.trim().toLowerCase(),
+  explanation,
+});
+
 function round(
   id: string,
   level: LearningGameRound["level"],
@@ -542,6 +571,40 @@ export const FALLBACK_GAMES: LearningGame[] = [
           },
         },
       ),
+    ],
+  },
+  {
+    id: "picture-word",
+    title: "Picture word",
+    body: "Look at the picture and choose the English word.",
+    skill: "reading",
+    durationMinutes: 2,
+    howToPlay: "Look at the image. Tap the matching English word before the timer ends.",
+    relatedSkill: "reading",
+    rounds: [
+      round("pw-laptop", "A2", 20, choice("pw-laptop-q", "What is this? Choose the English word.", ["printer", "laptop", "tablet", "camera"], 1, "A laptop is a portable computer you can take to meetings."), { material: { title: "Picture", body: "", imageEmoji: "💻", imageUrl: "/games/pictures/laptop.svg" } }),
+      round("pw-calendar", "A2", 20, choice("pw-calendar-q", "What is this? Choose the English word.", ["calendar", "notebook", "ticket", "poster"], 0, "A calendar shows dates, meetings and deadlines."), { material: { title: "Picture", body: "", imageEmoji: "📅", imageUrl: "/games/pictures/calendar.svg" } }),
+      round("pw-coffee", "A2", 20, choice("pw-coffee-q", "What is this? Choose the English word.", ["water", "soup", "coffee", "juice"], 2, "Coffee is a common drink at the office."), { material: { title: "Picture", body: "", imageEmoji: "☕", imageUrl: "/games/pictures/coffee.svg" } }),
+      round("pw-phone", "A2", 20, choice("pw-phone-q", "What is this? Choose the English word.", ["radio", "phone", "clock", "speaker"], 1, "A phone is used to call, message and join video meetings."), { material: { title: "Picture", body: "", imageEmoji: "📱", imageUrl: "/games/pictures/phone.svg" } }),
+      round("pw-email", "A2", 20, choice("pw-email-q", "What is this? Choose the English word.", ["letter", "package", "email", "invoice"], 2, "The envelope stands for email — a message you send at work."), { material: { title: "Picture", body: "", imageEmoji: "✉️", imageUrl: "/games/pictures/email.svg" } }),
+      round("pw-handshake", "TOEIC", 25, choice("pw-handshake-q", "What is this? Choose the English word.", ["argument", "handshake", "meeting", "contract"], 1, "A handshake is a common greeting in business."), { material: { title: "Picture", body: "", imageEmoji: "🤝", imageUrl: "/games/pictures/handshake.svg" } }),
+    ],
+  },
+  {
+    id: "word-unscramble",
+    title: "Word scramble",
+    body: "Rearrange the letters to make a real English word.",
+    skill: "writing",
+    durationMinutes: 2,
+    howToPlay: "Tap letters in order to spell a workplace word. Tap a letter in the word to undo.",
+    relatedSkill: "writing",
+    rounds: [
+      round("wu-team", "A2", 30, spell("wu-team-q", "Tap the letters to make a real English word.", "team", "TEAM — the people you work with.")),
+      round("wu-email", "A2", 30, spell("wu-email-q", "Tap the letters to make a real English word.", "email", "EMAIL — a message you send at work.")),
+      round("wu-office", "A2", 35, spell("wu-office-q", "Tap the letters to make a real English word.", "office", "OFFICE — the place where the team works.")),
+      round("wu-meeting", "TOEIC", 40, spell("wu-meeting-q", "Tap the letters to make a real English word.", "meeting", "MEETING — people talking together about work.")),
+      round("wu-deadline", "B1", 45, spell("wu-deadline-q", "Tap the letters to make a real English word.", "deadline", "DEADLINE — the time when work must be finished.")),
+      round("wu-commute", "IELTS", 40, spell("wu-commute-q", "Tap the letters to make a real English word.", "commute", "COMMUTE — the daily trip between home and work.")),
     ],
   },
 ];

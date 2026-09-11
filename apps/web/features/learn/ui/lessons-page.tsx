@@ -37,19 +37,19 @@ export function LessonsPage() {
 
   return (
     <div className="space-y-8 pb-8">
-      <header className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-rose-500 to-orange-400 px-6 py-9 text-white sm:px-10 sm:py-11">
+      <header className="workspace-hero-accent relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-rose-500 to-orange-400 px-5 py-6 text-white sm:rounded-[2rem] sm:px-10 sm:py-11">
         <div
           aria-hidden
-          className="absolute -right-12 -top-16 size-56 rounded-full border-[28px] border-white/10"
+          className="absolute -right-12 -top-16 hidden size-56 rounded-full border-[28px] border-white/10 sm:block"
         />
         <div className="relative">
-          <p className="text-xs font-semibold tracking-[0.16em] text-white/70 uppercase">
+          <p className="hidden text-xs font-semibold tracking-[0.16em] text-white/70 uppercase sm:block">
             Your learning path
           </p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">
+          <h1 className="text-xl font-semibold tracking-[-0.035em] sm:mt-3 sm:text-4xl">
             Learn through real-life moments
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-white/75 sm:text-base">
+          <p className="mt-3 hidden max-w-2xl text-sm leading-6 text-white/75 sm:block sm:text-base">
             Choose a lesson that feels useful right now. Each one blends practical English, helpful
             tips and a little play. You can also explore{" "}
             <Link href="/skills" className="font-semibold text-white underline underline-offset-4">

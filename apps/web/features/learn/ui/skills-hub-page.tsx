@@ -39,21 +39,22 @@ export function SkillsHubPage() {
   const { coverage, loading, source } = useSkillsCoverage();
   return (
     <div className="space-y-10 pb-8">
-      <header className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary to-primary/80 px-6 py-9 text-primary-foreground sm:px-10 sm:py-11">
+      <header className="workspace-hero-accent relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-primary to-primary/80 px-5 py-6 text-primary-foreground sm:rounded-[2rem] sm:px-10 sm:py-11">
         <div
           aria-hidden
-          className="absolute -right-16 -top-20 size-64 rounded-full border-[32px] border-white/[0.06]"
+          className="absolute -right-16 -top-20 hidden size-64 rounded-full border-[32px] border-white/[0.06] sm:block"
         />
         <div className="relative">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium">
+          <span className="hidden items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium sm:inline-flex">
             <Sparkles className="size-3.5 text-amber-300" />
             Practice your way
           </span>
-          <h1 className="mt-5 max-w-xl text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">
+          <h1 className="max-w-xl text-xl font-semibold tracking-[-0.035em] sm:mt-5 sm:text-4xl">
             Four skills. One more confident you.
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70 sm:text-base">
-            Choose what feels useful today. Every short exercise moves you forward — from A2 and B1 to TOEIC and IELTS.
+          <p className="mt-3 hidden max-w-2xl text-sm leading-6 text-white/70 sm:block sm:text-base">
+            Choose what feels useful today. Every short exercise moves you forward — from A2 and B1
+            to TOEIC and IELTS.
             {!loading && source === "api" ? " Fresh activities are ready for you." : ""}
           </p>
         </div>

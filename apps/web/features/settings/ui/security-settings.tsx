@@ -70,13 +70,13 @@ export function SecuritySettings() {
   };
 
   return (
-    <Card className="shadow-none">
-      <CardHeader>
+    <Card className="rounded-[1.5rem] shadow-none">
+      <CardHeader className="p-5 sm:p-6">
         <CardTitle className="flex items-center gap-2">
           <KeyRound className="size-5 text-primary" /> Password
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-5 pt-0 sm:p-6 sm:pt-0">
         <form className="space-y-4" onSubmit={(event) => void changePassword(event)}>
           <div className="space-y-2">
             <Label htmlFor="current-password">Current password</Label>
@@ -87,6 +87,7 @@ export function SecuritySettings() {
               value={currentPassword}
               onChange={(event) => setCurrentPassword(event.target.value)}
               required
+              className="h-11 text-base sm:h-9 sm:text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -99,6 +100,7 @@ export function SecuritySettings() {
               onChange={(event) => setNewPassword(event.target.value)}
               minLength={8}
               required
+              className="h-11 text-base sm:h-9 sm:text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -111,6 +113,7 @@ export function SecuritySettings() {
               onChange={(event) => setConfirmPassword(event.target.value)}
               minLength={8}
               required
+              className="h-11 text-base sm:h-9 sm:text-sm"
             />
           </div>
           <label className="flex items-start gap-2 text-sm text-muted-foreground">
@@ -127,7 +130,7 @@ export function SecuritySettings() {
               <AlertDescription>{passwordError}</AlertDescription>
             </Alert>
           ) : null}
-          <Button type="submit" disabled={passwordPending}>
+          <Button type="submit" disabled={passwordPending} className="h-11 w-full sm:w-auto">
             {passwordPending ? "Updating..." : "Update password"}
           </Button>
         </form>

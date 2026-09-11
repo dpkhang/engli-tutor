@@ -51,6 +51,28 @@ function isActivePath(pathname: string, href: string) {
   return pathname.startsWith(href);
 }
 
+const APP_PATH_PREFIXES = [
+  "/skills",
+  "/games",
+  "/lessons",
+  "/payments",
+  "/practice",
+  "/speaking",
+  "/login",
+  "/accounts",
+  "/settings",
+  "/search",
+  "/domains",
+  "/domain-unavailable",
+] as const;
+
+function isKnownAppPath(pathname: string) {
+  if (pathname === "/") return true;
+  return APP_PATH_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <TranslateSessionProvider>
@@ -68,14 +90,27 @@ function TranslateRouteReset() {
   return null;
 }
 
-function TranslateMainPad({ children }: { children: React.ReactNode }) {
+function TranslateMainPad({
+  children,
+  compact = false,
+}: {
+  children: React.ReactNode;
+  compact?: boolean;
+}) {
   const { open } = useTranslateSession();
   return (
-    <div className={cn(open && "lg:pr-[30rem]")}>
+    <div
+      className={cn(
+        "transition-[padding] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        open && "pb-[58dvh] lg:pr-[30rem] lg:pb-0",
+      )}
+    >
       <main
         className={cn(
-          "mx-auto w-full min-w-0 max-w-6xl px-4 py-8 sm:px-6 sm:py-10",
-          open && "max-lg:pointer-events-none max-lg:invisible",
+          "mx-auto w-full min-w-0 max-w-6xl overflow-x-clip px-4 pt-8 sm:px-6 sm:pt-10",
+          compact
+            ? "pb-10 sm:pb-16"
+            : "pb-[calc(6rem+env(safe-area-inset-bottom))] sm:pb-24",
         )}
       >
         {children}
@@ -91,8 +126,8 @@ function AppShellFrame({ children }: { children: React.ReactNode }) {
   const { beginSignOut, endSignOut } = useSignOutLoading();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
-  const [aiToolsOpen, setAiToolsOpen] = useState(true);
-  const [aiLauncherExpanded, setAiLauncherExpanded] = useState(false);
+  const [aiToolsOpen, setAiToolsOpen] = useState(false);
+  const [aiLauncherExpanded, setAiLauncherExpanded] = useState(true);
   const [clipAiTools, setClipAiTools] = useState(false);
   const aiDockActionRef = useRef<"idle" | "open-tools" | "show-pill">("idle");
   const aiToolsInnerRef = useRef<HTMLDivElement>(null);
@@ -192,6 +227,7 @@ function AppShellFrame({ children }: { children: React.ReactNode }) {
 
   const isPracticeExercise = /^\/skills\/[^/]+\/[^/]+/.test(pathname);
   const raiseFabForExerciseBar = isPracticeExercise;
+  const showAiDock = isKnownAppPath(pathname);
 
   return (
     <div className="workspace-background relative min-h-svh">
@@ -374,6 +410,7 @@ function AppShellFrame({ children }: { children: React.ReactNode }) {
         </AnimatePresence>
       </header>
 
+      {showAiDock ? (
       <div
         className="pointer-events-none fixed z-[60] flex w-max max-w-[calc(100vw-2rem)] flex-col items-end"
         style={{
@@ -523,8 +560,9 @@ function AppShellFrame({ children }: { children: React.ReactNode }) {
           </div>
         </motion.div>
       </div>
+      ) : null}
 
-      <TranslateMainPad>{children}</TranslateMainPad>
+      <TranslateMainPad compact={!showAiDock}>{children}</TranslateMainPad>
     </div>
   );
 }

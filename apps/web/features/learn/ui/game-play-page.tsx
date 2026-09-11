@@ -3,27 +3,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import {
-  ArrowLeft,
-  Check,
-  Lightbulb,
-  Mic2,
-  RotateCcw,
-  Volume2,
-} from "lucide-react";
+import { ArrowLeft, Check, Gamepad2, House, Lightbulb, Mic2, RotateCcw, Volume2 } from "lucide-react";
 import { Button, cn } from "@landing-page-generator/ui";
-import { DataLoadingState } from "@/features/layout";
+import { DataLoadingState, NotFoundPage } from "@/features/layout";
 import { ClickableTranslateText } from "@/features/translate";
 import { useAiSpeech } from "@/features/speaking-lab/hooks/use-ai-speech";
 import { useVoiceInput } from "@/features/tutor-chat/hooks/use-voice-input";
 import { LESSON_PACKS } from "../model/curriculum";
 import { useGame } from "../hooks/use-learning-catalog";
-import {
-  pickGameRounds,
-  sampleAnswerFor,
-  scoreGameRound,
-  shuffleInPlace,
-} from "../model/games";
+import { pickGameRounds, sampleAnswerFor, scoreGameRound, shuffleInPlace } from "../model/games";
 import type { LearningGameRound, LearningQuestion } from "../api/types";
 
 type Phase = "intro" | "playing" | "results";
@@ -151,7 +139,9 @@ function OrderRound({
 }) {
   return (
     <div className="space-y-3">
-      <p className="text-xs text-muted-foreground">Tap in the order you heard. Tap again to undo.</p>
+      <p className="text-xs text-muted-foreground">
+        Tap in the order you heard. Tap again to undo.
+      </p>
       <div className="space-y-2">
         {items.map((item) => {
           const position = value.indexOf(item.originalIndex);
@@ -256,6 +246,118 @@ function MatchRound({
             {right.text}
           </button>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function PicturePrompt({ imageUrl, imageEmoji }: { imageUrl?: string; imageEmoji?: string }) {
+  const [failed, setFailed] = useState(false);
+  const showImage = Boolean(imageUrl) && !failed;
+  return (
+    <div className="grid min-h-48 place-items-center rounded-2xl border border-border/60 bg-muted/30 px-4 py-6">
+      {showImage ? (
+        // eslint-disable-next-line @next/next/no-img-element -- game flashcards from /public SVGs
+        <img
+          src={imageUrl}
+          alt=""
+          className="h-44 w-44 object-contain"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <span className="text-7xl leading-none" aria-hidden>
+          {imageEmoji || "🖼️"}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function SpellRound({
+  letters,
+  answer,
+  locked,
+  onChange,
+}: {
+  letters: string[];
+  answer: string;
+  value: string;
+  locked: boolean;
+  onChange: (value: string) => void;
+}) {
+  const shuffled = useMemo(
+    () => shuffleInPlace(letters.map((letter, originalIndex) => ({ originalIndex, letter }))),
+    [letters],
+  );
+  const [picked, setPicked] = useState<number[]>([]);
+  const used = new Set(picked);
+
+  useEffect(() => {
+    setPicked([]);
+  }, [letters]);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex min-h-14 flex-wrap items-center justify-center gap-1.5 rounded-2xl border border-primary/20 bg-primary/5 px-3 py-3">
+        {answer.split("").map((_, slot) => {
+          const letter = picked[slot];
+          return (
+            <button
+              key={`slot-${slot}`}
+              type="button"
+              disabled={locked || letter === undefined}
+              onClick={() => {
+                if (locked || letter === undefined) return;
+                setPicked((current) => {
+                  const next = current.filter((_, index) => index !== slot);
+                  onChange(next.map((index) => letters[index] ?? "").join(""));
+                  return next;
+                });
+              }}
+              className={cn(
+                "grid size-10 place-items-center rounded-xl border text-lg font-semibold uppercase",
+                letter === undefined
+                  ? "border-dashed border-border bg-background text-muted-foreground"
+                  : "border-primary bg-card text-foreground",
+                locked && "cursor-default",
+              )}
+            >
+              {letter !== undefined ? (letters[letter] ?? "") : ""}
+            </button>
+          );
+        })}
+      </div>
+      <p className="text-center text-xs text-muted-foreground">
+        Tap letters to spell. Tap a letter above to undo.
+      </p>
+      <div className="flex flex-wrap justify-center gap-2">
+        {shuffled.map((item) => {
+          const taken = used.has(item.originalIndex);
+          return (
+            <button
+              key={item.originalIndex}
+              type="button"
+              disabled={locked || taken || picked.length >= answer.length}
+              onClick={() => {
+                if (locked || taken || picked.length >= answer.length) return;
+                setPicked((current) => {
+                  const next = [...current, item.originalIndex];
+                  onChange(next.map((index) => letters[index] ?? "").join(""));
+                  return next;
+                });
+              }}
+              className={cn(
+                "grid size-12 place-items-center rounded-xl border text-lg font-semibold uppercase transition",
+                taken
+                  ? "border-transparent bg-muted text-muted-foreground/30"
+                  : "border-border bg-card hover:border-primary hover:bg-primary/5",
+                locked && "cursor-default",
+              )}
+            >
+              {item.letter}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -412,7 +514,9 @@ function RoundPlay({
         ? parseJson(value || "[]", [] as Array<number | null>).every((item) => item !== null)
         : question.kind === "hunt"
           ? parseJson(value || "[]", [] as string[]).length === question.correctWords.length
-          : value.trim().length > 0;
+          : question.kind === "spell"
+            ? value.trim().length === question.answer.length
+            : value.trim().length > 0;
 
   return (
     <article className="space-y-5 rounded-[1.5rem] border border-border/70 bg-card p-5 sm:p-6">
@@ -424,7 +528,9 @@ function RoundPlay({
       </div>
       <h3 className="text-lg font-semibold tracking-tight">{question.prompt}</h3>
 
-      {round.material ? (
+      {round.material?.imageUrl || round.material?.imageEmoji ? (
+        <PicturePrompt imageUrl={round.material.imageUrl} imageEmoji={round.material.imageEmoji} />
+      ) : round.material ? (
         <div className="space-y-3 rounded-xl border border-border/60 bg-muted/40 px-4 py-3">
           {round.material.speakable ? (
             <div className="flex flex-wrap gap-2">
@@ -452,19 +558,16 @@ function RoundPlay({
       ) : null}
 
       {question.kind === "choice" || question.kind === "fix" ? (
-        <ChoiceRound
-          question={question}
-          value={value}
-          locked={locked}
-          onChange={setValue}
-        />
+        <ChoiceRound question={question} value={value} locked={locked} onChange={setValue} />
       ) : null}
       {question.kind === "open" ? (
         <OpenRound
           value={value}
           locked={locked}
           allowMic={gameId === "speed-reply"}
-          placeholder={gameId === "rewrite-race" ? "Type a shorter version…" : "Type your answer in English…"}
+          placeholder={
+            gameId === "rewrite-race" ? "Type a shorter version…" : "Type your answer in English…"
+          }
           onChange={setValue}
         />
       ) : null}
@@ -480,10 +583,7 @@ function RoundPlay({
         <MatchRound
           pairs={question.pairs}
           rights={shuffledRights}
-          mapping={parseJson(
-            value || "[]",
-            question.pairs.map(() => null) as Array<number | null>,
-          )}
+          mapping={parseJson(value || "[]", question.pairs.map(() => null) as Array<number | null>)}
           locked={locked}
           onChange={(next) => setValue(JSON.stringify(next))}
         />
@@ -495,6 +595,15 @@ function RoundPlay({
           locked={locked}
           targetCount={question.correctWords.length}
           onChange={(next) => setValue(JSON.stringify(next))}
+        />
+      ) : null}
+      {question.kind === "spell" ? (
+        <SpellRound
+          letters={question.letters}
+          answer={question.answer}
+          value={value}
+          locked={locked}
+          onChange={setValue}
         />
       ) : null}
 
@@ -558,12 +667,14 @@ export function GamePlayPage({ slug }: { slug: string }) {
 
   if (!game) {
     return (
-      <div className="space-y-4">
-        <p className="text-sm text-muted-foreground">Game not found.</p>
-        <Button asChild variant="outline" className="rounded-full">
-          <Link href="/games">All games</Link>
-        </Button>
-      </div>
+      <NotFoundPage
+        title="This game isn’t in the catalog"
+        description="It may have been removed or the link is outdated. Browse the games hub and pick another round."
+        actions={[
+          { href: "/games", label: "All games", icon: <Gamepad2 />, primary: true },
+          { href: "/", label: "Back to Today", icon: <House /> },
+        ]}
+      />
     );
   }
 
@@ -577,14 +688,16 @@ export function GamePlayPage({ slug }: { slug: string }) {
         </Link>
       </Button>
 
-      <header className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-rose-500 to-orange-400 px-6 py-8 text-white sm:px-9 sm:py-10">
-        <p className="text-[11px] font-semibold tracking-[0.18em] text-white/70 uppercase">
+      <header className="workspace-hero-accent relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-rose-500 to-orange-400 px-5 py-6 text-white sm:rounded-[1.75rem] sm:px-9 sm:py-10">
+        <p className="hidden text-[11px] font-semibold tracking-[0.18em] text-white/70 uppercase sm:block">
           {game.skill} · {game.durationMinutes} min
         </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{game.title}</h1>
-        <p className="mt-3 max-w-2xl text-sm text-white/80">{game.howToPlay}</p>
+        <h1 className="text-xl font-semibold tracking-tight sm:mt-2 sm:text-4xl">{game.title}</h1>
+        <p className="mt-3 hidden max-w-2xl text-sm text-white/80 sm:block">{game.howToPlay}</p>
         {lessonPack ? (
-          <p className="mt-4 text-xs text-white/75">From lesson: {lessonPack.title}</p>
+          <p className="mt-4 hidden text-xs text-white/75 sm:block">
+            From lesson: {lessonPack.title}
+          </p>
         ) : null}
       </header>
 
@@ -613,7 +726,9 @@ export function GamePlayPage({ slug }: { slug: string }) {
           <div className="h-2 overflow-hidden rounded-full bg-muted">
             <div
               className="h-full rounded-full bg-primary transition-[width]"
-              style={{ width: `${((index + (scores[index] !== undefined ? 1 : 0)) / session.length) * 100}%` }}
+              style={{
+                width: `${((index + (scores[index] !== undefined ? 1 : 0)) / session.length) * 100}%`,
+              }}
             />
           </div>
           <RoundPlay
@@ -662,7 +777,10 @@ export function GamePlayPage({ slug }: { slug: string }) {
               <RotateCcw className="size-4" />
               Play again
             </Button>
-            <Button asChild className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25">
+            <Button
+              asChild
+              className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25"
+            >
               <Link href={`/skills/${game.relatedSkill}`}>Related skill</Link>
             </Button>
             <Button

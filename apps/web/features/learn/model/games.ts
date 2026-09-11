@@ -72,6 +72,24 @@ export const GAMES_CATALOG: GameCatalogItem[] = [
     howToPlay: "Listen once, then pick the 5 words that were actually in the audio.",
     relatedSkill: "listening",
   },
+  {
+    id: "picture-word",
+    title: "Picture word",
+    body: "Look at the picture and choose the English word.",
+    skill: "reading",
+    durationMinutes: 2,
+    howToPlay: "Look at the image. Tap the matching English word before the timer ends.",
+    relatedSkill: "reading",
+  },
+  {
+    id: "word-unscramble",
+    title: "Word scramble",
+    body: "Rearrange the letters to make a real English word.",
+    skill: "writing",
+    durationMinutes: 2,
+    howToPlay: "Tap letters in order to spell a workplace word. Tap a letter in the word to undo.",
+    relatedSkill: "writing",
+  },
 ];
 
 export const MINI_GAMES = GAMES_CATALOG.map((game) => ({
@@ -107,6 +125,14 @@ export const GAME_THEME: Record<
   "keyword-hunt": {
     wash: "from-cyan-500/15",
     badge: "bg-cyan-100 text-cyan-700 dark:bg-cyan-400/15 dark:text-cyan-300",
+  },
+  "picture-word": {
+    wash: "from-pink-500/15",
+    badge: "bg-pink-100 text-pink-700 dark:bg-pink-400/15 dark:text-pink-300",
+  },
+  "word-unscramble": {
+    wash: "from-indigo-500/15",
+    badge: "bg-indigo-100 text-indigo-700 dark:bg-indigo-400/15 dark:text-indigo-300",
   },
 };
 
@@ -200,6 +226,9 @@ export function scoreGameRound(
       return false;
     }
   }
+  if (question.kind === "spell") {
+    return normalize(value).replace(/\s+/g, "") === question.answer.trim().toLowerCase();
+  }
   return false;
 }
 
@@ -216,6 +245,9 @@ export function sampleAnswerFor(question: LearningQuestion): string | undefined 
   }
   if (question.kind === "hunt") {
     return question.correctWords.join(", ");
+  }
+  if (question.kind === "spell") {
+    return question.answer.toUpperCase();
   }
   return undefined;
 }

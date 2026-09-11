@@ -62,7 +62,7 @@ export function LearnHome() {
 
   return (
     <div className="space-y-12 pb-10">
-      <section className="relative overflow-hidden rounded-[2rem] bg-primary px-6 py-8 text-primary-foreground shadow-xl shadow-primary/10 sm:px-9 sm:py-10 lg:px-12 lg:py-12">
+      <section className="workspace-hero-accent relative overflow-hidden rounded-[1.5rem] bg-primary px-5 py-6 text-primary-foreground shadow-xl shadow-primary/10 sm:rounded-[2rem] sm:px-9 sm:py-10 lg:px-12 lg:py-12">
         <div
           aria-hidden
           className="absolute inset-0 bg-[radial-gradient(circle_at_85%_15%,rgba(129,140,248,.38),transparent_30%),radial-gradient(circle_at_5%_100%,rgba(14,165,233,.2),transparent_35%)]"
@@ -77,13 +77,13 @@ export function LearnHome() {
         />
         <div className="relative grid items-center gap-8 lg:grid-cols-[1fr_auto]">
           <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-primary-foreground/80">
+            <div className="mb-5 hidden items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-primary-foreground/80 sm:inline-flex">
               <Sparkles className="size-3.5 text-amber-300" />A little English every day
             </div>
-            <h1 className="max-w-2xl text-3xl font-semibold leading-tight tracking-[-0.035em] sm:text-4xl lg:text-[2.75rem]">
+            <h1 className="max-w-2xl text-xl font-semibold leading-tight tracking-[-0.035em] sm:text-4xl lg:text-[2.75rem]">
               Hi {firstName}, what do you feel like learning today?
             </h1>
-            <p className="mt-4 max-w-xl text-sm leading-6 text-white/65 sm:text-base">
+            <p className="mt-4 hidden max-w-xl text-sm leading-6 text-white/65 sm:block sm:text-base">
               No pressure, no complicated dashboard. Pick one small activity and make today count.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
@@ -264,7 +264,11 @@ export function LearnHome() {
           </div>
           <div className="grid gap-px bg-border/70 sm:grid-cols-2">
             {MINI_GAMES.slice(0, 4).map((game, index) => (
-              <Link key={game.title} href={game.href} className="bg-card p-5 transition-colors hover:bg-muted/40">
+              <Link
+                key={game.title}
+                href={game.href}
+                className="bg-card p-5 transition-colors hover:bg-muted/40"
+              >
                 <span className="text-xs font-bold text-rose-500">0{index + 1}</span>
                 <h3 className="mt-2 text-sm font-semibold">{game.title}</h3>
                 <p className="mt-1 text-xs leading-5 text-muted-foreground">{game.body}</p>

@@ -181,21 +181,21 @@ export function TutorChatPage() {
 
   return (
     <div className="flex min-h-[calc(100svh-8rem)] flex-col gap-5">
-      <header className="relative space-y-4 overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-primary to-primary/80 px-5 py-6 text-primary-foreground sm:px-7 sm:py-7">
+      <header className="workspace-hero-accent relative space-y-3 overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-primary to-primary/80 px-5 py-5 text-primary-foreground sm:space-y-4 sm:rounded-[1.75rem] sm:px-7 sm:py-7">
         <div
           aria-hidden
-          className="absolute -right-12 -top-16 size-52 rounded-full border-[26px] border-white/[0.07]"
+          className="absolute -right-12 -top-16 hidden size-52 rounded-full border-[26px] border-white/[0.07] sm:block"
         />
-        <p className="relative inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.18em] text-primary-foreground/70 uppercase">
+        <p className="relative hidden items-center gap-2 text-[11px] font-semibold tracking-[0.18em] text-primary-foreground/70 uppercase sm:inline-flex">
           <Sparkles className="size-3.5 text-amber-300" />
           Your judgment-free practice space
         </p>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="relative max-w-2xl space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            <h1 className="text-xl font-semibold tracking-tight text-white sm:text-4xl">
               {lesson ? lesson.title : "Chat EngliTutor"}
             </h1>
-            <p className="text-sm leading-relaxed text-white/70 sm:text-base">
+            <p className="hidden text-sm leading-relaxed text-white/70 sm:block sm:text-base">
               {lesson
                 ? `${lesson.skills.join(" · ")} · ${lesson.duration} · ${lesson.focus}`
                 : "Type or record English — AI replies in English and suggests corrections in Vietnamese."}
@@ -203,7 +203,7 @@ export function TutorChatPage() {
           </div>
           <Button
             type="button"
-            className="relative h-10 rounded-full border-0 bg-white text-primary hover:bg-white/90"
+            className="relative h-9 rounded-full border-0 bg-white text-primary hover:bg-white/90 sm:h-10"
             onClick={() => resetChat(scenario)}
           >
             <RefreshCw className="size-4" />
@@ -218,7 +218,7 @@ export function TutorChatPage() {
               type="button"
               onClick={() => resetChat(item.id)}
               className={cn(
-                "rounded-full border px-3.5 py-2 text-left text-sm transition-colors",
+                "shrink-0 rounded-full border px-3 py-1.5 text-left text-sm transition-colors sm:px-3.5 sm:py-2",
                 scenario === item.id
                   ? "border-white bg-white text-primary"
                   : "border-white/15 bg-white/[0.06] text-white/65 hover:bg-white/10 hover:text-white",
@@ -258,10 +258,7 @@ export function TutorChatPage() {
           </div>
         </div>
 
-        <div
-          ref={messageListRef}
-          className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-5"
-        >
+        <div ref={messageListRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-5">
           {messages.map((message, index) => {
             const isUser = message.role === "user";
             const { english, tip } = isUser
@@ -316,7 +313,10 @@ export function TutorChatPage() {
           ) : null}
         </div>
 
-        <div ref={composerRef} className="scroll-mb-4 border-t border-border p-3 sm:p-4">
+        <div
+          ref={composerRef}
+          className="scroll-mb-4 border-t border-border px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4"
+        >
           {error || voice.error ? (
             <p className="mb-2 text-sm text-destructive">{error || voice.error}</p>
           ) : null}
@@ -338,14 +338,20 @@ export function TutorChatPage() {
           ) : null}
 
           {pendingAudioUrl && !voice.recording ? (
-            <div className="mb-3 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-muted/50 px-3.5 py-2.5">
-              <p className="text-xs font-medium text-muted-foreground">Last recording</p>
-              <audio controls src={pendingAudioUrl} className="h-8 max-w-full flex-1" />
+            <div className="mb-3 grid grid-cols-[1fr_auto] items-center gap-2 rounded-2xl border border-border bg-muted/50 p-3 sm:flex sm:gap-3 sm:px-3.5 sm:py-2.5">
+              <p className="text-xs font-medium text-muted-foreground sm:shrink-0">
+                Last recording
+              </p>
+              <audio
+                controls
+                src={pendingAudioUrl}
+                className="col-span-2 h-9 w-full min-w-0 sm:order-none sm:col-auto sm:h-8 sm:flex-1"
+              />
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="rounded-full text-muted-foreground"
+                className="row-start-1 rounded-full text-muted-foreground sm:row-auto"
                 onClick={() => {
                   if (pendingAudioUrl) URL.revokeObjectURL(pendingAudioUrl);
                   setPendingAudioUrl(null);
@@ -358,7 +364,7 @@ export function TutorChatPage() {
           ) : null}
 
           <form
-            className="flex items-end gap-2"
+            className="grid grid-cols-[auto_1fr_auto] items-center gap-2 rounded-[1.25rem] border border-border bg-muted/40 p-2 shadow-sm sm:flex sm:items-end sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none"
             onSubmit={(event) => {
               event.preventDefault();
               void send();
@@ -370,7 +376,7 @@ export function TutorChatPage() {
               size="lg"
               disabled={micDisabled}
               className={cn(
-                "h-11 w-11 shrink-0 rounded-full p-0",
+                "order-2 h-11 w-11 shrink-0 rounded-full p-0 sm:order-none",
                 voice.recording && "animate-pulse",
               )}
               aria-label={voice.recording ? "Stop recording" : "Record"}
@@ -402,17 +408,20 @@ export function TutorChatPage() {
               }}
               placeholder={
                 voice.recording
-                  ? "Listening… (tap ■ to stop)"
-                  : "Type or tap mic to record English… (Enter to send)"
+                  ? "Listening… tap stop when finished"
+                  : "Write a message in English…"
               }
               disabled={pending || voice.recording}
-              className="max-h-36 min-h-11 flex-1 resize-none overflow-y-auto rounded-2xl border border-border bg-background px-4 py-2.5 text-sm leading-6 outline-none focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/40 disabled:opacity-60"
+              className="order-1 col-span-3 max-h-32 min-h-20 w-full resize-none overflow-y-auto rounded-xl border-0 bg-background px-3.5 py-3 text-base leading-6 shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30 disabled:opacity-60 sm:order-none sm:col-auto sm:max-h-36 sm:min-h-11 sm:flex-1 sm:rounded-2xl sm:border sm:border-border sm:px-4 sm:py-2.5 sm:text-sm sm:shadow-none sm:focus-visible:border-primary sm:focus-visible:ring-primary/40"
             />
+            <span className="order-2 min-w-0 truncate text-xs text-muted-foreground sm:hidden">
+              {voice.recording ? "Tap stop when finished" : "Voice input"}
+            </span>
             <Button
               type="submit"
               size="lg"
               disabled={pending || voice.recording || !draft.trim()}
-              className="h-11 shrink-0 rounded-full px-5"
+              className="order-3 h-11 shrink-0 rounded-full px-4 sm:order-none sm:px-5"
             >
               {pending ? (
                 <LoaderCircle className="size-4 animate-spin" />
@@ -422,7 +431,7 @@ export function TutorChatPage() {
               Send
             </Button>
           </form>
-          <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+          <p className="mt-2 hidden flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground sm:flex">
             <span className="inline-flex items-center gap-1">
               <Mic className="size-3" />
               Record → recognize (Chrome/Edge works best) → quick edit → Send

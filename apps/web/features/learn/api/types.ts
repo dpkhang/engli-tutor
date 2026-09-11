@@ -6,7 +6,9 @@ export type LearningGameId =
   | "listen-order"
   | "rewrite-race"
   | "word-match"
-  | "keyword-hunt";
+  | "keyword-hunt"
+  | "picture-word"
+  | "word-unscramble";
 
 export type LearningQuestion =
   | {
@@ -55,6 +57,14 @@ export type LearningQuestion =
       options: string[];
       correctWords: string[];
       explanation: string;
+    }
+  | {
+      id: string;
+      kind: "spell";
+      prompt: string;
+      letters: string[];
+      answer: string;
+      explanation: string;
     };
 
 export type LearningGameRound = {
@@ -64,7 +74,7 @@ export type LearningGameRound = {
   lessonIds?: string[];
   hearAgainMax?: number;
   maxWords?: number;
-  material?: { title: string; body: string; speakable?: boolean };
+  material?: { title: string; body: string; speakable?: boolean; imageUrl?: string; imageEmoji?: string };
   question: LearningQuestion;
 };
 

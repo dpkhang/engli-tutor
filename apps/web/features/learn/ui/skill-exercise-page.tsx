@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, Lightbulb, RotateCcw, Volume2 } from "lucide-react";
+import { ArrowLeft, BookOpen, Check, House, Lightbulb, RotateCcw, Volume2 } from "lucide-react";
 import { Button, cn } from "@landing-page-generator/ui";
-import { DataLoadingState } from "@/features/layout";
+import { DataLoadingState, NotFoundPage } from "@/features/layout";
 import { ClickableTranslateText } from "@/features/translate";
 import { getAutoPlayListening } from "@/features/settings/model/preferences";
 import { useAiSpeech } from "@/features/speaking-lab/hooks/use-ai-speech";
@@ -154,12 +154,15 @@ export function SkillExercisePage({ skill, exerciseId }: { skill: SkillId; exerc
 
   if (!exercise) {
     return (
-      <div className="space-y-4">
-        <p className="text-sm text-muted-foreground">Exercise not found.</p>
-        <Button asChild variant="outline" className="rounded-full">
-          <Link href={`/skills/${skill}`}>Go back</Link>
-        </Button>
-      </div>
+      <NotFoundPage
+        title="This exercise isn’t available"
+        description="It may have been moved or the link is incomplete. Go back to this skill and pick another activity."
+        actions={[
+          { href: `/skills/${skill}`, label: "Back to skill", icon: <BookOpen />, primary: true },
+          { href: "/skills", label: "All skills" },
+          { href: "/", label: "Back to Today", icon: <House /> },
+        ]}
+      />
     );
   }
 
@@ -206,19 +209,19 @@ export function SkillExercisePage({ skill, exerciseId }: { skill: SkillId; exerc
             <ArrowLeft /> {skillMeta?.labelVi ?? skill}
           </Link>
         </Button>
-        <header className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-primary to-primary/80 px-6 py-8 text-primary-foreground sm:px-9 sm:py-10">
+        <header className="workspace-hero-accent relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-primary to-primary/80 px-5 py-6 text-primary-foreground sm:rounded-[1.75rem] sm:px-9 sm:py-10">
           <div
             aria-hidden
-            className="absolute -right-10 -top-16 size-52 rounded-full border-[28px] border-white/[0.07]"
+            className="absolute -right-10 -top-16 hidden size-52 rounded-full border-[28px] border-white/[0.07] sm:block"
           />
           <div className="relative">
-            <p className="text-[11px] font-semibold tracking-[0.18em] text-primary-foreground/70 uppercase">
+            <p className="hidden text-[11px] font-semibold tracking-[0.18em] text-primary-foreground/70 uppercase sm:block">
               {exercise.level} · {exercise.duration}
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+            <h1 className="text-xl font-semibold tracking-tight sm:mt-2 sm:text-4xl">
               {exercise.title}
             </h1>
-            <p className="mt-4 flex max-w-2xl gap-2 text-sm text-white/70">
+            <p className="mt-4 hidden max-w-2xl gap-2 text-sm text-white/70 sm:flex">
               <Lightbulb className="mt-0.5 size-4 shrink-0 text-amber-300" />
               <span>{exercise.tip}</span>
             </p>

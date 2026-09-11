@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useDragControls } from "motion/react";
 import {
   ArrowUpCircle,
   Check,
@@ -65,6 +65,7 @@ function formatDate(value: string) {
 }
 
 export default function PaymentsPage() {
+  const sheetDragControls = useDragControls();
   const searchParams = useSearchParams();
   const checkoutState = searchParams.get("checkout");
   const checkoutType = searchParams.get("type");
@@ -167,26 +168,26 @@ export default function PaymentsPage() {
   };
 
   return (
-    <div className="space-y-8 pb-10">
-      <header className="relative overflow-hidden rounded-[2rem] bg-primary px-6 py-9 text-primary-foreground shadow-xl shadow-primary/10 sm:px-10 sm:py-11">
+    <div className="space-y-5 pb-10 sm:space-y-8">
+      <header className="workspace-hero-accent relative overflow-hidden rounded-[1.5rem] bg-primary px-5 py-7 text-primary-foreground shadow-xl shadow-primary/10 sm:rounded-[2rem] sm:px-10 sm:py-11">
         <div
           aria-hidden
-          className="absolute -right-16 -top-20 size-64 rounded-full border-[34px] border-white/[0.07]"
+          className="absolute -right-16 -top-20 hidden size-64 rounded-full border-[34px] border-white/[0.07] sm:block"
         />
         <div
           aria-hidden
-          className="absolute bottom-0 right-1/4 size-40 rounded-full bg-violet-400/20 blur-3xl"
+          className="absolute bottom-0 right-1/4 hidden size-40 rounded-full bg-violet-400/20 blur-3xl sm:block"
         />
         <div className="relative max-w-2xl">
-          <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-primary-foreground/80">
+          <p className="hidden items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-primary-foreground/80 sm:inline-flex">
             <Sparkles className="size-3.5 text-amber-300" />
             Plans that grow with your confidence
           </p>
-          <h1 className="mt-5 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">
+          <h1 className="text-xl leading-tight font-semibold tracking-[-0.035em] sm:mt-5 sm:text-4xl">
             More practice. More progress.
             <br className="hidden sm:block" /> Always at your pace.
           </h1>
-          <p className="mt-4 max-w-xl text-sm leading-6 text-primary-foreground/70 sm:text-base">
+          <p className="mt-3 hidden max-w-xl text-sm leading-6 text-primary-foreground/75 sm:mt-4 sm:block sm:text-base">
             {hasPaidPlan
               ? "Your learning plan, practice time and payment activity—all in one simple place."
               : "Start free and upgrade whenever you want more time to speak, practise and grow."}
@@ -214,8 +215,8 @@ export default function PaymentsPage() {
         </Alert>
       ) : null}
 
-      <Card className="overflow-hidden rounded-[1.75rem] border-primary/20 shadow-[0_20px_55px_-40px_hsl(var(--primary)/0.45)]">
-        <CardHeader className="border-b border-primary/10 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 sm:p-8">
+      <Card className="overflow-hidden rounded-[1.5rem] border-primary/20 shadow-[0_20px_55px_-40px_hsl(var(--primary)/0.45)] sm:rounded-[1.75rem]">
+        <CardHeader className="border-b border-primary/10 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-5 sm:p-8">
           <div className="flex flex-wrap items-center gap-2">
             <Badge
               variant={hasPaidPlan ? "default" : "secondary"}
@@ -230,34 +231,34 @@ export default function PaymentsPage() {
               </Badge>
             ) : null}
           </div>
-          <CardTitle className="font-[family-name:var(--font-display)] text-3xl tracking-[-0.03em] sm:text-4xl">
+          <CardTitle className="font-[family-name:var(--font-display)] text-2xl tracking-[-0.03em] sm:text-4xl">
             {billing.isLoading ? "…" : activePlan.name}
           </CardTitle>
           <CardDescription>{activePlan.description}</CardDescription>
         </CardHeader>
-        <CardContent className="p-6 sm:p-8">
+        <CardContent className="p-4 sm:p-8">
           {billing.isLoading ? (
             <p className="text-sm text-muted-foreground">Loading plan details…</p>
           ) : (
-            <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
+            <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1fr_1.2fr]">
               <div className="space-y-4">
-                <div className="flex flex-wrap gap-3">
-                  <div className="flex items-center gap-3 rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3 text-sm">
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
+                  <div className="flex min-w-0 items-center gap-2 rounded-2xl border border-primary/15 bg-primary/5 px-3 py-3 text-sm sm:gap-3 sm:px-4">
                     <span className="grid size-9 place-items-center rounded-xl bg-primary/10">
                       <Coins className="size-4 text-primary" />
                     </span>
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-xs text-muted-foreground">Practice credits</p>
                       <p className="font-semibold">{balance}</p>
                     </div>
                   </div>
                   {hasPaidPlan && data?.subscription.creditsPerPeriod ? (
-                    <div className="rounded-2xl border border-border/70 bg-muted/30 px-4 py-3 text-sm">
+                    <div className="min-w-0 rounded-2xl border border-border/70 bg-muted/30 px-3 py-3 text-sm sm:px-4">
                       <p className="text-xs text-muted-foreground">Practice credits per period</p>
                       <p className="font-semibold">{data.subscription.creditsPerPeriod}</p>
                     </div>
                   ) : (
-                    <div className="rounded-2xl border border-border/70 bg-muted/30 px-4 py-3 text-sm">
+                    <div className="min-w-0 rounded-2xl border border-border/70 bg-muted/30 px-3 py-3 text-sm sm:px-4">
                       <p className="text-xs text-muted-foreground">Welcome practice credits</p>
                       <p className="font-semibold">{data?.signupBonus ?? 50} practice credits</p>
                     </div>
@@ -288,7 +289,7 @@ export default function PaymentsPage() {
                   {higherPlans.length > 0 ? (
                     <Button
                       type="button"
-                      className="h-11 rounded-full px-5 shadow-sm"
+                      className="h-11 w-full rounded-full px-5 shadow-sm sm:w-auto"
                       disabled={!stripeReady || Boolean(pending)}
                       onClick={() => setShowUpgradeOptions(true)}
                     >
@@ -300,7 +301,7 @@ export default function PaymentsPage() {
 
               <div className="space-y-3">
                 <p className="text-sm font-semibold">Current benefits</p>
-                <ul className="space-y-3 rounded-2xl border border-border/70 bg-muted/25 p-5 text-sm">
+                <ul className="space-y-3 rounded-2xl border border-border/70 bg-muted/25 p-4 text-sm sm:p-5">
                   {activePlan.features.map((feature) => (
                     <li key={feature} className="flex gap-2.5 text-muted-foreground">
                       <span className="grid size-5 shrink-0 place-items-center rounded-full bg-primary/10">
@@ -319,7 +320,7 @@ export default function PaymentsPage() {
       <AnimatePresence>
         {showUpgradeOptions && higherPlans.length > 0 ? (
           <motion.div
-            className="fixed inset-0 z-[100] grid place-items-center overflow-y-auto bg-black/45 p-4 backdrop-blur-[2px]"
+            className="fixed inset-0 z-[100] flex items-end bg-black/45 lg:grid lg:place-items-center lg:overflow-y-auto lg:p-4 lg:backdrop-blur-[2px]"
             role="presentation"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -334,51 +335,77 @@ export default function PaymentsPage() {
               aria-modal="true"
               aria-labelledby="upgrade-dialog-title"
               className={cn(
-                "relative my-auto w-full rounded-[1.75rem] border border-white/50 bg-popover p-6 text-popover-foreground shadow-2xl sm:p-8",
-                higherPlans.length <= 1 && "max-w-md",
-                higherPlans.length === 2 && "max-w-3xl",
-                higherPlans.length >= 3 && "max-w-5xl",
+                "absolute inset-x-0 bottom-0 flex h-[85dvh] max-h-[calc(100dvh-env(safe-area-inset-top)-0.75rem)] w-full flex-col overflow-hidden rounded-t-[1.75rem] border border-white/50 bg-popover text-popover-foreground shadow-2xl lg:relative lg:inset-auto lg:my-auto lg:h-auto lg:max-h-[calc(100dvh-2rem)] lg:rounded-[1.75rem]",
+                higherPlans.length <= 1 && "lg:max-w-md",
+                higherPlans.length === 2 && "lg:max-w-3xl",
+                higherPlans.length >= 3 && "lg:max-w-5xl",
               )}
               initial={{ opacity: 0, y: 16, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.97 }}
               transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              drag="y"
+              dragControls={sheetDragControls}
+              dragListener={false}
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0, bottom: 0.35 }}
+              dragMomentum={false}
+              dragSnapToOrigin
+              onDragEnd={(_, info) => {
+                if (info.offset.y > 96 || info.velocity.y > 650) {
+                  setShowUpgradeOptions(false);
+                }
+              }}
             >
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute top-4 right-4"
-                aria-label="Close"
-                onClick={() => setShowUpgradeOptions(false)}
+              <div
+                className="relative shrink-0 touch-none cursor-grab border-b border-border bg-popover px-4 pt-7 pb-4 active:cursor-grabbing sm:px-8 sm:pt-8 sm:pb-5 lg:cursor-default"
+                onPointerDown={(event) => {
+                  if (window.innerWidth >= 1024) return;
+                  if ((event.target as HTMLElement).closest("button")) return;
+                  sheetDragControls.start(event);
+                }}
               >
-                <X />
-              </Button>
-              <div className="space-y-2 pr-12">
-                <p className="text-xs font-semibold tracking-wider text-primary uppercase">
-                  Choose what fits you
-                </p>
-                <h2
-                  id="upgrade-dialog-title"
-                  className="flex items-center gap-2 text-2xl font-semibold tracking-tight"
+                <span
+                  className="absolute top-2 left-1/2 h-1 w-10 -translate-x-1/2 rounded-full bg-muted-foreground/25 sm:hidden"
+                  aria-hidden
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-3 right-3 sm:top-4 sm:right-4"
+                  aria-label="Close"
+                  onClick={() => setShowUpgradeOptions(false)}
                 >
-                  <ArrowUpCircle className="size-5 text-primary" /> Unlock more practice
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {hasPaidPlan
-                    ? `Choose the next step beyond ${activePlan.name}.`
-                    : "Choose how much speaking practice and guidance you need."}
-                </p>
+                  <X />
+                </Button>
+                <div className="space-y-2 pr-12">
+                  <p className="text-xs font-semibold tracking-wider text-primary uppercase">
+                    Choose what fits you
+                  </p>
+                  <h2
+                    id="upgrade-dialog-title"
+                    className="flex items-center gap-2 text-xl font-semibold tracking-tight sm:text-2xl"
+                  >
+                    <ArrowUpCircle className="size-5 text-primary" /> Unlock more practice
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {hasPaidPlan
+                      ? `Choose the next step beyond ${activePlan.name}.`
+                      : "Choose how much speaking practice and guidance you need."}
+                  </p>
+                </div>
               </div>
-              <div className="mt-6 space-y-5">
+              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:space-y-5 sm:px-8 sm:pt-5 sm:pb-8">
                 {!hasPaidPlan ? (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-2 rounded-full bg-muted p-1">
                     {(["monthly", "yearly"] as const).map((p) => (
                       <Button
                         key={p}
                         type="button"
                         size="sm"
                         variant={period === p ? "default" : "outline"}
+                        className="w-full rounded-full border-0"
                         onClick={() => setPeriod(p)}
                       >
                         {p === "monthly" ? "Monthly" : "Yearly (−2 months)"}
@@ -404,12 +431,12 @@ export default function PaymentsPage() {
                       <Card
                         key={plan.id}
                         className={cn(
-                          "relative overflow-hidden rounded-2xl shadow-none",
+                          "relative overflow-hidden rounded-[1.25rem] shadow-none",
                           plan.featured &&
                             "border-primary/50 bg-primary/[0.03] ring-1 ring-primary/15",
                         )}
                       >
-                        <CardHeader className="space-y-2">
+                        <CardHeader className="space-y-2 p-4 sm:p-6">
                           <div className="flex items-center justify-between gap-2">
                             <CardTitle className="text-xl">{plan.name}</CardTitle>
                             {plan.featured ? (
@@ -417,7 +444,7 @@ export default function PaymentsPage() {
                             ) : null}
                           </div>
                           <CardDescription>{plan.description}</CardDescription>
-                          <p className="font-[family-name:var(--font-display)] text-2xl tracking-tight">
+                          <p className="break-words font-[family-name:var(--font-display)] text-xl tracking-tight sm:text-2xl">
                             {formatVnd(price)}
                             <span className="ml-1 text-sm font-sans font-normal text-muted-foreground">
                               {period === "yearly" ? "/ year" : "/ month"}
@@ -427,7 +454,7 @@ export default function PaymentsPage() {
                             {plan.creditsPerPeriod} practice credits per period
                           </p>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
                           <ul className="space-y-2 text-sm text-muted-foreground">
                             {plan.features.map((feature) => (
                               <li key={feature} className="flex gap-2">
