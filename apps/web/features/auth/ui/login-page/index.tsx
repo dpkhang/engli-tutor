@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -45,53 +45,7 @@ export function LoginPage() {
     window.location.replace(returnTo);
   }, [sessionPending, data?.user, returnTo]);
 
-  const onSubmit = form.handleSubmit(async (values) => {
-    setError(null);
-    setPending(true);
-
-    try {
-      if (values.mode === "register") {
-        const result = await authClient.signUp.email({
-          email: values.email,
-          password: values.password,
-          name: values.name,
-        });
-        if (result.error) {
-          setError(authErrorMessage(result.error));
-          setPending(false);
-          return;
-        }
-      } else {
-        const result = await authClient.signIn.email({
-          email: values.email,
-          password: values.password,
-        });
-        if (result.error) {
-          setError(authErrorMessage(result.error));
-          setPending(false);
-          return;
-        }
-      }
-
-      // Reload after the auth response commits its Set-Cookie header. Checking
-      // getSession here can still return the anonymous client cache and report a
-      // false cookie failure; AuthGate verifies the fresh session on navigation.
-      if (values.mode === "register") {
-        const next =
-          returnTo.startsWith("/") && !returnTo.startsWith("//") && returnTo !== "/onboarding"
-            ? `/onboarding?returnTo=${encodeURIComponent(returnTo)}`
-            : "/onboarding";
-        window.location.assign(next);
-        return;
-      }
-      window.location.assign(returnTo);
-    } catch {
-      setPending(false);
-      setError("Couldn't reach the auth server. Please try again.");
-    }
-  });
-
-  const changeMode = (nextMode: AuthMode) => {
+  const changeMode = useCallback((nextMode: AuthMode) => {
     setMode(nextMode);
     setError(null);
     form.reset({
@@ -100,7 +54,57 @@ export function LoginPage() {
       email: form.getValues("email"),
       password: "",
     });
-  };
+  }, [form]);
+
+  const onSubmit = useMemo(
+    () =>
+      form.handleSubmit(async (values) => {
+        setError(null);
+        setPending(true);
+
+        try {
+          if (values.mode === "register") {
+            const result = await authClient.signUp.email({
+              email: values.email,
+              password: values.password,
+              name: values.name,
+            });
+            if (result.error) {
+              setError(authErrorMessage(result.error));
+              setPending(false);
+              return;
+            }
+          } else {
+            const result = await authClient.signIn.email({
+              email: values.email,
+              password: values.password,
+            });
+            if (result.error) {
+              setError(authErrorMessage(result.error));
+              setPending(false);
+              return;
+            }
+          }
+
+          // Reload after the auth response commits its Set-Cookie header. Checking
+          // getSession here can still return the anonymous client cache and report a
+          // false cookie failure; AuthGate verifies the fresh session on navigation.
+          if (values.mode === "register") {
+            const next =
+              returnTo.startsWith("/") && !returnTo.startsWith("//") && returnTo !== "/onboarding"
+                ? `/onboarding?returnTo=${encodeURIComponent(returnTo)}`
+                : "/onboarding";
+            window.location.assign(next);
+            return;
+          }
+          window.location.assign(returnTo);
+        } catch {
+          setPending(false);
+          setError("Couldn't reach the auth server. Please try again.");
+        }
+      }),
+    [form, returnTo],
+  );
 
   return (
     <LoginPageView

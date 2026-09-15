@@ -4,14 +4,14 @@ import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { getMarketingUrl, useSession } from "@/lib/auth-client";
-import { accountApi } from "@/features/accounts/api";
+import { accountApi } from "@/features/accounts";
 import {
   hasSeenWelcome,
   needsOnboarding,
   ONBOARDING_PATH,
   safeOnboardingReturnTo,
   WELCOME_PATH,
-} from "@/features/onboarding/model/onboarding";
+} from "@/features/onboarding";
 import { CACHE_TIMES, queryKeys } from "@/lib/query";
 
 const LOGIN_PATH = "/login";

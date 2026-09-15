@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { GamePlayPage } from "@/features/learn/ui/game-play-page";
-import { GAMES_CATALOG, isGameId } from "@/features/learn/model/games";
+import { GamePlayPage, GAMES_CATALOG, isGameId } from "@/features/learn";
 
 export function generateStaticParams() {
   return GAMES_CATALOG.map((game) => ({ slug: game.id }));

@@ -44,6 +44,39 @@ export const PERIOD_LABEL: Record<string, string> = {
   yearly: "Yearly",
 };
 
+export const LEDGER_REASON_LABEL: Record<string, string> = {
+  SIGNUP_BONUS: "Welcome practice credits",
+  PURCHASE: "Credit top-up",
+  SUBSCRIPTION_GRANT: "Plan practice credits",
+  AI_GENERATE: "AI practice session",
+  AI_GENERATE_REFUND: "AI practice credit refund",
+  ADJUST: "Adjustment",
+};
+
+export function formatVnd(value: number) {
+  return `${value.toLocaleString("en-US")} VND`;
+}
+
+export function formatBillingDate(value: string) {
+  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(value));
+}
+
+export function formatBillingDateTime(value: string) {
+  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(
+    new Date(value),
+  );
+}
+
+export function summarizeLedger(ledger: Array<{ delta: number }>) {
+  let added = 0;
+  let spent = 0;
+  for (const entry of ledger) {
+    if (entry.delta >= 0) added += entry.delta;
+    else spent += -entry.delta;
+  }
+  return { added, spent, count: ledger.length };
+}
+
 function planBullets(plan: Pick<SubscriptionPlan, "benefits" | "features">): string[] {
   if (plan.benefits?.length) return plan.benefits;
   return plan.features ?? [];

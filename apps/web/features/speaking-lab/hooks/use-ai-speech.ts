@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { tutorApi } from "@/features/tutor-chat/api";
-import { resolveSpeechRates } from "@/features/settings/model/preferences";
+import { resolveSpeechRates } from "@/features/settings";
 
 function pickEnglishVoice(): SpeechSynthesisVoice | null {
   if (typeof window === "undefined" || !window.speechSynthesis) return null;
@@ -70,11 +70,17 @@ export function useAiSpeech() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
   const generationRef = useRef(0);
+  const mountedRef = useRef(true);
+  const abortRef = useRef<AbortController | null>(null);
 
   const stop = useCallback(() => {
     generationRef.current += 1;
+    abortRef.current?.abort();
+    abortRef.current = null;
     if (typeof window !== "undefined") window.speechSynthesis?.cancel();
     if (audioRef.current) {
+      audioRef.current.onended = null;
+      audioRef.current.onerror = null;
       audioRef.current.pause();
       audioRef.current.src = "";
       audioRef.current = null;
@@ -85,10 +91,30 @@ export function useAiSpeech() {
     }
   }, []);
 
-  useEffect(() => () => stop(), [stop]);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      stop();
+    };
+  }, [stop]);
+
+  const isCurrent = useCallback((gen: number) => {
+    return mountedRef.current && gen === generationRef.current;
+  }, []);
 
   const playBlob = useCallback(
-    async (blob: Blob, cleaned: string, onEnd?: () => void): Promise<AiSpeechResult> => {
+    async (
+      blob: Blob,
+      cleaned: string,
+      gen: number,
+      onEnd?: () => void,
+    ): Promise<AiSpeechResult> => {
+      if (!isCurrent(gen)) {
+        onEnd?.();
+        return { source: "ai", stop };
+      }
+
       const url = URL.createObjectURL(blob);
       objectUrlRef.current = url;
       const audio = new Audio(url);
@@ -99,16 +125,42 @@ export function useAiSpeech() {
           URL.revokeObjectURL(url);
           objectUrlRef.current = null;
         }
-        audioRef.current = null;
-        onEnd?.();
+        if (audioRef.current === audio) audioRef.current = null;
+        if (isCurrent(gen)) onEnd?.();
       };
       audio.onerror = () => {
+        if (objectUrlRef.current === url) {
+          URL.revokeObjectURL(url);
+          objectUrlRef.current = null;
+        }
+        if (audioRef.current === audio) audioRef.current = null;
+        if (!isCurrent(gen)) {
+          onEnd?.();
+          return;
+        }
         speakBrowser(cleaned, resolveSpeechRates().tts, onEnd);
       };
-      await audio.play();
+
+      try {
+        await audio.play();
+      } catch {
+        if (!isCurrent(gen)) {
+          onEnd?.();
+          return { source: "ai", stop };
+        }
+        speakBrowser(cleaned, resolveSpeechRates().tts, onEnd);
+        return { source: "browser", stop };
+      }
+
+      if (!isCurrent(gen)) {
+        stop();
+        onEnd?.();
+        return { source: "ai", stop };
+      }
+
       return { source: "ai", stop };
     },
-    [stop],
+    [isCurrent, stop],
   );
 
   const speak = useCallback(
@@ -119,31 +171,49 @@ export function useAiSpeech() {
         return { source: "browser", stop };
       }
 
+      if (!mountedRef.current) {
+        onEnd?.();
+        return { source: "browser", stop };
+      }
+
       stop();
       const gen = generationRef.current;
       const key = cacheKey(cleaned);
+      const abort = new AbortController();
+      abortRef.current = abort;
 
       try {
         const cached = clientCacheGet(key);
-        const blob = cached ?? (await tutorApi.speak({ text: cleaned }));
+        const blob =
+          cached ?? (await tutorApi.speak({ text: cleaned, signal: abort.signal }));
         if (!cached) clientCacheSet(key, blob);
 
-        if (gen !== generationRef.current) {
+        if (!isCurrent(gen)) {
+          onEnd?.();
           return { source: "ai", stop };
         }
 
-        return await playBlob(blob, cleaned, onEnd);
-      } catch {
+        return await playBlob(blob, cleaned, gen, onEnd);
+      } catch (err) {
+        if (abort.signal.aborted || !isCurrent(gen)) {
+          onEnd?.();
+          return { source: "ai", stop };
+        }
+        if (err instanceof DOMException && err.name === "AbortError") {
+          onEnd?.();
+          return { source: "ai", stop };
+        }
         /* fall through to browser */
       }
 
-      if (gen !== generationRef.current) {
+      if (!isCurrent(gen)) {
+        onEnd?.();
         return { source: "browser", stop };
       }
       speakBrowser(cleaned, resolveSpeechRates().tts, onEnd);
       return { source: "browser", stop };
     },
-    [playBlob, stop],
+    [isCurrent, playBlob, stop],
   );
 
   return { speak, stop };

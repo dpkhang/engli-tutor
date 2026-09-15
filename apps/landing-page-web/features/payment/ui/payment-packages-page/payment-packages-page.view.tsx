@@ -1,12 +1,13 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import { Check, Coins, Crown, ExternalLink, LoaderCircle } from "lucide-react";
 import { Alert, AlertDescription, Badge, Button, cn } from "@landing-page-generator/ui";
 import { motion } from "motion/react";
 import { PageBackLink } from "@/features/layout";
-import type { Plan, PlanId } from "@/features/marketing/model/plans";
-import type { BillingMe } from "@/features/payment/api/billing";
+import type { Plan, PlanId } from "@/features/marketing";
+import type { BillingMe } from "../../api/billing";
 
 export type PaymentPackagesPageViewProps = {
   plans: Plan[];
@@ -58,7 +59,7 @@ function planBenefits(plan: Plan | undefined, billing: BillingMe | null): string
   return [];
 }
 
-export function PaymentPackagesPageView({
+export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
   plans,
   queriedPlan,
   highlighted,
@@ -79,7 +80,7 @@ export function PaymentPackagesPageView({
 
   if (redirectingToCurrentPlan) {
     return (
-      <main className="grid min-h-[100svh] place-items-center px-5">
+      <main className="grid min-h-svh place-items-center px-5">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <LoaderCircle className="size-4 animate-spin" />
           Opening your plan details…
@@ -89,7 +90,7 @@ export function PaymentPackagesPageView({
   }
 
   return (
-    <main className="relative min-h-[100svh] bg-[radial-gradient(ellipse_at_top,hsl(214_22%_92%),hsl(var(--background))_55%)] dark:bg-[radial-gradient(ellipse_at_top,hsl(222_28%_14%),hsl(var(--background))_55%)]">
+    <main className="relative min-h-svh bg-[radial-gradient(ellipse_at_top,hsl(214_22%_92%),hsl(var(--background))_55%)] dark:bg-[radial-gradient(ellipse_at_top,hsl(222_28%_14%),hsl(var(--background))_55%)]">
       <div className="mx-auto max-w-6xl space-y-10 px-5 pt-24 pb-16 sm:px-8 lg:pt-28 lg:pb-20">
         <PageBackLink href="/" label="home" />
 
@@ -99,10 +100,8 @@ export function PaymentPackagesPageView({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45 }}
         >
-          <p className="text-xs font-semibold tracking-[0.18em] text-accent uppercase">
-            Plans
-          </p>
-          <h1 className="font-[family-name:var(--font-display)] text-3xl tracking-tight text-foreground sm:text-4xl">
+          <p className="text-xs font-semibold tracking-[0.18em] text-accent uppercase">Plans</p>
+          <h1 className="font-display text-3xl tracking-tight text-foreground sm:text-4xl">
             {isLoggedIn && !billingLoading ? "Your plan & benefits" : "Choose the right plan"}
           </h1>
           <p className="text-sm text-muted-foreground sm:text-base">
@@ -152,7 +151,7 @@ export function PaymentPackagesPageView({
                   </div>
 
                   <div>
-                    <h2 className="font-[family-name:var(--font-display)] text-3xl tracking-tight">
+                    <h2 className="font-display text-3xl tracking-tight">
                       {activePlan.name}
                     </h2>
                     <p className="mt-1 text-sm text-muted-foreground">{activePlan.description}</p>
@@ -262,7 +261,7 @@ export function PaymentPackagesPageView({
                     </span>
                   ) : null}
 
-                  <div className="-mx-6 -mt-6 mb-5 aspect-[16/9] overflow-hidden border-b sm:-mx-7 sm:-mt-7">
+                  <div className="-mx-6 -mt-6 mb-5 aspect-video overflow-hidden border-b sm:-mx-7 sm:-mt-7">
                     <img
                       src={plan.imageUrl}
                       alt={`${plan.name} plan`}
@@ -272,9 +271,7 @@ export function PaymentPackagesPageView({
 
                   <div className="space-y-1">
                     <div className="flex items-center justify-between gap-2">
-                      <h2 className="font-[family-name:var(--font-display)] text-2xl tracking-tight">
-                        {plan.name}
-                      </h2>
+                      <h2 className="font-display text-2xl tracking-tight">{plan.name}</h2>
                       {plan.featured && !isCurrent ? (
                         <span
                           className={cn(
@@ -298,7 +295,7 @@ export function PaymentPackagesPageView({
                     </p>
                   </div>
 
-                  <p className="mt-5 font-[family-name:var(--font-display)] text-3xl tracking-tight">
+                  <p className="mt-5 font-display text-3xl tracking-tight">
                     {plan.price}
                     <span
                       className={cn(
@@ -351,4 +348,4 @@ export function PaymentPackagesPageView({
       </div>
     </main>
   );
-}
+});

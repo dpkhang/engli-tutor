@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
-import { getAppUrl, getMarketingAuthHref } from "@/features/auth/model/session";
+import { getAppUrl, getMarketingAuthHref } from "@/features/auth";
 import {
   getBillingTotal,
   getPlanById,
@@ -11,10 +11,10 @@ import {
   plansFromCatalog,
   type BillingPeriod,
   type PlanId,
-} from "@/features/marketing/model/plans";
-import { billingApi } from "@/features/payment/api/billing";
-import { useBillingMe } from "@/features/payment/hooks/use-billing-me";
-import { useBillingCatalog } from "@/features/payment/hooks/use-billing-catalog";
+} from "@/features/marketing";
+import { billingApi } from "../../api/billing";
+import { useBillingMe } from "../../hooks/use-billing-me";
+import { useBillingCatalog } from "../../hooks/use-billing-catalog";
 import { PaymentCheckoutPageView } from "./payment-checkout-page.view";
 
 export function PaymentCheckoutPage() {
@@ -22,7 +22,8 @@ export function PaymentCheckoutPage() {
   const searchParams = useSearchParams();
   const catalog = useBillingCatalog();
   const plans = useMemo(() => plansFromCatalog(catalog.data), [catalog.data]);
-  const plan = useMemo(() => getPlanById(searchParams.get("plan"), plans), [searchParams, plans]);
+  const planParam = searchParams.get("plan");
+  const plan = useMemo(() => getPlanById(planParam, plans), [planParam, plans]);
   const [period, setPeriod] = useState<BillingPeriod>("monthly");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,14 +33,22 @@ export function PaymentCheckoutPage() {
   const billing = useMemo(() => getBillingTotal(plan, period), [plan, period]);
   const isFree = plan.priceValue === 0;
   const paidPlan = isPaidPlan(plan.id);
-  const ownedPlan = billingMe.data?.hasPaidPlan
-    ? getPlanById(billingMe.data.subscription.planId, plans)
-    : null;
-  const upgradePlans = ownedPlan
-    ? plans.filter((candidate) => candidate.priceValue > ownedPlan.priceValue).sort(
-        (left, right) => left.priceValue - right.priceValue,
-      )
-    : [];
+  const ownedPlan = useMemo(
+    () =>
+      billingMe.data?.hasPaidPlan
+        ? getPlanById(billingMe.data.subscription.planId, plans)
+        : null,
+    [billingMe.data, plans],
+  );
+  const upgradePlans = useMemo(
+    () =>
+      ownedPlan
+        ? plans
+            .filter((candidate) => candidate.priceValue > ownedPlan.priceValue)
+            .sort((left, right) => left.priceValue - right.priceValue)
+        : [],
+    [ownedPlan, plans],
+  );
 
   useEffect(() => {
     if (sessionPending || catalog.isLoading) return;
@@ -54,7 +63,7 @@ export function PaymentCheckoutPage() {
     }
   }, [catalog.error, catalog.isLoading, isFree, searchParams, session?.user, sessionPending, router]);
 
-  const onSubscribe = async () => {
+  const onSubscribe = useCallback(async () => {
     if (!paidPlan) return;
     setError(null);
     setPending(true);
@@ -70,9 +79,9 @@ export function PaymentCheckoutPage() {
     } finally {
       setPending(false);
     }
-  };
+  }, [paidPlan, period, plan.id]);
 
-  const onUpgrade = async (planId: PlanId) => {
+  const onUpgrade = useCallback(async (planId: PlanId) => {
     if (!isPaidPlan(planId)) return;
     setError(null);
     setPending(true);
@@ -88,7 +97,7 @@ export function PaymentCheckoutPage() {
     } finally {
       setPending(false);
     }
-  };
+  }, []);
 
   return (
     <PaymentCheckoutPageView
@@ -111,8 +120,8 @@ export function PaymentCheckoutPage() {
       ownedSubscription={ownedPlan && billingMe.data ? billingMe.data.subscription : null}
       creditBalance={ownedPlan ? (billingMe.data?.balance ?? null) : null}
       onPeriodChange={setPeriod}
-      onSubscribe={() => void onSubscribe()}
-      onUpgrade={(planId) => void onUpgrade(planId)}
+      onSubscribe={onSubscribe}
+      onUpgrade={onUpgrade}
     />
   );
 }

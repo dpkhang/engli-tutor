@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "@/lib/auth-client";
-import { getAppUrl, getEntryHref, getMarketingAuthHref } from "@/features/auth/model/session";
+import { getAppUrl, getEntryHref, getMarketingAuthHref } from "../model/session";
 
 export function useAuthSession() {
   const { data, isPending, error } = useSession();

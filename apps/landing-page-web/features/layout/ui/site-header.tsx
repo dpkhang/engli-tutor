@@ -7,7 +7,7 @@ import { ArrowUpRight, ChevronDown } from "lucide-react";
 import { authClient, useSession } from "@/lib/auth-client";
 import { Button, cn, ThemeToggle } from "@landing-page-generator/ui";
 import { motion, AnimatePresence } from "motion/react";
-import { getAppUrl, getAuthHref } from "@/features/auth/model/session";
+import { getAppUrl, getAuthHref } from "@/features/auth";
 
 const GUEST_NAV = [
   { href: "/#for-you", label: "For you" },
@@ -40,7 +40,7 @@ function WorkspaceMenuCard({ href, className }: { href: string; className?: stri
     >
       <span className="relative flex items-center justify-between gap-3">
         <span className="min-w-0 space-y-0.5">
-          <span className="font-[family-name:var(--font-display)] text-base leading-none tracking-tight">
+          <span className="font-display text-base leading-none tracking-tight">
             Open Workspace
           </span>
           <span className="block truncate text-xs text-primary-foreground/70">
@@ -132,7 +132,7 @@ export function SiteHeader() {
         "fixed inset-x-0 top-0 z-50 transition-[background,box-shadow,backdrop-filter] duration-300",
         useSolidHeader
           ? "bg-background/90 shadow-[0_8px_28px_-20px_rgba(15,23,42,0.35)] backdrop-blur-md"
-          : "bg-gradient-to-b from-[#0b1524]/80 via-[#0b1524]/40 to-transparent",
+          : "bg-linear-to-b from-[#0b1524]/80 via-[#0b1524]/40 to-transparent",
       )}
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -149,7 +149,7 @@ export function SiteHeader() {
         <Link
           href="/"
           className={cn(
-            "font-[family-name:var(--font-display)] text-xl tracking-tight transition-colors",
+            "font-display text-xl tracking-tight transition-colors",
             useSolidHeader ? "text-foreground" : "text-white",
           )}
         >
@@ -195,7 +195,7 @@ export function SiteHeader() {
                   <span className="inline-flex size-6 items-center justify-center rounded-sm bg-primary text-[10px] font-semibold text-primary-foreground">
                     {displayName.slice(0, 1).toUpperCase()}
                   </span>
-                  <span className="hidden max-w-[7.5rem] truncate sm:inline">{displayName}</span>
+                  <span className="hidden max-w-30 truncate sm:inline">{displayName}</span>
                   <ChevronDown
                     className={cn(
                       "size-3.5 transition-transform duration-200",
@@ -209,7 +209,7 @@ export function SiteHeader() {
                   {menuOpen ? (
                     <motion.div
                       role="menu"
-                    className="absolute right-0 mt-2 w-[17.5rem] overflow-hidden rounded-sm border border-border bg-background p-2 shadow-[0_20px_44px_-24px_rgba(15,23,42,0.45)]"
+                    className="absolute right-0 mt-2 w-70 overflow-hidden rounded-sm border border-border bg-background p-2 shadow-[0_20px_44px_-24px_rgba(15,23,42,0.45)]"
                       initial={{ opacity: 0, y: 8, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 6, scale: 0.98 }}

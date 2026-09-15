@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { WelcomePage } from "@/features/onboarding/ui/welcome-page";
+import { WelcomePage } from "@/features/onboarding";
 
 export const metadata: Metadata = {
   title: "Welcome — EngliTutor",

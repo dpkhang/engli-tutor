@@ -4,8 +4,8 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import { QueryProvider } from "@/providers/query-provider";
 import { AuthGate } from "@/providers/auth-gate";
 import { AppShell, GlobalNavigationLoading, SignOutLoadingProvider } from "@/features/layout";
-import { AppearanceProvider } from "@/features/settings/ui/appearance-runtime";
-import { ActionDialogProvider } from "@landing-page-generator/ui";
+import { AppearanceProvider } from "@/features/settings";
+import { ActionDialogProvider, ToastProvider } from "@landing-page-generator/ui";
 import "./globals.css";
 
 const sans = Plus_Jakarta_Sans({
@@ -34,14 +34,16 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <QueryProvider>
           <AppearanceProvider>
             <ActionDialogProvider>
-              <SignOutLoadingProvider>
-                <Suspense fallback={null}>
-                  <GlobalNavigationLoading />
-                </Suspense>
-                <AuthGate>
-                  <AppShell>{children}</AppShell>
-                </AuthGate>
-              </SignOutLoadingProvider>
+              <ToastProvider>
+                <SignOutLoadingProvider>
+                  <Suspense fallback={null}>
+                    <GlobalNavigationLoading />
+                  </Suspense>
+                  <AuthGate>
+                    <AppShell>{children}</AppShell>
+                  </AuthGate>
+                </SignOutLoadingProvider>
+              </ToastProvider>
             </ActionDialogProvider>
           </AppearanceProvider>
         </QueryProvider>

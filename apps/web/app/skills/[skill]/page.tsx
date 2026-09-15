@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { SkillListPage } from "@/features/learn";
-import { SKILLS, isSkillId } from "@/features/learn/model/skill-exercises";
+import { SkillListPage, SKILLS, isSkillId } from "@/features/learn";
 
 export function generateStaticParams() {
   return SKILLS.map((skill) => ({ skill: skill.id }));

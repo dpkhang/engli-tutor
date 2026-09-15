@@ -1,8 +1,9 @@
 "use client";
 
+import { memo } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button } from "@landing-page-generator/ui";
 import { motion } from "motion/react";
-import type { Plan, PlanId } from "@/features/marketing/model/plans";
+import type { Plan, PlanId } from "../../model/plans";
 
 const LEARNER_NEEDS = [
   {
@@ -123,7 +124,7 @@ export type MainBodyViewProps = {
   onPlanClick: (planId: PlanId) => void;
 };
 
-export function MainBodyView({
+export const MainBodyView = memo(function MainBodyView({
   entryLabel,
   plans,
   onEntryClick,
@@ -334,7 +335,7 @@ export function MainBodyView({
 
       {/* 6. Pricing */}
       <section id="pricing" className="section-snap border-y border-border bg-surface/60">
-        <div className="mx-auto flex min-h-[100svh] w-full max-w-6xl flex-col justify-center px-5 py-24 sm:px-8">
+        <div className="mx-auto flex min-h-svh w-full max-w-6xl flex-col justify-center px-5 py-24 sm:px-8">
           <motion.div {...fadeUp}>
             <p className="text-[11px] font-medium tracking-[0.18em] text-accent uppercase">
               Pricing
@@ -348,7 +349,7 @@ export function MainBodyView({
 
             <div
               className={`mt-12 grid gap-5 ${
-                plans.length === 2 ? "mx-auto w-full max-w-[47.5rem] lg:grid-cols-2" : "lg:grid-cols-3"
+                plans.length === 2 ? "mx-auto w-full max-w-190 lg:grid-cols-2" : "lg:grid-cols-3"
               }`}
             >
               {plans.map((plan) => (
@@ -424,7 +425,7 @@ export function MainBodyView({
 
       {/* 7. FAQ */}
       <section id="faq" className="section-snap w-full">
-        <div className="mx-auto flex min-h-[100svh] w-full max-w-6xl flex-col justify-center px-5 py-24 sm:px-8">
+        <div className="mx-auto flex min-h-svh w-full max-w-6xl flex-col justify-center px-5 py-24 sm:px-8">
           <motion.div {...fadeUp}>
             <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
               <div>
@@ -483,4 +484,4 @@ export function MainBodyView({
       </section>
     </div>
   );
-}
+});

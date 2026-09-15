@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
-import { SkillExercisePage } from "@/features/learn";
-import { isSkillId } from "@/features/learn/model/skill-exercises";
+import { SkillExercisePage, isSkillId } from "@/features/learn";
 
 export default async function SkillExerciseRoutePage({
   params,

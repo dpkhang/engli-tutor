@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowUpCircle,
@@ -27,11 +27,7 @@ import {
 } from "@landing-page-generator/ui";
 import { AnimatePresence, motion } from "motion/react";
 import { PageBackLink } from "@/features/layout";
-import {
-  type BillingPeriod,
-  type Plan,
-  type PlanId,
-} from "@/features/marketing/model/plans";
+import { type BillingPeriod, type Plan, type PlanId } from "@/features/marketing";
 
 export type PaymentCheckoutPageViewProps = {
   plan: Plan;
@@ -56,7 +52,7 @@ export type PaymentCheckoutPageViewProps = {
   onUpgrade: (planId: PlanId) => void;
 };
 
-export function PaymentCheckoutPageView({
+export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
   plan,
   period,
   billing,
@@ -78,7 +74,7 @@ export function PaymentCheckoutPageView({
 
   if (isFree || checkingBilling) {
     return (
-      <main className="grid min-h-[100svh] place-items-center px-5">
+      <main className="grid min-h-svh place-items-center px-5">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <LoaderCircle className="size-4 animate-spin" />
           {isFree ? "Redirecting to free signup…" : "Checking your plan…"}
@@ -96,7 +92,7 @@ export function PaymentCheckoutPageView({
       : null;
 
     return (
-      <main className="min-h-[100svh] bg-background px-5 py-20 sm:px-8 sm:py-24">
+      <main className="min-h-svh bg-background px-5 py-20 sm:px-8 sm:py-24">
         <motion.section
           className="mx-auto max-w-4xl"
           initial={{ opacity: 0, y: 12 }}
@@ -153,7 +149,7 @@ export function PaymentCheckoutPageView({
               <p className="text-xs font-semibold tracking-[0.14em] text-white/75 uppercase">
                 Current plan · {periodLabel}
               </p>
-              <h1 className="mt-1 font-[family-name:var(--font-display)] text-4xl tracking-tight sm:text-5xl">
+              <h1 className="mt-1 font-display text-4xl tracking-tight sm:text-5xl">
                 {ownedPlan.name}
               </h1>
               <p className="mt-2 max-w-xl text-sm text-white/80">{ownedPlan.description}</p>
@@ -201,7 +197,7 @@ export function PaymentCheckoutPageView({
           <AnimatePresence>
             {showUpgradeOptions && upgradePlans.length > 0 ? (
               <motion.div
-                className="fixed inset-0 z-[100] grid place-items-center overflow-y-auto bg-black/45 p-4 backdrop-blur-[2px]"
+                className="fixed inset-0 z-100 grid place-items-center overflow-y-auto bg-black/45 p-4 backdrop-blur-[2px]"
                 role="presentation"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -260,7 +256,7 @@ export function PaymentCheckoutPageView({
                         <CardHeader className="space-y-2">
                           <CardTitle className="text-xl">{upgradePlan.name}</CardTitle>
                           <CardDescription>{upgradePlan.description}</CardDescription>
-                          <p className="font-[family-name:var(--font-display)] text-2xl tracking-tight">
+                          <p className="font-display text-2xl tracking-tight">
                             {upgradePlan.price}
                             <span className="ml-1 text-sm font-sans font-normal text-muted-foreground">
                               {upgradePlan.period}
@@ -301,7 +297,7 @@ export function PaymentCheckoutPageView({
   }
 
   return (
-    <main className="relative min-h-[100svh] bg-[radial-gradient(ellipse_at_top,hsl(214_22%_92%),hsl(var(--background))_55%)] dark:bg-[radial-gradient(ellipse_at_top,hsl(222_28%_14%),hsl(var(--background))_55%)]">
+    <main className="relative min-h-svh bg-[radial-gradient(ellipse_at_top,hsl(214_22%_92%),hsl(var(--background))_55%)] dark:bg-[radial-gradient(ellipse_at_top,hsl(222_28%_14%),hsl(var(--background))_55%)]">
       <div className="mx-auto grid max-w-6xl gap-10 px-5 pt-24 pb-16 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14 lg:pt-28 lg:pb-20">
         <motion.div
           className="space-y-8"
@@ -315,12 +311,12 @@ export function PaymentCheckoutPageView({
               <p className="text-xs font-semibold tracking-[0.18em] text-accent uppercase">
                 Checkout
               </p>
-              <h1 className="font-[family-name:var(--font-display)] text-3xl tracking-tight text-foreground sm:text-4xl">
+              <h1 className="font-display text-3xl tracking-tight text-foreground sm:text-4xl">
                 Complete your subscription
               </h1>
               <p className="max-w-lg text-sm text-muted-foreground sm:text-base">
-                <span className="font-medium text-foreground">{plan.name}</span> plan — secure payment
-                via Stripe (international cards).
+                <span className="font-medium text-foreground">{plan.name}</span> plan — secure
+                payment via Stripe (international cards).
               </p>
             </div>
           </div>
@@ -383,16 +379,14 @@ export function PaymentCheckoutPageView({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.08 }}
         >
-          <div className="-mx-7 -mt-7 aspect-[16/9] overflow-hidden border-b sm:-mx-8 sm:-mt-8">
+          <div className="-mx-7 -mt-7 aspect-video overflow-hidden border-b sm:-mx-8 sm:-mt-8">
             <img src={plan.imageUrl} alt={`${plan.name} plan`} className="size-full object-cover" />
           </div>
           <div className="space-y-1">
             <p className="text-xs font-semibold tracking-[0.16em] text-accent uppercase">
               Order summary
             </p>
-            <h2 className="font-[family-name:var(--font-display)] text-2xl text-foreground">
-              {plan.name}
-            </h2>
+            <h2 className="font-display text-2xl text-foreground">{plan.name}</h2>
             <p className="text-sm text-muted-foreground">{plan.description}</p>
           </div>
 
@@ -408,7 +402,7 @@ export function PaymentCheckoutPageView({
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="text-xs text-muted-foreground">Total</p>
-              <p className="font-[family-name:var(--font-display)] text-3xl tracking-tight text-foreground">
+              <p className="font-display text-3xl tracking-tight text-foreground">
                 {billing.label}
               </p>
             </div>
@@ -429,4 +423,4 @@ export function PaymentCheckoutPageView({
       </div>
     </main>
   );
-}
+});
