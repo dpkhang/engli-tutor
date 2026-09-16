@@ -1,4 +1,4 @@
-import { GamesHubPage } from "@/features/learn/ui/games-hub-page";
+import { GamesHubPage } from "@/features/learn";
 
 export default function GamesPage() {
   return <GamesHubPage />;

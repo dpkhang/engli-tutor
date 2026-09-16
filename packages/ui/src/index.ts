@@ -42,6 +42,12 @@ export {
   type DialogTone,
 } from "./components/action-dialog";
 export {
+  ToastProvider,
+  useToast,
+  type ToastOptions,
+  type ToastTone,
+} from "./components/toast";
+export {
   Accordion,
   AccordionItem,
   AccordionTrigger,

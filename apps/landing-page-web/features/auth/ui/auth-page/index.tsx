@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { authClient, authErrorMessage, useSession } from "@/lib/auth-client";
-import { getAppUrl, getSiteUrl } from "@/features/auth/model/session";
+import { getAppUrl, getSiteUrl } from "../../model/session";
 import { authFormSchema, type AuthFormValues, type AuthPayload } from "../../model/auth-schema";
 import { AuthPageView, type AuthMode } from "./auth-page.view";
 
@@ -44,52 +44,59 @@ export function AuthPage() {
     window.location.replace(returnTo);
   }, [sessionPending, data?.user, returnTo]);
 
-  const onSubmit = form.handleSubmit(async (values) => {
-    setError(null);
-    setPending(true);
+  const changeMode = useCallback(
+    (nextMode: AuthMode) => {
+      if (pending || nextMode === mode) return;
+      setMode(nextMode);
+      setError(null);
+      form.reset({
+        mode: nextMode,
+        name: "",
+        email: form.getValues("email"),
+        password: "",
+      });
+    },
+    [form, mode, pending],
+  );
 
-    try {
-      if (values.mode === "register") {
-        const result = await authClient.signUp.email({
-          email: values.email,
-          password: values.password,
-          name: values.name,
-        });
-        if (result.error) {
-          setError(authErrorMessage(result.error));
+  const onSubmit = useMemo(
+    () =>
+      form.handleSubmit(async (values) => {
+        setError(null);
+        setPending(true);
+
+        try {
+          if (values.mode === "register") {
+            const result = await authClient.signUp.email({
+              email: values.email,
+              password: values.password,
+              name: values.name,
+            });
+            if (result.error) {
+              setError(authErrorMessage(result.error));
+              setPending(false);
+              return;
+            }
+          } else {
+            const result = await authClient.signIn.email({
+              email: values.email,
+              password: values.password,
+            });
+            if (result.error) {
+              setError(authErrorMessage(result.error));
+              setPending(false);
+              return;
+            }
+          }
+
+          window.location.assign(returnTo);
+        } catch {
           setPending(false);
-          return;
+          setError("Could not reach the auth server. Please try again.");
         }
-      } else {
-        const result = await authClient.signIn.email({
-          email: values.email,
-          password: values.password,
-        });
-        if (result.error) {
-          setError(authErrorMessage(result.error));
-          setPending(false);
-          return;
-        }
-      }
-
-      window.location.assign(returnTo);
-    } catch {
-      setPending(false);
-      setError("Could not reach the auth server. Please try again.");
-    }
-  });
-
-  const changeMode = (nextMode: AuthMode) => {
-    if (pending || nextMode === mode) return;
-    setMode(nextMode);
-    setError(null);
-    form.reset({
-      mode: nextMode,
-      name: "",
-      email: form.getValues("email"),
-      password: "",
-    });
-  };
+      }),
+    [form, returnTo],
+  );
 
   return (
     <AuthPageView

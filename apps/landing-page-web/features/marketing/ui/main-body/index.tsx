@@ -1,30 +1,39 @@
 "use client";
 
-import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
-import { goToEntry, goToWorkspace } from "@/features/auth/model/session";
-import { planCheckoutHref, plansFromCatalog } from "@/features/marketing/model/plans";
+import { useCallback, useMemo } from "react";
+import { goToEntry, goToWorkspace, useAuthSession } from "@/features/auth";
+import { planCheckoutHref, plansFromCatalog, type PlanId } from "../../model/plans";
 import { useBillingCatalog } from "@/features/payment/hooks/use-billing-catalog";
 import { MainBodyView } from "./main-body.view";
 
 export function MainBody() {
   const { entryLabel, isLoggedIn } = useAuthSession();
   const catalog = useBillingCatalog();
-  const plans = plansFromCatalog(catalog.data);
-  const visiblePlans = isLoggedIn ? plans.filter((plan) => plan.id !== "starter") : plans;
+  const plans = useMemo(() => plansFromCatalog(catalog.data), [catalog.data]);
+  const visiblePlans = useMemo(
+    () => (isLoggedIn ? plans.filter((plan) => plan.id !== "starter") : plans),
+    [isLoggedIn, plans],
+  );
+
+  const onEntryClick = useCallback(() => goToEntry(isLoggedIn), [isLoggedIn]);
+  const onPlanClick = useCallback(
+    (planId: PlanId) => {
+      if (planId === "starter" && isLoggedIn) {
+        goToWorkspace();
+        return;
+      }
+
+      window.location.href = planCheckoutHref(planId);
+    },
+    [isLoggedIn],
+  );
 
   return (
     <MainBodyView
       entryLabel={entryLabel}
       plans={visiblePlans}
-      onEntryClick={() => goToEntry(isLoggedIn)}
-      onPlanClick={(planId) => {
-        if (planId === "starter" && isLoggedIn) {
-          goToWorkspace();
-          return;
-        }
-
-        window.location.href = planCheckoutHref(planId);
-      }}
+      onEntryClick={onEntryClick}
+      onPlanClick={onPlanClick}
     />
   );
 }

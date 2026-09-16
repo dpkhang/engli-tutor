@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
+import { useAuthSession } from "@/features/auth";
 
 const FOOTER_LINKS = [
   {
@@ -32,7 +32,7 @@ export function SiteFooter() {
     <footer className="border-t border-border bg-primary text-primary-foreground">
       <div className="mx-auto grid max-w-6xl gap-8 px-5 py-10 sm:px-8 md:grid-cols-[1.6fr_1fr_1fr] md:gap-6 md:py-12">
         <div className="space-y-3">
-          <p className="font-[family-name:var(--font-display)] text-2xl tracking-tight">
+          <p className="font-display text-2xl tracking-tight">
             EngliTutor
           </p>
           <p className="max-w-xs text-sm leading-relaxed text-primary-foreground/65">

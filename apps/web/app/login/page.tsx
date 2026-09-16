@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { LoginPage } from "@/features/auth/ui/login-page";
+import { LoginPage } from "@/features/auth";
 
 export default function LoginRoutePage() {
   return (

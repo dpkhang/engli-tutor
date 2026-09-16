@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import type { RefObject } from "react";
+import { memo, type RefObject } from "react";
 import { Button } from "@landing-page-generator/ui";
 import { motion, type MotionValue } from "motion/react";
 
@@ -19,7 +19,7 @@ export type MasterBannerViewProps = {
   onPracticeClick: () => void;
 };
 
-export function MasterBannerView({
+export const MasterBannerView = memo(function MasterBannerView({
   sectionRef,
   entryLabel,
   imageTransform,
@@ -30,7 +30,7 @@ export function MasterBannerView({
   return (
     <section
       ref={sectionRef}
-      className="section-snap relative min-h-svh overflow-hidden bg-[#0b1524] [contain:paint]"
+      className="section-snap relative min-h-svh overflow-hidden bg-[#0b1524] contain-[paint]"
     >
       <motion.div
         aria-hidden
@@ -127,4 +127,4 @@ export function MasterBannerView({
       </div>
     </section>
   );
-}
+});

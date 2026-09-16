@@ -89,6 +89,16 @@ export function setAutoPlayListening(value: boolean) {
   notifyPreferences();
 }
 
+export function applyLearningPreferences(prefs: {
+  level: SkillLevel | null;
+  speechRate: SpeechRateId;
+  autoPlay: boolean;
+}) {
+  setPreferredLevel(prefs.level);
+  setSpeechRateId(prefs.speechRate);
+  setAutoPlayListening(prefs.autoPlay);
+}
+
 export function getThemePreference(): ThemePreference {
   if (typeof window === "undefined") return "system";
   const stored = localStorage.getItem(THEME_STORAGE_KEY);
@@ -165,6 +175,24 @@ export function applyStoredAppearance() {
   paintAccent(getAccentPreference());
   paintTextSize(getTextSizePreference());
   paintReduceMotion(getReduceMotionPreference());
+}
+
+export function applyAppearancePreferences(prefs: {
+  theme: ThemePreference;
+  accent: AccentId;
+  textSize: TextSizeId;
+  reduceMotion: ReduceMotionPreference;
+}) {
+  paintTheme(prefs.theme);
+  localStorage.setItem(THEME_STORAGE_KEY, prefs.theme);
+  paintAccent(prefs.accent);
+  localStorage.setItem(ACCENT_STORAGE_KEY, prefs.accent);
+  paintTextSize(prefs.textSize);
+  localStorage.setItem(TEXT_SIZE_STORAGE_KEY, prefs.textSize);
+  paintReduceMotion(prefs.reduceMotion);
+  localStorage.setItem(REDUCE_MOTION_STORAGE_KEY, prefs.reduceMotion);
+  window.dispatchEvent(new Event(THEME_EVENT));
+  notifyPreferences();
 }
 
 export function resolveSpeechRates() {

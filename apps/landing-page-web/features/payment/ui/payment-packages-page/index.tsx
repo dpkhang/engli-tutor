@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
-import { getAppUrl, getAuthHref, getSiteUrl } from "@/features/auth/model/session";
-import { getPlanById, planCheckoutHref, plansFromCatalog, type PlanId } from "@/features/marketing/model/plans";
-import { billingApi } from "@/features/payment/api/billing";
-import { useBillingMe } from "@/features/payment/hooks/use-billing-me";
-import { useBillingCatalog } from "@/features/payment/hooks/use-billing-catalog";
+import { getAppUrl, getAuthHref, getSiteUrl, useAuthSession } from "@/features/auth";
+import { getPlanById, planCheckoutHref, plansFromCatalog, type PlanId } from "@/features/marketing";
+import { billingApi } from "../../api/billing";
+import { useBillingMe } from "../../hooks/use-billing-me";
+import { useBillingCatalog } from "../../hooks/use-billing-catalog";
 import { PaymentPackagesPageView } from "./payment-packages-page.view";
 
 export function PaymentPackagesPage() {
@@ -15,7 +14,7 @@ export function PaymentPackagesPage() {
   const searchParams = useSearchParams();
   const queriedPlan = searchParams.get("plan");
   const catalog = useBillingCatalog();
-  const plans = plansFromCatalog(catalog.data);
+  const plans = useMemo(() => plansFromCatalog(catalog.data), [catalog.data]);
   const highlighted = getPlanById(queriedPlan, plans).id;
   const checkoutState = searchParams.get("checkout");
   const checkoutType = searchParams.get("type");
@@ -26,14 +25,18 @@ export function PaymentPackagesPage() {
   const redirectingToCurrentPlan = Boolean(
     !authReady || catalog.isLoading || (isLoggedIn && (billing.isLoading || billing.data?.hasPaidPlan)),
   );
-  const planHrefs = Object.fromEntries(
-    plans.map((plan) => {
-      const checkoutHref = planCheckoutHref(plan.id);
-      if (isLoggedIn) return [plan.id, checkoutHref];
-      if (plan.id === "starter") return [plan.id, getAuthHref("/")];
-      return [plan.id, getAuthHref(`${getSiteUrl()}${checkoutHref}`)];
-    }),
-  ) as Record<PlanId, string>;
+  const planHrefs = useMemo(
+    () =>
+      Object.fromEntries(
+        plans.map((plan) => {
+          const checkoutHref = planCheckoutHref(plan.id);
+          if (isLoggedIn) return [plan.id, checkoutHref];
+          if (plan.id === "starter") return [plan.id, getAuthHref("/")];
+          return [plan.id, getAuthHref(`${getSiteUrl()}${checkoutHref}`)];
+        }),
+      ) as Record<PlanId, string>,
+    [isLoggedIn, plans],
+  );
 
   useEffect(() => {
     if (checkoutState !== "success" || !isLoggedIn) return;

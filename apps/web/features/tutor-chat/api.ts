@@ -28,16 +28,21 @@ export const tutorApi = {
   }) => workspaceApiClient.post<TutorChatResponse>("/api/tutor/chat", input),
 
   /** Returns MPEG audio when TTS is configured; throws on non-OK responses. */
-  speak: async (input: { text: string; voice?: string }): Promise<Blob> => {
+  speak: async (input: {
+    text: string;
+    voice?: string;
+    signal?: AbortSignal;
+  }): Promise<Blob> => {
     const response = await fetch(`${getApiBase()}/api/tutor/speak`, {
       method: "POST",
       credentials: "include",
+      signal: input.signal,
       headers: {
         Accept: "audio/mpeg, application/json",
         "Content-Type": "application/json",
         "X-Client": "pagecraft-workspace",
       },
-      body: JSON.stringify(input),
+      body: JSON.stringify({ text: input.text, voice: input.voice }),
     });
 
     if (!response.ok) {

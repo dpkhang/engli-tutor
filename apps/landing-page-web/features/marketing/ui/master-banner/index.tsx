@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useMotionTemplate, useMotionValue, useSpring } from "motion/react";
-import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
-import { goToEntry } from "@/features/auth/model/session";
+import { goToEntry, useAuthSession } from "@/features/auth";
 import { MasterBannerView } from "./master-banner.view";
 
 function prefersReducedMotion() {
@@ -73,16 +72,19 @@ export function MasterBanner() {
     };
   }, [rawX, rawY]);
 
+  const onEntryClick = useCallback(() => goToEntry(isLoggedIn), [isLoggedIn]);
+  const onPracticeClick = useCallback(() => {
+    document.getElementById("practice")?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
   return (
     <MasterBannerView
       sectionRef={sectionRef}
       entryLabel={entryLabel}
       imageTransform={imageTransform}
       glowTransform={glowTransform}
-      onEntryClick={() => goToEntry(isLoggedIn)}
-      onPracticeClick={() => {
-        document.getElementById("practice")?.scrollIntoView({ behavior: "smooth" });
-      }}
+      onEntryClick={onEntryClick}
+      onPracticeClick={onPracticeClick}
     />
   );
 }

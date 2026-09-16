@@ -4,6 +4,8 @@ export {
   hasSeenWelcome,
   needsOnboarding,
   persistWelcomeSeen,
+  peekWelcomePending,
+  clearWelcomePending,
   ONBOARDING_PATH,
   safeOnboardingReturnTo,
   WELCOME_PATH,

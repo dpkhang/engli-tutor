@@ -1,4 +1,4 @@
-import { SearchPage } from "@/features/learn/ui/search-page";
+import { SearchPage } from "@/features/learn";
 
 export default function SearchRoutePage() {
   return <SearchPage />;

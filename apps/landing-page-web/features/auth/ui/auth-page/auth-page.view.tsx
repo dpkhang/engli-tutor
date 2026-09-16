@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { memo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import {
@@ -44,7 +44,7 @@ function FieldMessage({ id, message }: { id: string; message?: string }) {
   );
 }
 
-export function AuthPageView({
+export const AuthPageView = memo(function AuthPageView({
   mode,
   pending,
   error,
@@ -66,11 +66,11 @@ export function AuthPageView({
       />
       <div
         aria-hidden
-        className="absolute -top-32 left-1/2 h-80 w-[46rem] -translate-x-1/2 rounded-full bg-violet-500/15 blur-[110px]"
+        className="absolute -top-32 left-1/2 h-80 w-184 -translate-x-1/2 rounded-full bg-violet-500/15 blur-[110px]"
       />
       <div
         aria-hidden
-        className="absolute inset-0 opacity-[0.035] [background-image:linear-gradient(white_1px,transparent_1px),linear-gradient(90deg,white_1px,transparent_1px)] [background-size:56px_56px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]"
+        className="absolute inset-0 bg-[linear-gradient(white_1px,transparent_1px),linear-gradient(90deg,white_1px,transparent_1px)] bg-size-[56px_56px] opacity-[0.035] mask-[linear-gradient(to_bottom,black,transparent_85%)]"
       />
 
       <header className="absolute inset-x-0 top-0 z-20 mx-auto flex max-w-7xl items-center justify-between px-5 py-6 sm:px-8 lg:px-12">
@@ -78,7 +78,7 @@ export function AuthPageView({
           href="/"
           className="group inline-flex items-center gap-2.5 text-sm font-semibold tracking-wide text-white"
         >
-          <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-indigo-400 to-violet-600 shadow-lg shadow-indigo-500/25 transition-transform group-hover:-rotate-6">
+          <span className="grid size-9 place-items-center rounded-xl bg-linear-to-br from-indigo-400 to-violet-600 shadow-lg shadow-indigo-500/25 transition-transform group-hover:-rotate-6">
             <Sparkles className="size-4" />
           </span>
           <span className="text-base">EngliTutor</span>
@@ -98,12 +98,12 @@ export function AuthPageView({
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-indigo-200 backdrop-blur-xl">
+          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-1.5 text-xs font-medium text-indigo-200 backdrop-blur-xl">
             <WandSparkles className="size-3.5" /> Your personal AI English coach
           </div>
           <h1 className="max-w-2xl text-5xl font-semibold leading-[1.07] tracking-[-0.045em] text-white xl:text-6xl">
             Make every conversation feel{" "}
-            <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-sky-300 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-indigo-300 via-violet-300 to-sky-300 bg-clip-text text-transparent">
               effortless.
             </span>
           </h1>
@@ -112,11 +112,11 @@ export function AuthPageView({
             feedback, and progress you can feel.
           </p>
 
-          <div className="relative mt-10 max-w-xl rounded-[1.6rem] border border-white/10 bg-white/[0.06] p-3 shadow-2xl shadow-black/30 backdrop-blur-2xl">
+          <div className="relative mt-10 max-w-xl rounded-[1.6rem] border border-white/10 bg-white/6 p-3 shadow-2xl shadow-black/30 backdrop-blur-2xl">
             <div className="rounded-[1.15rem] border border-white/10 bg-[#0d1227]/90 p-5">
               <div className="mb-5 flex items-center justify-between border-b border-white/8 pb-4">
                 <div className="flex items-center gap-3">
-                  <span className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-violet-400 to-indigo-600">
+                  <span className="grid size-9 place-items-center rounded-full bg-linear-to-br from-violet-400 to-indigo-600">
                     <Sparkles className="size-4 text-white" />
                   </span>
                   <div>
@@ -130,14 +130,14 @@ export function AuthPageView({
                 </span>
               </div>
               <div className="space-y-3">
-                <div className="max-w-[82%] rounded-2xl rounded-tl-md bg-white/[0.07] px-4 py-3 text-sm leading-6 text-white/75">
+                <div className="max-w-[82%] rounded-2xl rounded-tl-md bg-white/7 px-4 py-3 text-sm leading-6 text-white/75">
                   How would you introduce your idea in tomorrow&apos;s meeting?
                 </div>
                 <div className="ml-auto max-w-[78%] rounded-2xl rounded-tr-md bg-indigo-500 px-4 py-3 text-sm leading-6 text-white">
                   I&apos;d start by explaining the problem our customers face...
                 </div>
               </div>
-              <div className="mt-5 flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.04] p-3">
+              <div className="mt-5 flex items-center gap-3 rounded-xl border border-white/8 bg-white/4 p-3">
                 <button
                   type="button"
                   tabIndex={-1}
@@ -175,7 +175,7 @@ export function AuthPageView({
         </motion.section>
 
         <motion.section
-          className="mx-auto w-full max-w-[31rem] rounded-[1.75rem] border border-white/40 bg-white/[0.96] p-6 shadow-[0_30px_90px_rgba(0,0,0,.4)] backdrop-blur-2xl sm:p-9 dark:border-white/10 dark:bg-slate-950/80"
+          className="mx-auto w-full max-w-124 rounded-[1.75rem] border border-white/40 bg-white/96 p-6 shadow-[0_30px_90px_rgba(0,0,0,.4)] backdrop-blur-2xl sm:p-9 dark:border-white/10 dark:bg-slate-950/80"
           initial={{ opacity: 0, y: 20, scale: 0.985 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.48, delay: 0.08 }}
@@ -296,7 +296,7 @@ export function AuthPageView({
             </p>
             <Button
               type="submit"
-              className="mt-2 h-12 w-full rounded-xl border-0 bg-gradient-to-r from-indigo-600 to-violet-600 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all hover:brightness-110"
+              className="mt-2 h-12 w-full rounded-xl border-0 bg-linear-to-r from-indigo-600 to-violet-600 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all hover:brightness-110"
               size="lg"
               disabled={pending}
             >
@@ -324,4 +324,4 @@ export function AuthPageView({
       </div>
     </main>
   );
-}
+});

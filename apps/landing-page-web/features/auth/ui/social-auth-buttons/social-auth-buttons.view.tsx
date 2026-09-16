@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import { Button, cn } from "@landing-page-generator/ui";
 
 export type SocialProvider = "google" | "apple" | "facebook" | "github";
@@ -58,7 +58,9 @@ export type SocialAuthButtonsViewProps = SocialAuthButtonsProps & {
   onProviderClick: (provider: SocialProviderItem) => void;
 };
 
-export function SocialAuthButtonsView({ className }: SocialAuthButtonsViewProps) {
+export const SocialAuthButtonsView = memo(function SocialAuthButtonsView({
+  className,
+}: SocialAuthButtonsViewProps) {
   return (
     <div className={cn("space-y-2", className)}>
       <div className="grid grid-cols-2 gap-2">
@@ -79,4 +81,4 @@ export function SocialAuthButtonsView({ className }: SocialAuthButtonsViewProps)
       <p className="text-center text-xs text-muted-foreground">Social sign-in — coming soon</p>
     </div>
   );
-}
+});

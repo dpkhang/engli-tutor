@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { memo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import {
@@ -17,7 +17,6 @@ import {
   UserRound,
 } from "lucide-react";
 import { Button, Input, SegmentedSwitch } from "@landing-page-generator/ui";
-import { AnimatePresence, motion } from "motion/react";
 import type { LoginFormValues } from "../../model/login-schema";
 
 export type AuthMode = "login" | "register";
@@ -43,7 +42,7 @@ function FieldMessage({ id, message }: { id: string; message?: string }) {
   );
 }
 
-export function LoginPageView({
+export const LoginPageView = memo(function LoginPageView({
   mode,
   pending,
   error,
@@ -55,17 +54,13 @@ export function LoginPageView({
   const [showPassword, setShowPassword] = useState(false);
   const isLogin = mode === "login";
   const inputClass =
-    "h-12 rounded-xl border-slate-200 bg-white/80 pl-11 shadow-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus-visible:border-primary focus-visible:ring-primary/15 dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20";
+    "h-12 rounded-xl border-slate-200 bg-white/80 pl-11 shadow-none transition-[border-color,box-shadow] placeholder:text-slate-400 hover:border-slate-300 focus-visible:border-primary focus-visible:ring-primary/15 dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20";
 
   return (
     <main className="relative min-h-svh overflow-hidden bg-slate-950">
       <div
         aria-hidden
-        className="absolute inset-0 bg-[radial-gradient(circle_at_8%_5%,rgba(79,70,229,.42),transparent_34%),radial-gradient(circle_at_94%_92%,rgba(6,182,212,.2),transparent_34%),linear-gradient(135deg,#070a15_0%,#111633_50%,#080b18_100%)]"
-      />
-      <div
-        aria-hidden
-        className="absolute inset-0 opacity-[0.035] [background-image:linear-gradient(white_1px,transparent_1px),linear-gradient(90deg,white_1px,transparent_1px)] [background-size:56px_56px] [mask-image:linear-gradient(to_bottom,black,transparent_86%)]"
+        className="absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,hsl(var(--primary)/0.35),transparent_36%),radial-gradient(circle_at_92%_92%,hsl(var(--primary)/0.12),transparent_34%),linear-gradient(160deg,#070a15_0%,#111633_52%,#080b18_100%)]"
       />
 
       <header className="absolute inset-x-0 top-0 z-20 mx-auto flex max-w-7xl items-center justify-between px-5 py-6 sm:px-8 lg:px-12">
@@ -84,20 +79,15 @@ export function LoginPageView({
       </header>
 
       <div className="relative z-10 mx-auto grid min-h-svh max-w-7xl items-center gap-12 px-5 pt-24 pb-8 sm:px-8 lg:grid-cols-[1fr_30rem] lg:px-12 lg:py-28">
-        <motion.section
-          className="hidden pr-8 lg:block"
-          initial={{ opacity: 0, x: -24 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.58 }}
-        >
-          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-indigo-200 backdrop-blur-xl">
+        <section className="auth-enter-panel hidden pr-8 lg:block">
+          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-1.5 text-xs font-medium text-indigo-200">
             <LayoutDashboard className="size-3.5" />
             Everything you need, in one place
           </div>
           <h1 className="max-w-2xl text-5xl font-semibold leading-[1.07] tracking-[-0.045em] text-white xl:text-6xl">
             Your learning.
             <br />
-            <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-sky-300 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-primary via-indigo-300 to-sky-300 bg-clip-text text-transparent">
               Beautifully organized.
             </span>
           </h1>
@@ -106,7 +96,7 @@ export function LoginPageView({
             workspace.
           </p>
 
-          <div className="relative mt-10 max-w-2xl rounded-[1.6rem] border border-white/10 bg-white/[0.06] p-3 shadow-2xl shadow-black/35 backdrop-blur-2xl">
+          <div className="relative mt-10 max-w-2xl rounded-[1.6rem] border border-white/10 bg-white/6 p-3 shadow-2xl shadow-black/35">
             <div className="overflow-hidden rounded-[1.15rem] border border-white/10 bg-[#0d1227]/95">
               <div className="flex items-center gap-2 border-b border-white/8 px-5 py-4">
                 <span className="size-2.5 rounded-full bg-rose-400/80" />
@@ -116,7 +106,7 @@ export function LoginPageView({
               </div>
               <div className="grid grid-cols-[3.5rem_1fr]">
                 <div className="flex flex-col items-center gap-4 border-r border-white/8 py-5 text-white/35">
-                  <span className="grid size-8 place-items-center rounded-lg bg-indigo-500 text-white">
+                  <span className="grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground">
                     <Sparkles className="size-4" />
                   </span>
                   <LayoutDashboard className="size-4 text-white" />
@@ -138,27 +128,27 @@ export function LoginPageView({
                       {
                         label: "Words learned",
                         value: "348",
-                        color: "from-indigo-400/20 to-indigo-400/5",
+                        color: "from-primary/25 to-primary/5",
                       },
                       { label: "CEFR level", value: "B1", color: "from-cyan-400/20 to-cyan-400/5" },
                     ].map((item) => (
                       <div
                         key={item.label}
-                        className={`rounded-xl border border-white/8 bg-gradient-to-br ${item.color} p-3`}
+                        className={`rounded-xl border border-white/8 bg-linear-to-br ${item.color} p-3`}
                       >
                         <p className="text-[10px] text-white/40">{item.label}</p>
                         <p className="mt-1 text-xl font-semibold text-white">{item.value}</p>
                       </div>
                     ))}
                   </div>
-                  <div className="mt-3 flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.04] p-3">
-                    <span className="grid size-9 place-items-center rounded-lg bg-violet-500/20">
-                      <BookOpen className="size-4 text-violet-300" />
+                  <div className="mt-3 flex items-center gap-3 rounded-xl border border-white/8 bg-white/4 p-3">
+                    <span className="grid size-9 place-items-center rounded-lg bg-primary/20">
+                      <BookOpen className="size-4 text-primary" />
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-white">Workplace English</p>
                       <div className="mt-1.5 h-1.5 rounded-full bg-white/8">
-                        <div className="h-full w-[68%] rounded-full bg-gradient-to-r from-indigo-400 to-violet-400" />
+                        <div className="h-full w-[68%] rounded-full bg-primary" />
                       </div>
                     </div>
                     <span className="text-[10px] text-white/35">68%</span>
@@ -167,14 +157,9 @@ export function LoginPageView({
               </div>
             </div>
           </div>
-        </motion.section>
+        </section>
 
-        <motion.section
-          className="mx-auto w-full max-w-[30rem] rounded-[1.75rem] border border-white/40 bg-white/[0.97] p-6 shadow-[0_30px_90px_rgba(0,0,0,.42)] backdrop-blur-2xl sm:p-9 dark:border-white/10 dark:bg-slate-950/80"
-          initial={{ opacity: 0, y: 20, scale: 0.985 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.48, delay: 0.08 }}
-        >
+        <section className="auth-enter mx-auto w-full max-w-120 rounded-[1.75rem] border border-white/40 bg-white/97 p-6 shadow-[0_30px_90px_rgba(0,0,0,.42)] sm:p-9 dark:border-white/10 dark:bg-slate-950/90">
           <div className="mb-7">
             <p className="mb-2 text-xs font-semibold tracking-[0.14em] text-primary uppercase">
               {isLogin ? "Welcome back" : "Join the workspace"}
@@ -202,14 +187,9 @@ export function LoginPageView({
           />
 
           <form className="space-y-0.5" onSubmit={onSubmit} noValidate aria-busy={pending}>
-            <AnimatePresence initial={false}>
-              {!isLogin && (
-                <motion.label
-                  className="block overflow-hidden text-sm"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                >
+            <div className="auth-field-reveal" data-open={!isLogin || undefined}>
+              <div>
+                <label className="block pb-0.5 text-sm">
                   <span className="mb-1.5 block font-medium text-slate-700 dark:text-slate-200">
                     Full name
                   </span>
@@ -218,7 +198,8 @@ export function LoginPageView({
                     <Input
                       placeholder="Your full name"
                       autoComplete="name"
-                      disabled={pending}
+                      disabled={pending || isLogin}
+                      tabIndex={isLogin ? -1 : undefined}
                       aria-invalid={Boolean(errors.name)}
                       aria-describedby="workspace-name-error"
                       className={inputClass}
@@ -226,9 +207,9 @@ export function LoginPageView({
                     />
                   </div>
                   <FieldMessage id="workspace-name-error" message={errors.name?.message} />
-                </motion.label>
-              )}
-            </AnimatePresence>
+                </label>
+              </div>
+            </div>
             <label className="block text-sm">
               <span className="mb-1.5 block font-medium text-slate-700 dark:text-slate-200">
                 Email address
@@ -285,7 +266,7 @@ export function LoginPageView({
             </p>
             <Button
               type="submit"
-              className="mt-2 h-12 w-full rounded-xl border-0 bg-primary text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90"
+              className="mt-2 h-12 w-full rounded-xl border-0 bg-primary text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-colors hover:bg-primary/90"
               size="lg"
               disabled={pending}
             >
@@ -308,8 +289,8 @@ export function LoginPageView({
           <p className="mt-6 text-center text-xs text-slate-400 dark:text-slate-500">
             Secure authentication · Your data stays private
           </p>
-        </motion.section>
+        </section>
       </div>
     </main>
   );
-}
+});
