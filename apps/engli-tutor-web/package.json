@@ -1,0 +1,39 @@
+{
+  "name": "engli-tutor-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "install:workspace": "pnpm --dir ../.. install:landing",
+    "install:all": "pnpm --dir ../.. install:all",
+    "install:landing-page": "pnpm --dir ../.. install:landing-page",
+    "module:add": "pnpm --dir ../.. module:add",
+    "dev": "next dev -p 3002",
+    "dev:https": "next dev -p 3002 -H local.pagecraft-ai.site --experimental-https --experimental-https-key ../../../certs/local-pagecraft-key.pem --experimental-https-cert ../../../certs/local-pagecraft.pem",
+    "build": "next build",
+    "start": "next start -p 3002",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.5.7",
+    "@engli-tutor/api-client": "workspace:*",
+    "@engli-tutor/auth": "workspace:*",
+    "@engli-tutor/legal": "workspace:*",
+    "@engli-tutor/ui": "workspace:*",
+    "lucide-react": "^1.28.0",
+    "motion": "^12.43.0",
+    "next": "^16.2.12",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-hook-form": "^7.83.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "postcss": "^8.5.25",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~5.9.3"
+  }
+}
