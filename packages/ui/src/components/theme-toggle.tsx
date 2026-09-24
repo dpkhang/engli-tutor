@@ -6,7 +6,13 @@ import { cn } from "../lib/utils";
 
 type Theme = "light" | "dark";
 
-export function ThemeToggle({ className }: { className?: string }) {
+export function ThemeToggle({
+  className,
+  variant = "icon",
+}: {
+  className?: string;
+  variant?: "icon" | "menuitem";
+}) {
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
@@ -31,7 +37,26 @@ export function ThemeToggle({ className }: { className?: string }) {
     setTheme(nextTheme);
   };
 
-  const nextThemeLabel = theme === "dark" ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối";
+  const isDark = theme === "dark";
+  const label = isDark ? "Light mode" : "Dark mode";
+  const Icon = isDark ? Sun : Moon;
+
+  if (variant === "menuitem") {
+    return (
+      <button
+        type="button"
+        role="menuitem"
+        className={cn(
+          "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-muted",
+          className,
+        )}
+        onClick={toggleTheme}
+      >
+        <Icon className="size-4 text-muted-foreground" />
+        {label}
+      </button>
+    );
+  }
 
   return (
     <button
@@ -41,10 +66,10 @@ export function ThemeToggle({ className }: { className?: string }) {
         className,
       )}
       onClick={toggleTheme}
-      aria-label={nextThemeLabel}
-      title={nextThemeLabel}
+      aria-label={label}
+      title={label}
     >
-      {theme === "dark" ? <Sun className="size-4.5" /> : <Moon className="size-4.5" />}
+      <Icon className="size-4.5" />
     </button>
   );
 }

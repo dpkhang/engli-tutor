@@ -1,9 +1,9 @@
-# GitLab CI — fe workspace (packages + apps/web + apps/landing-page-web)
+# GitLab CI — fe workspace (packages + apps/web + apps/engli-tutor-web)
 # Repo root = fe/
 
 workflow:
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME == "develop" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     - if: $CI_COMMIT_TAG
 
@@ -64,7 +64,7 @@ default:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        - apps/landing-page-web/**/*
+        - apps/engli-tutor-web/**/*
         - packages/**/*
         - pnpm-lock.yaml
         - package.json
@@ -105,7 +105,7 @@ lint:web:
   stage: lint
   script:
     - pnpm --filter "./packages/*" run build
-    - pnpm --filter landing-page-generator-fe lint
+    - pnpm --filter engli-tutor-fe lint
 
 build:web:
   extends:
@@ -117,7 +117,7 @@ build:web:
       optional: true
   script:
     - pnpm --filter "./packages/*" run build
-    - pnpm --filter landing-page-generator-fe build
+    - pnpm --filter engli-tutor-fe build
   artifacts:
     paths:
       - apps/web/.next/
@@ -133,7 +133,7 @@ lint:landing:
   stage: lint
   script:
     - pnpm --filter "./packages/*" run build
-    - pnpm --filter landing-page-web lint
+    - pnpm --filter engli-tutor-web lint
 
 build:landing:
   extends:
@@ -145,12 +145,12 @@ build:landing:
       optional: true
   script:
     - pnpm --filter "./packages/*" run build
-    - pnpm --filter landing-page-web build
+    - pnpm --filter engli-tutor-web build
   artifacts:
     paths:
-      - apps/landing-page-web/.next/
+      - apps/engli-tutor-web/.next/
     exclude:
-      - apps/landing-page-web/.next/cache/**
+      - apps/engli-tutor-web/.next/cache/**
     expire_in: 1 day
 
 # ── Deploy (Vercel) ─────────────────────────────────────────────────────────
@@ -192,12 +192,12 @@ deploy:landing:preview:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        - apps/landing-page-web/**/*
+        - apps/engli-tutor-web/**/*
         - packages/**/*
         - pnpm-lock.yaml
         - package.json
         - pnpm-workspace.yaml
-        - apps/landing-page-web/vercel.json
+        - apps/engli-tutor-web/vercel.json
         - .gitlab-ci.yml
 
 deploy:landing:production:
@@ -217,12 +217,12 @@ deploy:landing:production:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes:
-        - apps/landing-page-web/**/*
+        - apps/engli-tutor-web/**/*
         - packages/**/*
         - pnpm-lock.yaml
         - package.json
         - pnpm-workspace.yaml
-        - apps/landing-page-web/vercel.json
+        - apps/engli-tutor-web/vercel.json
         - .gitlab-ci.yml
     - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

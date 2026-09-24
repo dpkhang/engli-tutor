@@ -1,5 +1,5 @@
 import type { ComponentProps } from "react";
-import { Card, CardContent, CardHeader, cn } from "@landing-page-generator/ui";
+import { Card, CardContent, CardHeader, cn } from "@engli-tutor/ui";
 
 export function SettingsCard({ className, ...props }: ComponentProps<typeof Card>) {
   return (

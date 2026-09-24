@@ -3,7 +3,7 @@
 import { memo } from "react";
 import Link from "next/link";
 import { ArrowLeft, BookOpen, Check, Heart, House, Lightbulb, RotateCcw, Volume2 } from "lucide-react";
-import { Button, cn } from "@landing-page-generator/ui";
+import { Button, cn } from "@engli-tutor/ui";
 import { DataLoadingState, NotFoundPage } from "@/features/layout";
 import { ClickableTranslateText } from "@/features/translate";
 import type {
@@ -114,6 +114,7 @@ function QuestionCard({
 export type SkillExercisePageViewProps = {
   skill: SkillId;
   skillMeta: SkillMeta | undefined;
+  backHref: string;
   exercise: SkillExercise | null;
   loading: boolean;
   answers: Record<string, AnswerDraft>;
@@ -134,6 +135,7 @@ export type SkillExercisePageViewProps = {
 export const SkillExercisePageView = memo(function SkillExercisePageView({
   skill,
   skillMeta,
+  backHref,
   exercise,
   loading,
   answers,
@@ -166,7 +168,7 @@ export const SkillExercisePageView = memo(function SkillExercisePageView({
         title="This exercise isn’t available"
         description="It may have been moved or the link is incomplete. Go back to this skill and pick another activity."
         actions={[
-          { href: `/skills/${skill}`, label: "Back to skill", icon: <BookOpen />, primary: true },
+          { href: backHref, label: "Back to skill", icon: <BookOpen />, primary: true },
           { href: "/skills", label: "All skills" },
           { href: "/", label: "Back to Today", icon: <House /> },
         ]}
@@ -178,7 +180,7 @@ export const SkillExercisePageView = memo(function SkillExercisePageView({
     <div className="w-full min-w-0 max-w-full space-y-8 overflow-x-clip">
       <div className="space-y-4">
         <Button variant="ghost" size="sm" asChild className="-ml-2 text-muted-foreground">
-          <Link href={`/skills/${skill}`}>
+          <Link href={backHref}>
             <ArrowLeft /> {skillMeta?.labelVi ?? skill}
           </Link>
         </Button>
@@ -343,7 +345,7 @@ export const SkillExercisePageView = memo(function SkillExercisePageView({
               asChild
               className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25"
             >
-              <Link href={`/skills/${skill}`}>More in this skill</Link>
+              <Link href={backHref}>More in this skill</Link>
             </Button>
             <Button
               asChild

@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import { useReducedMotion } from "motion/react";
-import { ApiError } from "@landing-page-generator/api-client";
+import { ApiError } from "@engli-tutor/api-client";
 import { type TranslateDirection, type TranslateResult } from "../../api";
 import { lookupTranslation } from "../../model/translate-lookup";
 import { getCachedLookup } from "../../model/translate-cache";

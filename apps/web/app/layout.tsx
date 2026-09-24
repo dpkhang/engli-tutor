@@ -5,7 +5,7 @@ import { QueryProvider } from "@/providers/query-provider";
 import { AuthGate } from "@/providers/auth-gate";
 import { AppShell, GlobalNavigationLoading, SignOutLoadingProvider } from "@/features/layout";
 import { AppearanceProvider } from "@/features/settings";
-import { ActionDialogProvider, ToastProvider } from "@landing-page-generator/ui";
+import { ActionDialogProvider, CookieConsentBanner, ToastProvider } from "@engli-tutor/ui";
 import "./globals.css";
 
 const sans = Plus_Jakarta_Sans({
@@ -42,6 +42,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                   <AuthGate>
                     <AppShell>{children}</AppShell>
                   </AuthGate>
+                  <CookieConsentBanner policyHref="/policy/cookies" />
                 </SignOutLoadingProvider>
               </ToastProvider>
             </ActionDialogProvider>

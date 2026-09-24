@@ -786,6 +786,21 @@ export function isSkillLevel(value: string): value is SkillLevel {
   return LEVELS.some((item) => item.id === value);
 }
 
+export function skillListHref(skill: SkillId, level?: string | null) {
+  if (level === "all" || (level && isSkillLevel(level))) {
+    return `/skills/${skill}?level=${level}`;
+  }
+  return `/skills/${skill}`;
+}
+
+export function skillExerciseHref(skill: SkillId, exerciseId: string, level?: string | null) {
+  const base = `/skills/${skill}/${exerciseId}`;
+  if (level === "all" || (level && isSkillLevel(level))) {
+    return `${base}?level=${level}`;
+  }
+  return base;
+}
+
 export function getExercisesBySkill(skill: SkillId, level?: SkillLevel): SkillExercise[] {
   return SKILL_EXERCISES.filter(
     (item) => item.skill === skill && (level ? item.level === level : true),

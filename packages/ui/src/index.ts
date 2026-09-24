@@ -31,6 +31,11 @@ export {
 export { Separator } from "./components/separator";
 export { ThemeToggle } from "./components/theme-toggle";
 export {
+  CookieConsentBanner,
+  CookieConsentManageButton,
+  openCookieConsent,
+} from "./components/cookie-consent";
+export {
   SegmentedSwitch,
   BillingPeriodSwitch,
   type SegmentedOption,

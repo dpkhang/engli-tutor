@@ -1,5 +1,5 @@
 import { ArrowRight, DatabaseZap } from "lucide-react";
-import { Badge, Button, Card, CardContent } from "@landing-page-generator/ui";
+import { Badge, Button, Card, CardContent } from "@engli-tutor/ui";
 import { PageHeader } from "./page-header";
 
 export type ModuleCapability = {

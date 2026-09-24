@@ -3,7 +3,7 @@
 import { memo } from "react";
 import Link from "next/link";
 import { Check, CircleX, LoaderCircle } from "lucide-react";
-import { Button, Card, CardContent } from "@landing-page-generator/ui";
+import { Button, Card, CardContent } from "@engli-tutor/ui";
 
 export type PaymentResultState = "processing" | "success" | "failed";
 

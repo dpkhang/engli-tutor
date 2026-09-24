@@ -15,7 +15,7 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { Button, cn, ThemeToggle } from "@landing-page-generator/ui";
+import { Button, cn, ThemeToggle } from "@engli-tutor/ui";
 import { AnimatePresence, motion } from "motion/react";
 import { FloatingTranslate } from "@/features/translate";
 
@@ -107,10 +107,12 @@ export const AppShellView = memo(function AppShellView({
 }: AppShellViewProps) {
   const raiseFabForExerciseBar = isPracticeExercise;
   const navItems = PRIMARY_NAV.filter((item) => !("private" in item && item.private) || Boolean(user));
+  const hideHeader = pathname.startsWith("/policy");
 
   return (
     <div className="workspace-background group/shell relative min-h-svh">
       {routeReset}
+      {hideHeader ? null : (
       <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
@@ -171,7 +173,7 @@ export const AppShellView = memo(function AppShellView({
                 </Link>
               </Button>
             ) : null}
-            <ThemeToggle />
+            {user ? null : <ThemeToggle />}
             {user ? (
               <div className="relative" ref={accountMenuRef}>
                 <button
@@ -245,6 +247,7 @@ export const AppShellView = memo(function AppShellView({
                           <Settings className="size-4 text-muted-foreground" />
                           Settings
                         </Link>
+                        <ThemeToggle variant="menuitem" />
                       </div>
                       <div className="border-t border-border pt-1">
                         <button
@@ -296,6 +299,7 @@ export const AppShellView = memo(function AppShellView({
           ) : null}
         </AnimatePresence>
       </header>
+      )}
 
       {showAiDock || showTranslate ? (
       <div

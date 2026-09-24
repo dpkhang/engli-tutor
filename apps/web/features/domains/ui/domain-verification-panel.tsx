@@ -9,7 +9,7 @@ import {
   Button,
   Card,
   CardContent,
-} from "@landing-page-generator/ui";
+} from "@engli-tutor/ui";
 import { domainHooks } from "../hooks";
 import type { Domain } from "../api";
 

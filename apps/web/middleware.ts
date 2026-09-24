@@ -48,15 +48,59 @@ async function resolveSlug(request: NextRequest, host: string): Promise<string |
   }
 }
 
+function workspaceReturnTo(request: NextRequest): URL {
+  const dest = request.nextUrl.clone();
+  const returnTo = request.nextUrl.searchParams.get("returnTo");
+  if (returnTo?.startsWith("/") && !returnTo.startsWith("//")) {
+    const queryAt = returnTo.indexOf("?");
+    dest.pathname = (queryAt >= 0 ? returnTo.slice(0, queryAt) : returnTo) || "/";
+    dest.search = queryAt >= 0 ? returnTo.slice(queryAt) : "";
+    dest.hash = "";
+    return dest;
+  }
+  dest.pathname = "/";
+  dest.search = "";
+  dest.hash = "";
+  return dest;
+}
+
+async function hasWorkspaceSession(request: NextRequest): Promise<boolean> {
+  const cookie = request.headers.get("cookie");
+  if (!cookie) return false;
+  try {
+    const response = await fetch(`${apiBase(request)}/api/auth/get-session`, {
+      headers: { accept: "application/json", cookie },
+      cache: "no-store",
+      signal: AbortSignal.timeout(8_000),
+    });
+    if (!response.ok) return false;
+    const body = (await response.json().catch(() => null)) as {
+      session?: { id?: unknown } | null;
+      user?: { id?: unknown } | null;
+    } | null;
+    return typeof body?.session?.id === "string" && typeof body?.user?.id === "string";
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Custom domains (Host ≠ platform) → published landing at /p/{slug}.
- * Workspace hosts are unchanged.
+ * Workspace hosts are unchanged, except signed-in users cannot open /login.
  */
 export async function middleware(request: NextRequest) {
   const host = requestHost(request);
+  const { pathname } = request.nextUrl;
+
+  if (pathname === "/login" && !isCustomDomainHost(host)) {
+    if (await hasWorkspaceSession(request)) {
+      return NextResponse.redirect(workspaceReturnTo(request));
+    }
+    return NextResponse.next();
+  }
+
   if (!isCustomDomainHost(host)) return NextResponse.next();
 
-  const { pathname } = request.nextUrl;
   if (shouldBypass(pathname)) return NextResponse.next();
 
   // Already on public renderer — keep as-is (useful for debugging).

@@ -1,6 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { SkillLevel } from "@/features/learn/model/skill-exercises";
 import { accountApi, type AccountProfile } from "@/features/accounts/api";
+import { notifyAccountChanged } from "@/features/accounts/model/account-sync";
 import { queryKeys } from "@/lib/query";
 
 export const ONBOARDING_PATH = "/onboarding";
@@ -126,6 +127,7 @@ export async function persistWelcomeSeen(queryClient: QueryClient) {
       ? { ...current, welcomeSeenAt: new Date().toISOString() }
       : current,
   );
+  notifyAccountChanged(queryClient.getQueryData<AccountProfile>(queryKeys.account));
   try {
     const profile = await accountApi.update({ welcomeSeen: true });
     queryClient.setQueryData(queryKeys.account, profile);

@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useState, type FormEvent } from "react";
-import { useActionDialog } from "@landing-page-generator/ui";
-import { ApiError } from "@landing-page-generator/api-client";
+import { useActionDialog } from "@engli-tutor/ui";
+import { ApiError } from "@engli-tutor/api-client";
 import { authClient, authErrorMessage } from "@/lib/auth-client";
 import { SecuritySettingsView } from "./security-settings.view";
 

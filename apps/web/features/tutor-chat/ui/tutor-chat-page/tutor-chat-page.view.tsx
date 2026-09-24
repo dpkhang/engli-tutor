@@ -11,7 +11,7 @@ import {
   Sparkles,
   Square,
 } from "lucide-react";
-import { Button, cn } from "@landing-page-generator/ui";
+import { Button, cn } from "@engli-tutor/ui";
 import { type TutorChatMessage, type TutorScenario } from "../../api";
 
 export const SCENARIOS: { id: TutorScenario; label: string; hint: string }[] = [

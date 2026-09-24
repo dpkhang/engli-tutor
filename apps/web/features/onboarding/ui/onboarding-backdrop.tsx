@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useEffect, useState } from "react";
-import { cn } from "@landing-page-generator/ui";
+import { cn } from "@engli-tutor/ui";
 
 /** Lightweight decorative backdrop — opacity-only motion, no transforming blurs. */
 export const OnboardingBackdrop = memo(function OnboardingBackdrop() {

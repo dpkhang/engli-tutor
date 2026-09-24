@@ -9,12 +9,13 @@ import { useBillingMe, useSubscribe } from "@/features/payments/hooks/use-billin
 import { allPlansForCompare } from "@/features/payments/model/plans";
 import { setPreferredLevel } from "@/features/settings";
 import { useSession } from "@/lib/auth-client";
-import { ApiError } from "@landing-page-generator/api-client";
+import { ApiError } from "@engli-tutor/api-client";
 import { CACHE_TIMES, queryKeys } from "@/lib/query";
 import {
   LEARNING_GOALS,
   NATIVE_LANGUAGE,
   goalText,
+  hasSeenWelcome,
   needsOnboarding,
   persistWelcomeSeen,
   safeOnboardingReturnTo,
@@ -51,14 +52,18 @@ export function OnboardingPage() {
   const [planError, setPlanError] = useState<string | null>(null);
   const [pendingPlan, setPendingPlan] = useState<string | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
-  const initialProfileCheck = useRef(false);
+  const finishingHere = useRef(false);
 
   useEffect(() => {
     const profile = profileQuery.data;
-    if (!profile || initialProfileCheck.current) return;
-    initialProfileCheck.current = true;
-    if (!needsOnboarding(profile) && !showWelcome) window.location.replace(returnTo);
-  }, [profileQuery.data, returnTo, showWelcome]);
+    if (!profile || showWelcome || finishingHere.current) return;
+    if (needsOnboarding(profile)) return;
+    if (hasSeenWelcome(profile)) {
+      window.location.replace(returnTo);
+      return;
+    }
+    router.replace(`/welcome?returnTo=${encodeURIComponent(returnTo)}`);
+  }, [profileQuery.data, returnTo, router, showWelcome]);
 
   useEffect(() => {
     const profile = profileQuery.data;
@@ -105,16 +110,22 @@ export function OnboardingPage() {
   }, [queryClient, returnTo, router]);
 
   const finishOnboarding = useCallback(async () => {
-    const profile = await saveProfile.mutateAsync();
-    queryClient.setQueryData(queryKeys.account, profile);
-    router.prefetch(returnTo);
-    setShowWelcome(true);
+    finishingHere.current = true;
+    try {
+      const profile = await saveProfile.mutateAsync();
+      queryClient.setQueryData(queryKeys.account, profile);
+      router.prefetch(returnTo);
+      setShowWelcome(true);
+    } catch {
+      finishingHere.current = false;
+    }
   }, [queryClient, returnTo, router, saveProfile]);
 
   const onChoosePaidPlan = useCallback(
     async (planId: string) => {
       setPlanError(null);
       setPendingPlan(planId);
+      finishingHere.current = true;
       try {
         await saveProfile.mutateAsync();
         const result = await subscribe.mutateAsync({ planId, period });
@@ -122,6 +133,7 @@ export function OnboardingPage() {
         setWelcomePending(returnTo);
         window.location.assign(result.url);
       } catch (error) {
+        finishingHere.current = false;
         setPlanError(error instanceof Error ? error.message : "Couldn't start upgrade. Try again.");
         setPendingPlan(null);
       }

@@ -13,7 +13,7 @@ Usage: bash ./scripts/install-workspace.sh <workspace>
 Workspaces:
   all       Install root + apps/* + packages/*, then build packages
   web       Install apps/web (+ deps), then build packages
-  landing   Install apps/landing-page-web (+ deps), then build packages
+  landing   Install apps/engli-tutor-web (+ deps), then build packages
   ui        Install all packages/*, then build them
   packages  Alias of ui
 
@@ -36,14 +36,14 @@ case "$TARGET" in
     pnpm --filter "./packages/*" run build
     ;;
   web)
-    echo "→ Installing workspace: landing-page-generator-fe (web)..."
-    pnpm install --filter "landing-page-generator-fe..."
+    echo "→ Installing workspace: engli-tutor-fe (web)..."
+    pnpm install --filter "engli-tutor-fe..."
     echo "→ Building packages..."
     pnpm --filter "./packages/*" run build
     ;;
   landing)
-    echo "→ Installing workspace: landing-page-web..."
-    pnpm install --filter "landing-page-web..."
+    echo "→ Installing workspace: engli-tutor-web..."
+    pnpm install --filter "engli-tutor-web..."
     echo "→ Building packages..."
     pnpm --filter "./packages/*" run build
     ;;

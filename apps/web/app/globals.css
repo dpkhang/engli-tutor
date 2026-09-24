@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "react-phone-number-input/style.css";
-@import "@landing-page-generator/ui/globals.css";
+@import "@engli-tutor/ui/globals.css";
 
 @source "../../../packages/ui/src";
 @source "../../../packages/landing-renderer/src";

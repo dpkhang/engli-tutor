@@ -15,7 +15,7 @@ import {
   VolumeX,
   X,
 } from "lucide-react";
-import { Button, cn } from "@landing-page-generator/ui";
+import { Button, cn } from "@engli-tutor/ui";
 import { type TutorLevel, type TutorScenario } from "@/features/tutor-chat/api";
 import { VoiceOrb } from "../shared";
 

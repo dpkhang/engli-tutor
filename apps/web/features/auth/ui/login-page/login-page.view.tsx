@@ -1,7 +1,6 @@
 "use client";
 
 import { memo, useState, type FormEvent } from "react";
-import Link from "next/link";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import {
   ArrowRight,
@@ -16,7 +15,7 @@ import {
   Sparkles,
   UserRound,
 } from "lucide-react";
-import { Button, Input, SegmentedSwitch } from "@landing-page-generator/ui";
+import { Button, Input, SegmentedSwitch } from "@engli-tutor/ui";
 import type { LoginFormValues } from "../../model/login-schema";
 
 export type AuthMode = "login" | "register";
@@ -26,6 +25,9 @@ export type LoginPageViewProps = {
   error: string | null;
   register: UseFormRegister<LoginFormValues>;
   errors: FieldErrors<LoginFormValues>;
+  policyHref: string;
+  cookiesHref: string;
+  homeHref: string;
   onModeChange: (mode: AuthMode) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 };
@@ -48,6 +50,9 @@ export const LoginPageView = memo(function LoginPageView({
   error,
   register,
   errors,
+  policyHref,
+  cookiesHref,
+  homeHref,
   onModeChange,
   onSubmit,
 }: LoginPageViewProps) {
@@ -64,14 +69,14 @@ export const LoginPageView = memo(function LoginPageView({
       />
 
       <header className="absolute inset-x-0 top-0 z-20 mx-auto flex max-w-7xl items-center justify-between px-5 py-6 sm:px-8 lg:px-12">
-        <Link href="/" className="group inline-flex items-center gap-2.5 text-white">
+        <a href={homeHref} className="group inline-flex items-center gap-2.5 text-white">
           <span className="grid size-9 place-items-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/25 transition-transform group-hover:-rotate-6">
             <Sparkles className="size-4" />
           </span>
           <span className="text-base font-semibold tracking-wide">
             EngliTutor <span className="font-normal text-white/45">Workspace</span>
           </span>
-        </Link>
+        </a>
         <span className="hidden items-center gap-2 text-xs text-white/45 sm:flex">
           <span className="size-1.5 rounded-full bg-emerald-400" />
           All systems operational
@@ -286,8 +291,21 @@ export const LoginPageView = memo(function LoginPageView({
               {pending ? "Your request is being processed" : ""}
             </span>
           </form>
-          <p className="mt-6 text-center text-xs text-slate-400 dark:text-slate-500">
-            Secure authentication · Your data stays private
+          <p className="mt-6 text-center text-xs leading-5 text-slate-400 dark:text-slate-500">
+            {isLogin ? "Secure authentication · Your data stays private." : "By creating an account you agree to our policies."}{" "}
+            <a
+              href={policyHref}
+              className="font-medium text-slate-500 underline decoration-slate-300 underline-offset-2 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+            >
+              Privacy Policy
+            </a>
+            {" · "}
+            <a
+              href={cookiesHref}
+              className="font-medium text-slate-500 underline decoration-slate-300 underline-offset-2 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+            >
+              Cookie Policy
+            </a>
           </p>
         </section>
       </div>

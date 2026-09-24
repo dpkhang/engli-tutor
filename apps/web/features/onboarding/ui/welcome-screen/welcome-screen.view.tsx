@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useEffect, useRef } from "react";
-import { Button } from "@landing-page-generator/ui";
+import { Button } from "@engli-tutor/ui";
 import { WELCOME_DURATION_MS } from "../../model/onboarding";
 
 export type WelcomeScreenViewProps = {

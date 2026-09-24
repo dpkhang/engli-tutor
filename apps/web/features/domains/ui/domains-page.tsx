@@ -26,7 +26,7 @@ import {
   Input,
   Label,
   useActionDialog,
-} from "@landing-page-generator/ui";
+} from "@engli-tutor/ui";
 import { PageHeader } from "@/features/layout";
 import { domainHooks } from "../hooks";
 import type { Domain } from "../api";

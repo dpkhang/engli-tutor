@@ -16,7 +16,7 @@ import {
   Sparkles,
   Target,
 } from "lucide-react";
-import { Alert, AlertDescription, Badge, BillingPeriodSwitch, Button, cn } from "@landing-page-generator/ui";
+import { Alert, AlertDescription, Badge, BillingPeriodSwitch, Button, cn } from "@engli-tutor/ui";
 import { LEVELS, type SkillLevel } from "@/features/learn/model/skill-exercises";
 import { allPlansForCompare } from "@/features/payments/model/plans";
 import {

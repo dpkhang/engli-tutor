@@ -17,7 +17,11 @@ import { CACHE_TIMES, queryKeys } from "@/lib/query";
 const LOGIN_PATH = "/login";
 
 function isPublicPath(pathname: string) {
-  return pathname === LOGIN_PATH || pathname === "/domain-unavailable";
+  return (
+    pathname === LOGIN_PATH ||
+    pathname === "/domain-unavailable" ||
+    pathname.startsWith("/policy")
+  );
 }
 
 function AuthSplash({ message }: { message: string }) {
@@ -81,27 +85,29 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     !hasSeenWelcome(profile);
 
   useEffect(() => {
+    redirected.current = false;
+  }, [pathname]);
+
+  useEffect(() => {
     if (isPending || redirected.current) return;
 
     if (isLogin && user) {
-      if (profileQuery.isPending) return;
       redirected.current = true;
-      if (needsSetup) {
-        window.location.replace(ONBOARDING_PATH);
-        return;
-      }
-      if (needsWelcome) {
-        const dest = getSafeReturnTo();
-        if (dest.startsWith("/") && !dest.startsWith("//")) {
-          router.replace(
-            `${WELCOME_PATH}?returnTo=${encodeURIComponent(safeOnboardingReturnTo(dest))}`,
-          );
-          return;
-        }
-        window.location.replace(dest);
-        return;
-      }
       window.location.replace(getSafeReturnTo());
+      return;
+    }
+
+    if (user && isWelcome && profileQuery.isSuccess && !needsSetup && !needsWelcome) {
+      redirected.current = true;
+      window.location.replace(getSafeReturnTo());
+      return;
+    }
+
+    if (user && isWelcome && profileQuery.isSuccess && needsSetup) {
+      redirected.current = true;
+      window.location.replace(
+        `${ONBOARDING_PATH}?returnTo=${encodeURIComponent(safeOnboardingReturnTo(getSafeReturnTo()))}`,
+      );
       return;
     }
 
@@ -133,7 +139,6 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     isPending,
     user,
     pathname,
-    profileQuery.isPending,
     profileQuery.isSuccess,
     profileQuery.isError,
     needsSetup,
@@ -141,25 +146,15 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     router,
   ]);
 
-  if (isPending && !isPublic) {
-    return <AuthSplash message="Preparing workspace..." />;
+  if (isLogin) {
+    if (isPending || user) {
+      return <AuthSplash message={user ? "Opening workspace..." : "Checking session..."} />;
+    }
+    return <>{children}</>;
   }
 
-  if (isLogin) {
-    if (!user) return <>{children}</>;
-    return (
-      <AuthSplash
-        message={
-          profileQuery.isPending
-            ? "Opening workspace..."
-            : needsSetup
-              ? "Setting up your path..."
-              : needsWelcome
-                ? "Welcome in..."
-                : "Opening workspace..."
-        }
-      />
-    );
+  if (isPending && !isPublic) {
+    return <AuthSplash message="Preparing workspace..." />;
   }
 
   if (isPublic) return <>{children}</>;

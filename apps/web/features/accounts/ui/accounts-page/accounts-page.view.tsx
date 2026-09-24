@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
   cn,
-} from "@landing-page-generator/ui";
+} from "@engli-tutor/ui";
 import { PageHeader, DataLoadingState } from "@/features/layout";
 import { LEVELS, type SkillLevel } from "@/features/learn/model/skill-exercises";
 import {

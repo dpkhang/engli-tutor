@@ -2,9 +2,9 @@
 
 import { useCallback, useLayoutEffect, useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useActionDialog, useToast } from "@landing-page-generator/ui";
+import { useActionDialog, useToast } from "@engli-tutor/ui";
 import { useSignOutLoading } from "@/features/layout";
-import { ApiError } from "@landing-page-generator/api-client";
+import { ApiError } from "@engli-tutor/api-client";
 import { authClient, useSession } from "@/lib/auth-client";
 import { queryKeys } from "@/lib/query";
 import { setPreferredLevel } from "@/features/settings";

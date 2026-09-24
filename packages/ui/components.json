@@ -11,10 +11,10 @@
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": "@landing-page-generator/ui/components",
-    "utils": "@landing-page-generator/ui/lib/utils",
-    "hooks": "@landing-page-generator/ui/hooks",
-    "lib": "@landing-page-generator/ui/lib",
-    "ui": "@landing-page-generator/ui/components"
+    "components": "@engli-tutor/ui/components",
+    "utils": "@engli-tutor/ui/lib/utils",
+    "hooks": "@engli-tutor/ui/hooks",
+    "lib": "@engli-tutor/ui/lib",
+    "ui": "@engli-tutor/ui/components"
   }
 }

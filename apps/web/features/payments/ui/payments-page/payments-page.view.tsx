@@ -29,7 +29,7 @@ import {
   cn,
   useLockScroll,
   BillingPeriodSwitch,
-} from "@landing-page-generator/ui";
+} from "@engli-tutor/ui";
 import type { CreditLedgerEntry, SubscriptionPlan, TopupPack } from "../../api/billing";
 import {
   allPlansForCompare,

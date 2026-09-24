@@ -7,7 +7,7 @@ APP="${1:-}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 case "$APP" in
-  landing) PATHS=("apps/landing-page-web" "packages" "pnpm-lock.yaml" "pnpm-workspace.yaml" "package.json") ;;
+  landing) PATHS=("apps/engli-tutor-web" "packages" "pnpm-lock.yaml" "pnpm-workspace.yaml" "package.json") ;;
   web) PATHS=("apps/web" "packages" "pnpm-lock.yaml" "pnpm-workspace.yaml" "package.json") ;;
   *)
     echo "Usage: vercel-ignore.sh <landing|web>" >&2

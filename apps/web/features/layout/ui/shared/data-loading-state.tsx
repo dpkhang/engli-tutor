@@ -1,4 +1,4 @@
-import { cn } from "@landing-page-generator/ui";
+import { cn } from "@engli-tutor/ui";
 
 type DataLoadingStateProps = {
   title?: string;

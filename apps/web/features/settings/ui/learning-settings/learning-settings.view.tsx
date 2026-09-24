@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import { Target, Volume2 } from "lucide-react";
-import { Button, CardTitle, Label, SegmentedSwitch, cn } from "@landing-page-generator/ui";
+import { Button, CardTitle, Label, SegmentedSwitch, cn } from "@engli-tutor/ui";
 import { LEVELS, type SkillLevel } from "@/features/learn/model/skill-exercises";
 import { SPEECH_RATES, type SpeechRateId } from "../../model/preferences";
 import { ChoiceChip, SettingsCard, SettingsCardContent, SettingsCardHeader, SettingsPanel } from "../shared";

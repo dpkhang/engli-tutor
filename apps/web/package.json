@@ -1,5 +1,5 @@
 {
-  "name": "landing-page-generator-fe",
+  "name": "engli-tutor-fe",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -15,9 +15,10 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.5.7",
-    "@landing-page-generator/api-client": "workspace:*",
-    "@landing-page-generator/auth": "workspace:*",
-    "@landing-page-generator/ui": "workspace:*",
+    "@engli-tutor/api-client": "workspace:*",
+    "@engli-tutor/auth": "workspace:*",
+    "@engli-tutor/legal": "workspace:*",
+    "@engli-tutor/ui": "workspace:*",
     "@tanstack/react-query": "^5.101.4",
     "chart.js": "^4.5.1",
     "lucide-react": "^1.28.0",

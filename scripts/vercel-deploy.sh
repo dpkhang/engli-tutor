@@ -4,7 +4,7 @@
 #
 # Run from the fe workspace root. Do NOT pass the app subdirectory to
 # `vercel deploy` — Vercel Project Settings → Root Directory must already be:
-#   landing → apps/landing-page-web
+#   landing → apps/engli-tutor-web
 #   web     → apps/web
 #
 # GitLab CI/CD variables required:
@@ -32,9 +32,9 @@ usage() {
 
 case "$APP" in
   landing)
-    APP_DIR="apps/landing-page-web"
+    APP_DIR="apps/engli-tutor-web"
     PROJECT_ID_VAR="VERCEL_PROJECT_ID_LANDING"
-    EXPECTED_ROOT="apps/landing-page-web"
+    EXPECTED_ROOT="apps/engli-tutor-web"
     ;;
   web)
     APP_DIR="apps/web"

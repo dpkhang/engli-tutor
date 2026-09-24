@@ -3,7 +3,7 @@
 import { memo } from "react";
 import Link from "next/link";
 import { BookOpen, Gamepad2, House, Search } from "lucide-react";
-import { Button } from "@landing-page-generator/ui";
+import { Button } from "@engli-tutor/ui";
 
 export type NotFoundAction = {
   href: string;

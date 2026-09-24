@@ -14,7 +14,7 @@
     "components": "@/components",
     "hooks": "@/hooks",
     "lib": "@/lib",
-    "utils": "@landing-page-generator/ui/lib/utils",
-    "ui": "@landing-page-generator/ui/components"
+    "utils": "@engli-tutor/ui/lib/utils",
+    "ui": "@engli-tutor/ui/components"
   }
 }

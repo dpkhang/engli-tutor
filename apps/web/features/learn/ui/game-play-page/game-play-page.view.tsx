@@ -3,7 +3,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check, Gamepad2, House, Lightbulb, Mic2, RotateCcw, Volume2 } from "lucide-react";
-import { Button, cn } from "@landing-page-generator/ui";
+import { Button, cn } from "@engli-tutor/ui";
 import { DataLoadingState, NotFoundPage } from "@/features/layout";
 import { ClickableTranslateText } from "@/features/translate";
 import { useAiSpeech } from "@/features/speaking-lab/hooks/use-ai-speech";

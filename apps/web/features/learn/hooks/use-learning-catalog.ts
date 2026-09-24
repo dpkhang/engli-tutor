@@ -11,7 +11,6 @@ import { GAMES_CATALOG, getFallbackGame } from "../model/games";
 import {
   getExercise as getLocalExercise,
   getExercisesBySkill,
-  getExercisesGroupedByLevel,
   LEVELS,
   type SkillExercise,
   type SkillId,
@@ -131,23 +130,21 @@ export function useSkillExercises(skill: SkillId, level?: SkillLevel | "all") {
     ...catalogQuery,
   });
 
-  const remote = query.data?.source === "api" ? query.data.data : null;
-  const list = query.data?.data ?? getExercisesBySkill(skill);
+  const list = query.data?.data ?? [];
 
   const exercises = useMemo(() => {
     if (!level || level === "all") return list;
     return list.filter((exercise) => exercise.level === level);
   }, [list, level]);
 
-  const groups = useMemo(() => {
-    if (remote) {
-      return LEVELS.map((levelMeta) => ({
+  const groups = useMemo(
+    () =>
+      LEVELS.map((levelMeta) => ({
         level: levelMeta,
-        exercises: remote.filter((exercise) => exercise.level === levelMeta.id),
-      })).filter((group) => group.exercises.length > 0);
-    }
-    return getExercisesGroupedByLevel(skill);
-  }, [remote, skill]);
+        exercises: list.filter((exercise) => exercise.level === levelMeta.id),
+      })).filter((group) => group.exercises.length > 0),
+    [list],
+  );
 
   const filteredGroups = useMemo(() => {
     if (!level || level === "all") return groups;

@@ -3,7 +3,7 @@
 import { memo } from "react";
 import Link from "next/link";
 import { Check, Coins, CreditCard, Crown, ReceiptText, Sparkles } from "lucide-react";
-import { Badge, Button, CardTitle } from "@landing-page-generator/ui";
+import { Badge, Button, CardTitle } from "@engli-tutor/ui";
 import { SettingsCard, SettingsCardContent, SettingsCardHeader, SettingsPanel } from "../shared";
 
 export type BillingFact = {

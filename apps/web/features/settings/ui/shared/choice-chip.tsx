@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { cn } from "@landing-page-generator/ui";
+import { cn } from "@engli-tutor/ui";
 
 export function ChoiceChip({
   active,

@@ -6,11 +6,11 @@ pnpm workspace: hai app Next.js + ba package dùng chung. Marketing site định
 
 | Workspace | Package name | Purpose |
 | --- | --- | --- |
-| `apps/web` | `landing-page-generator-fe` | Workspace dashboard (auth) |
-| `apps/landing-page-web` | `landing-page-web` | Marketing + checkout |
-| `packages/api-client` | `@landing-page-generator/api-client` | Fetch client + interceptors |
-| `packages/auth` | `@landing-page-generator/auth` | Better Auth client factory |
-| `packages/ui` | `@landing-page-generator/ui` | Shared components / tokens |
+| `apps/web` | `engli-tutor-fe` | Workspace dashboard (auth) |
+| `apps/engli-tutor-web` | `engli-tutor-web` | Marketing + checkout |
+| `packages/api-client` | `@engli-tutor/api-client` | Fetch client + interceptors |
+| `packages/auth` | `@engli-tutor/auth` | Better Auth client factory |
+| `packages/ui` | `@engli-tutor/ui` | Shared components / tokens |
 
 ## Install
 
@@ -45,7 +45,7 @@ Env:
 
 ```bash
 cp apps/web/.env.local.example apps/web/.env.local
-cp apps/landing-page-web/.env.local.example apps/landing-page-web/.env.local
+cp apps/engli-tutor-web/.env.local.example apps/engli-tutor-web/.env.local
 ```
 
 ### Workspace (`apps/web`)
@@ -58,7 +58,7 @@ cp apps/landing-page-web/.env.local.example apps/landing-page-web/.env.local
 
 Browser gọi `/api/*` same-origin; Next proxy/route forward tới `NEXT_PUBLIC_API_URL` để cookie first-party.
 
-### Marketing (`apps/landing-page-web`)
+### Marketing (`apps/engli-tutor-web`)
 
 | Variable | Purpose |
 | --- | --- |
@@ -101,7 +101,7 @@ Thiếu R2 write permission → generate vẫn ra page, không có ảnh (xem [b
 ## API client
 
 ```text
-@landing-page-generator/api-client
+@engli-tutor/api-client
   └── ApiClient
       ├── WorkspaceApiClient   # credentials + 401 → /login
       └── MarketingApiClient
@@ -159,8 +159,8 @@ Hai project từ repo `fe`:
 | Project | Root Directory |
 | --- | --- |
 | Workspace | `apps/web` |
-| Marketing | `apps/landing-page-web` |
+| Marketing | `apps/engli-tutor-web` |
 
 CI variables: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID_WEB`, `VERCEL_PROJECT_ID_LANDING`, cùng các `NEXT_PUBLIC_*` ở trên.
 
-> Cloudflare Workers: monorepo cần **Root directory** = `apps/web` hoặc `apps/landing-page-web` (không để `/`). Repo hiện deploy chính qua Vercel; OpenNext/Workers cần adapter riêng.
+> Cloudflare Workers: monorepo cần **Root directory** = `apps/web` hoặc `apps/engli-tutor-web` (không để `/`). Repo hiện deploy chính qua Vercel; OpenNext/Workers cần adapter riêng.

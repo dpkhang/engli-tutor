@@ -3,7 +3,7 @@
 import { memo } from "react";
 import Link from "next/link";
 import { ArrowRight, BriefcaseBusiness, Coffee, Mail, Mic2, Sparkles, Users } from "lucide-react";
-import { Button } from "@landing-page-generator/ui";
+import { Button } from "@engli-tutor/ui";
 import { LESSON_PACKS } from "../../model/curriculum";
 
 const SCENARIOS = [

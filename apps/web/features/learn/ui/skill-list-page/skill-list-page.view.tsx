@@ -3,10 +3,12 @@
 import { memo } from "react";
 import Link from "next/link";
 import { ArrowLeft, Heart, Timer } from "lucide-react";
-import { Button, cn } from "@landing-page-generator/ui";
+import { Button, cn } from "@engli-tutor/ui";
 import { DataLoadingState } from "@/features/layout";
 import {
   LEVELS,
+  skillExerciseHref,
+  skillListHref,
   type SkillExercise,
   type SkillId,
   type SkillLevel,
@@ -83,7 +85,7 @@ export const SkillListPageView = memo(function SkillListPageView({
 
       <div className="flex flex-wrap gap-2">
         <Link
-          href={`/skills/${skill}?level=all`}
+          href={skillListHref(skill, "all")}
           className={cn(
             "rounded-full border px-3.5 py-2 text-sm font-medium transition-colors",
             activeLevel === "all"
@@ -98,7 +100,7 @@ export const SkillListPageView = memo(function SkillListPageView({
           return (
             <Link
               key={level.id}
-              href={`/skills/${skill}?level=${level.id}`}
+              href={skillListHref(skill, level.id)}
               className={cn(
                 "rounded-full border px-3.5 py-2 text-sm font-medium transition-colors",
                 activeLevel === level.id
@@ -120,8 +122,8 @@ export const SkillListPageView = memo(function SkillListPageView({
             description={`Preparing ${meta.labelEn.toLowerCase()} practice for this level.`}
             cards={3}
           />
-        ) : null}
-        {groups.map(({ level, exercises }) => (
+        ) : (
+          groups.map(({ level, exercises }) => (
           <section key={level.id} className="space-y-4">
             <div className="space-y-1">
               <h2 className="text-xl font-semibold tracking-tight">
@@ -179,7 +181,7 @@ export const SkillListPageView = memo(function SkillListPageView({
                         asChild
                         className="h-10 rounded-full bg-primary px-5 text-primary-foreground hover:bg-primary/90"
                       >
-                        <Link href={`/skills/${skill}/${exercise.id}`}>Start exercise</Link>
+                        <Link href={skillExerciseHref(skill, exercise.id, activeLevel)}>Start exercise</Link>
                       </Button>
                     </div>
                   </article>
@@ -187,7 +189,8 @@ export const SkillListPageView = memo(function SkillListPageView({
               })}
             </div>
           </section>
-        ))}
+        ))
+        )}
       </div>
 
       {!loading && groups.length === 0 ? (

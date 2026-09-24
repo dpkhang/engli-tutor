@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, type MouseEvent, type RefObject } from "react";
-import { cn } from "@landing-page-generator/ui";
+import { cn } from "@engli-tutor/ui";
 import { type TextToken } from "../../model/tokenize-words";
 import { type TranslateActivePick } from "../../model/translate-session";
 

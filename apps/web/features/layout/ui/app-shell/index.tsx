@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { authClient, useSession } from "@/lib/auth-client";
-import { useActionDialog } from "@landing-page-generator/ui";
+import { useActionDialog } from "@engli-tutor/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useBillingMe } from "@/features/payments/hooks/use-billing";
 import { useSignOutLoading } from "../shared";
@@ -14,6 +14,7 @@ import { AppShellView } from "./app-shell.view";
 function isAiDockHiddenPath(pathname: string) {
   return (
     pathname.startsWith("/settings") ||
+    pathname.startsWith("/policy") ||
     pathname.startsWith("/payments") ||
     pathname === "/accounts"
   );

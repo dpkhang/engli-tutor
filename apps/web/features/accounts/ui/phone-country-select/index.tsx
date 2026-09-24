@@ -16,7 +16,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { Check, ChevronDown, Search } from "lucide-react";
-import { cn } from "@landing-page-generator/ui";
+import { cn } from "@engli-tutor/ui";
 import { getCountryCallingCode, type Country } from "react-phone-number-input";
 
 type CountryOption = {

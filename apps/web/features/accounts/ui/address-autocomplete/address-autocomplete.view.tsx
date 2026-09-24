@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import { Check, LoaderCircle, MapPin, Search } from "lucide-react";
-import { cn } from "@landing-page-generator/ui";
+import { cn } from "@engli-tutor/ui";
 
 export type AddressSuggestion = {
   id: string;

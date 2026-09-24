@@ -106,6 +106,10 @@ export function LoginPage() {
     [form, returnTo],
   );
 
+  if (sessionPending || data?.user) {
+    return null;
+  }
+
   return (
     <LoginPageView
       mode={mode}
@@ -113,6 +117,9 @@ export function LoginPage() {
       error={error}
       register={form.register}
       errors={form.formState.errors}
+      policyHref="/policy"
+      cookiesHref="/policy/cookies"
+      homeHref={marketingUrl}
       onModeChange={changeMode}
       onSubmit={onSubmit}
     />

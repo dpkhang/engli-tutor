@@ -16,7 +16,7 @@ import {
   Timer,
   WandSparkles,
 } from "lucide-react";
-import { Button } from "@landing-page-generator/ui";
+import { Button } from "@engli-tutor/ui";
 import { LESSON_PACKS, MINI_GAMES, QUICK_TIPS } from "../../model/curriculum";
 
 const SKILLS = [

@@ -9,7 +9,7 @@ import {
   CardTitle,
   Input,
   Label,
-} from "@landing-page-generator/ui";
+} from "@engli-tutor/ui";
 import { SettingsCard, SettingsCardContent, SettingsCardHeader } from "../shared";
 
 export type SecuritySettingsViewProps = {

@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import { Monitor, Moon, Palette, Sparkles, Sun, Type } from "lucide-react";
-import { Button, CardTitle, SegmentedSwitch, cn } from "@landing-page-generator/ui";
+import { Button, CardTitle, SegmentedSwitch, cn } from "@engli-tutor/ui";
 import {
   ACCENTS,
   REDUCE_MOTION_OPTIONS,

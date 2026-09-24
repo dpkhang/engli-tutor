@@ -1,5 +1,6 @@
 import { workspaceApiClient } from "@/lib/workspace-api-client";
 import type { SkillLevel } from "@/features/learn/model/skill-exercises";
+import { notifyAccountChanged } from "./model/account-sync";
 
 export type AccountProfile = {
   id: string;
@@ -33,6 +34,9 @@ export type UpdateAccountInput = {
 
 export const accountApi = {
   get: () => workspaceApiClient.get<AccountProfile>("/api/account"),
-  update: (input: UpdateAccountInput) =>
-    workspaceApiClient.patch<AccountProfile>("/api/account", input),
+  update: async (input: UpdateAccountInput) => {
+    const profile = await workspaceApiClient.patch<AccountProfile>("/api/account", input);
+    notifyAccountChanged(profile);
+    return profile;
+  },
 };

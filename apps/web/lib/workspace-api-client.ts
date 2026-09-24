@@ -1,6 +1,6 @@
 "use client";
 
-import { ApiClient, ApiError } from "@landing-page-generator/api-client";
+import { ApiClient, ApiError } from "@engli-tutor/api-client";
 
 export class WorkspaceApiClient extends ApiClient {
   constructor() {

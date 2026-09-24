@@ -13,7 +13,7 @@ import {
   Volume2,
   X,
 } from "lucide-react";
-import { Button, cn } from "@landing-page-generator/ui";
+import { Button, cn } from "@engli-tutor/ui";
 import { type TranslateResult } from "../../api";
 
 function highlightWordInSentence(sentence: string, word: string) {

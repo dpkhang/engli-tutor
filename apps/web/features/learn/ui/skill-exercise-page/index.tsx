@@ -5,7 +5,7 @@ import { getAutoPlayListening } from "@/features/settings";
 import { useAiSpeech } from "@/features/speaking-lab/hooks/use-ai-speech";
 import { useSkillExercise } from "../../hooks/use-learning-catalog";
 import { useLessonProgress } from "../../hooks/use-lesson-progress";
-import { getSkillMeta, type OpenQuestion, type SkillId } from "../../model/skill-exercises";
+import { getSkillMeta, skillListHref, type OpenQuestion, type SkillId } from "../../model/skill-exercises";
 import {
   SkillExercisePageView,
   type AnswerDraft,
@@ -19,9 +19,18 @@ function scoreOpen(answer: string, question: OpenQuestion): boolean {
   return keys.every((key) => normalized.includes(key.toLowerCase()));
 }
 
-export function SkillExercisePage({ skill, exerciseId }: { skill: SkillId; exerciseId: string }) {
+export function SkillExercisePage({
+  skill,
+  exerciseId,
+  listLevel,
+}: {
+  skill: SkillId;
+  exerciseId: string;
+  listLevel?: string;
+}) {
   const { exercise, loading } = useSkillExercise(skill, exerciseId);
   const skillMeta = getSkillMeta(skill);
+  const backHref = skillListHref(skill, listLevel);
   const { progress, hydrated, toggleExerciseFavorite } = useLessonProgress();
   const { speak, stop } = useAiSpeech();
   const [answers, setAnswers] = useState<Record<string, AnswerDraft>>({});
@@ -113,6 +122,7 @@ export function SkillExercisePage({ skill, exerciseId }: { skill: SkillId; exerc
     <SkillExercisePageView
       skill={skill}
       skillMeta={skillMeta}
+      backHref={backHref}
       exercise={exercise}
       loading={loading}
       answers={mergedAnswers}

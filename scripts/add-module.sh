@@ -17,8 +17,8 @@ Examples:
   pnpm module:add vitest @testing-library/react --dev
 
 Targets:
-  landing-page-generator-fe  (apps/web)
-  landing-page-web           (apps/landing-page-web)
+  engli-tutor-fe  (apps/web)
+  engli-tutor-web           (apps/engli-tutor-web)
 EOF
 }
 
@@ -63,13 +63,13 @@ echo "→ Adding modules to Marketing + Workspace"
 printf '  - %s\n' "${PACKAGES[@]}"
 
 pnpm add \
-  --filter landing-page-generator-fe \
-  --filter landing-page-web \
+  --filter engli-tutor-fe \
+  --filter engli-tutor-web \
   "${PNPM_FLAGS[@]}" \
   "${PACKAGES[@]}"
 
 echo "→ Verifying workspace dependencies"
-pnpm --filter landing-page-generator-fe list --depth 0
-pnpm --filter landing-page-web list --depth 0
+pnpm --filter engli-tutor-fe list --depth 0
+pnpm --filter engli-tutor-web list --depth 0
 
 echo "→ Done"

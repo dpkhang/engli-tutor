@@ -4,7 +4,7 @@ import {
   authErrorMessage,
   createPagecraftAuthClient,
   normalizePublicUrl,
-} from "@landing-page-generator/auth";
+} from "@engli-tutor/auth";
 
 const useSameOrigin = process.env.NEXT_PUBLIC_AUTH_SAME_ORIGIN === "true";
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;

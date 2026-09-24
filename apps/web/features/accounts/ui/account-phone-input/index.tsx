@@ -9,7 +9,7 @@ import PhoneInput, {
   type Value,
 } from "react-phone-number-input";
 import flags from "react-phone-number-input/flags";
-import { cn } from "@landing-page-generator/ui";
+import { cn } from "@engli-tutor/ui";
 import { PhoneCountrySelect } from "../phone-country-select";
 
 const PRIORITY_COUNTRIES: Array<Country | "|" | "..."> = [

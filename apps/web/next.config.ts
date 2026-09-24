@@ -26,9 +26,10 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_AUTH_SAME_ORIGIN: useSameOriginProxy ? "true" : "false",
   },
   transpilePackages: [
-    "@landing-page-generator/ui",
-    "@landing-page-generator/auth",
-    "@landing-page-generator/api-client",
+    "@engli-tutor/ui",
+    "@engli-tutor/auth",
+    "@engli-tutor/api-client",
+    "@engli-tutor/legal",
   ],
   turbopack: {
     root: path.join(__dirname, "../.."),
