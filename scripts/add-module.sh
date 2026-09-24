@@ -17,8 +17,8 @@ Examples:
   pnpm module:add vitest @testing-library/react --dev
 
 Targets:
-  engli-tutor-fe  (apps/web)
-  engli-tutor-web           (apps/engli-tutor-web)
+  engli-tutor-fe  (apps/workspace)
+  engli-tutor-web           (apps/marketing)
 EOF
 }
 

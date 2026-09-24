@@ -12,8 +12,8 @@ Usage: bash ./scripts/install-workspace.sh <workspace>
 
 Workspaces:
   all       Install root + apps/* + packages/*, then build packages
-  web       Install apps/web (+ deps), then build packages
-  landing   Install apps/engli-tutor-web (+ deps), then build packages
+  web       Install apps/workspace (+ deps), then build packages
+  landing   Install apps/marketing (+ deps), then build packages
   ui        Install all packages/*, then build them
   packages  Alias of ui
 

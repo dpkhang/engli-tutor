@@ -12,7 +12,7 @@ importers:
         specifier: ^0.61.0
         version: 0.61.0
 
-  apps/engli-tutor-web:
+  apps/marketing:
     dependencies:
       '@engli-tutor/api-client':
         specifier: workspace:*
@@ -73,7 +73,7 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
-  apps/web:
+  apps/workspace:
     dependencies:
       '@engli-tutor/api-client':
         specifier: workspace:*

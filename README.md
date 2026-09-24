@@ -6,8 +6,8 @@ pnpm workspace: hai app Next.js + ba package dùng chung. Marketing site định
 
 | Workspace | Package name | Purpose |
 | --- | --- | --- |
-| `apps/web` | `engli-tutor-fe` | Workspace dashboard (auth) |
-| `apps/engli-tutor-web` | `engli-tutor-web` | Marketing + checkout |
+| `apps/workspace` | `engli-tutor-fe` | Workspace dashboard (auth) |
+| `apps/marketing` | `engli-tutor-web` | Marketing + checkout |
 | `packages/api-client` | `@engli-tutor/api-client` | Fetch client + interceptors |
 | `packages/auth` | `@engli-tutor/auth` | Better Auth client factory |
 | `packages/ui` | `@engli-tutor/ui` | Shared components / tokens |
@@ -44,11 +44,11 @@ pnpm dev:landing   # http://localhost:3002  (HTTPS local: local.pagecraft-ai.sit
 Env:
 
 ```bash
-cp apps/web/.env.local.example apps/web/.env.local
-cp apps/engli-tutor-web/.env.local.example apps/engli-tutor-web/.env.local
+cp apps/workspace/.env.local.example apps/workspace/.env.local
+cp apps/marketing/.env.local.example apps/marketing/.env.local
 ```
 
-### Workspace (`apps/web`)
+### Workspace (`apps/workspace`)
 
 | Variable | Purpose |
 | --- | --- |
@@ -58,7 +58,7 @@ cp apps/engli-tutor-web/.env.local.example apps/engli-tutor-web/.env.local
 
 Browser gọi `/api/*` same-origin; Next proxy/route forward tới `NEXT_PUBLIC_API_URL` để cookie first-party.
 
-### Marketing (`apps/engli-tutor-web`)
+### Marketing (`apps/marketing`)
 
 | Variable | Purpose |
 | --- | --- |
@@ -158,9 +158,9 @@ Hai project từ repo `fe`:
 
 | Project | Root Directory |
 | --- | --- |
-| Workspace | `apps/web` |
-| Marketing | `apps/engli-tutor-web` |
+| Workspace | `apps/workspace` |
+| Marketing | `apps/marketing` |
 
 CI variables: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID_WEB`, `VERCEL_PROJECT_ID_LANDING`, cùng các `NEXT_PUBLIC_*` ở trên.
 
-> Cloudflare Workers: monorepo cần **Root directory** = `apps/web` hoặc `apps/engli-tutor-web` (không để `/`). Repo hiện deploy chính qua Vercel; OpenNext/Workers cần adapter riêng.
+> Cloudflare Workers: monorepo cần **Root directory** = `apps/workspace` hoặc `apps/marketing` (không để `/`). Repo hiện deploy chính qua Vercel; OpenNext/Workers cần adapter riêng.
