@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "install:workspace": "pnpm --dir ../.. install:landing",
+    "install:workspace": "pnpm --dir ../.. install:marketing",
     "install:all": "pnpm --dir ../.. install:all",
     "install:landing-page": "pnpm --dir ../.. install:landing-page",
     "module:add": "pnpm --dir ../.. module:add",

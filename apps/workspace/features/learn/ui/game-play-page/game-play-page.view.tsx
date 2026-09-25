@@ -2,12 +2,13 @@
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, Gamepad2, House, Lightbulb, Mic2, RotateCcw, Volume2 } from "lucide-react";
+import { ArrowLeft, Bookmark, Check, ChevronLeft, Gamepad2, House, Lightbulb, Mic2, RotateCcw, Volume2, X } from "lucide-react";
 import { Button, cn } from "@engli-tutor/ui";
 import { DataLoadingState, NotFoundPage } from "@/features/layout";
 import { ClickableTranslateText } from "@/features/translate";
 import { useAiSpeech } from "@/features/speaking-lab/hooks/use-ai-speech";
 import { useVoiceInput } from "@/features/tutor-chat/hooks/use-voice-input";
+import { isFlashcardSaved, saveFlashcard, saveFlashcardForReview } from "../../model/flashcard-review";
 import { sampleAnswerFor, scoreGameRound, shuffleInPlace } from "../../model/games";
 import type { LearningGame, LearningGameRound, LearningQuestion } from "../../api/types";
 import type { LessonPack } from "../../model/curriculum";
@@ -408,13 +409,207 @@ function HuntRound({
   );
 }
 
+function ShortcutTip({ label }: { label: string }) {
+  return (
+    <span className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-10 -translate-x-1/2 translate-y-1 opacity-0 transition duration-150 group-hover:translate-y-0 group-hover:opacity-100">
+      <kbd className="inline-flex min-w-6 items-center justify-center rounded-md border border-border bg-popover px-1.5 py-1 font-sans text-[11px] font-medium leading-none text-foreground shadow-[0_8px_18px_-12px_rgba(15,23,42,0.6)]">
+        {label}
+      </kbd>
+    </span>
+  );
+}
+
+function FlashRound({
+  question,
+  imageUrl,
+  wordId,
+  locked,
+  canGoBack,
+  enter,
+  onSpeak,
+  onBack,
+  onRate,
+}: {
+  question: Extract<LearningQuestion, { kind: "flash" }>;
+  imageUrl?: string;
+  wordId: string;
+  locked: boolean;
+  canGoBack: boolean;
+  enter: "next" | "back";
+  onSpeak: () => void;
+  onBack: () => void;
+  onRate: (value: "xmart" | "check") => void;
+}) {
+  const [flipped, setFlipped] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const outline = "h-14 rounded-2xl border bg-transparent shadow-none";
+  const mark = "h-14 w-full rounded-full border bg-card shadow-none";
+
+  useEffect(() => {
+    setSaved(isFlashcardSaved(wordId));
+  }, [wordId]);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (locked || event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
+      const target = event.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)
+      ) {
+        return;
+      }
+      if (event.key === "x" || event.key === "X") {
+        event.preventDefault();
+        onRate("xmart");
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        onRate("check");
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [locked, onRate]);
+
+  return (
+    <div className="mx-auto w-full max-w-lg space-y-5">
+      <div className="[perspective:1400px]">
+        <button
+          type="button"
+          aria-label={flipped ? question.word : `Flip ${question.word}`}
+          className={cn(
+            "relative grid min-h-[34rem] w-full [transform-style:preserve-3d] transition-transform duration-500",
+            !locked && !flipped && "hover:-translate-y-1",
+            flipped && "[transform:rotateY(180deg)]",
+            locked && "cursor-default",
+          )}
+          disabled={locked}
+          onClick={() => setFlipped((open) => !open)}
+        >
+          <span className="col-start-1 row-start-1 flex flex-col overflow-hidden rounded-[2rem] border border-black/8 bg-card dark:border-white/10 text-left shadow-[0_18px_40px_-28px_rgba(15,23,42,0.35)] ring-1 ring-black/5 dark:shadow-[0_24px_50px_-28px_rgba(0,0,0,0.65)] dark:ring-white/10 [backface-visibility:hidden]">
+            <span className="relative block h-72 overflow-hidden bg-card">
+              {imageUrl && !imageFailed ? (
+                // eslint-disable-next-line @next/next/no-img-element -- flashcard art in /public
+                <img
+                  src={imageUrl}
+                  alt=""
+                  decoding="sync"
+                  className="size-full object-cover"
+                  onError={() => setImageFailed(true)}
+                />
+              ) : (
+                <span className="grid size-full place-items-center text-6xl" aria-hidden>
+                  Aa
+                </span>
+              )}
+            </span>
+              <span className={cn("flex flex-1 flex-col items-center justify-center px-6 py-7 text-center", enter === "back" ? "flashcard-enter-back" : "flashcard-enter-next")}>
+              <span className="text-5xl font-semibold tracking-[-0.04em] capitalize sm:text-6xl">{question.word}</span>
+              <span className="mt-3 text-xs text-muted-foreground">Tap the card to reveal</span>
+            </span>
+          </span>
+
+          <span className="col-start-1 row-start-1 flex min-h-[34rem] flex-col justify-between overflow-hidden rounded-[2rem] border border-black/8 bg-card dark:border-white/10 p-7 text-left shadow-[0_18px_40px_-28px_rgba(15,23,42,0.35)] ring-1 ring-black/5 dark:shadow-[0_24px_50px_-28px_rgba(0,0,0,0.65)] dark:ring-white/10 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+            <span>
+              <span className="text-[11px] font-semibold tracking-[0.16em] text-muted-foreground uppercase">
+                {question.word}
+              </span>
+              <span className="mt-4 block text-base text-primary">{question.ipa}</span>
+              <span className="mt-2 block text-4xl font-semibold tracking-tight">{question.meaningVi}</span>
+              <span className="mt-4 block text-sm leading-6 text-muted-foreground">{question.gloss}</span>
+            </span>
+            <span className="rounded-2xl bg-muted/70 px-4 py-3 text-sm leading-6 text-foreground">
+              {question.example}
+            </span>
+          </span>
+        </button>
+      </div>
+
+      <div className="grid grid-cols-5 items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          aria-label="Previous word"
+          disabled={!canGoBack}
+          className={cn(outline, "border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800")}
+          onClick={onBack}
+        >
+          <ChevronLeft className="size-5" />
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          aria-label="Save word"
+          aria-pressed={saved}
+          className={cn(
+            outline,
+            saved
+              ? "border-amber-600 bg-amber-500/15 text-amber-800 dark:text-amber-200"
+              : "border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-400/40 dark:text-amber-300 dark:hover:bg-amber-400/10",
+          )}
+          onClick={() => {
+            saveFlashcard(wordId);
+            setSaved(true);
+          }}
+        >
+          <Bookmark className="size-5" />
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          aria-label="Hear"
+          className={cn(outline, "border-primary/40 text-primary hover:bg-primary/10")}
+          onClick={onSpeak}
+        >
+          <Volume2 className="size-5" />
+        </Button>
+        <span className="group relative">
+          <Button
+            type="button"
+            variant="outline"
+            aria-label="Save to study again"
+            aria-keyshortcuts="x"
+            disabled={locked}
+            className={cn(mark, "border-rose-200 text-rose-600 hover:border-rose-300 hover:bg-rose-50 dark:border-rose-400/30 dark:text-rose-300 dark:hover:bg-rose-400/10")}
+            onClick={() => onRate("xmart")}
+          >
+            <X className="size-5" strokeWidth={1.75} />
+          </Button>
+          <ShortcutTip label="X" />
+        </span>
+        <span className="group relative">
+          <Button
+            type="button"
+            variant="outline"
+            aria-label="Next word"
+            aria-keyshortcuts="Enter"
+            disabled={locked}
+            className={cn(mark, "border-emerald-200 text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50 dark:border-emerald-400/30 dark:text-emerald-300 dark:hover:bg-emerald-400/10")}
+            onClick={() => onRate("check")}
+          >
+            <Check className="size-5" strokeWidth={1.75} />
+          </Button>
+          <ShortcutTip label="Enter" />
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function RoundPlay({
   round,
   gameId,
+  canGoBack,
+  enter,
+  onBack,
   onSubmit,
 }: {
   round: LearningGameRound;
   gameId: string;
+  canGoBack: boolean;
+  enter: "next" | "back";
+  onBack: () => void;
   onSubmit: (value: string, correct: boolean) => void;
 }) {
   const { speak, stop } = useAiSpeech();
@@ -424,6 +619,7 @@ function RoundPlay({
   const [locked, setLocked] = useState(false);
   const [correct, setCorrect] = useState<boolean | null>(null);
   const question = round.question;
+  const timed = question.kind !== "flash";
 
   const valueRef = useRef(value);
   valueRef.current = value;
@@ -483,7 +679,7 @@ function RoundPlay({
   finishRef.current = finish;
 
   useEffect(() => {
-    if (locked) return;
+    if (locked || !timed) return;
     const timer = window.setInterval(() => {
       setSeconds((current) => {
         if (current <= 1) {
@@ -494,13 +690,12 @@ function RoundPlay({
       });
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [locked, round.id]);
+  }, [locked, round.id, timed]);
 
   useEffect(() => {
-    if (seconds === 0 && !locked) {
-      finishRef.current(valueRef.current);
-    }
-  }, [seconds, locked]);
+    if (!timed || seconds !== 0 || locked) return;
+    finishRef.current(valueRef.current);
+  }, [seconds, locked, timed]);
 
   const hearMax = round.hearAgainMax ?? 2;
   const canHear = Boolean(round.material?.speakable) && hears < hearMax && !locked;
@@ -517,18 +712,29 @@ function RoundPlay({
             : value.trim().length > 0;
 
   return (
-    <article className="space-y-5 rounded-3xl border border-border/70 bg-card p-5 sm:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-          {round.level} · {gameId.replaceAll("-", " ")}
-        </p>
-        <TimerRing seconds={seconds} total={round.seconds} />
-      </div>
-      <h3 className="text-lg font-semibold tracking-tight">{question.prompt}</h3>
+    <article
+      className={cn(
+        "space-y-5",
+        question.kind === "flash"
+          ? "bg-transparent"
+          : "rounded-3xl border border-border/70 bg-card p-5 sm:p-6",
+      )}
+    >
+      {question.kind === "flash" ? null : (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            {round.level} · {gameId.replaceAll("-", " ")}
+          </p>
+          {timed ? <TimerRing seconds={seconds} total={round.seconds} /> : null}
+        </div>
+      )}
+      {question.kind === "flash" ? null : (
+        <h3 className="text-lg font-semibold tracking-tight">{question.prompt}</h3>
+      )}
 
-      {round.material?.imageUrl || round.material?.imageEmoji ? (
+      {question.kind !== "flash" && (round.material?.imageUrl || round.material?.imageEmoji) ? (
         <PicturePrompt imageUrl={round.material.imageUrl} imageEmoji={round.material.imageEmoji} />
-      ) : round.material ? (
+      ) : question.kind !== "flash" && round.material ? (
         <div className="space-y-3 rounded-xl border border-border/60 bg-muted/40 px-4 py-3">
           {round.material.speakable ? (
             <div className="flex flex-wrap gap-2">
@@ -604,8 +810,24 @@ function RoundPlay({
           onChange={setValue}
         />
       ) : null}
+      {question.kind === "flash" ? (
+        <FlashRound
+          question={question}
+          imageUrl={round.material?.imageUrl}
+          wordId={round.id}
+          locked={locked}
+          canGoBack={canGoBack}
+          enter={enter}
+          onSpeak={() => void speak(question.word)}
+          onBack={onBack}
+          onRate={(rating) => {
+            if (rating === "xmart") saveFlashcardForReview(round.id);
+            finish(rating === "check" ? "know" : "again");
+          }}
+        />
+      ) : null}
 
-      {locked ? (
+      {locked && question.kind !== "flash" ? (
         <div className="space-y-2 rounded-xl border border-accent/25 bg-accent/8 px-4 py-3">
           <p className="flex items-center gap-2 text-sm font-semibold">
             <Check className="size-4 text-accent" />
@@ -617,7 +839,7 @@ function RoundPlay({
             {sampleAnswerFor(question)}
           </p>
         </div>
-      ) : (
+      ) : question.kind === "flash" ? null : (
         <Button
           type="button"
           className="h-11 w-full rounded-full sm:w-auto"
@@ -640,11 +862,13 @@ export type GamePlayPageViewProps = {
   index: number;
   scores: boolean[];
   playId: number;
+  enter: "next" | "back";
   round: LearningGameRound | undefined;
   correctCount: number;
   onStart: () => void;
   onRoundSubmit: (value: string, isCorrect: boolean) => void;
   onNextRound: () => void;
+  onPreviousRound: () => void;
 };
 
 export const GamePlayPageView = memo(function GamePlayPageView({
@@ -656,12 +880,25 @@ export const GamePlayPageView = memo(function GamePlayPageView({
   index,
   scores,
   playId,
+  enter,
   round,
   correctCount,
   onStart,
   onRoundSubmit,
   onNextRound,
+  onPreviousRound,
 }: GamePlayPageViewProps) {
+  useEffect(() => {
+    if (game?.id !== "flashcard" || phase !== "playing") return;
+    for (const item of session) {
+      const url = item.material?.imageUrl;
+      if (!url) continue;
+      const loader = new Image();
+      loader.decoding = "sync";
+      loader.src = url;
+    }
+  }, [game?.id, phase, session]);
+
   if (loading) {
     return (
       <DataLoadingState
@@ -740,9 +977,12 @@ export const GamePlayPageView = memo(function GamePlayPageView({
             key={`${playId}-${round.id}-${index}`}
             round={round}
             gameId={game.id}
+            canGoBack={index > 0}
+            enter={enter}
+            onBack={onPreviousRound}
             onSubmit={onRoundSubmit}
           />
-          {scores[index] !== undefined ? (
+          {game.id !== "flashcard" && scores[index] !== undefined ? (
             <Button className="h-11 rounded-full px-6" onClick={onNextRound}>
               {index + 1 >= session.length ? "See results" : "Next round"}
             </Button>

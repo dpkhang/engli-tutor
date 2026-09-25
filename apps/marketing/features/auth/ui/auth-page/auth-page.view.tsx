@@ -16,7 +16,7 @@ import {
   UserRound,
   WandSparkles,
 } from "lucide-react";
-import { Button, Input, SegmentedSwitch } from "@engli-tutor/ui";
+import { BrandLogo, Button, Input, SegmentedSwitch } from "@engli-tutor/ui";
 import { AnimatePresence, motion } from "motion/react";
 import type { AuthFormValues } from "../../model/auth-schema";
 import { SocialAuthButtons } from "../social-auth-buttons";
@@ -78,10 +78,7 @@ export const AuthPageView = memo(function AuthPageView({
           href="/"
           className="group inline-flex items-center gap-2.5 text-sm font-semibold tracking-wide text-white"
         >
-          <span className="grid size-9 place-items-center rounded-xl bg-linear-to-br from-indigo-400 to-violet-600 shadow-lg shadow-indigo-500/25 transition-transform group-hover:-rotate-6">
-            <Sparkles className="size-4" />
-          </span>
-          <span className="text-base">EngliTutor</span>
+          <BrandLogo size={32} wordmarkClassName="text-white" />
         </Link>
         <Link
           href="/"
@@ -324,6 +321,8 @@ export const AuthPageView = memo(function AuthPageView({
             <p>
               <Link
                 href="/policy"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="font-medium text-slate-500 underline decoration-slate-300 underline-offset-2 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
               >
                 Privacy Policy
@@ -331,6 +330,8 @@ export const AuthPageView = memo(function AuthPageView({
               {" · "}
               <Link
                 href="/policy/cookies"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="font-medium text-slate-500 underline decoration-slate-300 underline-offset-2 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
               >
                 Cookie Policy

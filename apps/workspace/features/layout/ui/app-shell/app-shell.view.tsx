@@ -15,13 +15,13 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { Button, cn, ThemeToggle } from "@engli-tutor/ui";
+import { Button, BrandLogo, cn, ThemeToggle } from "@engli-tutor/ui";
 import { AnimatePresence, motion } from "motion/react";
 import { FloatingTranslate } from "@/features/translate";
 
 const PRIMARY_NAV = [
   { href: "/", label: "Today" },
-  { href: "/skills", label: "Practice" },
+  { href: "/skills", label: "Skills" },
   { href: "/games", label: "Games" },
   { href: "/lessons", label: "My path" },
   { href: "/progress", label: "My progress", private: true },
@@ -129,12 +129,9 @@ export const AppShellView = memo(function AppShellView({
 
             <Link
               href="/"
-              className="group flex shrink-0 items-center gap-2 text-lg font-semibold tracking-tight text-foreground"
+              className="group flex shrink-0 items-center text-foreground"
             >
-              <span className="grid size-8 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm transition-transform group-hover:-rotate-6">
-                <span className="text-sm">E</span>
-              </span>
-              <span className="hidden sm:inline">EngliTutor</span>
+              <BrandLogo size={30} />
             </Link>
 
             <nav className="ml-4 hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
@@ -247,7 +244,6 @@ export const AppShellView = memo(function AppShellView({
                           <Settings className="size-4 text-muted-foreground" />
                           Settings
                         </Link>
-                        <ThemeToggle variant="menuitem" />
                       </div>
                       <div className="border-t border-border pt-1">
                         <button

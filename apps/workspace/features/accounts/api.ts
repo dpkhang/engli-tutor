@@ -16,6 +16,9 @@ export type AccountProfile = {
   targetLevel: SkillLevel | null;
   learningGoal: string | null;
   welcomeSeenAt: string | null;
+  appearanceTheme: string | null;
+  appearanceAccent: string | null;
+  appearanceTextSize: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -30,6 +33,9 @@ export type UpdateAccountInput = {
   targetLevel?: SkillLevel | "";
   learningGoal?: string;
   welcomeSeen?: boolean;
+  appearanceTheme?: string;
+  appearanceAccent?: string;
+  appearanceTextSize?: string;
 };
 
 export const accountApi = {

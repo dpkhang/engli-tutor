@@ -9,6 +9,7 @@ export {
 export { SettingsShell } from "./ui/settings-shell";
 export { AppearanceSettings } from "./ui/appearance-settings";
 export { LearningSettings } from "./ui/learning-settings";
+export { NotificationSettings } from "./ui/notification-settings";
 export { SecuritySettings } from "./ui/security-settings";
 export { BillingSettings } from "./ui/billing-settings";
 export {

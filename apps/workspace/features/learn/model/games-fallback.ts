@@ -87,6 +87,34 @@ const choice = (
   explanation,
 });
 
+const flash = (
+  id: string,
+  word: string,
+  ipa: string,
+  meaningVi: string,
+  gloss: string,
+  example: string,
+  explanation: string,
+): LearningQuestion => ({
+  id,
+  kind: "flash",
+  prompt: "Tap the card to see the IPA and the Vietnamese meaning.",
+  word,
+  ipa,
+  meaningVi,
+  gloss,
+  example,
+  explanation,
+});
+
+function flashArt(file: string) {
+  return {
+    title: "Picture",
+    body: "",
+    imageUrl: `/games/pictures/flashcards/${file}.png`,
+  };
+}
+
 const spell = (
   id: string,
   prompt: string,
@@ -605,6 +633,27 @@ export const FALLBACK_GAMES: LearningGame[] = [
       round("wu-meeting", "TOEIC", 40, spell("wu-meeting-q", "Tap the letters to make a real English word.", "meeting", "MEETING — people talking together about work.")),
       round("wu-deadline", "B1", 45, spell("wu-deadline-q", "Tap the letters to make a real English word.", "deadline", "DEADLINE — the time when work must be finished.")),
       round("wu-commute", "IELTS", 40, spell("wu-commute-q", "Tap the letters to make a real English word.", "commute", "COMMUTE — the daily trip between home and work.")),
+    ],
+  },
+  {
+    id: "flashcard",
+    title: "Flashcards",
+    body: "Flip a workplace word, then mark whether you know it.",
+    skill: "reading",
+    durationMinutes: 2,
+    howToPlay: "Tap the card to see the IPA, the Vietnamese meaning, and an example. The X saves it for later. The check skips it.",
+    relatedSkill: "reading",
+    rounds: [
+      round("fc-laptop", "A2", 0, flash("fc-laptop-q", "laptop", "/ˈlæp.tɑːp/", "máy tính xách tay", "A portable computer you can take to meetings.", "I left my laptop in the meeting room.", "LAPTOP — a computer you carry with you."), { material: flashArt("laptop") }),
+      round("fc-email", "A2", 0, flash("fc-email-q", "email", "/ˈiː.meɪl/", "thư điện tử", "A written message you send at work.", "Please send me an email with the agenda.", "EMAIL — a message, not a paper letter."), { material: flashArt("email") }),
+      round("fc-office", "A2", 0, flash("fc-office-q", "office", "/ˈɒf.ɪs/", "văn phòng", "The place where a team works.", "Our office is on the third floor.", "OFFICE — the workplace, not a job title."), { material: flashArt("office") }),
+      round("fc-calendar", "A2", 0, flash("fc-calendar-q", "calendar", "/ˈkæl.ɪn.dər/", "lịch", "A chart of dates, meetings, and deadlines.", "Check the calendar before you book the room.", "CALENDAR — where you see dates and meetings."), { material: flashArt("calendar") }),
+      round("fc-meeting", "TOEIC", 0, flash("fc-meeting-q", "meeting", "/ˈmiː.tɪŋ/", "cuộc họp", "People talking together about work.", "The meeting starts at nine.", "MEETING — a work conversation with a group."), { material: flashArt("meeting") }),
+      round("fc-agenda", "TOEIC", 0, flash("fc-agenda-q", "agenda", "/əˈdʒen.də/", "chương trình họp", "The list of topics for a meeting.", "The first item on the agenda is the budget.", "AGENDA — the plan of what you will discuss."), { material: flashArt("agenda") }),
+      round("fc-deadline", "B1", 0, flash("fc-deadline-q", "deadline", "/ˈded.laɪn/", "hạn chót", "The time when work must be finished.", "The deadline for the report is Friday.", "DEADLINE — the last moment the work can be done."), { material: flashArt("deadline") }),
+      round("fc-feedback", "B1", 0, flash("fc-feedback-q", "feedback", "/ˈfiːd.bæk/", "phản hồi", "Comments that help someone improve.", "She gave clear feedback on the draft.", "FEEDBACK — useful comments, not only praise."), { material: flashArt("feedback") }),
+      round("fc-commute", "IELTS", 0, flash("fc-commute-q", "commute", "/kəˈmjuːt/", "đi lại hàng ngày giữa nhà và nơi làm", "The regular trip between home and work.", "My commute takes forty minutes by train.", "COMMUTE — the daily journey, not a one-off trip."), { material: flashArt("commute") }),
+      round("fc-invoice", "IELTS", 0, flash("fc-invoice-q", "invoice", "/ˈɪn.vɔɪs/", "hóa đơn", "A bill that asks a customer to pay.", "We sent the invoice after the project ended.", "INVOICE — a request for payment."), { material: flashArt("invoice") }),
     ],
   },
 ];

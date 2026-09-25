@@ -77,6 +77,7 @@ export type SpeakingRoomPageViewProps = {
   voiceError: string | null;
   bottomRef: RefObject<HTMLDivElement | null>;
   draftInputRef: RefObject<HTMLTextAreaElement | null>;
+  onExit: () => void;
   onToggleSfx: () => void;
   onToggleAutoSpeak: () => void;
   onReset: () => void;
@@ -113,6 +114,7 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
   voiceError,
   bottomRef,
   draftInputRef,
+  onExit,
   onToggleSfx,
   onToggleAutoSpeak,
   onReset,
@@ -136,13 +138,14 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
 
       <header className="relative z-20 flex shrink-0 items-center justify-between gap-3 border-b border-primary/10 px-5 py-3 sm:px-8 sm:py-4">
         <div className="flex min-w-0 items-center gap-3">
-          <Link
-            href="/skills/speaking"
+          <button
+            type="button"
+            onClick={onExit}
             className="inline-flex size-9 items-center justify-center rounded-full text-muted-foreground transition hover:bg-primary/10 hover:text-foreground"
             aria-label="Exit"
           >
             <X className="size-4" strokeWidth={1.5} />
-          </Link>
+          </button>
           <div className="min-w-0">
             <p className="flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.14em] text-primary uppercase">
               <Sparkles className="size-3" strokeWidth={2} />

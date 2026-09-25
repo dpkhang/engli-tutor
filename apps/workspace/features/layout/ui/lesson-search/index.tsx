@@ -18,7 +18,7 @@ export function LessonSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const { packs, loading } = useLessonPacks();
+  const { packs, loading, fetching } = useLessonPacks();
 
   const matches = useMemo(() => {
     const term = normalize(query.trim());
@@ -80,7 +80,7 @@ export function LessonSearch() {
     <LessonSearchView
       open={open}
       query={query}
-      loading={loading}
+      loading={loading || fetching}
       matches={matches}
       rootRef={rootRef}
       inputRef={inputRef}

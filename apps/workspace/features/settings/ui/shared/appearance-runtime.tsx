@@ -1,15 +1,20 @@
 "use client";
 
-import { useLayoutEffect, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { MotionConfig } from "motion/react";
+import { useSession } from "@/lib/auth-client";
 import {
   applyStoredAppearance,
+  disarmAppearanceSync,
   getReduceMotionPreference,
+  hydrateAppearancePreferences,
   PREFERENCES_EVENT,
   THEME_EVENT,
 } from "../../model/preferences";
 
 export function AppearanceProvider({ children }: { children: ReactNode }) {
+  const { data: session } = useSession();
+  const userId = session?.user?.id ?? null;
   const [reducedMotion, setReducedMotion] = useState<"user" | "always" | "never">("user");
 
   useLayoutEffect(() => {
@@ -29,6 +34,14 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
       window.removeEventListener(THEME_EVENT, sync);
     };
   }, []);
+
+  useEffect(() => {
+    if (!userId) {
+      disarmAppearanceSync();
+      return;
+    }
+    void hydrateAppearancePreferences();
+  }, [userId]);
 
   return <MotionConfig reducedMotion={reducedMotion}>{children}</MotionConfig>;
 }

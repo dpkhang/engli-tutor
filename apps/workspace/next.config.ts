@@ -22,7 +22,9 @@ const useSameOriginProxy = true;
 const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: apiUrl,
-    NEXT_PUBLIC_SITE_URL: (process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://pagecraft-ai.site").replace(/\/$/, ""),
+    NEXT_PUBLIC_SITE_URL: (
+      process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://pagecraft-ai.site"
+    ).replace(/\/$/, ""),
     NEXT_PUBLIC_AUTH_SAME_ORIGIN: useSameOriginProxy ? "true" : "false",
   },
   transpilePackages: [
@@ -31,6 +33,9 @@ const nextConfig: NextConfig = {
     "@engli-tutor/api-client",
     "@engli-tutor/legal",
   ],
+  experimental: {
+    optimizePackageImports: ["@engli-tutor/ui"],
+  },
   turbopack: {
     root: path.join(__dirname, "../.."),
   },

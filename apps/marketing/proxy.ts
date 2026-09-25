@@ -12,7 +12,7 @@ function shouldBypass(pathname: string) {
   );
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const host = normalizeHostname(request.headers.get("x-forwarded-host") ?? request.headers.get("host"));
   if (!isCustomDomainHost(host) || shouldBypass(request.nextUrl.pathname)) return NextResponse.next();
 

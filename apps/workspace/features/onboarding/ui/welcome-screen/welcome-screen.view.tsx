@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useEffect, useRef } from "react";
-import { Button } from "@engli-tutor/ui";
+import { BrandLogo, Button } from "@engli-tutor/ui";
 import { WELCOME_DURATION_MS } from "../../model/onboarding";
 
 export type WelcomeScreenViewProps = {
@@ -35,8 +35,8 @@ export const WelcomeScreenView = memo(function WelcomeScreenView({
 
   return (
     <div className="relative z-10 flex min-h-svh flex-col items-center justify-center px-6 text-center">
-      <div className="auth-enter mb-8 grid size-20 place-items-center rounded-[1.4rem] bg-primary text-2xl font-semibold text-primary-foreground shadow-[0_18px_50px_-18px_hsl(var(--primary))]">
-        E
+      <div className="auth-enter mb-8">
+        <BrandLogo size={52} />
       </div>
 
       <p className="auth-enter text-sm font-medium text-primary" style={{ animationDelay: "60ms" }}>

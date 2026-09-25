@@ -1,4 +1,3 @@
-import { PageBackLink } from "@/features/layout";
 import type { LegalCtaCard } from "../../model/legal-ctas";
 import type { PolicySection } from "../../model/policy";
 import type { ReactNode } from "react";
@@ -18,8 +17,6 @@ type LegalDocumentViewProps = {
 };
 
 export function LegalDocumentView({
-  backHref = "/",
-  backLabel = "home",
   eyebrow,
   title,
   intro,
@@ -31,8 +28,6 @@ export function LegalDocumentView({
   return (
     <main className="relative min-h-svh bg-[radial-gradient(ellipse_at_top,hsl(214_22%_92%),hsl(var(--background))_55%)] dark:bg-[radial-gradient(ellipse_at_top,hsl(222_28%_14%),hsl(var(--background))_55%)]">
       <div className="mx-auto max-w-3xl space-y-10 px-5 pt-10 pb-16 sm:px-8 sm:pt-12 lg:pt-16 lg:pb-20">
-        <PageBackLink href={backHref} label={backLabel} />
-
         <header className="space-y-3">
           <p className="text-xs font-semibold tracking-[0.18em] text-accent uppercase">{eyebrow}</p>
           <h1 className="font-display text-3xl tracking-tight text-foreground sm:text-4xl">{title}</h1>

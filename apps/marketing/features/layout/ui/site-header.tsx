@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
 import { authClient, useSession } from "@/lib/auth-client";
-import { Button, cn, ThemeToggle } from "@engli-tutor/ui";
+import { BrandLogo, Button, cn, ThemeToggle } from "@engli-tutor/ui";
 import { motion, AnimatePresence } from "motion/react";
 import { getAppUrl, getAuthHref } from "@/features/auth";
 
@@ -152,11 +152,15 @@ export function SiteHeader() {
         <Link
           href="/"
           className={cn(
-            "font-display text-xl tracking-tight transition-colors",
+            "group inline-flex items-center transition-colors",
             useSolidHeader ? "text-foreground" : "text-white",
           )}
         >
-          EngliTutor
+          <BrandLogo
+            size={32}
+            tone={useSolidHeader ? "default" : "inverse"}
+            wordmarkClassName={useSolidHeader ? undefined : "text-white"}
+          />
         </Link>
 
         <div className="flex items-center justify-end gap-4 md:gap-10">
@@ -229,7 +233,6 @@ export function SiteHeader() {
                         >
                           Manage plan
                         </Link>
-                        <ThemeToggle variant="menuitem" />
                         <button
                           type="button"
                           role="menuitem"

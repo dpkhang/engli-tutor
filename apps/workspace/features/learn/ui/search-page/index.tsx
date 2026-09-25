@@ -16,7 +16,7 @@ function normalize(value: string) {
 export function SearchPage() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q")?.trim() ?? "";
-  const { packs, loading } = useLessonPacks();
+  const { packs, loading, fetching } = useLessonPacks();
   const { progress, hydrated, toggleFavorite } = useLessonProgress();
 
   const lessons = useMemo(() => {
@@ -40,7 +40,7 @@ export function SearchPage() {
     <SearchPageView
       query={query}
       lessons={lessons}
-      loading={loading}
+      loading={Boolean(query) && (loading || fetching)}
       favoriteIds={favoriteIds}
       onToggleFavorite={toggleFavorite}
     />

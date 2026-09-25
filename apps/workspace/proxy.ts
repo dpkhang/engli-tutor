@@ -88,7 +88,7 @@ async function hasWorkspaceSession(request: NextRequest): Promise<boolean> {
  * Custom domains (Host ≠ platform) → published landing at /p/{slug}.
  * Workspace hosts are unchanged, except signed-in users cannot open /login.
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const host = requestHost(request);
   const { pathname } = request.nextUrl;
 

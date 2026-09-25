@@ -1,7 +1,8 @@
 "use client";
 
-import { memo } from "react";
+import { memo, type FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   BookOpenCheck,
   Gamepad2,
@@ -41,6 +42,17 @@ export const LessonsPageView = memo(function LessonsPageView({
   favoriteIds,
   onToggleFavorite,
 }: LessonsPageViewProps) {
+  const router = useRouter();
+
+  const onSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const next = String(new FormData(event.currentTarget).get("q") ?? "").trim();
+    const params = new URLSearchParams();
+    if (activeSkill !== "All") params.set("skill", activeSkill);
+    if (next) params.set("q", next);
+    router.push(params.size ? `/lessons?${params.toString()}` : "/lessons");
+  };
+
   return (
     <div className="space-y-8 pb-8">
       <header className="workspace-hero-accent relative overflow-hidden rounded-3xl bg-linear-to-br from-rose-500 to-orange-400 px-5 py-6 text-white sm:rounded-4xl sm:px-10 sm:py-11">
@@ -79,7 +91,7 @@ export const LessonsPageView = memo(function LessonsPageView({
       </header>
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <form className="relative w-full max-w-md" action="/lessons">
+        <form className="relative w-full max-w-md" onSubmit={onSearch}>
           <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
           <input
             name="q"

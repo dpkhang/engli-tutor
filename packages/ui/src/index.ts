@@ -62,5 +62,6 @@ export {
   type AccordionTriggerProps,
   type AccordionContentProps,
 } from "./components/accordion";
+export { BrandLogo, BrandLogoMark, type BrandLogoProps } from "./components/brand-logo";
 export { useLockScroll } from "./hooks/use-lock-scroll";
 export { cn } from "./lib/utils";

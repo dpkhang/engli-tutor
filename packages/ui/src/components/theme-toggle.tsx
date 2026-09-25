@@ -6,13 +6,7 @@ import { cn } from "../lib/utils";
 
 type Theme = "light" | "dark";
 
-export function ThemeToggle({
-  className,
-  variant = "icon",
-}: {
-  className?: string;
-  variant?: "icon" | "menuitem";
-}) {
+export function ThemeToggle({ className }: { className?: string }) {
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
@@ -21,10 +15,8 @@ export function ThemeToggle({
     };
     sync();
     window.addEventListener("pagecraft-theme", sync);
-    window.addEventListener("storage", sync);
     return () => {
       window.removeEventListener("pagecraft-theme", sync);
-      window.removeEventListener("storage", sync);
     };
   }, []);
 
@@ -32,7 +24,6 @@ export function ThemeToggle({
     const nextTheme: Theme = theme === "dark" ? "light" : "dark";
     document.documentElement.classList.toggle("dark", nextTheme === "dark");
     document.documentElement.style.colorScheme = nextTheme;
-    localStorage.setItem("pagecraft-theme", nextTheme);
     window.dispatchEvent(new Event("pagecraft-theme"));
     setTheme(nextTheme);
   };
@@ -40,23 +31,6 @@ export function ThemeToggle({
   const isDark = theme === "dark";
   const label = isDark ? "Light mode" : "Dark mode";
   const Icon = isDark ? Sun : Moon;
-
-  if (variant === "menuitem") {
-    return (
-      <button
-        type="button"
-        role="menuitem"
-        className={cn(
-          "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-muted",
-          className,
-        )}
-        onClick={toggleTheme}
-      >
-        <Icon className="size-4 text-muted-foreground" />
-        {label}
-      </button>
-    );
-  }
 
   return (
     <button

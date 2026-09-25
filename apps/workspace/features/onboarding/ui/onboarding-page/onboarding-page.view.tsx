@@ -16,7 +16,7 @@ import {
   Sparkles,
   Target,
 } from "lucide-react";
-import { Alert, AlertDescription, Badge, BillingPeriodSwitch, Button, cn } from "@engli-tutor/ui";
+import { Alert, AlertDescription, Badge, BillingPeriodSwitch, BrandLogo, Button, cn } from "@engli-tutor/ui";
 import { LEVELS, type SkillLevel } from "@/features/learn/model/skill-exercises";
 import { allPlansForCompare } from "@/features/payments/model/plans";
 import {
@@ -148,11 +148,8 @@ export const OnboardingPageView = memo(function OnboardingPageView({
           wide ? "max-w-3xl" : "max-w-lg sm:px-0",
         )}
       >
-        <Link href="/" className="group flex items-center gap-2 text-lg font-semibold tracking-tight">
-          <span className="grid size-8 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm transition-transform group-hover:-rotate-6">
-            <span className="text-sm">E</span>
-          </span>
-          EngliTutor
+        <Link href="/" className="group flex items-center">
+          <BrandLogo size={32} />
         </Link>
         <span className="text-xs font-medium text-muted-foreground">
           Step {stepIndex + 1} of {STEPS.length}

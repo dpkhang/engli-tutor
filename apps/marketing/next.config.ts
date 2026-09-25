@@ -6,12 +6,8 @@ const isProdBuild = process.env.NODE_ENV === "production";
 const DEFAULT_API_URL = isProdBuild
   ? "https://pkbc7gf23n.ap-southeast-1.awsapprunner.com"
   : "http://localhost:3001";
-const DEFAULT_APP_URL = isProdBuild
-  ? "https://app.pagecraft-ai.site"
-  : "http://localhost:3000";
-const DEFAULT_SITE_URL = isProdBuild
-  ? "https://pagecraft-ai.site"
-  : "http://localhost:3002";
+const DEFAULT_APP_URL = isProdBuild ? "https://app.pagecraft-ai.site" : "http://localhost:3000";
+const DEFAULT_SITE_URL = isProdBuild ? "https://pagecraft-ai.site" : "http://localhost:3002";
 
 function publicUrl(value: string | undefined, fallback: string): string {
   return (value?.trim() || fallback).replace(/\/$/, "");
@@ -61,6 +57,9 @@ const nextConfig: NextConfig = {
   ],
   turbopack: {
     root: path.join(__dirname, "../.."),
+  },
+  experimental: {
+    optimizePackageImports: ["@engli-tutor/ui"],
   },
   images: {
     qualities: [70, 75],

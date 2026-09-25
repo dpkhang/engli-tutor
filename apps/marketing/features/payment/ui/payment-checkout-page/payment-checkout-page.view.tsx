@@ -365,10 +365,10 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
             </Button>
             <div className="flex flex-wrap justify-center gap-2">
               <Button asChild variant="outline" size="sm">
-                <Link href="/policy">Privacy Policy</Link>
+                <Link href="/policy" target="_blank" rel="noopener noreferrer">Privacy Policy</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
-                <Link href="/policy/cookies">Cookie Policy</Link>
+                <Link href="/policy/cookies" target="_blank" rel="noopener noreferrer">Cookie Policy</Link>
               </Button>
             </div>
             <p className="text-center text-xs text-muted-foreground">

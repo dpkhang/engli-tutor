@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { openCookieConsent } from "@engli-tutor/ui";
+import { BrandLogo, openCookieConsent } from "@engli-tutor/ui";
 import { useAuthSession } from "@/features/auth";
 import { FOOTER_PRIVACY_LINKS } from "@/features/legal/model/legal-ctas";
 
@@ -38,9 +38,7 @@ export function SiteFooter() {
     <footer className="border-t border-border bg-primary text-primary-foreground">
       <div className="mx-auto grid max-w-6xl gap-8 px-5 py-10 sm:px-8 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] md:gap-6 md:py-12">
         <div className="space-y-3">
-          <p className="font-display text-2xl tracking-tight">
-            EngliTutor
-          </p>
+          <BrandLogo size={36} tone="inverse" wordmarkClassName="text-primary-foreground" />
           <p className="max-w-xs text-sm leading-relaxed text-primary-foreground/65">
             AI English tutor — listen, speak, read, write every day, with feedback in Vietnamese. Built for A2–B1 professionals.
           </p>
@@ -87,10 +85,10 @@ export function SiteFooter() {
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-3.5 text-xs text-primary-foreground/50 sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <span>© {new Date().getFullYear()} EngliTutor</span>
           <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            <Link href="/policy" className="underline-offset-4 transition-colors hover:text-primary-foreground hover:underline">
+            <Link href="/policy" target="_blank" rel="noopener noreferrer" className="underline-offset-4 transition-colors hover:text-primary-foreground hover:underline">
               Privacy Policy
             </Link>
-            <Link href="/policy/cookies" className="underline-offset-4 transition-colors hover:text-primary-foreground hover:underline">
+            <Link href="/policy/cookies" target="_blank" rel="noopener noreferrer" className="underline-offset-4 transition-colors hover:text-primary-foreground hover:underline">
               Cookie Policy
             </Link>
             <button

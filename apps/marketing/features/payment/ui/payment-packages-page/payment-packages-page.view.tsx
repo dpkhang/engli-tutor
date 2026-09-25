@@ -349,6 +349,8 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
             <span>Billing is processed by Stripe.</span>
             <Link
               href="/policy"
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium text-foreground underline-offset-4 hover:underline"
             >
               Privacy Policy
@@ -356,6 +358,8 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
             <span aria-hidden>·</span>
             <Link
               href="/policy/cookies"
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium text-foreground underline-offset-4 hover:underline"
             >
               Cookie Policy

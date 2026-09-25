@@ -11,18 +11,69 @@ export const PREFERENCES_EVENT = "englitutor-preferences";
 export const THEME_EVENT = "pagecraft-theme";
 
 export type SpeechRateId = "slow" | "normal" | "fast";
-export type ThemePreference = "light" | "dark" | "system";
-export type AccentId = "indigo" | "sky" | "teal" | "emerald" | "rose" | "amber";
+export type ThemePreference =
+  | "light"
+  | "warm"
+  | "dark"
+  | "midnight"
+  | "forest"
+  | "ocean"
+  | "dusk"
+  | "system";
+
+const THEME_IDS: ThemePreference[] = [
+  "light",
+  "warm",
+  "dark",
+  "midnight",
+  "forest",
+  "ocean",
+  "dusk",
+  "system",
+];
+
+const DARK_THEMES = new Set<ThemePreference>(["dark", "midnight", "forest", "ocean", "dusk"]);
+
+export function isThemePreference(value: string | null): value is ThemePreference {
+  return value !== null && THEME_IDS.includes(value as ThemePreference);
+}
+
+export function isAccentId(value: string | null): value is AccentId {
+  return value !== null && ACCENTS.some((item) => item.id === value);
+}
+
+export function isTextSizeId(value: string | null): value is TextSizeId {
+  return value === "default" || value === "comfortable" || value === "large";
+}
+export type AccentId =
+  | "indigo"
+  | "violet"
+  | "fuchsia"
+  | "sky"
+  | "blue"
+  | "teal"
+  | "emerald"
+  | "lime"
+  | "amber"
+  | "orange"
+  | "rose"
+  | "slate";
 export type TextSizeId = "default" | "comfortable" | "large";
 export type ReduceMotionPreference = "system" | "on" | "off";
 
 export const ACCENTS: Array<{ id: AccentId; label: string; swatch: string }> = [
   { id: "indigo", label: "Indigo", swatch: "244 72% 56%" },
+  { id: "violet", label: "Violet", swatch: "262 72% 54%" },
+  { id: "fuchsia", label: "Fuchsia", swatch: "292 72% 50%" },
   { id: "sky", label: "Sky", swatch: "201 90% 44%" },
+  { id: "blue", label: "Blue", swatch: "217 88% 50%" },
   { id: "teal", label: "Teal", swatch: "173 70% 36%" },
   { id: "emerald", label: "Emerald", swatch: "156 64% 36%" },
-  { id: "rose", label: "Rose", swatch: "348 78% 52%" },
+  { id: "lime", label: "Lime", swatch: "84 70% 38%" },
   { id: "amber", label: "Amber", swatch: "32 94% 48%" },
+  { id: "orange", label: "Orange", swatch: "24 94% 50%" },
+  { id: "rose", label: "Rose", swatch: "348 78% 52%" },
+  { id: "slate", label: "Slate", swatch: "215 22% 42%" },
 ];
 
 export const TEXT_SIZES: Array<{ id: TextSizeId; label: string; hint: string }> = [
@@ -53,6 +104,71 @@ export const SPEECH_RATES: Record<
 function notifyPreferences() {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new Event(PREFERENCES_EVENT));
+}
+
+let appearanceSyncArmed = false;
+let applyingRemoteAppearance = false;
+let appearanceSyncTimer: ReturnType<typeof setTimeout> | null = null;
+
+function queueAppearanceSync() {
+  if (!appearanceSyncArmed || applyingRemoteAppearance || typeof window === "undefined") return;
+  if (appearanceSyncTimer) clearTimeout(appearanceSyncTimer);
+  appearanceSyncTimer = setTimeout(() => {
+    appearanceSyncTimer = null;
+    void import("@/features/accounts/api").then(({ accountApi }) =>
+      accountApi.update({
+        appearanceTheme: getThemePreference(),
+        appearanceAccent: getAccentPreference(),
+        appearanceTextSize: getTextSizePreference(),
+      }),
+    );
+  }, 300);
+}
+
+export function disarmAppearanceSync() {
+  appearanceSyncArmed = false;
+  if (appearanceSyncTimer) clearTimeout(appearanceSyncTimer);
+}
+
+export async function hydrateAppearancePreferences() {
+  const { accountApi } = await import("@/features/accounts/api");
+  let profile;
+  try {
+    profile = await accountApi.get();
+  } catch {
+    return;
+  }
+  applyingRemoteAppearance = true;
+  const missing: {
+    appearanceTheme?: ThemePreference;
+    appearanceAccent?: AccentId;
+    appearanceTextSize?: TextSizeId;
+  } = {};
+  if (isThemePreference(profile.appearanceTheme)) {
+    paintTheme(profile.appearanceTheme);
+    localStorage.setItem(THEME_STORAGE_KEY, profile.appearanceTheme);
+  } else {
+    missing.appearanceTheme = getThemePreference();
+  }
+  if (isAccentId(profile.appearanceAccent)) {
+    paintAccent(profile.appearanceAccent);
+    localStorage.setItem(ACCENT_STORAGE_KEY, profile.appearanceAccent);
+  } else {
+    missing.appearanceAccent = getAccentPreference();
+  }
+  if (isTextSizeId(profile.appearanceTextSize)) {
+    paintTextSize(profile.appearanceTextSize);
+    localStorage.setItem(TEXT_SIZE_STORAGE_KEY, profile.appearanceTextSize);
+  } else {
+    missing.appearanceTextSize = getTextSizePreference();
+  }
+  applyingRemoteAppearance = false;
+  window.dispatchEvent(new Event(THEME_EVENT));
+  notifyPreferences();
+  appearanceSyncArmed = true;
+  if (Object.keys(missing).length > 0) {
+    await accountApi.update(missing);
+  }
 }
 
 export function getPreferredLevel(): SkillLevel | null {
@@ -102,16 +218,22 @@ export function applyLearningPreferences(prefs: {
 export function getThemePreference(): ThemePreference {
   if (typeof window === "undefined") return "system";
   const stored = localStorage.getItem(THEME_STORAGE_KEY);
-  if (stored === "light" || stored === "dark" || stored === "system") return stored;
-  return "system";
+  return isThemePreference(stored) ? stored : "system";
 }
 
 function paintTheme(theme: ThemePreference) {
-  const dark =
-    theme === "dark" ||
-    (theme !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-  document.documentElement.classList.toggle("dark", dark);
-  document.documentElement.style.colorScheme = dark ? "dark" : "light";
+  const root = document.documentElement;
+  const resolved =
+    theme === "system"
+      ? window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light"
+      : theme;
+  const dark = DARK_THEMES.has(resolved as ThemePreference);
+  root.classList.toggle("dark", dark);
+  root.classList.remove("midnight");
+  root.setAttribute("data-theme", resolved);
+  root.style.colorScheme = dark ? "dark" : "light";
 }
 
 export function applyThemePreference(theme: ThemePreference) {
@@ -119,6 +241,7 @@ export function applyThemePreference(theme: ThemePreference) {
   localStorage.setItem(THEME_STORAGE_KEY, theme);
   window.dispatchEvent(new Event(THEME_EVENT));
   notifyPreferences();
+  queueAppearanceSync();
 }
 
 export function getAccentPreference(): AccentId {
@@ -135,6 +258,7 @@ export function applyAccentPreference(accent: AccentId) {
   paintAccent(accent);
   localStorage.setItem(ACCENT_STORAGE_KEY, accent);
   notifyPreferences();
+  queueAppearanceSync();
 }
 
 export function getTextSizePreference(): TextSizeId {
@@ -151,6 +275,7 @@ export function applyTextSizePreference(size: TextSizeId) {
   paintTextSize(size);
   localStorage.setItem(TEXT_SIZE_STORAGE_KEY, size);
   notifyPreferences();
+  queueAppearanceSync();
 }
 
 export function getReduceMotionPreference(): ReduceMotionPreference {
@@ -193,6 +318,7 @@ export function applyAppearancePreferences(prefs: {
   localStorage.setItem(REDUCE_MOTION_STORAGE_KEY, prefs.reduceMotion);
   window.dispatchEvent(new Event(THEME_EVENT));
   notifyPreferences();
+  queueAppearanceSync();
 }
 
 export function resolveSpeechRates() {

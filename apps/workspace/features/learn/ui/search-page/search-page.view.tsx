@@ -1,8 +1,9 @@
 "use client";
 
-import { memo } from "react";
+import { memo, type FormEvent } from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpen, Heart, Search, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, BookOpen, Heart, LoaderCircle, Search, Sparkles } from "lucide-react";
 import { Button, cn } from "@engli-tutor/ui";
 import { DataLoadingState } from "@/features/layout";
 import type { LessonPack } from "../../model/curriculum";
@@ -22,6 +23,14 @@ export const SearchPageView = memo(function SearchPageView({
   favoriteIds,
   onToggleFavorite,
 }: SearchPageViewProps) {
+  const router = useRouter();
+
+  const onSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const next = String(new FormData(event.currentTarget).get("q") ?? "").trim();
+    router.push(next ? `/search?q=${encodeURIComponent(next)}` : "/search");
+  };
+
   return (
     <div className="space-y-7 pb-10">
       <section className="relative overflow-hidden rounded-3xl border border-primary/15 bg-linear-to-br from-primary/12 via-card to-accent/10 px-5 py-6 sm:rounded-4xl sm:px-9 sm:py-8">
@@ -39,7 +48,7 @@ export const SearchPageView = memo(function SearchPageView({
           Find lessons by topic, skill, level, or a real-life situation you want to practise.
         </p>
 
-        <form action="/search" className="mt-6 grid max-w-2xl gap-2 sm:relative sm:block">
+        <form onSubmit={onSearch} className="mt-6 grid max-w-2xl gap-2 sm:relative sm:block">
           <div className="relative">
             <Search className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -54,8 +63,10 @@ export const SearchPageView = memo(function SearchPageView({
           <Button
             type="submit"
             className="h-11 w-full rounded-full px-5 sm:absolute sm:top-1/2 sm:right-1.5 sm:h-10 sm:w-auto sm:-translate-y-1/2"
+            disabled={loading}
           >
-            Search
+            {loading ? <LoaderCircle className="size-4 animate-spin" /> : null}
+            {loading ? "Searching" : "Search"}
           </Button>
         </form>
       </section>

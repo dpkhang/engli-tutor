@@ -61,21 +61,13 @@ export const SettingsShellView = memo(function SettingsShellView({
             <div className="mx-3 hidden h-px bg-border lg:block" role="presentation" />
             {SIDEBAR_PRIVACY.map((item) => {
               const Icon = item.icon;
-              const active =
-                item.href === "/policy"
-                  ? pathname === "/policy"
-                  : pathname === item.href || pathname.startsWith(`${item.href}/`);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "inline-flex h-11 shrink-0 snap-start items-center gap-2 rounded-xl px-3.5 text-sm font-medium transition-colors lg:h-auto lg:gap-2.5 lg:px-3 lg:py-2.5",
-                    active
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-11 shrink-0 snap-start items-center gap-2 rounded-xl px-3.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:h-auto lg:gap-2.5 lg:px-3 lg:py-2.5"
                 >
                   <Icon className="size-4" />
                   {item.label}

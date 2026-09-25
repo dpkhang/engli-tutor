@@ -100,16 +100,21 @@ async function fetchLessonPacks(): Promise<Cached<LessonPack[]>> {
   return { source: "local", data: LESSON_PACKS };
 }
 
+function localGameSummaries(): LearningGameSummary[] {
+  return GAMES_CATALOG.map((game) => ({
+    ...game,
+    roundCount: getFallbackGame(game.id)?.rounds.length ?? 0,
+  }));
+}
+
 async function fetchGames(): Promise<Cached<LearningGameSummary[]>> {
+  const local = localGameSummaries();
   const result = await learningApi.listGames();
-  if (result?.data?.length) return { source: "api", data: result.data };
-  return {
-    source: "local",
-    data: GAMES_CATALOG.map((game) => ({
-      ...game,
-      roundCount: getFallbackGame(game.id)?.rounds.length ?? 0,
-    })),
-  };
+  if (result?.data?.length) {
+    const ids = new Set(result.data.map((game) => game.id));
+    return { source: "api", data: [...result.data, ...local.filter((game) => !ids.has(game.id))] };
+  }
+  return { source: "local", data: local };
 }
 
 async function fetchGame(

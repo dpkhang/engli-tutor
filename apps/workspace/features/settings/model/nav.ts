@@ -1,4 +1,5 @@
 import {
+  Bell,
   CreditCard,
   KeyRound,
   Monitor,
@@ -35,6 +36,13 @@ export const SETTINGS_NAV: SettingsSection[] = [
     label: "Learning",
     description: "Level, playback speed, and listening",
     icon: Target,
+    match: "prefix",
+  },
+  {
+    href: "/settings/notifications",
+    label: "Notifications",
+    description: "Reminders, lessons, credits, and billing",
+    icon: Bell,
     match: "prefix",
   },
   {

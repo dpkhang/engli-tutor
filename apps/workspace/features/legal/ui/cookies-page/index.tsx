@@ -10,8 +10,6 @@ import { WorkspaceLegalDocument } from "../legal-document";
 export function CookiesPage() {
   return (
     <WorkspaceLegalDocument
-      backHref="/policy"
-      backLabel="privacy policy"
       title="Cookie Policy"
       description={`Last updated ${COOKIE_POLICY_UPDATED_AT}. Which cookies and browser storage EngliTutor uses, and how you can control them.`}
       hubLabel="Related privacy pages"

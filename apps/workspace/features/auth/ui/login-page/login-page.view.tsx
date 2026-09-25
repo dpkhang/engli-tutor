@@ -15,7 +15,7 @@ import {
   Sparkles,
   UserRound,
 } from "lucide-react";
-import { Button, Input, SegmentedSwitch } from "@engli-tutor/ui";
+import { BrandLogo, Button, Input, SegmentedSwitch } from "@engli-tutor/ui";
 import type { LoginFormValues } from "../../model/login-schema";
 
 export type AuthMode = "login" | "register";
@@ -59,23 +59,19 @@ export const LoginPageView = memo(function LoginPageView({
   const [showPassword, setShowPassword] = useState(false);
   const isLogin = mode === "login";
   const inputClass =
-    "h-12 rounded-xl border-slate-200 bg-white/80 pl-11 shadow-none transition-[border-color,box-shadow] placeholder:text-slate-400 hover:border-slate-300 focus-visible:border-primary focus-visible:ring-primary/15 dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20";
+    "h-12 rounded-xl border-slate-200 bg-white/80 pl-10 shadow-none transition-[border-color,box-shadow] placeholder:text-slate-400 hover:border-slate-300 focus-visible:border-primary focus-visible:ring-primary/15 dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20";
 
   return (
-    <main className="relative min-h-svh overflow-hidden bg-slate-950">
+    <main className="relative flex h-svh flex-col overflow-hidden bg-slate-950">
       <div
         aria-hidden
         className="absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,hsl(var(--primary)/0.35),transparent_36%),radial-gradient(circle_at_92%_92%,hsl(var(--primary)/0.12),transparent_34%),linear-gradient(160deg,#070a15_0%,#111633_52%,#080b18_100%)]"
       />
 
-      <header className="absolute inset-x-0 top-0 z-20 mx-auto flex max-w-7xl items-center justify-between px-5 py-6 sm:px-8 lg:px-12">
+      <header className="relative z-20 mx-auto flex w-full max-w-7xl shrink-0 items-center justify-between px-5 py-3 sm:px-8 lg:px-10">
         <a href={homeHref} className="group inline-flex items-center gap-2.5 text-white">
-          <span className="grid size-9 place-items-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/25 transition-transform group-hover:-rotate-6">
-            <Sparkles className="size-4" />
-          </span>
-          <span className="text-base font-semibold tracking-wide">
-            EngliTutor <span className="font-normal text-white/45">Workspace</span>
-          </span>
+          <BrandLogo size={28} wordmarkClassName="text-white" />
+          <span className="text-sm font-normal text-white/45">Workspace</span>
         </a>
         <span className="hidden items-center gap-2 text-xs text-white/45 sm:flex">
           <span className="size-1.5 rounded-full bg-emerald-400" />
@@ -83,34 +79,34 @@ export const LoginPageView = memo(function LoginPageView({
         </span>
       </header>
 
-      <div className="relative z-10 mx-auto grid min-h-svh max-w-7xl items-center gap-12 px-5 pt-24 pb-8 sm:px-8 lg:grid-cols-[1fr_30rem] lg:px-12 lg:py-28">
-        <section className="auth-enter-panel hidden pr-8 lg:block">
-          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-1.5 text-xs font-medium text-indigo-200">
+      <div className="relative z-10 mx-auto grid min-h-0 w-full max-w-7xl flex-1 items-center gap-6 px-5 py-3 sm:px-8 lg:grid-cols-[minmax(0,1fr)_30rem] lg:gap-8 lg:px-10">
+        <section className="auth-enter-panel hidden max-h-full min-h-0 overflow-hidden pr-2 lg:block">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-1.5 text-xs font-medium text-indigo-200">
             <LayoutDashboard className="size-3.5" />
             Everything you need, in one place
           </div>
-          <h1 className="max-w-2xl text-5xl font-semibold leading-[1.07] tracking-[-0.045em] text-white xl:text-6xl">
+          <h1 className="max-w-2xl text-[2.75rem] font-semibold leading-[1.05] tracking-[-0.045em] text-white">
             Your learning.
             <br />
             <span className="bg-linear-to-r from-primary via-indigo-300 to-sky-300 bg-clip-text text-transparent">
               Beautifully organized.
             </span>
           </h1>
-          <p className="mt-6 max-w-xl text-base leading-7 text-slate-300/70">
+          <p className="mt-4 max-w-xl text-base leading-7 text-slate-300/70">
             Plan lessons, continue practice, and see your English improve—all from one focused
             workspace.
           </p>
 
-          <div className="relative mt-10 max-w-2xl rounded-[1.6rem] border border-white/10 bg-white/6 p-3 shadow-2xl shadow-black/35">
+          <div className="relative mt-6 max-w-2xl rounded-[1.45rem] border border-white/10 bg-white/6 p-3 shadow-2xl shadow-black/35">
             <div className="overflow-hidden rounded-[1.15rem] border border-white/10 bg-[#0d1227]/95">
-              <div className="flex items-center gap-2 border-b border-white/8 px-5 py-4">
+              <div className="flex items-center gap-2 border-b border-white/8 px-5 py-3">
                 <span className="size-2.5 rounded-full bg-rose-400/80" />
                 <span className="size-2.5 rounded-full bg-amber-300/80" />
                 <span className="size-2.5 rounded-full bg-emerald-400/80" />
                 <span className="ml-3 text-[11px] text-white/30">app.english-tutor.ai</span>
               </div>
               <div className="grid grid-cols-[3.5rem_1fr]">
-                <div className="flex flex-col items-center gap-4 border-r border-white/8 py-5 text-white/35">
+                <div className="flex flex-col items-center gap-4 border-r border-white/8 py-4 text-white/35">
                   <span className="grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground">
                     <Sparkles className="size-4" />
                   </span>
@@ -118,12 +114,12 @@ export const LoginPageView = memo(function LoginPageView({
                   <BookOpen className="size-4" />
                   <BarChart3 className="size-4" />
                 </div>
-                <div className="p-5">
+                <div className="p-4">
                   <p className="text-xs text-white/35">Good morning, Alex</p>
                   <p className="mt-1 text-lg font-semibold text-white">
                     Ready for today&apos;s practice?
                   </p>
-                  <div className="mt-5 grid grid-cols-3 gap-3">
+                  <div className="mt-4 grid grid-cols-3 gap-2.5">
                     {[
                       {
                         label: "Day streak",
@@ -164,15 +160,15 @@ export const LoginPageView = memo(function LoginPageView({
           </div>
         </section>
 
-        <section className="auth-enter mx-auto w-full max-w-120 rounded-[1.75rem] border border-white/40 bg-white/97 p-6 shadow-[0_30px_90px_rgba(0,0,0,.42)] sm:p-9 dark:border-white/10 dark:bg-slate-950/90">
-          <div className="mb-7">
+        <section className="auth-enter mx-auto w-full max-w-lg rounded-3xl border border-white/40 bg-white/97 px-6 py-8 shadow-[0_24px_70px_rgba(0,0,0,.42)] sm:px-8 lg:max-w-none dark:border-white/10 dark:bg-slate-950/90">
+          <div className="mb-6">
             <p className="mb-2 text-xs font-semibold tracking-[0.14em] text-primary uppercase">
               {isLogin ? "Welcome back" : "Join the workspace"}
             </p>
-            <h2 className="text-3xl font-semibold tracking-[-0.035em] text-slate-950 dark:text-white">
+            <h2 className="text-2xl font-semibold tracking-[-0.035em] text-slate-950 dark:text-white">
               {isLogin ? "Sign in to continue" : "Create your account"}
             </h2>
-            <p className="mt-2.5 text-sm leading-6 text-slate-500 dark:text-slate-400">
+            <p className="mt-1.5 text-sm leading-5 text-slate-500 dark:text-slate-400">
               {isLogin
                 ? "Your workspace is ready when you are."
                 : "Set up your personal learning workspace."}
@@ -199,7 +195,7 @@ export const LoginPageView = memo(function LoginPageView({
                     Full name
                   </span>
                   <div className="relative">
-                    <UserRound className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
+                    <UserRound className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
                     <Input
                       placeholder="Your full name"
                       autoComplete="name"
@@ -220,7 +216,7 @@ export const LoginPageView = memo(function LoginPageView({
                 Email address
               </span>
               <div className="relative">
-                <Mail className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
+                <Mail className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   type="email"
                   inputMode="email"
@@ -240,7 +236,7 @@ export const LoginPageView = memo(function LoginPageView({
                 Password
               </span>
               <div className="relative">
-                <LockKeyhole className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
+                <LockKeyhole className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   placeholder="Minimum 8 characters"
@@ -295,6 +291,8 @@ export const LoginPageView = memo(function LoginPageView({
             {isLogin ? "Secure authentication · Your data stays private." : "By creating an account you agree to our policies."}{" "}
             <a
               href={policyHref}
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium text-slate-500 underline decoration-slate-300 underline-offset-2 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
             >
               Privacy Policy
@@ -302,6 +300,8 @@ export const LoginPageView = memo(function LoginPageView({
             {" · "}
             <a
               href={cookiesHref}
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium text-slate-500 underline decoration-slate-300 underline-offset-2 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
             >
               Cookie Policy

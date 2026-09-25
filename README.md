@@ -22,8 +22,8 @@ pnpm install:landing-page
 Targeted:
 
 ```bash
-pnpm install:web
-pnpm install:landing
+pnpm install:workspace
+pnpm install:marketing
 pnpm install:packages
 ```
 
@@ -37,8 +37,8 @@ pnpm module:add vitest @testing-library/react --dev
 ## Development
 
 ```bash
-pnpm dev:web       # http://localhost:3000  (HTTPS local: local.app.pagecraft-ai.site)
-pnpm dev:landing   # http://localhost:3002  (HTTPS local: local.pagecraft-ai.site)
+pnpm dev:workspace   # http://localhost:3000  (HTTPS local: local.app.pagecraft-ai.site)
+pnpm dev:marketing   # http://localhost:3002  (HTTPS local: local.pagecraft-ai.site)
 ```
 
 Env:
@@ -132,10 +132,10 @@ Thiếu R2 write permission → generate vẫn ra page, không có ảnh (xem [b
 | `pnpm build:pkg` | Build packages |
 | `pnpm build` | Packages + cả hai apps |
 | `pnpm lint` | Typecheck |
-| `pnpm ci:web` | Web lint/build |
-| `pnpm ci:landing` | Marketing lint/build |
-| `pnpm deploy:web:prod` | Deploy workspace → Vercel |
-| `pnpm deploy:landing:prod` | Deploy marketing → Vercel |
+| `pnpm ci:workspace` | Workspace lint/build |
+| `pnpm ci:marketing` | Marketing lint/build |
+| `pnpm deploy:workspace:prod` | Deploy workspace → Vercel |
+| `pnpm deploy:marketing:prod` | Deploy marketing → Vercel |
 
 ## Formatting
 

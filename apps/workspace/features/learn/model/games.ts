@@ -90,6 +90,15 @@ export const GAMES_CATALOG: GameCatalogItem[] = [
     howToPlay: "Tap letters in order to spell a workplace word. Tap a letter in the word to undo.",
     relatedSkill: "writing",
   },
+  {
+    id: "flashcard",
+    title: "Flashcards",
+    body: "Flip a workplace word, then mark whether you know it.",
+    skill: "reading",
+    durationMinutes: 2,
+    howToPlay: "Tap the card to see the IPA, the Vietnamese meaning, and an example. The X saves it for later. The check skips it.",
+    relatedSkill: "reading",
+  },
 ];
 
 export const MINI_GAMES = GAMES_CATALOG.map((game) => ({
@@ -133,6 +142,10 @@ export const GAME_THEME: Record<
   "word-unscramble": {
     wash: "from-indigo-500/15",
     badge: "bg-indigo-100 text-indigo-700 dark:bg-indigo-400/15 dark:text-indigo-300",
+  },
+  flashcard: {
+    wash: "from-teal-500/15",
+    badge: "bg-teal-100 text-teal-700 dark:bg-teal-400/15 dark:text-teal-300",
   },
 };
 
@@ -229,6 +242,9 @@ export function scoreGameRound(
   if (question.kind === "spell") {
     return normalize(value).replace(/\s+/g, "") === question.answer.trim().toLowerCase();
   }
+  if (question.kind === "flash") {
+    return value === "know";
+  }
   return false;
 }
 
@@ -248,6 +264,9 @@ export function sampleAnswerFor(question: LearningQuestion): string | undefined 
   }
   if (question.kind === "spell") {
     return question.answer.toUpperCase();
+  }
+  if (question.kind === "flash") {
+    return `${question.ipa} · ${question.meaningVi}`;
   }
   return undefined;
 }

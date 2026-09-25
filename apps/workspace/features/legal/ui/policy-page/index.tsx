@@ -8,8 +8,6 @@ import { WorkspaceLegalDocument } from "../legal-document";
 export function PolicyPage() {
   return (
     <WorkspaceLegalDocument
-      backHref="/settings"
-      backLabel="settings"
       title="Privacy Policy"
       description={`Last updated ${POLICY_UPDATED_AT}. How EngliTutor collects, uses, and protects your personal data.`}
       hubLabel="Jump to a privacy topic"

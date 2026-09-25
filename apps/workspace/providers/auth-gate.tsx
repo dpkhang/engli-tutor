@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { BrandLogo } from "@engli-tutor/ui";
 import { getMarketingUrl, useSession } from "@/lib/auth-client";
 import { accountApi } from "@/features/accounts";
 import {
@@ -32,7 +33,7 @@ function AuthSplash({ message }: { message: string }) {
       aria-live="polite"
     >
       <div className="flex flex-col items-center gap-6 text-center">
-        <div className="text-3xl font-semibold tracking-tight text-foreground">EngliTutor</div>
+        <BrandLogo size={40} />
         <div className="h-1 w-28 overflow-hidden rounded-full bg-muted">
           <div className="h-full w-1/2 animate-[splash-progress_1.1s_ease-in-out_infinite] rounded-full bg-primary" />
         </div>

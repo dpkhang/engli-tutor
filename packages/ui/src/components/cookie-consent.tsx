@@ -89,7 +89,12 @@ export function CookieConsentBanner({ policyHref = "/policy/cookies" }: { policy
             <p id="cookie-consent-copy" className="text-sm leading-relaxed text-muted-foreground">
               We use cookies to keep you signed in and remember learning preferences. We do not use
               advertising cookies.{" "}
-              <a href={policyHref} className="font-medium text-foreground underline-offset-4 hover:underline">
+              <a
+                href={policyHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-foreground underline-offset-4 hover:underline"
+              >
                 Cookie Policy
               </a>
             </p>

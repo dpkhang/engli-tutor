@@ -1,7 +1,19 @@
 "use client";
 
-import { memo } from "react";
-import { Monitor, Moon, Palette, Sparkles, Sun, Type } from "lucide-react";
+import { memo, type ReactNode } from "react";
+import {
+  Leaf,
+  Monitor,
+  Moon,
+  MoonStar,
+  Palette,
+  Sparkles,
+  Sun,
+  Sunrise,
+  Sunset,
+  Waves,
+  Type,
+} from "lucide-react";
 import { Button, CardTitle, SegmentedSwitch, cn } from "@engli-tutor/ui";
 import {
   ACCENTS,
@@ -16,9 +28,38 @@ import { SettingsCard, SettingsCardContent, SettingsCardHeader, SettingsPanel } 
 
 const THEME_OPTIONS: Array<{ id: ThemePreference; label: string; hint: string }> = [
   { id: "light", label: "Light", hint: "Bright workspace" },
+  { id: "warm", label: "Warm", hint: "Soft paper tone" },
   { id: "dark", label: "Dark", hint: "Dim for night study" },
+  { id: "midnight", label: "Midnight", hint: "Deep OLED black" },
+  { id: "forest", label: "Forest", hint: "Calm green night" },
+  { id: "ocean", label: "Ocean", hint: "Cool blue depth" },
+  { id: "dusk", label: "Dusk", hint: "Warm sunset glow" },
   { id: "system", label: "System", hint: "Follow your device" },
 ];
+
+const THEME_ICONS: Record<ThemePreference, ReactNode> = {
+  light: <Sun className="size-5 text-primary" />,
+  warm: <Sunrise className="size-5 text-primary" />,
+  dark: <Moon className="size-5 text-primary" />,
+  midnight: <MoonStar className="size-5 text-primary" />,
+  forest: <Leaf className="size-5 text-primary" />,
+  ocean: <Waves className="size-5 text-primary" />,
+  dusk: <Sunset className="size-5 text-primary" />,
+  system: <Monitor className="size-5 text-primary" />,
+};
+
+const THEME_PREVIEW: Record<
+  Exclude<ThemePreference, "system">,
+  { bg: string; bar: string; card: string; border: string }
+> = {
+  light: { bg: "#f3f5f8", bar: "#c9d1db", card: "#ffffff", border: "border-border/80" },
+  warm: { bg: "#f6f0e6", bar: "#d9c8b0", card: "#fbf7f0", border: "border-[#e2d4c0]" },
+  dark: { bg: "#12161d", bar: "#3b4656", card: "#1c232c", border: "border-white/10" },
+  midnight: { bg: "#06080f", bar: "#2a3348", card: "#0d1220", border: "border-white/8" },
+  forest: { bg: "#0c1510", bar: "#2f4a3a", card: "#142019", border: "border-white/8" },
+  ocean: { bg: "#0a1219", bar: "#2a4558", card: "#11202b", border: "border-white/8" },
+  dusk: { bg: "#16101c", bar: "#4a3558", card: "#22182c", border: "border-white/8" },
+};
 
 export type AppearanceViewState = {
   theme: ThemePreference;
@@ -43,16 +84,14 @@ function ThemePreview({ mode }: { mode: ThemePreference }) {
     );
   }
 
-  const dark = mode === "dark";
+  const preview = THEME_PREVIEW[mode];
   return (
     <div
-      className={cn(
-        "h-20 overflow-hidden rounded-xl border p-2.5",
-        dark ? "border-white/10 bg-[#12161d]" : "border-border/80 bg-[#f3f5f8]",
-      )}
+      className={cn("h-20 overflow-hidden rounded-xl border p-2.5", preview.border)}
+      style={{ backgroundColor: preview.bg }}
     >
-      <div className={cn("h-1.5 w-12 rounded-full", dark ? "bg-[#3b4656]" : "bg-[#c9d1db]")} />
-      <div className={cn("mt-2 h-10 rounded-lg shadow-sm", dark ? "bg-[#1c232c]" : "bg-white")}>
+      <div className="h-1.5 w-12 rounded-full" style={{ backgroundColor: preview.bar }} />
+      <div className="mt-2 h-10 rounded-lg shadow-sm" style={{ backgroundColor: preview.card }}>
         <div className="m-2 h-2 w-16 rounded-full bg-primary/70" />
       </div>
     </div>
@@ -87,13 +126,7 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
           <SettingsCard>
             <SettingsCardHeader>
               <CardTitle className="flex items-center gap-2">
-                {view.theme === "dark" ? (
-                  <Moon className="size-5 text-primary" />
-                ) : view.theme === "light" ? (
-                  <Sun className="size-5 text-primary" />
-                ) : (
-                  <Monitor className="size-5 text-primary" />
-                )}
+                {THEME_ICONS[view.theme]}
                 Theme
               </CardTitle>
             </SettingsCardHeader>
@@ -101,7 +134,7 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
               <p className="text-sm text-muted-foreground">
                 Choose how EngliTutor looks while you study. System follows your device.
               </p>
-              <div className="grid gap-2 sm:grid-cols-3">
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                 {THEME_OPTIONS.map((option) => (
                   <button
                     key={option.id}
@@ -133,7 +166,7 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
               <p className="text-sm text-muted-foreground">
                 Buttons, links, and highlights use this color across the workspace.
               </p>
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
                 {ACCENTS.map((option) => {
                   const active = view.accent === option.id;
                   return (

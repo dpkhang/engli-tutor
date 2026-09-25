@@ -9,6 +9,7 @@ import {
   useState,
   type KeyboardEvent,
 } from "react";
+import { useRouter } from "next/navigation";
 import {
   tutorApi,
   type TutorChatMessage,
@@ -32,6 +33,7 @@ function splitCoach(content: string): { english: string; tip: string | null } {
 }
 
 export function SpeakingRoomPage() {
+  const router = useRouter();
   const [scene, setScene] = useState<TutorScenario>("interview");
   const [level, setLevel] = useState<TutorLevel>("B1");
   const [turns, setTurns] = useState<Turn[]>([{ role: "assistant", content: SCENES[0].opener }]);
@@ -296,6 +298,13 @@ export function SpeakingRoomPage() {
   const onMic = useCallback(() => {
     void onMicClick();
   }, [onMicClick]);
+  const onExit = useCallback(() => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+      return;
+    }
+    router.replace("/");
+  }, [router]);
 
   return (
     <SpeakingRoomPageView
@@ -321,6 +330,7 @@ export function SpeakingRoomPage() {
       voiceError={voice.error}
       bottomRef={bottomRef}
       draftInputRef={draftInputRef}
+      onExit={onExit}
       onToggleSfx={onToggleSfx}
       onToggleAutoSpeak={onToggleAutoSpeak}
       onReset={onReset}

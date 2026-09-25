@@ -8,7 +8,8 @@ export type LearningGameId =
   | "word-match"
   | "keyword-hunt"
   | "picture-word"
-  | "word-unscramble";
+  | "word-unscramble"
+  | "flashcard";
 
 export type LearningQuestion =
   | {
@@ -64,6 +65,17 @@ export type LearningQuestion =
       prompt: string;
       letters: string[];
       answer: string;
+      explanation: string;
+    }
+  | {
+      id: string;
+      kind: "flash";
+      prompt: string;
+      word: string;
+      ipa: string;
+      meaningVi: string;
+      gloss: string;
+      example: string;
       explanation: string;
     };
 

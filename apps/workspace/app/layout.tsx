@@ -5,6 +5,8 @@ import { QueryProvider } from "@/providers/query-provider";
 import { AuthGate } from "@/providers/auth-gate";
 import { AppShell, GlobalNavigationLoading, SignOutLoadingProvider } from "@/features/layout";
 import { AppearanceProvider } from "@/features/settings";
+import { LessonProgressSync } from "@/features/learn/ui/lesson-progress-sync";
+import { PushRegistrar } from "@/features/notifications/push-registrar";
 import { ActionDialogProvider, CookieConsentBanner, ToastProvider } from "@engli-tutor/ui";
 import "./globals.css";
 
@@ -18,6 +20,12 @@ export const metadata: Metadata = {
   title: "EngliTutor — Learn English with AI",
   description:
     "Practice listening · speaking · reading · writing with AI chat, quick tips, and mini-games every day.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "EngliTutor",
+    statusBarStyle: "default",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -26,13 +34,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var r=document.documentElement;var t=localStorage.getItem('pagecraft-theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);r.classList.toggle('dark',d);r.style.colorScheme=d?'dark':'light';var a=localStorage.getItem('englitutor-accent');if(a)r.setAttribute('data-accent',a);var s=localStorage.getItem('englitutor-text-size');if(s)r.setAttribute('data-text-size',s);var m=localStorage.getItem('englitutor-reduce-motion');if(m)r.setAttribute('data-reduce-motion',m);r.classList.toggle('reduce-motion',m==='on')}catch(e){}})()`,
+            __html: `(function(){try{var r=document.documentElement;var t=localStorage.getItem('pagecraft-theme');var darkIds={dark:1,midnight:1,forest:1,ocean:1,dusk:1};var resolved=t==='system'||!t?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):t;if(resolved==='warm'||resolved==='light'||resolved==='dark'||resolved==='midnight'||resolved==='forest'||resolved==='ocean'||resolved==='dusk'){}else{resolved=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}var d=!!darkIds[resolved];r.classList.toggle('dark',d);r.classList.remove('midnight');r.setAttribute('data-theme',resolved);r.style.colorScheme=d?'dark':'light';var a=localStorage.getItem('englitutor-accent');if(a)r.setAttribute('data-accent',a);var s=localStorage.getItem('englitutor-text-size');if(s)r.setAttribute('data-text-size',s);var m=localStorage.getItem('englitutor-reduce-motion');if(m)r.setAttribute('data-reduce-motion',m);r.classList.toggle('reduce-motion',m==='on')}catch(e){}})()`,
           }}
         />
       </head>
       <body suppressHydrationWarning>
         <QueryProvider>
           <AppearanceProvider>
+            <LessonProgressSync>
             <ActionDialogProvider>
               <ToastProvider>
                 <SignOutLoadingProvider>
@@ -40,12 +49,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                     <GlobalNavigationLoading />
                   </Suspense>
                   <AuthGate>
+                    <PushRegistrar />
                     <AppShell>{children}</AppShell>
                   </AuthGate>
                   <CookieConsentBanner policyHref="/policy/cookies" />
                 </SignOutLoadingProvider>
               </ToastProvider>
             </ActionDialogProvider>
+            </LessonProgressSync>
           </AppearanceProvider>
         </QueryProvider>
       </body>

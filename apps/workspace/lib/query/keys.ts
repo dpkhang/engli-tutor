@@ -18,6 +18,7 @@ export const queryKeys = {
     game: (slug: string, lesson?: string | null) =>
       ["learning", "game", slug, lesson ?? ""] as const,
   },
+  notifications: ["notifications", "preferences"] as const,
 } as const;
 
 export const CACHE_TIMES = {

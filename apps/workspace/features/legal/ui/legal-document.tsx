@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { CardTitle } from "@engli-tutor/ui";
 import type { LegalCtaCard, PolicyCta, PolicySection } from "@engli-tutor/legal";
 import { PageHeader } from "@/features/layout";
@@ -65,8 +65,6 @@ function HubCta({ item }: { item: LegalCtaCard }) {
 }
 
 type WorkspaceLegalDocumentProps = {
-  backHref: string;
-  backLabel: string;
   title: string;
   description: string;
   hubLabel: string;
@@ -76,8 +74,6 @@ type WorkspaceLegalDocumentProps = {
 };
 
 export function WorkspaceLegalDocument({
-  backHref,
-  backLabel,
   title,
   description,
   hubLabel,
@@ -87,14 +83,6 @@ export function WorkspaceLegalDocument({
 }: WorkspaceLegalDocumentProps) {
   return (
     <div className="space-y-4 sm:space-y-5">
-      <Link
-        href={backHref}
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="size-4 shrink-0" aria-hidden strokeWidth={2} />
-        Back to {backLabel}
-      </Link>
-
       <PageHeader eyebrow="Legal" title={title} description={description} />
 
       <SettingsCard>

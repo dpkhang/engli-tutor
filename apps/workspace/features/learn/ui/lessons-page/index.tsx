@@ -18,7 +18,7 @@ export function LessonsPage() {
   const activeSkill: LessonSkillFilter = SKILL_FILTERS.includes(skillParam as LessonSkillFilter)
     ? (skillParam as LessonSkillFilter)
     : "All";
-  const { packs, loading, source } = useLessonPacks();
+  const { packs, loading, fetching, source } = useLessonPacks();
   const { progress, hydrated, toggleFavorite } = useLessonProgress();
 
   const lessons = useMemo(() => {
@@ -55,7 +55,7 @@ export function LessonsPage() {
       query={query}
       activeSkill={activeSkill}
       lessons={lessons}
-      loading={loading}
+      loading={loading || (Boolean(query) && fetching)}
       source={source}
       statusById={statusById}
       favoriteIds={favoriteIds}

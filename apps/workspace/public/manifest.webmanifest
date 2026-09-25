@@ -1,0 +1,9 @@
+{
+  "name": "EngliTutor",
+  "short_name": "EngliTutor",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#070a15",
+  "theme_color": "#4F46E5"
+}

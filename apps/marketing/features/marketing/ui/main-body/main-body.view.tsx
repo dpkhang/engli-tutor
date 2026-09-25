@@ -95,6 +95,8 @@ function PolicyFaqLink({ href, children }: { href: string; children: ReactNode }
   return (
     <Link
       href={href}
+      target="_blank"
+      rel="noopener noreferrer"
       className="mt-3 flex w-fit items-center text-sm font-medium text-foreground underline-offset-4 hover:underline"
     >
       {children}
@@ -472,10 +474,10 @@ export const MainBodyView = memo(function MainBodyView({
                 </p>
                 <div className="mt-6 flex flex-wrap gap-2">
                   <Button asChild variant="outline" size="sm" className="rounded-full">
-                    <Link href="/policy">Privacy Policy</Link>
+                    <Link href="/policy" target="_blank" rel="noopener noreferrer">Privacy Policy</Link>
                   </Button>
                   <Button asChild variant="outline" size="sm" className="rounded-full">
-                    <Link href="/policy/cookies">Cookie Policy</Link>
+                    <Link href="/policy/cookies" target="_blank" rel="noopener noreferrer">Cookie Policy</Link>
                   </Button>
                 </div>
               </div>

@@ -22,7 +22,7 @@ import {
 
 function subscribe(onStoreChange: () => void) {
   const onStorage = (event: StorageEvent) => {
-    if (event.key !== null && event.key !== LESSON_PROGRESS_KEY) return;
+    if (event.key !== null && !event.key.startsWith(LESSON_PROGRESS_KEY)) return;
     invalidateLessonProgressCache();
     onStoreChange();
   };

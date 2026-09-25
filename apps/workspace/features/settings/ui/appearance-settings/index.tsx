@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useLayoutEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   applyAppearancePreferences,
   getAccentPreference,
@@ -11,6 +11,7 @@ import {
   type ReduceMotionPreference,
   type TextSizeId,
   type ThemePreference,
+  PREFERENCES_EVENT,
 } from "../../model/preferences";
 import {
   AppearanceSettingsView,
@@ -78,6 +79,20 @@ export function AppearanceSettings() {
     if (!saved) return;
     setView(saved);
   }, [saved]);
+
+  const dirtyRef = useRef(dirty);
+  dirtyRef.current = dirty;
+
+  useEffect(() => {
+    const sync = () => {
+      if (dirtyRef.current) return;
+      const next = readAppearance();
+      setView(next);
+      setSaved(next);
+    };
+    window.addEventListener(PREFERENCES_EVENT, sync);
+    return () => window.removeEventListener(PREFERENCES_EVENT, sync);
+  }, []);
 
   return (
     <AppearanceSettingsView
