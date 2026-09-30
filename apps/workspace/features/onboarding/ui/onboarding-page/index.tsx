@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { accountApi } from "@/features/accounts";
 import { type SkillLevel } from "@/features/learn/model/skill-exercises";
+import type { BillingPeriod } from "@/features/payments/api/billing";
 import { useBillingMe, useSubscribe } from "@/features/payments/hooks/use-billing";
 import { allPlansForCompare } from "@/features/payments/model/plans";
 import { setPreferredLevel } from "@/features/settings";
@@ -48,7 +49,7 @@ export function OnboardingPage() {
   const [level, setLevel] = useState<SkillLevel | null>(null);
   const [goalId, setGoalId] = useState<LearningGoalId>("speak");
   const [customGoal, setCustomGoal] = useState("");
-  const [period, setPeriod] = useState<"monthly" | "yearly">("monthly");
+  const [period, setPeriod] = useState<BillingPeriod>("monthly");
   const [planError, setPlanError] = useState<string | null>(null);
   const [pendingPlan, setPendingPlan] = useState<string | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);

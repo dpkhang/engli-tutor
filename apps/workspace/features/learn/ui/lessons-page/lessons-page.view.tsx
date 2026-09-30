@@ -13,7 +13,7 @@ import {
   Timer,
   X,
 } from "lucide-react";
-import { Button, cn } from "@engli-tutor/ui";
+import { Button, cn, Input } from "@engli-tutor/ui";
 import { DataLoadingState } from "@/features/layout";
 import type { LessonPack } from "../../model/curriculum";
 import type { LessonProgressStatus } from "../../model/lesson-progress";
@@ -93,7 +93,8 @@ export const LessonsPageView = memo(function LessonsPageView({
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <form className="relative w-full max-w-md" onSubmit={onSearch}>
           <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
-          <input
+          <Input
+            clearable={!query}
             name="q"
             defaultValue={query}
             placeholder="Search lessons by topic, skill, or level…"

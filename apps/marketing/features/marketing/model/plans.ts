@@ -1,12 +1,13 @@
-import type { BillingCatalog } from "@/features/payment/api/billing";
+import type { BillingCatalog, PeriodPrice } from "@/features/payment/api/billing";
 
 export type PlanId = string;
 
 export type PaidPlanId = string;
 
-export type BillingPeriod = "monthly" | "yearly";
+export type BillingPeriod = "monthly" | "quarterly" | "yearly";
 
 export type Plan = {
+  periodPrices?: Record<BillingPeriod, PeriodPrice>;
   id: PlanId;
   name: string;
   price: string;
@@ -26,15 +27,15 @@ export const PLANS: Plan[] = [
     price: "0đ",
     priceValue: 0,
     period: "forever",
-    description: "Limited conversation minutes each day — a good way to explore EngliTutor.",
+    description: "A daily AI tutor allowance — a good way to explore EngliTutor.",
     imageUrl: "/images/plan-starter.png",
     features: [
-      "Limited AI speaking practice minutes per day",
+      "10 AI tutor chats and 20 AI voice replies per day",
       "4-skill placement test (listening–speaking–reading–writing)",
       "Full CEFR A2–B1 path across all four skills",
       "Error feedback in Vietnamese",
     ],
-    cta: "Start speaking practice",
+    cta: "Start lesson",
     featured: false,
   },
 ];
@@ -57,7 +58,10 @@ export function plansFromCatalog(catalog: BillingCatalog | null | undefined): Pl
       description: plan.description,
       imageUrl: plan.imageUrl || (plan.id === "scale" ? "/images/plan-scale.png" : `/images/plan-${plan.id}.png`),
       features: benefits,
-      cta: plan.cta || (isFree ? "Start speaking practice" : `Choose ${plan.name}`),
+      periodPrices: plan.periodPrices,
+      cta: isFree || /^start speaking\b/i.test(plan.cta || "")
+        ? "Start lesson"
+        : plan.cta || `Choose ${plan.name}`,
       featured: Boolean(plan.featured),
     } satisfies Plan;
   });
@@ -72,8 +76,15 @@ export const BILLING_PERIODS: {
   hint: string;
 }[] = [
   { id: "monthly", label: "Monthly", hint: "Billed every month" },
-  { id: "yearly", label: "Yearly", hint: "Save ~2 months" },
+  { id: "quarterly", label: "3 months", hint: "Billed every 3 months · save 15%" },
+  { id: "yearly", label: "Yearly", hint: "Billed once a year · save 40%" },
 ];
+
+const PERIOD_TERMS: Record<BillingPeriod, { months: number; discount: number; label: string }> = {
+  monthly: { months: 1, discount: 0, label: "/ month" },
+  quarterly: { months: 3, discount: 0.15, label: "/ 3 months" },
+  yearly: { months: 12, discount: 0.4, label: "/ year" },
+};
 
 export function getPlanById(id: string | null | undefined, plans: Plan[] = PLANS): Plan {
   return plans.find((plan) => plan.id === id) ?? plans.find((plan) => plan.featured) ?? plans[0]!;
@@ -93,7 +104,7 @@ export function formatVnd(value: number): string {
   return `${value.toLocaleString("vi-VN")}đ`;
 }
 
-/** Yearly = 10× monthly (2 months free). */
+/** Mirrors the backend period pricing when the catalog has no `periodPrices`. */
 export function getBillingTotal(plan: Plan, period: BillingPeriod): {
   total: number;
   label: string;
@@ -103,18 +114,13 @@ export function getBillingTotal(plan: Plan, period: BillingPeriod): {
     return { total: 0, label: "0đ", periodLabel: "forever" };
   }
 
-  if (period === "yearly") {
-    const total = plan.priceValue * 10;
-    return {
-      total,
-      label: formatVnd(total),
-      periodLabel: "/ year",
-    };
-  }
+  const terms = PERIOD_TERMS[period];
+  const total =
+    plan.periodPrices?.[period]?.totalVnd ??
+    Math.round((plan.priceValue * terms.months * (1 - terms.discount)) / 1000) * 1000;
+  return { total, label: formatVnd(total), periodLabel: terms.label };
+}
 
-  return {
-    total: plan.priceValue,
-    label: formatVnd(plan.priceValue),
-    periodLabel: "/ month",
-  };
+export function billingPeriodLabel(period: BillingPeriod | null | undefined): string {
+  return BILLING_PERIODS.find((item) => item.id === period)?.label ?? "Monthly";
 }

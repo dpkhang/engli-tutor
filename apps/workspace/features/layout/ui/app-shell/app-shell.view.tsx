@@ -4,8 +4,8 @@ import { memo, type ReactNode, type RefObject } from "react";
 import Link from "next/link";
 import {
   ChevronDown,
-  Coins,
   Crown,
+  Gauge,
   LogOut,
   Menu,
   MessageCircle,
@@ -56,8 +56,8 @@ export type AppShellViewProps = {
   clipAiTools: boolean;
   aiToolsHeight: number;
   user: { name?: string | null; email?: string | null } | undefined;
-  creditsLoading: boolean;
-  creditsBalance: number | undefined;
+  planLoading: boolean;
+  planLabel: string | undefined;
   hasPaidPlan: boolean;
   displayName: string;
   initials: string;
@@ -87,8 +87,8 @@ export const AppShellView = memo(function AppShellView({
   clipAiTools,
   aiToolsHeight,
   user,
-  creditsLoading,
-  creditsBalance,
+  planLoading,
+  planLabel,
   hasPaidPlan,
   displayName,
   initials,
@@ -165,8 +165,8 @@ export const AppShellView = memo(function AppShellView({
                 className="hidden h-9 rounded-full sm:inline-flex"
               >
                 <Link href="/payments" className="gap-1.5">
-                  <Coins className="size-3.5" />
-                  {creditsLoading ? "…" : (creditsBalance ?? 0)}
+                  {hasPaidPlan ? <Crown className="size-3.5" /> : <Gauge className="size-3.5" />}
+                  {planLoading ? "…" : (planLabel ?? "Plans")}
                 </Link>
               </Button>
             ) : null}
@@ -233,7 +233,7 @@ export const AppShellView = memo(function AppShellView({
                           role="menuitem"
                           className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-muted"
                         >
-                          <Coins className="size-4 text-muted-foreground" />
+                          <Gauge className="size-4 text-muted-foreground" />
                           Plans
                         </Link>
                         <Link

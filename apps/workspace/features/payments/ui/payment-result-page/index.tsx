@@ -4,17 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { peekWelcomePending, clearWelcomePending, WELCOME_PATH } from "@/features/onboarding";
-import { billingApi, type BillingMe } from "../../api/billing";
+import { billingApi } from "../../api/billing";
 import { billingMeQueryKey } from "../../hooks/use-billing";
 import { PaymentResultPageView, type PaymentResultState } from "./payment-result-page.view";
 
 const PLAN_NAMES: Record<string, string> = {
   growth: "Standard",
   scale: "Premium",
-  "boost-100": "Boost 100",
-  "boost-500": "Boost 500",
-  "boost-1500": "Boost 1500",
-  custom: "Custom top-up",
 };
 
 export function PaymentResultPage() {
@@ -36,7 +32,6 @@ export function PaymentResultPage() {
             : "Payment did not complete. Please check your payment details and try again."),
   );
   const [confirmedPlanId, setConfirmedPlanId] = useState<string | null>(null);
-  const [balanceAfter, setBalanceAfter] = useState<number | null>(null);
   const [countdown, setCountdown] = useState(5);
 
   useEffect(() => {
@@ -53,34 +48,17 @@ export function PaymentResultPage() {
 
     let cancelled = false;
     (async () => {
-      const applySuccess = (result: {
-        planId?: string | null;
-        balanceAfter?: number;
-        topup?: boolean;
-      }) => {
+      const applySuccess = (result: { planId?: string | null }) => {
         setConfirmedPlanId(result.planId ?? itemId ?? null);
-        if (typeof result.balanceAfter === "number") {
-          setBalanceAfter(result.balanceAfter);
-          queryClient.setQueryData(billingMeQueryKey, (current: BillingMe | undefined) => {
-            if (!current) return current;
-            return { ...current, balance: result.balanceAfter! };
-          });
-        }
         if (peekWelcomePending()) {
           router.replace(WELCOME_PATH);
           return;
         }
         setState("success");
         setMessage(
-          checkoutType === "topup"
-            ? typeof result.balanceAfter === "number"
-              ? `Credits have been added. Your new balance is ${result.balanceAfter}.`
-              : "Credits have been added to your account and are ready to use."
-            : checkoutType === "upgrade"
-              ? typeof result.balanceAfter === "number"
-                ? `Your plan is upgraded. New balance: ${result.balanceAfter} credits.`
-                : "Your plan is upgraded and extra practice credits have been added."
-              : "Your plan is active and benefits have been updated.",
+          checkoutType === "upgrade"
+            ? "Your plan is upgraded. New benefits apply right away."
+            : "Your plan is active and benefits have been updated.",
         );
       };
 
@@ -105,13 +83,9 @@ export function PaymentResultPage() {
           if (cancelled) return;
           const upgraded =
             checkoutType === "upgrade" && Boolean(itemId) && me.subscription.planId === itemId;
-          const paid = checkoutType !== "topup" && checkoutType !== "upgrade" && me.hasPaidPlan;
+          const paid = checkoutType !== "upgrade" && me.hasPaidPlan;
           if (upgraded || paid) {
-            applySuccess({
-              planId: me.subscription.planId,
-              balanceAfter: me.balance,
-              topup: checkoutType === "topup",
-            });
+            applySuccess({ planId: me.subscription.planId });
             return;
           }
         } catch {
@@ -134,12 +108,12 @@ export function PaymentResultPage() {
       return;
     }
     if (countdown <= 0) {
-      router.replace(checkoutType === "topup" ? "/payments" : "/skills");
+      router.replace("/skills");
       return;
     }
     const timer = window.setTimeout(() => setCountdown((value) => value - 1), 1_000);
     return () => window.clearTimeout(timer);
-  }, [checkoutType, countdown, router, state]);
+  }, [countdown, router, state]);
 
   const packageName = useMemo(
     () => PLAN_NAMES[confirmedPlanId ?? itemId ?? ""] ?? "selected plan",
@@ -152,7 +126,6 @@ export function PaymentResultPage() {
       message={message}
       checkoutType={checkoutType}
       packageName={packageName}
-      balanceAfter={balanceAfter}
       countdown={countdown}
     />
   );

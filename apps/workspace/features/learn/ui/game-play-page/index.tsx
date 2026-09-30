@@ -1,24 +1,27 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { accountApi } from "@/features/accounts/api";
+import { queryKeys } from "@/lib/query";
 import { LESSON_PACKS } from "../../model/curriculum";
 import { markLessonStarted } from "../../model/lesson-progress";
 import { useGame } from "../../hooks/use-learning-catalog";
-import { listFlashcardReview } from "../../model/flashcard-review";
+import { useVocabProgress } from "../../hooks/use-vocab-progress";
+import { gameSessionsApi } from "../../api/vocab-api";
 import { pickGameRounds, shuffleInPlace } from "../../model/games";
-import type { LearningGameRound } from "../../api/types";
-import { GamePlayPageView, type GamePlayPhase } from "./game-play-page.view";
-
-function pickFlashcardSession(rounds: LearningGameRound[], lesson?: string | null) {
-  const tagged = lesson ? rounds.filter((round) => round.lessonIds?.includes(lesson)) : [];
-  const pool = tagged.length ? tagged : rounds;
-  const saved = new Set(listFlashcardReview());
-  const review = shuffleInPlace(pool.filter((round) => saved.has(round.id)));
-  const fresh = shuffleInPlace(pool.filter((round) => !saved.has(round.id)));
-  const next = [...review, ...fresh].slice(0, 5);
-  return next.length ? next : pickGameRounds(rounds, lesson);
-}
+import {
+  isMastered,
+  needsReview,
+  pickVocabSession,
+  reviewRounds,
+  supportsMode,
+  toModeRound,
+  type VocabMode,
+} from "../../model/vocab-trainer";
+import type { LearningGameRound, LearningLevel } from "../../api/types";
+import { GamePlayPageView, type FlashcardDeckOption, type GamePlayPhase } from "./game-play-page.view";
 
 export function GamePlayPage({ slug }: { slug: string }) {
   const searchParams = useSearchParams();
@@ -34,25 +37,127 @@ export function GamePlayPage({ slug }: { slug: string }) {
   const [scores, setScores] = useState<boolean[]>([]);
   const [playId, setPlayId] = useState(0);
   const [enter, setEnter] = useState<"next" | "back">("next");
+  const isVocab = game?.id === "flashcard";
+  const allDecks = useMemo(() => (isVocab ? (game?.decks ?? []) : []), [game, isVocab]);
+  const profileQuery = useQuery({
+    queryKey: queryKeys.account,
+    queryFn: accountApi.get,
+    enabled: allDecks.length > 0,
+  });
+  const [pickedLevel, setPickedLevel] = useState<LearningLevel | null>(null);
+  const [pickedDeckId, setPickedDeckId] = useState<string | null>(null);
+  const [mode, setMode] = useState<VocabMode>("flip");
+  const [sessionMode, setSessionMode] = useState<VocabMode>("flip");
+  const [reviewRound, setReviewRound] = useState(0);
+  const startedAt = useRef(0);
+  const recordedPlayId = useRef(0);
+  const { progress, saved, review, saveCard } = useVocabProgress(isVocab);
+
+  const deckLevels = useMemo(
+    () => [...new Set(allDecks.map((deck) => deck.level))],
+    [allDecks],
+  );
+  const profileLevel = profileQuery.data?.targetLevel ?? null;
+  const level =
+    pickedLevel ??
+    (profileLevel && deckLevels.includes(profileLevel) ? profileLevel : deckLevels[0] ?? null);
+  const decks = useMemo<FlashcardDeckOption[]>(() => {
+    const now = Date.now();
+    return allDecks
+      .filter((deck) => deck.level === level)
+      .map((deck) => {
+        const rounds = game?.rounds.filter((round) => round.deck === deck.id) ?? [];
+        return {
+          ...deck,
+          reviewCount: rounds.filter((round) => needsReview(progress.get(round.id), now)).length,
+          masteredCount: rounds.filter((round) => isMastered(progress.get(round.id))).length,
+          pictureCount: rounds.filter((round) => supportsMode(round, "picture")).length,
+        };
+      });
+  }, [allDecks, game, level, progress]);
+  const deckId = decks.some((deck) => deck.id === pickedDeckId) ? pickedDeckId : decks[0]?.id ?? null;
 
   useEffect(() => {
     if (lesson) markLessonStarted(lesson);
   }, [lesson]);
 
-  const onStart = useCallback(() => {
-    if (!game) return;
-    if (lesson) markLessonStarted(lesson);
-    setSession(
-      game.id === "flashcard"
-        ? pickFlashcardSession(game.rounds, lesson)
-        : pickGameRounds(game.rounds, lesson),
-    );
+  const onPickLevel = useCallback((next: LearningLevel) => {
+    setPickedLevel(next);
+    setPickedDeckId(null);
+  }, []);
+
+  const begin = useCallback((rounds: LearningGameRound[], nextReviewRound: number, nextMode: VocabMode) => {
+    setSession(rounds);
+    setSessionMode(nextMode);
+    setReviewRound(nextReviewRound);
     setEnter("next");
     setIndex(0);
     setScores([]);
     setPlayId((current) => current + 1);
+    startedAt.current = Date.now();
     setPhase("playing");
-  }, [game, lesson]);
+  }, []);
+
+  const vocabSession = useCallback(
+    (cards: LearningGameRound[], nextReviewRound: number, requested: VocabMode) => {
+      if (!game) return;
+      const usable = cards.filter((round) => supportsMode(round, requested));
+      const nextMode = usable.length ? requested : "flip";
+      const picked = usable.length ? usable : cards;
+      begin(
+        picked.map((round) => toModeRound(round, nextMode, game.rounds)),
+        nextReviewRound,
+        nextMode,
+      );
+    },
+    [begin, game],
+  );
+
+  const onStart = useCallback(() => {
+    if (!game) return;
+    if (lesson) markLessonStarted(lesson);
+    if (!isVocab) {
+      begin(pickGameRounds(game.rounds, lesson), 0, "flip");
+      return;
+    }
+    const tagged = lesson ? game.rounds.filter((round) => round.lessonIds?.includes(lesson)) : [];
+    const inDeck = deckId ? game.rounds.filter((round) => round.deck === deckId) : [];
+    const pool = tagged.length ? tagged : inDeck.length ? inDeck : game.rounds;
+    const picked = pickVocabSession(pool, progress, mode);
+    vocabSession(picked.length ? picked : pickVocabSession(pool, progress, "flip"), 0, mode);
+  }, [begin, deckId, game, isVocab, lesson, mode, progress, vocabSession]);
+
+  const cardsById = useMemo(() => new Map((game?.rounds ?? []).map((round) => [round.id, round])), [game]);
+
+  const missedRounds = useMemo(
+    () =>
+      isVocab
+        ? session.flatMap((round, i) => {
+            const card = cardsById.get(round.id);
+            return scores[i] === false && card ? [card] : [];
+          })
+        : [],
+    [cardsById, isVocab, scores, session],
+  );
+
+  const onPracticeMissed = useCallback(() => {
+    if (!missedRounds.length) return;
+    vocabSession(shuffleInPlace([...missedRounds]), reviewRound + 1, sessionMode);
+  }, [missedRounds, reviewRound, sessionMode, vocabSession]);
+
+  const onReviewDeck = useCallback(
+    (id: string) => {
+      if (!game) return;
+      const deckRounds = game.rounds.filter((round) => round.deck === id);
+      const rounds = reviewRounds(deckRounds, progress, "flip");
+      if (!rounds.length) return;
+      setPickedDeckId(id);
+      vocabSession(rounds, 1, mode);
+    },
+    [game, mode, progress, vocabSession],
+  );
+
+  const autoAdvance = isVocab && sessionMode === "flip";
 
   const onRoundSubmit = useCallback((_value: string, isCorrect: boolean) => {
     setScores((prev) => {
@@ -60,11 +165,14 @@ export function GamePlayPage({ slug }: { slug: string }) {
       next[index] = isCorrect;
       return next;
     });
-    if (game?.id !== "flashcard") return;
+    if (!isVocab) return;
+    const cardId = session[index]?.id;
+    if (cardId) review(cardId, isCorrect);
+    if (!autoAdvance) return;
     setEnter("next");
     if (index + 1 >= session.length) setPhase("results");
     else setIndex((current) => current + 1);
-  }, [game?.id, index, session.length]);
+  }, [autoAdvance, index, isVocab, review, session]);
 
   const onPreviousRound = useCallback(() => {
     setEnter("back");
@@ -72,12 +180,32 @@ export function GamePlayPage({ slug }: { slug: string }) {
   }, []);
 
   const onNextRound = useCallback(() => {
+    setEnter("next");
     if (index + 1 >= session.length) setPhase("results");
     else setIndex((current) => current + 1);
   }, [index, session.length]);
 
-  const round = session[index];
+  const onBackToDecks = useCallback(() => {
+    setPhase("intro");
+  }, []);
+
   const correctCount = scores.filter(Boolean).length;
+
+  useEffect(() => {
+    if (phase !== "results" || !game || recordedPlayId.current === playId || !session.length) return;
+    recordedPlayId.current = playId;
+    gameSessionsApi
+      .record({
+        gameId: game.id,
+        ...(isVocab ? { mode: sessionMode, deckId: deckId ?? undefined } : {}),
+        correct: correctCount,
+        total: session.length,
+        durationMs: Math.min(3_600_000, Date.now() - startedAt.current),
+      })
+      .catch(() => undefined);
+  }, [correctCount, deckId, game, isVocab, phase, playId, session.length, sessionMode]);
+
+  const round = session[index];
 
   return (
     <GamePlayPageView
@@ -92,10 +220,26 @@ export function GamePlayPage({ slug }: { slug: string }) {
       enter={enter}
       round={round}
       correctCount={correctCount}
+      deckLevels={lesson ? [] : deckLevels}
+      deckLevel={level}
+      decks={lesson ? [] : decks}
+      deckId={deckId}
+      mode={mode}
+      autoAdvance={autoAdvance}
+      onPickLevel={onPickLevel}
+      onPickDeck={setPickedDeckId}
+      onPickMode={setMode}
+      onReviewDeck={onReviewDeck}
+      reviewRound={reviewRound}
+      missedRounds={missedRounds}
+      onPracticeMissed={onPracticeMissed}
       onStart={onStart}
       onRoundSubmit={onRoundSubmit}
       onNextRound={onNextRound}
       onPreviousRound={onPreviousRound}
+      onBackToDecks={onBackToDecks}
+      savedCards={saved}
+      onSaveCard={saveCard}
     />
   );
 }

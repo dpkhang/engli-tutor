@@ -154,8 +154,3 @@ export function safeOnboardingReturnTo(raw: string | null | undefined) {
 export function formatVnd(value: number) {
   return `${value.toLocaleString("en-US")} VND`;
 }
-
-export function planPriceVnd(priceVndMonthly: number, period: "monthly" | "yearly") {
-  if (priceVndMonthly <= 0) return 0;
-  return period === "yearly" ? priceVndMonthly * 10 : priceVndMonthly;
-}

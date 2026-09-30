@@ -1,51 +1,32 @@
-const FLASHCARD_REVIEW_KEY = "englitutor-flashcard-review";
+import type { LegacyFlashcardMarks } from "../api/vocab-api";
 
-function readIds(): string[] {
-  if (typeof window === "undefined") return [];
+const LEGACY_REVIEW_KEY = "englitutor-flashcard-review";
+const LEGACY_SAVED_KEY = "englitutor-flashcard-saved";
+const IMPORT_LIMIT = 500;
+
+function readIds(key: string): string[] {
   try {
-    const parsed = JSON.parse(window.localStorage.getItem(FLASHCARD_REVIEW_KEY) ?? "[]") as unknown;
+    const parsed = JSON.parse(window.localStorage.getItem(key) ?? "[]") as unknown;
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((id): id is string => typeof id === "string" && id.length > 0);
+    return parsed
+      .filter((id): id is string => typeof id === "string" && /^fc-[a-z0-9-]+$/.test(id))
+      .slice(0, IMPORT_LIMIT);
   } catch {
     return [];
   }
 }
 
-function writeIds(ids: string[]) {
-  window.localStorage.setItem(FLASHCARD_REVIEW_KEY, JSON.stringify([...new Set(ids)]));
+/** Marks saved in this browser before flashcards synced per account; null when nothing to import. */
+export function readLegacyFlashcardMarks(): LegacyFlashcardMarks | null {
+  if (typeof window === "undefined") return null;
+  const marks = { unlearned: readIds(LEGACY_REVIEW_KEY), saved: readIds(LEGACY_SAVED_KEY) };
+  const hasKeys =
+    window.localStorage.getItem(LEGACY_REVIEW_KEY) !== null ||
+    window.localStorage.getItem(LEGACY_SAVED_KEY) !== null;
+  return hasKeys ? marks : null;
 }
 
-export function listFlashcardReview(): string[] {
-  return readIds();
-}
-
-export function saveFlashcardForReview(id: string) {
-  writeIds([id, ...readIds()]);
-}
-
-export function skipFlashcard(id: string) {
-  writeIds(readIds().filter((item) => item !== id));
-}
-
-const FLASHCARD_SAVED_KEY = "englitutor-flashcard-saved";
-
-function readSaved(): string[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(FLASHCARD_SAVED_KEY) ?? "[]") as unknown;
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((id): id is string => typeof id === "string" && id.length > 0);
-  } catch {
-    return [];
-  }
-}
-
-export function isFlashcardSaved(id: string) {
-  return readSaved().includes(id);
-}
-
-export function saveFlashcard(id: string) {
-  const ids = readSaved();
-  if (ids.includes(id)) return;
-  window.localStorage.setItem(FLASHCARD_SAVED_KEY, JSON.stringify([id, ...ids]));
+export function clearLegacyFlashcardMarks() {
+  window.localStorage.removeItem(LEGACY_REVIEW_KEY);
+  window.localStorage.removeItem(LEGACY_SAVED_KEY);
 }

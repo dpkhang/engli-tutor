@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@engli-tutor/ui";
-import type { LegalCtaCard } from "../../model/legal-ctas";
+import type { LegalCtaCard } from "../model/legal-ctas";
 
 function CtaLink({
   item,

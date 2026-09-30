@@ -76,7 +76,7 @@ const EXPLORE_MORE = [
   { label: "Lessons", note: "Full lesson packs", href: "/lessons" },
   { label: "Games", note: "Quick drills", href: "/games" },
   { label: "Search", note: "Find anything", href: "/search" },
-  { label: "Credits", note: "Top up practice", href: "/payments" },
+  { label: "Plans", note: "Unlock more practice", href: "/payments" },
 ] as const;
 
 export type HomeContinueItem = {
@@ -116,8 +116,8 @@ export type HomeDrillItem = {
 };
 
 export type HomeSnapshot = {
-  credits: number | undefined;
-  creditsLoading: boolean;
+  plan: string | undefined;
+  planLoading: boolean;
   started: number;
   completed: number;
   saved: number;
@@ -195,8 +195,8 @@ export const LearnHomeView = memo(function LearnHomeView({
   const otherContinue = continueItems.slice(1);
   const snapshotStats = [
     {
-      label: "Credits",
-      value: snapshot.creditsLoading ? "…" : (snapshot.credits ?? 0).toLocaleString("en-US"),
+      label: "Plan",
+      value: snapshot.planLoading ? "…" : (snapshot.plan ?? "Free"),
     },
     { label: "In progress", value: String(snapshot.started) },
     { label: "Done", value: String(snapshot.completed) },
@@ -679,13 +679,21 @@ export const LearnHomeView = memo(function LearnHomeView({
       {/* Tips — numbered list / blockquotes */}
       <section>
         <SectionHeader eyebrow="Study smarter" title="Quick tips" />
-        <ol className="space-y-6 border-l border-primary/25 pl-5 sm:pl-6">
+        <ol className="space-y-6">
           {tips.map((tip, index) => (
-            <li key={tip} className="relative">
-              <span className="absolute -left-[1.65rem] top-0 grid size-5 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground sm:-left-[1.9rem]">
-                {index + 1}
-              </span>
-              <p className="text-base leading-7 text-muted-foreground sm:text-lg">{tip}</p>
+            <li key={tip} className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 sm:gap-x-4">
+              <div className="relative">
+                {index < tips.length - 1 && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -bottom-7 left-1/2 top-1 w-px -translate-x-1/2 bg-primary/25"
+                  />
+                )}
+                <span className="relative mt-1 grid size-5 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                  {index + 1}
+                </span>
+              </div>
+              <p className="text-base leading-7 text-muted-foreground sm:text-lg sm:leading-7">{tip}</p>
             </li>
           ))}
         </ol>

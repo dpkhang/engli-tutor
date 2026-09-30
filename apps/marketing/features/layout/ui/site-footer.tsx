@@ -14,7 +14,7 @@ const FOOTER_LINKS = [
       { href: "/#path", label: "Four-skill path" },
       { href: "/#pricing", label: "Pricing" },
       { href: "/#faq", label: "FAQ" },
-      { href: "/auth", label: "Start speaking", entry: true as const },
+      { href: "/auth", label: "Start lesson", entry: true as const },
     ],
   },
   {

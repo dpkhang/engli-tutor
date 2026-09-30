@@ -6,6 +6,8 @@ import { authClient, useSession } from "@/lib/auth-client";
 import { useActionDialog } from "@engli-tutor/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useBillingMe } from "@/features/payments/hooks/use-billing";
+import { hasPremiumAccess, planBadgeLabel } from "@/features/payments/model/plans";
+import { usePendingReferral } from "@/features/referrals";
 import { useSignOutLoading } from "../shared";
 import { TranslateSessionProvider, useTranslateSession, isLessonTranslatePath } from "@/features/translate";
 import { LessonSearch } from "../lesson-search";
@@ -66,16 +68,14 @@ function AppShellFrame({ children }: { children: ReactNode }) {
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const { data } = useSession();
   const user = data?.user;
-  const credits = useBillingMe(Boolean(user));
-  const paidPlan = credits.data?.hasPaidPlan
-    ? credits.data.subscriptionPlans.find((plan) => plan.id === credits.data?.subscription.planId)
-    : undefined;
+  const billing = useBillingMe(Boolean(user));
   const displayName = user?.name?.trim() || user?.email?.split("@")[0] || "Account";
   const initials = displayName.slice(0, 1).toUpperCase();
   const isPracticeExercise = /^\/skills\/[^/]+\/[^/]+/.test(pathname);
   const showTranslate = isLessonTranslatePath(pathname);
   const showAiDock = !isAiDockHiddenPath(pathname);
   const search = useMemo(() => <LessonSearch />, []);
+  usePendingReferral(Boolean(user));
 
   useEffect(() => {
     setAccountOpen(false);
@@ -207,9 +207,9 @@ function AppShellFrame({ children }: { children: ReactNode }) {
       clipAiTools={clipAiTools}
       aiToolsHeight={aiToolsHeight}
       user={user}
-      creditsLoading={credits.isLoading}
-      creditsBalance={credits.data?.balance}
-      hasPaidPlan={Boolean(paidPlan)}
+      planLoading={billing.isLoading}
+      planLabel={planBadgeLabel(billing.data)}
+      hasPaidPlan={hasPremiumAccess(billing.data)}
       displayName={displayName}
       initials={initials}
       isPracticeExercise={isPracticeExercise}

@@ -118,7 +118,8 @@ export function PaymentCheckoutPage() {
       ownedPlan={ownedPlan}
       upgradePlans={upgradePlans}
       ownedSubscription={ownedPlan && billingMe.data ? billingMe.data.subscription : null}
-      creditBalance={ownedPlan ? (billingMe.data?.balance ?? null) : null}
+      dailyChatLimit={billingMe.data?.entitlements?.limits.tutorChatPerDay}
+      chatsUsedToday={billingMe.data?.usage?.tutor_chat ?? null}
       onPeriodChange={setPeriod}
       onSubscribe={onSubscribe}
       onUpgrade={onUpgrade}

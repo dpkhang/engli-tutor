@@ -52,7 +52,6 @@ export type NotificationSettingsViewProps = {
   notifyReminders: boolean;
   notifyTutor: boolean;
   notifyLessons: boolean;
-  notifyCredits: boolean;
   notifyBilling: boolean;
   reminderMinutes: number;
   scheduleEnabled: boolean;
@@ -61,7 +60,6 @@ export type NotificationSettingsViewProps = {
   onToggleReminders: () => void;
   onToggleTutor: () => void;
   onToggleLessons: () => void;
-  onToggleCredits: () => void;
   onToggleBilling: () => void;
   onReminderTime: (minutes: number) => void;
 };
@@ -71,7 +69,6 @@ export const NotificationSettingsView = memo(function NotificationSettingsView({
   notifyReminders,
   notifyTutor,
   notifyLessons,
-  notifyCredits,
   notifyBilling,
   reminderMinutes,
   scheduleEnabled,
@@ -80,7 +77,6 @@ export const NotificationSettingsView = memo(function NotificationSettingsView({
   onToggleReminders,
   onToggleTutor,
   onToggleLessons,
-  onToggleCredits,
   onToggleBilling,
   onReminderTime,
 }: NotificationSettingsViewProps) {
@@ -145,13 +141,6 @@ export const NotificationSettingsView = memo(function NotificationSettingsView({
             </CardTitle>
           </SettingsCardHeader>
           <SettingsCardContent className="space-y-4">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <Label htmlFor="low-credits">Low practice credits</Label>
-                <p className="text-sm text-muted-foreground">Once, when you have 10 credits or fewer left.</p>
-              </div>
-              <Toggle id="low-credits" checked={notifyCredits} disabled={pending} onClick={onToggleCredits} />
-            </div>
             <div className="flex items-center justify-between gap-4">
               <div>
                 <Label htmlFor="billing-alerts">Plan and payment</Label>

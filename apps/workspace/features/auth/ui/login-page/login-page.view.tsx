@@ -62,11 +62,7 @@ export const LoginPageView = memo(function LoginPageView({
     "h-12 rounded-xl border-slate-200 bg-white/80 pl-10 shadow-none transition-[border-color,box-shadow] placeholder:text-slate-400 hover:border-slate-300 focus-visible:border-primary focus-visible:ring-primary/15 dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20";
 
   return (
-    <main className="relative flex h-svh flex-col overflow-hidden bg-slate-950">
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,hsl(var(--primary)/0.35),transparent_36%),radial-gradient(circle_at_92%_92%,hsl(var(--primary)/0.12),transparent_34%),linear-gradient(160deg,#070a15_0%,#111633_52%,#080b18_100%)]"
-      />
+    <main className="relative flex h-svh flex-col overflow-x-hidden overflow-y-auto bg-slate-950 bg-[radial-gradient(circle_at_10%_0%,hsl(var(--primary)/0.35),transparent_36%),radial-gradient(circle_at_92%_92%,hsl(var(--primary)/0.12),transparent_34%),linear-gradient(160deg,#070a15_0%,#111633_52%,#080b18_100%)] bg-local">
 
       <header className="relative z-20 mx-auto flex w-full max-w-7xl shrink-0 items-center justify-between px-5 py-3 sm:px-8 lg:px-10">
         <a href={homeHref} className="group inline-flex items-center gap-2.5 text-white">
@@ -79,7 +75,7 @@ export const LoginPageView = memo(function LoginPageView({
         </span>
       </header>
 
-      <div className="relative z-10 mx-auto grid min-h-0 w-full max-w-7xl flex-1 items-center gap-6 px-5 py-3 sm:px-8 lg:grid-cols-[minmax(0,1fr)_30rem] lg:gap-8 lg:px-10">
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl flex-[1_0_auto] items-center gap-6 px-5 py-3 sm:px-8 lg:grid-cols-[minmax(0,1fr)_30rem] lg:gap-8 lg:px-10">
         <section className="auth-enter-panel hidden max-h-full min-h-0 overflow-hidden pr-2 lg:block">
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-1.5 text-xs font-medium text-indigo-200">
             <LayoutDashboard className="size-3.5" />
@@ -244,7 +240,8 @@ export const LoginPageView = memo(function LoginPageView({
                   disabled={pending}
                   aria-invalid={Boolean(errors.password)}
                   aria-describedby="workspace-password-error"
-                  className={`${inputClass} pr-11`}
+                  className={`${inputClass} pr-20`}
+                  clearButtonClassName="right-11"
                   {...register("password")}
                 />
                 <button
@@ -259,6 +256,24 @@ export const LoginPageView = memo(function LoginPageView({
               </div>
               <FieldMessage id="workspace-password-error" message={errors.password?.message} />
             </label>
+            {!isLogin && (
+              <label className="block text-sm">
+                <span className="mb-1.5 block font-medium text-slate-700 dark:text-slate-200">
+                  Referral code (optional)
+                </span>
+                <Input
+                  placeholder="Enter your friend's code"
+                  autoComplete="off"
+                  maxLength={24}
+                  disabled={pending}
+                  aria-invalid={Boolean(errors.referralCode)}
+                  aria-describedby="workspace-referral-error"
+                  className="h-12 rounded-xl uppercase"
+                  {...register("referralCode")}
+                />
+                <FieldMessage id="workspace-referral-error" message={errors.referralCode?.message} />
+              </label>
+            )}
             <p
               className="min-h-5 text-sm leading-5 text-rose-500"
               role={error ? "alert" : undefined}

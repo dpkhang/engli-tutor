@@ -1,5 +1,5 @@
-import type { LegalCtaCard } from "../../model/legal-ctas";
-import type { PolicySection } from "../../model/policy";
+import type { LegalCtaCard } from "../model/legal-ctas";
+import type { PolicySection } from "../model/policy";
 import type { ReactNode } from "react";
 import { LegalCtaCards } from "./legal-cta-cards";
 import { LegalSectionCta } from "./legal-section-cta";

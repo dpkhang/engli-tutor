@@ -16,7 +16,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { Check, ChevronDown, Search } from "lucide-react";
-import { cn } from "@engli-tutor/ui";
+import { cn, Input } from "@engli-tutor/ui";
 import { getCountryCallingCode, type Country } from "react-phone-number-input";
 
 type CountryOption = {
@@ -243,12 +243,12 @@ export const PhoneCountrySelect = memo(function PhoneCountrySelect({
           >
             <div className="relative border-b border-border px-2 py-2">
               <Search className="pointer-events-none absolute top-1/2 left-4 size-3.5 -translate-y-1/2 text-muted-foreground" />
-              <input
+              <Input
                 ref={searchRef}
                 value={query}
                 placeholder="Search country or code"
                 aria-label="Search countries"
-                className="h-8 w-full rounded-md border border-input bg-transparent pr-2 pl-8 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/40"
+                className="h-8 w-full rounded-md border border-input bg-transparent pr-10 pl-8 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/40"
                 onChange={(event) => setQuery(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" && filtered[0]) {

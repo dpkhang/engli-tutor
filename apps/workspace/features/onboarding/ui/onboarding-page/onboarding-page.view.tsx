@@ -16,14 +16,15 @@ import {
   Sparkles,
   Target,
 } from "lucide-react";
-import { Alert, AlertDescription, Badge, BillingPeriodSwitch, BrandLogo, Button, cn } from "@engli-tutor/ui";
+import { Alert, AlertDescription, Badge, BrandLogo, Button, cn } from "@engli-tutor/ui";
 import { LEVELS, type SkillLevel } from "@/features/learn/model/skill-exercises";
-import { allPlansForCompare } from "@/features/payments/model/plans";
+import type { BillingPeriod } from "@/features/payments/api/billing";
+import { PERIOD_SUFFIX, planPeriodPrice, type ComparePlan } from "@/features/payments/model/plans";
+import { PlanPeriodSwitch } from "@/features/payments/ui/plan-period-switch";
 import {
   INTRO_HIGHLIGHTS,
   LEARNING_GOALS,
   formatVnd,
-  planPriceVnd,
   type LearningGoalId,
 } from "../../model/onboarding";
 import { OnboardingBackdrop } from "../onboarding-backdrop";
@@ -37,7 +38,7 @@ const STEPS = [
 
 export type OnboardingStepId = (typeof STEPS)[number]["id"];
 
-type OnboardingPlan = ReturnType<typeof allPlansForCompare>[number];
+type OnboardingPlan = ComparePlan;
 
 const INTRO_ICONS = [Mic2, Headphones, Gamepad2, Compass] as const;
 
@@ -78,7 +79,7 @@ export type OnboardingPageViewProps = {
   level: SkillLevel | null;
   goalId: LearningGoalId;
   customGoal: string;
-  period: "monthly" | "yearly";
+  period: BillingPeriod;
   plans: OnboardingPlan[];
   billingLoading: boolean;
   stripeReady: boolean;
@@ -92,7 +93,7 @@ export type OnboardingPageViewProps = {
   onLevelChange: (level: SkillLevel) => void;
   onGoalChange: (goalId: LearningGoalId) => void;
   onCustomGoalChange: (value: string) => void;
-  onPeriodChange: (period: "monthly" | "yearly") => void;
+  onPeriodChange: (period: BillingPeriod) => void;
   onChoosePaidPlan: (planId: string) => void;
   onNext: () => void;
   onBack: () => void;
@@ -287,12 +288,12 @@ export const OnboardingPageView = memo(function OnboardingPageView({
                     Upgrade from Free
                   </h1>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                    You’re on Free. Upgrade to Standard or Premium for more AI speaking time. Skip
-                    to keep learning on Free.
+                    You’re on Free. Upgrade to Standard or Premium for unlimited AI tutor chat and
+                    voice. Skip to keep learning on Free.
                   </p>
                 </div>
 
-                <BillingPeriodSwitch
+                <PlanPeriodSwitch
                   value={period}
                   onChange={onPeriodChange}
                   className="max-w-md"
@@ -303,7 +304,8 @@ export const OnboardingPageView = memo(function OnboardingPageView({
                 ) : (
                   <div className="flex flex-wrap justify-center gap-4 sm:grid sm:grid-cols-2 sm:items-stretch">
                     {plans.map((plan) => {
-                      const price = planPriceVnd(plan.priceVndMonthly, period);
+                      const price = planPeriodPrice(plan, period);
+                      const discount = plan.periodPrices?.[period]?.discountPercent ?? 0;
                       const choosing = pendingPlan === plan.id;
                       return (
                         <article
@@ -323,12 +325,12 @@ export const OnboardingPageView = memo(function OnboardingPageView({
                           <p className="mt-4 text-2xl font-semibold tracking-tight">
                             {formatVnd(price)}
                             <span className="ml-1 text-sm font-normal text-muted-foreground">
-                              {period === "yearly" ? "/ year" : "/ month"}
+                              {PERIOD_SUFFIX[period]}
                             </span>
                           </p>
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            {plan.creditsPerPeriod} practice credits / period
-                          </p>
+                          {discount > 0 ? (
+                            <p className="mt-1 text-xs text-muted-foreground">Save {discount}% vs monthly</p>
+                          ) : null}
                           <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                             {plan.features.map((feature) => (
                               <li key={feature} className="flex gap-2">

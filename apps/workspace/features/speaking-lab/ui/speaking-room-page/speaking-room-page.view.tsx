@@ -60,6 +60,7 @@ export type SpeakingRoomPageViewProps = {
   draft: string;
   pending: boolean;
   error: string | null;
+  showUpgrade: boolean;
   demoMode: boolean;
   autoSpeak: boolean;
   aiSpeaking: boolean;
@@ -97,6 +98,7 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
   draft,
   pending,
   error,
+  showUpgrade,
   demoMode,
   autoSpeak,
   aiSpeaking,
@@ -318,7 +320,17 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
             <div className="flex h-29 w-full shrink-0 flex-col justify-start overflow-hidden text-center sm:h-32">
               <div className="flex h-8 shrink-0 items-center justify-center">
                 {(error || voiceError) && (
-                  <p className="line-clamp-2 text-xs text-destructive">{error || voiceError}</p>
+                  <p className="line-clamp-2 text-xs text-destructive">
+                    {error || voiceError}
+                    {showUpgrade ? (
+                      <>
+                        {" "}
+                        <Link href="/payments" className="font-semibold text-primary underline">
+                          See plans
+                        </Link>
+                      </>
+                    ) : null}
+                  </p>
                 )}
               </div>
 

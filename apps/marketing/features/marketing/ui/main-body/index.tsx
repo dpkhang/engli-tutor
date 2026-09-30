@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import { goToEntry, goToWorkspace, useAuthSession } from "@/features/auth";
+import { goToEntry, useAuthSession } from "@/features/auth";
 import { planCheckoutHref, plansFromCatalog, type PlanId } from "../../model/plans";
 import { useBillingCatalog } from "@/features/payment/hooks/use-billing-catalog";
 import { MainBodyView } from "./main-body.view";
@@ -18,14 +18,14 @@ export function MainBody() {
   const onEntryClick = useCallback(() => goToEntry(isLoggedIn), [isLoggedIn]);
   const onPlanClick = useCallback(
     (planId: PlanId) => {
-      if (planId === "starter" && isLoggedIn) {
-        goToWorkspace();
+      if (plans.find((plan) => plan.id === planId)?.cta === "Start lesson") {
+        goToEntry(isLoggedIn);
         return;
       }
 
       window.location.href = planCheckoutHref(planId);
     },
-    [isLoggedIn],
+    [isLoggedIn, plans],
   );
 
   return (

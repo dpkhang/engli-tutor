@@ -1,18 +1,18 @@
 import { workspaceApiClient } from "@/lib/workspace-api-client";
 
-export type CreditLedgerEntry = {
-  id: string;
-  delta: number;
-  balanceAfter: number;
-  reason:
-    | "SIGNUP_BONUS"
-    | "PURCHASE"
-    | "SUBSCRIPTION_GRANT"
-    | "AI_GENERATE"
-    | "AI_GENERATE_REFUND"
-    | "ADJUST";
-  reference: string | null;
-  createdAt: string;
+export type BillingPeriod = "monthly" | "quarterly" | "yearly";
+
+export type PlanLimits = {
+  tutorChatPerDay: number | null;
+  ttsPerDay: number | null;
+  enforcement: "block" | "throttle";
+  proScenarios: boolean;
+};
+
+export type PeriodPrice = {
+  totalVnd: number;
+  months: number;
+  discountPercent: number;
 };
 
 export type SubscriptionPlan = {
@@ -20,7 +20,8 @@ export type SubscriptionPlan = {
   name: string;
   description: string;
   priceVndMonthly: number;
-  creditsPerPeriod: number;
+  limits: PlanLimits;
+  periodPrices: Record<BillingPeriod, PeriodPrice>;
   features: string[];
   benefits?: string[];
   cta?: string;
@@ -29,34 +30,29 @@ export type SubscriptionPlan = {
   isFree?: boolean;
 };
 
-export type TopupPack = {
-  id: string;
-  name: string;
-  description?: string;
-  credits: number;
-  priceVnd: number;
-  unitPriceVnd?: number;
-  minCredits?: number;
-  maxCredits?: number;
-  isCustom?: boolean;
-  cta?: string;
+export type Entitlements = {
+  planId: string;
+  source: "subscription" | "trial" | "bonus" | "free";
+  limits: PlanLimits;
+  proUntil: string | null;
+  trialAvailable: boolean;
 };
 
+export type UsageMetric = "tutor_chat" | "tts";
+
 export type BillingMe = {
-  balance: number;
-  signupBonus: number;
-  ledger: CreditLedgerEntry[];
   subscription: {
     planId: string;
     status: string;
-    billingPeriod: "monthly" | "yearly" | null;
+    billingPeriod: BillingPeriod | null;
     currentPeriodEnd: string | null;
-    creditsPerPeriod: number;
     isPaid: boolean;
   };
   hasPaidPlan: boolean;
+  entitlements: Entitlements;
+  usage: Record<UsageMetric, number>;
+  trialDays: number;
   subscriptionPlans: SubscriptionPlan[];
-  topupPacks: TopupPack[];
   stripeConfigured: boolean;
 };
 
@@ -67,7 +63,7 @@ export type CheckoutResponse = {
 
 export const billingApi = {
   me: () => workspaceApiClient.get<BillingMe>("/api/billing/me", { cache: "no-store" }),
-  subscribe: (planId: SubscriptionPlan["id"], period: "monthly" | "yearly" = "monthly") =>
+  subscribe: (planId: SubscriptionPlan["id"], period: BillingPeriod = "monthly") =>
     workspaceApiClient.post<CheckoutResponse>("/api/billing/subscribe", {
       planId,
       period,
@@ -78,19 +74,12 @@ export const billingApi = {
       planId,
       returnOrigin: typeof window !== "undefined" ? window.location.origin : undefined,
     }),
-  topup: (packId: string, credits?: number) =>
-    workspaceApiClient.post<CheckoutResponse>("/api/billing/topup", {
-      packId,
-      ...(typeof credits === "number" ? { credits } : {}),
-      returnOrigin: typeof window !== "undefined" ? window.location.origin : undefined,
-    }),
+  startTrial: () =>
+    workspaceApiClient.post<{ trialEndsAt: string; entitlements: Entitlements }>("/api/billing/trial", {}),
   confirm: (input: { sessionId?: string; planId?: string }) =>
     workspaceApiClient.post<{
       subscribed?: boolean;
       upgraded?: boolean;
-      topup?: boolean;
       planId?: string | null;
-      balanceAfter?: number;
-      creditsAdded?: number;
     }>("/api/billing/confirm", input),
 };

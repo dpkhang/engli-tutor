@@ -11,7 +11,14 @@ import {
   type KeyboardEvent,
 } from "react";
 import { useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { LESSON_PACKS, markLessonStarted } from "@/features/learn";
+import {
+  UPGRADE_MESSAGE,
+  billingMeQueryKey,
+  upgradeReasonFromError,
+  type UpgradeReason,
+} from "@/features/payments";
 import { tutorApi, type TutorChatMessage, type TutorScenario } from "../../api";
 import { useVoiceInput } from "../../hooks/use-voice-input";
 import { SCENARIOS, STARTERS, TutorChatPageView } from "./tutor-chat-page.view";
@@ -48,6 +55,8 @@ export function TutorChatPage() {
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [upgradeReason, setUpgradeReason] = useState<UpgradeReason | null>(null);
+  const queryClient = useQueryClient();
   const [demoMode, setDemoMode] = useState(false);
   const [pendingAudioUrl, setPendingAudioUrl] = useState<string | null>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
@@ -78,6 +87,7 @@ export function TutorChatPage() {
     setMessages([{ role: "assistant", content: starterFor(nextScenario, nextLesson) }]);
     setDraft("");
     setError(null);
+    setUpgradeReason(null);
     setDemoMode(false);
     setPendingAudioUrl(null);
     if (nextLesson) markLessonStarted(nextLesson);
@@ -119,6 +129,7 @@ export function TutorChatPage() {
       setMessages([{ role: "assistant", content: starterFor(next, null) }]);
       setDraft("");
       setError(null);
+      setUpgradeReason(null);
       setDemoMode(false);
       setPendingAudioUrl(null);
       voice.clearAudio();
@@ -139,14 +150,20 @@ export function TutorChatPage() {
     voice.clearAudio({ revoke: false });
     setPending(true);
     setError(null);
+    setUpgradeReason(null);
 
     try {
       const payload = nextMessages.map(({ role, content }) => ({ role, content }));
       const result = await tutorApi.chat({ messages: payload, scenario });
       setDemoMode(result.demo);
       setMessages((prev) => [...prev, { role: "assistant", content: result.reply }]);
+      void queryClient.invalidateQueries({ queryKey: billingMeQueryKey });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't send message");
+      const reason = upgradeReasonFromError(err);
+      setUpgradeReason(reason);
+      setError(
+        reason ? UPGRADE_MESSAGE[reason] : err instanceof Error ? err.message : "Couldn't send message",
+      );
       setMessages((prev) => prev.slice(0, -1));
       setDraft(text);
       if (audioUrl) setPendingAudioUrl(audioUrl);
@@ -154,7 +171,7 @@ export function TutorChatPage() {
       setPending(false);
       inputRef.current?.focus();
     }
-  }, [draft, messages, pending, pendingAudioUrl, scenario, voice]);
+  }, [draft, messages, pending, pendingAudioUrl, queryClient, scenario, voice]);
 
   const onResetCurrent = useCallback(() => resetChat(scenario), [resetChat, scenario]);
   const onDraftChange = useCallback((value: string) => setDraft(value), []);
@@ -194,6 +211,7 @@ export function TutorChatPage() {
       draft={draft}
       pending={pending}
       error={error}
+      showUpgrade={upgradeReason !== null}
       demoMode={demoMode}
       pendingAudioUrl={pendingAudioUrl}
       voiceRecording={voice.recording}

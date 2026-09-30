@@ -1,7 +1,7 @@
 import { marketingApiClient } from "@/lib/marketing-api-client";
 
 export type PaidPlanId = string;
-export type BillingPeriod = "monthly" | "yearly";
+export type BillingPeriod = "monthly" | "quarterly" | "yearly";
 export type PlanId = string;
 
 export type CheckoutResponse = {
@@ -9,24 +9,46 @@ export type CheckoutResponse = {
   sessionId: string;
 };
 
+export type PlanLimits = {
+  tutorChatPerDay: number | null;
+  ttsPerDay: number | null;
+  enforcement: "block" | "throttle";
+  proScenarios: boolean;
+};
+
+export type PeriodPrice = {
+  totalVnd: number;
+  months: number;
+  discountPercent: number;
+};
+
+export type Entitlements = {
+  planId: string;
+  source: "subscription" | "trial" | "bonus" | "free";
+  limits: PlanLimits;
+  proUntil: string | null;
+  trialAvailable: boolean;
+};
+
 export type BillingMe = {
-  balance: number;
-  signupBonus: number;
   subscription: {
     planId: string;
     status: string;
     billingPeriod: BillingPeriod | null;
     currentPeriodEnd: string | null;
-    creditsPerPeriod: number;
     isPaid: boolean;
   };
   hasPaidPlan: boolean;
+  entitlements: Entitlements;
+  usage: Record<"tutor_chat" | "tts", number>;
+  trialDays: number;
   subscriptionPlans: Array<{
     id: PaidPlanId;
     name: string;
     description: string;
     priceVndMonthly: number;
-    creditsPerPeriod: number;
+    limits?: PlanLimits;
+    periodPrices?: Record<BillingPeriod, PeriodPrice>;
     features: string[];
     benefits?: string[];
     cta?: string;
@@ -39,7 +61,7 @@ export type BillingMe = {
 
 export type BillingCatalog = {
   subscriptionPlans: BillingMe["subscriptionPlans"];
-  topupPacks: unknown[];
+  trialDays?: number;
   stripeConfigured: boolean;
 };
 
@@ -67,7 +89,6 @@ export const billingApi = {
     marketingApiClient.post<{
       subscribed?: boolean;
       upgraded?: boolean;
-      planId?: string;
-      balanceAfter?: number;
+      planId?: string | null;
     }>("/api/billing/confirm", input),
 };

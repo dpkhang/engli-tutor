@@ -100,7 +100,6 @@ export function NotificationSettings() {
       notifyReminders={current?.notifyReminders ?? false}
       notifyTutor={current?.notifyTutor ?? false}
       notifyLessons={current?.notifyLessons ?? false}
-      notifyCredits={current?.notifyCredits ?? false}
       notifyBilling={current?.notifyBilling ?? false}
       reminderMinutes={reminderMinutes}
       scheduleEnabled={scheduleEnabled}
@@ -109,7 +108,6 @@ export function NotificationSettings() {
       onToggleReminders={() => save({ notifyReminders: !current?.notifyReminders })}
       onToggleTutor={() => save({ notifyTutor: !current?.notifyTutor })}
       onToggleLessons={() => save({ notifyLessons: !current?.notifyLessons })}
-      onToggleCredits={() => save({ notifyCredits: !current?.notifyCredits })}
       onToggleBilling={() => save({ notifyBilling: !current?.notifyBilling })}
       onReminderTime={onReminderTime}
     />

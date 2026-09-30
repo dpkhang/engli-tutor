@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useSession } from "@/lib/auth-client";
 import { useBillingMe } from "@/features/payments/hooks/use-billing";
+import { planBadgeLabel } from "@/features/payments/model/plans";
 import { useLessonPacks } from "../../hooks/use-learning-catalog";
 import { useLessonProgress } from "../../hooks/use-lesson-progress";
 import type { LessonPack } from "../../model/curriculum";
@@ -160,14 +161,14 @@ export function LearnHome() {
 
   const snapshot = useMemo((): HomeSnapshot => {
     return {
-      credits: billing.data?.balance,
-      creditsLoading: billing.isLoading,
+      plan: planBadgeLabel(billing.data),
+      planLoading: billing.isLoading,
       started: progress.started.length,
       completed: progress.completed.length,
       saved: progress.favorites.length + progress.exerciseFavorites.length,
     };
   }, [
-    billing.data?.balance,
+    billing.data,
     billing.isLoading,
     progress.completed.length,
     progress.exerciseFavorites.length,

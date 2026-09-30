@@ -10,6 +10,7 @@ import PhoneInput, {
 } from "react-phone-number-input";
 import flags from "react-phone-number-input/flags";
 import { cn } from "@engli-tutor/ui";
+import { X } from "lucide-react";
 import { PhoneCountrySelect } from "../phone-country-select";
 
 const PRIORITY_COUNTRIES: Array<Country | "|" | "..."> = [
@@ -92,6 +93,7 @@ export const AccountPhoneInput = memo(function AccountPhoneInput({
 
   return (
     <div className={cn("space-y-1.5", className)}>
+      <div className="relative [&_.PhoneInputInput]:pr-10">
       <PhoneInput
         id={id}
         className={cn("account-phone-input", showError && "is-invalid")}
@@ -109,6 +111,15 @@ export const AccountPhoneInput = memo(function AccountPhoneInput({
         onChange={handleChange}
         onCountryChange={handleCountryChange}
       />
+      {value && !disabled ? (
+        <button type="button" aria-label="Clear phone number"
+          className="absolute right-2 top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-primary"
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => { handleChange(undefined); document.getElementById(id)?.focus(); }}>
+          <X className="size-3.5" aria-hidden="true" />
+        </button>
+      ) : null}
+      </div>
       {showError ? (
         <p className="text-xs text-destructive">Enter a valid phone number</p>
       ) : null}

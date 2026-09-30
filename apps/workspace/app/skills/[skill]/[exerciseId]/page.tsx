@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { SkillExercisePage, isSkillId } from "@/features/learn";
 
+export const dynamicParams = true;
+
 export default async function SkillExerciseRoutePage({
   params,
   searchParams,

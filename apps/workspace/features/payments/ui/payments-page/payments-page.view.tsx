@@ -6,13 +6,11 @@ import { AnimatePresence, motion, useDragControls } from "motion/react";
 import {
   ArrowUpCircle,
   Check,
-  Coins,
   CreditCard,
   Crown,
+  Gauge,
   LoaderCircle,
-  ReceiptText,
   Sparkles,
-  Zap,
   X,
 } from "lucide-react";
 import {
@@ -25,22 +23,21 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  Input,
   cn,
   useLockScroll,
-  BillingPeriodSwitch,
 } from "@engli-tutor/ui";
-import type { CreditLedgerEntry, SubscriptionPlan, TopupPack } from "../../api/billing";
+import type { BillingPeriod, SubscriptionPlan } from "../../api/billing";
 import {
-  allPlansForCompare,
   formatBillingDateTime,
   formatVnd,
-  LEDGER_REASON_LABEL,
+  planPeriodPrice,
   PERIOD_LABEL,
+  PERIOD_SUFFIX,
   STATUS_LABEL,
+  type ComparePlan,
+  type usageRows,
 } from "../../model/plans";
-
-type ComparePlan = ReturnType<typeof allPlansForCompare>[number];
+import { PlanPeriodSwitch } from "../plan-period-switch";
 
 export type PaymentsPageViewProps = {
   checkoutState: string | null;
@@ -48,26 +45,23 @@ export type PaymentsPageViewProps = {
   billingLoading: boolean;
   hasPaidPlan: boolean;
   stripeReady: boolean;
-  balance: number;
   activePlan: { name: string; description: string; features: string[] };
+  accessNote: string | null;
+  usage: ReturnType<typeof usageRows>;
+  trialDays: number;
+  canStartTrial: boolean;
   subscriptionStatus: string | undefined;
-  billingPeriod: string | null | undefined;
+  billingPeriod: BillingPeriod | null | undefined;
   currentPeriodEnd: string | null | undefined;
-  creditsPerPeriod: number | undefined;
-  signupBonus: number | undefined;
   higherPlans: ComparePlan[];
-  topupPacks: TopupPack[];
-  ledger: CreditLedgerEntry[];
-  period: "monthly" | "yearly";
+  period: BillingPeriod;
   error: string | null;
   pending: string | null;
   showUpgradeOptions: boolean;
-  customCredits: number;
-  onPeriodChange: (period: "monthly" | "yearly") => void;
-  onCustomCreditsChange: (value: number) => void;
+  onPeriodChange: (period: BillingPeriod) => void;
   onSubscribe: (planId: SubscriptionPlan["id"]) => void;
   onUpgrade: (planId: SubscriptionPlan["id"]) => void;
-  onTopup: (pack: TopupPack) => void;
+  onStartTrial: () => void;
   onOpenUpgrade: () => void;
   onCloseUpgrade: () => void;
 };
@@ -78,26 +72,23 @@ export const PaymentsPageView = memo(function PaymentsPageView({
   billingLoading,
   hasPaidPlan,
   stripeReady,
-  balance,
   activePlan,
+  accessNote,
+  usage,
+  trialDays,
+  canStartTrial,
   subscriptionStatus,
   billingPeriod,
   currentPeriodEnd,
-  creditsPerPeriod,
-  signupBonus,
   higherPlans,
-  topupPacks,
-  ledger,
   period,
   error,
   pending,
   showUpgradeOptions,
-  customCredits,
   onPeriodChange,
-  onCustomCreditsChange,
   onSubscribe,
   onUpgrade,
-  onTopup,
+  onStartTrial,
   onOpenUpgrade,
   onCloseUpgrade,
 }: PaymentsPageViewProps) {
@@ -140,9 +131,9 @@ export const PaymentsPageView = memo(function PaymentsPageView({
       {checkoutState === "success" ? (
         <Alert>
           <AlertDescription>
-            {checkoutType === "subscription"
-              ? "Your learning plan is active. Practice credits will be available shortly."
-              : "Payment successful. Your practice credits will be available shortly."}
+            {checkoutType === "upgrade"
+              ? "Your plan is upgraded. New benefits apply right away."
+              : "Your learning plan is active. Enjoy your new benefits."}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -172,6 +163,7 @@ export const PaymentsPageView = memo(function PaymentsPageView({
                 {STATUS_LABEL[subscriptionStatus] ?? subscriptionStatus}
               </Badge>
             ) : null}
+            {accessNote ? <Badge variant="outline">{accessNote}</Badge> : null}
           </div>
           <CardTitle className="font-display text-2xl tracking-[-0.03em] sm:text-4xl">
             {billingLoading ? "…" : activePlan.name}
@@ -184,27 +176,32 @@ export const PaymentsPageView = memo(function PaymentsPageView({
           ) : (
             <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1fr_1.2fr]">
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
-                  <div className="flex min-w-0 items-center gap-2 rounded-2xl border border-primary/15 bg-primary/5 px-3 py-3 text-sm sm:gap-3 sm:px-4">
-                    <span className="grid size-9 place-items-center rounded-xl bg-primary/10">
-                      <Coins className="size-4 text-primary" />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-xs text-muted-foreground">Practice credits</p>
-                      <p className="font-semibold">{balance}</p>
-                    </div>
+                <div className="space-y-2">
+                  <p className="flex items-center gap-2 text-sm font-semibold">
+                    <Gauge className="size-4 text-primary" /> Today&apos;s usage
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    {usage.map((row) => (
+                      <div
+                        key={row.metric}
+                        className="min-w-0 rounded-2xl border border-primary/15 bg-primary/5 px-3 py-3 text-sm sm:px-4"
+                      >
+                        <p className="text-xs text-muted-foreground">{row.label}</p>
+                        <p className="font-semibold">
+                          {row.limit === null ? "Unlimited" : `${row.used} / ${row.limit}`}
+                        </p>
+                        {row.limit !== null ? (
+                          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-primary/10">
+                            <div
+                              className="h-full rounded-full bg-primary"
+                              style={{ width: `${Math.min(100, (row.used / Math.max(1, row.limit)) * 100)}%` }}
+                            />
+                          </div>
+                        ) : null}
+                      </div>
+                    ))}
                   </div>
-                  {hasPaidPlan && creditsPerPeriod ? (
-                    <div className="min-w-0 rounded-2xl border border-border/70 bg-muted/30 px-3 py-3 text-sm sm:px-4">
-                      <p className="text-xs text-muted-foreground">Practice credits per period</p>
-                      <p className="font-semibold">{creditsPerPeriod}</p>
-                    </div>
-                  ) : (
-                    <div className="min-w-0 rounded-2xl border border-border/70 bg-muted/30 px-3 py-3 text-sm sm:px-4">
-                      <p className="text-xs text-muted-foreground">Welcome practice credits</p>
-                      <p className="font-semibold">{signupBonus ?? 50} practice credits</p>
-                    </div>
-                  )}
+                  <p className="text-xs text-muted-foreground">Daily allowances reset at midnight (Vietnam time).</p>
                 </div>
 
                 <dl className="grid gap-3 text-sm sm:grid-cols-2">
@@ -231,6 +228,23 @@ export const PaymentsPageView = memo(function PaymentsPageView({
                       onClick={onOpenUpgrade}
                     >
                       <ArrowUpCircle /> {hasPaidPlan ? "Upgrade plan" : "Explore plans"}
+                    </Button>
+                  ) : null}
+                  {canStartTrial ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-11 w-full rounded-full px-5 sm:w-auto"
+                      disabled={Boolean(pending)}
+                      onClick={onStartTrial}
+                    >
+                      {pending === "trial" ? (
+                        <LoaderCircle className="animate-spin" />
+                      ) : (
+                        <>
+                          <Sparkles /> Try Premium free for {trialDays} days
+                        </>
+                      )}
                     </Button>
                   ) : null}
                 </div>
@@ -339,7 +353,7 @@ export const PaymentsPageView = memo(function PaymentsPageView({
                     </div>
                     <div className="min-h-0 space-y-4 overflow-y-auto overscroll-contain px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] max-md:flex-1 sm:space-y-5 sm:px-8 sm:pt-5 sm:pb-6">
                       {!hasPaidPlan ? (
-                        <BillingPeriodSwitch value={period} onChange={onPeriodChange} />
+                        <PlanPeriodSwitch value={period} onChange={onPeriodChange} />
                       ) : null}
                       <div
                         className={cn(
@@ -350,10 +364,9 @@ export const PaymentsPageView = memo(function PaymentsPageView({
                         )}
                       >
                         {higherPlans.map((plan) => {
-                          const price =
-                            period === "yearly" && !plan.isFree
-                              ? plan.priceVndMonthly * 10
-                              : plan.priceVndMonthly;
+                          const shownPeriod = hasPaidPlan ? (billingPeriod ?? "monthly") : period;
+                          const price = planPeriodPrice(plan, shownPeriod);
+                          const discount = plan.periodPrices?.[shownPeriod]?.discountPercent ?? 0;
 
                           return (
                             <article
@@ -375,12 +388,14 @@ export const PaymentsPageView = memo(function PaymentsPageView({
                               <p className="mt-4 wrap-break-word font-display text-xl tracking-tight sm:text-2xl">
                                 {formatVnd(price)}
                                 <span className="ml-1 text-sm font-sans font-normal text-muted-foreground">
-                                  {period === "yearly" ? "/ year" : "/ month"}
+                                  {PERIOD_SUFFIX[shownPeriod]}
                                 </span>
                               </p>
-                              <p className="mt-1 text-xs text-muted-foreground">
-                                {plan.creditsPerPeriod} practice credits per period
-                              </p>
+                              {discount > 0 ? (
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                  Save {discount}% vs monthly ({formatVnd(plan.priceVndMonthly)} / month)
+                                </p>
+                              ) : null}
                               <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                                 {plan.features.map((feature) => (
                                   <li key={feature} className="flex gap-2">
@@ -420,119 +435,6 @@ export const PaymentsPageView = memo(function PaymentsPageView({
             document.body,
           )
         : null}
-
-      {hasPaidPlan ? (
-        <div>
-          <Card className="rounded-[1.75rem] border-border/70 shadow-none">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <span className="grid size-10 place-items-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300">
-                  <Zap className="size-5" />
-                </span>{" "}
-                Top up your practice time
-              </CardTitle>
-              <CardDescription>
-                Add extra conversation and exercise time without changing your current plan.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {topupPacks.map((pack) => {
-                const min = pack.minCredits ?? 50;
-                const max = pack.maxCredits ?? 5_000;
-                const unit = pack.unitPriceVnd ?? 0;
-                const price = pack.isCustom ? customCredits * unit : pack.priceVnd;
-                const invalidCustom = pack.isCustom && (customCredits < min || customCredits > max);
-
-                return (
-                  <div
-                    key={pack.id}
-                    className="group flex h-full flex-col rounded-2xl border border-border/70 bg-linear-to-br from-amber-500/8 to-card p-5 transition-all hover:-translate-y-0.5 hover:shadow-md"
-                  >
-                    <p className="text-sm font-semibold">{pack.name}</p>
-                    {pack.description ? (
-                      <p className="mt-1 text-xs text-muted-foreground">{pack.description}</p>
-                    ) : null}
-                    {pack.isCustom ? (
-                      <div className="mt-3 space-y-2">
-                        <Input
-                          type="number"
-                          min={min}
-                          max={max}
-                          step={10}
-                          value={customCredits}
-                          onChange={(event) => onCustomCreditsChange(Number(event.target.value) || min)}
-                          aria-label="Custom credit amount"
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          {min.toLocaleString("en-US")}–{max.toLocaleString("en-US")} credits
-                        </p>
-                      </div>
-                    ) : (
-                      <>
-                        <p className="mt-2 text-xl font-bold">{pack.credits}</p>
-                        <p className="text-xs text-muted-foreground">practice credits</p>
-                      </>
-                    )}
-                    <p className="mt-2 text-sm">{formatVnd(price)}</p>
-                    <Button
-                      className="mt-auto w-full rounded-full"
-                      variant="outline"
-                      disabled={!stripeReady || Boolean(pending) || invalidCustom || price <= 0}
-                      onClick={() => onTopup(pack)}
-                    >
-                      {pending === `top-${pack.id}` ? (
-                        <LoaderCircle className="animate-spin" />
-                      ) : (
-                        pack.cta || (pack.isCustom ? "Buy custom amount" : "Buy more")
-                      )}
-                    </Button>
-                  </div>
-                );
-              })}
-            </CardContent>
-          </Card>
-        </div>
-      ) : null}
-
-      <Card className="rounded-[1.75rem] border-border/70 shadow-none">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
-              <ReceiptText className="size-5" />
-            </span>{" "}
-            Payment activity
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {billingLoading ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
-          ) : !ledger.length ? (
-            <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-              No transactions yet.
-            </div>
-          ) : (
-            <ul className="divide-y overflow-hidden rounded-2xl border border-border/70">
-              {ledger.map((entry) => (
-                <li
-                  key={entry.id}
-                  className="flex items-center justify-between gap-3 px-4 py-3.5 text-sm transition-colors hover:bg-muted/40"
-                >
-                  <div>
-                    <p className="font-medium">{LEDGER_REASON_LABEL[entry.reason] ?? entry.reason}</p>
-                    <p className="text-xs text-muted-foreground">{formatBillingDateTime(entry.createdAt)}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className={entry.delta >= 0 ? "font-semibold text-primary" : "font-semibold"}>
-                      {entry.delta >= 0 ? `+${entry.delta}` : entry.delta}
-                    </p>
-                    <p className="text-xs text-muted-foreground">= {entry.balanceAfter}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 });

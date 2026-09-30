@@ -253,20 +253,7 @@ export function SiteHeader() {
                     onHero && "text-white/80 hover:bg-white/10 hover:text-white",
                   )}
                 />
-                {!isAuth && !isPayment ? (
-                  <Link
-                    href={authHref}
-                    className={cn(
-                      "hidden h-9 items-center rounded-md px-3 text-sm transition-colors sm:inline-flex",
-                      onHero
-                        ? "text-white/90 hover:bg-white/10"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                    )}
-                  >
-                    Sign in
-                  </Link>
-                ) : null}
-                <Link href={isAuth || isPayment ? "/" : "/payment"}>
+                <Link href={isAuth || isPayment ? "/" : authHref}>
                   <Button
                     size="sm"
                     className={
@@ -276,7 +263,7 @@ export function SiteHeader() {
                     }
                     type="button"
                   >
-                    {isAuth || isPayment ? "Back to home" : "Start speaking"}
+                    {isAuth || isPayment ? "Back to home" : "Start lesson"}
                   </Button>
                 </Link>
               </>

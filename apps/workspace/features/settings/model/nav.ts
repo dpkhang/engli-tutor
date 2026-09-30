@@ -1,6 +1,7 @@
 import {
   Bell,
   CreditCard,
+  Gift,
   KeyRound,
   Monitor,
   Target,
@@ -41,7 +42,7 @@ export const SETTINGS_NAV: SettingsSection[] = [
   {
     href: "/settings/notifications",
     label: "Notifications",
-    description: "Reminders, lessons, credits, and billing",
+    description: "Reminders, lessons, and billing",
     icon: Bell,
     match: "prefix",
   },
@@ -53,9 +54,16 @@ export const SETTINGS_NAV: SettingsSection[] = [
     match: "prefix",
   },
   {
+    href: "/settings/referrals",
+    label: "Referrals",
+    description: "Invite friends and redeem codes",
+    icon: Gift,
+    match: "prefix",
+  },
+  {
     href: "/settings/billing",
     label: "Billing",
-    description: "Plan, credits, and payments",
+    description: "Plan, usage, and payments",
     icon: CreditCard,
     match: "prefix",
   },

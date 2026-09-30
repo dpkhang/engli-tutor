@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const credentialsSchema = {
+  referralCode: z.string().trim().toUpperCase().max(24, "Referral code must be at most 24 characters").regex(/^[A-Z0-9]*$/, "Use letters and numbers only").optional(),
   email: z.string().trim().min(1, "Please enter your email").email("Invalid email"),
   password: z
     .string()

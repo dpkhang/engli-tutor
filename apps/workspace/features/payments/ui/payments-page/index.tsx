@@ -5,16 +5,18 @@ import { useSearchParams } from "next/navigation";
 import {
   useBillingMe,
   useConfirmCheckout,
+  useStartTrial,
   useSubscribe,
-  useTopupCheckout,
   useUpgradePlan,
 } from "../../hooks/use-billing";
-import type { CreditLedgerEntry, SubscriptionPlan, TopupPack } from "../../api/billing";
-import { allPlansForCompare, currentPlanDetails, currentPlanId } from "../../model/plans";
+import type { BillingPeriod, SubscriptionPlan } from "../../api/billing";
+import {
+  accessNote,
+  allPlansForCompare,
+  currentPlanDetails,
+  usageRows,
+} from "../../model/plans";
 import { PaymentsPageView } from "./payments-page.view";
-
-const EMPTY_TOPUPS: TopupPack[] = [];
-const EMPTY_LEDGER: CreditLedgerEntry[] = [];
 
 export function PaymentsPage() {
   const searchParams = useSearchParams();
@@ -24,13 +26,12 @@ export function PaymentsPage() {
   const billing = useBillingMe();
   const subscribe = useSubscribe();
   const upgrade = useUpgradePlan();
-  const topup = useTopupCheckout();
+  const startTrial = useStartTrial();
   const confirmCheckout = useConfirmCheckout();
-  const [period, setPeriod] = useState<"monthly" | "yearly">("monthly");
+  const [period, setPeriod] = useState<BillingPeriod>("monthly");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
   const [showUpgradeOptions, setShowUpgradeOptions] = useState(false);
-  const [customCredits, setCustomCredits] = useState(200);
 
   useEffect(() => {
     if (checkoutState !== "success") return;
@@ -44,7 +45,7 @@ export function PaymentsPage() {
       } catch (err) {
         if (cancelled) return;
         const latest = await billing.refetch();
-        if (latest.data?.hasPaidPlan && checkoutType !== "topup") return;
+        if (latest.data?.hasPaidPlan) return;
         setError(
           err instanceof Error ? err.message : "Couldn't sync payment. Try refreshing the page.",
         );
@@ -62,18 +63,19 @@ export function PaymentsPage() {
   const data = billing.data;
   const hasPaidPlan = data?.hasPaidPlan ?? false;
   const stripeReady = data?.stripeConfigured ?? false;
-  const balance = data?.balance ?? 0;
-  const activePlanId = currentPlanId(data);
   const activePlan = currentPlanDetails(data);
   const comparePlans = useMemo(
     () => allPlansForCompare(data?.subscriptionPlans ?? []),
     [data?.subscriptionPlans],
   );
-  const activePlanIndex = comparePlans.findIndex((plan) => plan.id === activePlanId);
-  const higherPlans = useMemo(
-    () => (activePlanIndex < 0 ? [] : comparePlans.slice(activePlanIndex + 1)),
-    [activePlanIndex, comparePlans],
-  );
+  const higherPlans = useMemo(() => {
+    const paid = comparePlans.filter((plan) => !plan.isFree);
+    if (!hasPaidPlan) return paid;
+    const index = comparePlans.findIndex((plan) => plan.id === data?.subscription.planId);
+    return index < 0 ? paid : comparePlans.slice(index + 1);
+  }, [comparePlans, data?.subscription.planId, hasPaidPlan]);
+  const usage = useMemo(() => usageRows(data), [data]);
+  const canStartTrial = Boolean(data?.entitlements?.trialAvailable && !hasPaidPlan);
 
   const redirectCheckout = useCallback(async (url: string | null) => {
     if (!url) {
@@ -115,22 +117,17 @@ export function PaymentsPage() {
     [redirectCheckout, upgrade],
   );
 
-  const onTopup = useCallback(
-    async (pack: TopupPack) => {
-      setError(null);
-      setPending(`top-${pack.id}`);
-      try {
-        const credits = pack.isCustom ? customCredits : undefined;
-        const result = await topup.mutateAsync({ packId: pack.id, credits });
-        await redirectCheckout(result.url);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Couldn't create payment session");
-      } finally {
-        setPending(null);
-      }
-    },
-    [customCredits, redirectCheckout, topup],
-  );
+  const onStartTrial = useCallback(async () => {
+    setError(null);
+    setPending("trial");
+    try {
+      await startTrial.mutateAsync();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't start the trial");
+    } finally {
+      setPending(null);
+    }
+  }, [startTrial]);
 
   const onOpenUpgrade = useCallback(() => setShowUpgradeOptions(true), []);
   const onCloseUpgrade = useCallback(() => setShowUpgradeOptions(false), []);
@@ -142,26 +139,23 @@ export function PaymentsPage() {
       billingLoading={billing.isLoading}
       hasPaidPlan={hasPaidPlan}
       stripeReady={stripeReady}
-      balance={balance}
       activePlan={activePlan}
+      accessNote={accessNote(data)}
+      usage={usage}
+      trialDays={data?.trialDays ?? 7}
+      canStartTrial={canStartTrial}
       subscriptionStatus={data?.subscription.status}
       billingPeriod={data?.subscription.billingPeriod}
       currentPeriodEnd={data?.subscription.currentPeriodEnd}
-      creditsPerPeriod={data?.subscription.creditsPerPeriod}
-      signupBonus={data?.signupBonus}
       higherPlans={higherPlans}
-      topupPacks={data?.topupPacks ?? EMPTY_TOPUPS}
-      ledger={data?.ledger ?? EMPTY_LEDGER}
       period={period}
       error={error}
       pending={pending}
       showUpgradeOptions={showUpgradeOptions}
-      customCredits={customCredits}
       onPeriodChange={setPeriod}
-      onCustomCreditsChange={setCustomCredits}
       onSubscribe={onSubscribe}
       onUpgrade={onUpgrade}
-      onTopup={onTopup}
+      onStartTrial={onStartTrial}
       onOpenUpgrade={onOpenUpgrade}
       onCloseUpgrade={onCloseUpgrade}
     />

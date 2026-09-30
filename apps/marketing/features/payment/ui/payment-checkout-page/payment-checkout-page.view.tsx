@@ -6,8 +6,8 @@ import {
   ArrowUpCircle,
   Check,
   CheckCircle2,
-  Coins,
   CreditCard,
+  MessageCircle,
   LoaderCircle,
   X,
 } from "lucide-react";
@@ -27,7 +27,18 @@ import {
 } from "@engli-tutor/ui";
 import { AnimatePresence, motion } from "motion/react";
 import { PageBackLink } from "@/features/layout";
-import { type BillingPeriod, type Plan, type PlanId } from "@/features/marketing";
+import {
+  billingPeriodLabel,
+  type BillingPeriod,
+  type Plan,
+  type PlanId,
+} from "@/features/marketing";
+
+const PERIOD_NOTE: Record<BillingPeriod, string> = {
+  monthly: "Billed every month. Pay for 3 months to save 15%, or a year to save 40%.",
+  quarterly: "Billed every 3 months · save 15%",
+  yearly: "Billed once a year · save 40%",
+};
 
 export type PaymentCheckoutPageViewProps = {
   plan: Plan;
@@ -44,9 +55,9 @@ export type PaymentCheckoutPageViewProps = {
     status: string;
     billingPeriod: BillingPeriod | null;
     currentPeriodEnd: string | null;
-    creditsPerPeriod: number;
   } | null;
-  creditBalance: number | null;
+  dailyChatLimit: number | null | undefined;
+  chatsUsedToday: number | null;
   onPeriodChange: (period: BillingPeriod) => void;
   onSubscribe: () => void;
   onUpgrade: (planId: PlanId) => void;
@@ -64,7 +75,8 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
   ownedPlan,
   upgradePlans,
   ownedSubscription,
-  creditBalance,
+  dailyChatLimit,
+  chatsUsedToday,
   onPeriodChange,
   onSubscribe,
   onUpgrade,
@@ -84,7 +96,7 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
   }
 
   if (ownedPlan && ownedSubscription) {
-    const periodLabel = ownedSubscription.billingPeriod === "yearly" ? "Yearly" : "Monthly";
+    const periodLabel = billingPeriodLabel(ownedSubscription.billingPeriod);
     const renewalDate = ownedSubscription.currentPeriodEnd
       ? new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(
           new Date(ownedSubscription.currentPeriodEnd),
@@ -162,16 +174,15 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
               <dd className="mt-1.5 font-semibold text-foreground">{periodLabel}</dd>
             </div>
             <div className="border-b px-3 py-5 sm:border-r sm:border-b-0 sm:px-5">
-              <dt className="text-xs text-muted-foreground">Credit balance</dt>
+              <dt className="text-xs text-muted-foreground">AI tutor chats / day</dt>
               <dd className="mt-1.5 flex items-center gap-1.5 font-semibold text-foreground">
-                <Coins className="size-4 text-primary" /> {creditBalance ?? 0}
+                <MessageCircle className="size-4 text-primary" />
+                {dailyChatLimit === null ? "Unlimited" : (dailyChatLimit ?? "—")}
               </dd>
             </div>
             <div className="border-r px-3 py-5 sm:px-5">
-              <dt className="text-xs text-muted-foreground">Credits per period</dt>
-              <dd className="mt-1.5 font-semibold text-foreground">
-                {ownedSubscription.creditsPerPeriod}
-              </dd>
+              <dt className="text-xs text-muted-foreground">Chats used today</dt>
+              <dd className="mt-1.5 font-semibold text-foreground">{chatsUsedToday ?? 0}</dd>
             </div>
             <div className="px-3 py-5 sm:px-5">
               <dt className="text-xs text-muted-foreground">Next renewal</dt>
@@ -324,11 +335,7 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
           <div className="space-y-3">
             <p className="text-sm font-medium text-foreground">Billing period</p>
             <BillingPeriodSwitch value={period} onChange={onPeriodChange} />
-            <p className="text-xs text-muted-foreground">
-              {period === "yearly"
-                ? "Billed once a year · save 2 months"
-                : "Billed every month. Switch to yearly to save 2 months."}
-            </p>
+            <p className="text-xs text-muted-foreground">{PERIOD_NOTE[period]}</p>
           </div>
 
           {error ? (
@@ -343,7 +350,7 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
               <div className="space-y-1">
                 <p className="text-sm font-medium text-foreground">Pay by card</p>
                 <p className="text-sm text-muted-foreground">
-                  You&apos;ll be redirected to Stripe Checkout. Plan credits are added automatically
+                  You&apos;ll be redirected to Stripe Checkout. Your plan unlocks automatically
                   after a successful payment.
                 </p>
               </div>
@@ -376,7 +383,7 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
               <a href={workspaceUrl} className="underline">
                 workspace
               </a>{" "}
-              to use your credits.
+              to start practicing.
             </p>
           </div>
         </motion.div>
@@ -418,8 +425,8 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
           </div>
 
           <p className="text-xs leading-relaxed text-muted-foreground">
-            Paid plans include a fixed credit allowance each period. You can buy more credits in the
-            workspace whenever you need them.
+            Daily limits reset at midnight (Vietnam time). Cancel anytime — you keep access until
+            the end of the paid period.
           </p>
 
           <Link href="/payment">

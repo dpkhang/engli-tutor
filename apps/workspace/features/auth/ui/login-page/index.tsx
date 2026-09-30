@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { authClient, authErrorMessage, getMarketingUrl, useSession } from "@/lib/auth-client";
 import { loginFormSchema, type LoginFormValues } from "../../model/login-schema";
 import { LoginPageView, type AuthMode } from "./login-page.view";
+import { persistPendingReferral } from "@/features/referrals/use-pending-referral";
 
 function resolveReturnTo(raw: string | null, marketingUrl: string): string {
   if (!raw) return "/";
@@ -38,7 +39,13 @@ export function LoginPage() {
 
   useEffect(() => {
     setHydrated(true);
-  }, []);
+    const code = searchParams.get("ref")?.trim().toUpperCase();
+    if (code) {
+      setMode("register");
+      form.setValue("mode", "register");
+      form.setValue("referralCode", code);
+    }
+  }, [form, searchParams]);
 
   useEffect(() => {
     if (sessionPending || !data?.user) return;
@@ -53,6 +60,7 @@ export function LoginPage() {
       name: "",
       email: form.getValues("email"),
       password: "",
+      referralCode: nextMode === "register" ? form.getValues("referralCode") : "",
     });
   }, [form]);
 
@@ -64,6 +72,8 @@ export function LoginPage() {
 
         try {
           if (values.mode === "register") {
+            // Persist even an empty value so removing a prefilled invite is respected.
+            persistPendingReferral(values.referralCode ?? "");
             const result = await authClient.signUp.email({
               email: values.email,
               password: values.password,

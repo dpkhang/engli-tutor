@@ -2,13 +2,8 @@ export type LearningSkill = "reading" | "listening" | "speaking" | "writing";
 export type LearningLevel = "A2" | "B1" | "TOEIC" | "IELTS";
 export type LearningGameId =
   | "speed-reply"
-  | "fix-sentence"
   | "listen-order"
-  | "rewrite-race"
-  | "word-match"
   | "keyword-hunt"
-  | "picture-word"
-  | "word-unscramble"
   | "flashcard";
 
 export type LearningQuestion =
@@ -84,6 +79,7 @@ export type LearningGameRound = {
   level: LearningLevel;
   seconds: number;
   lessonIds?: string[];
+  deck?: string;
   hearAgainMax?: number;
   maxWords?: number;
   material?: { title: string; body: string; speakable?: boolean; imageUrl?: string; imageEmoji?: string };
@@ -98,7 +94,15 @@ export type LearningGame = {
   durationMinutes: number;
   howToPlay: string;
   relatedSkill: LearningSkill;
+  decks?: LearningGameDeck[];
   rounds: LearningGameRound[];
+};
+
+export type LearningGameDeck = {
+  id: string;
+  level: LearningLevel;
+  title: string;
+  cardCount: number;
 };
 
 export type LearningGameSummary = Omit<LearningGame, "rounds"> & { roundCount: number };

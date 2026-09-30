@@ -269,7 +269,8 @@ export const AuthPageView = memo(function AuthPageView({
                   disabled={pending}
                   aria-invalid={Boolean(errors.password)}
                   aria-describedby="password-error"
-                  className={`${inputClass} pr-11`}
+                  className={`${inputClass} pr-20`}
+                  clearButtonClassName="right-11"
                   {...register("password")}
                 />
                 <button

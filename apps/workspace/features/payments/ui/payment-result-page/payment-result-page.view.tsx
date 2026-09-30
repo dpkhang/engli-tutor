@@ -12,7 +12,6 @@ export type PaymentResultPageViewProps = {
   message: string;
   checkoutType: string | null;
   packageName: string;
-  balanceAfter: number | null;
   countdown: number;
 };
 
@@ -21,7 +20,6 @@ export const PaymentResultPageView = memo(function PaymentResultPageView({
   message,
   checkoutType,
   packageName,
-  balanceAfter,
   countdown,
 }: PaymentResultPageViewProps) {
   const Icon = state === "processing" ? LoaderCircle : state === "success" ? Check : CircleX;
@@ -77,28 +75,17 @@ export const PaymentResultPageView = memo(function PaymentResultPageView({
                     }`}
                   >
                     {state === "success"
-                      ? checkoutType === "topup"
-                        ? "Credits added"
-                        : checkoutType === "upgrade"
-                          ? "Plan upgraded"
-                          : "Plan activated"
+                      ? checkoutType === "upgrade"
+                        ? "Plan upgraded"
+                        : "Plan activated"
                       : "Checkout not completed"}
                   </p>
                   <p className="mt-1 truncate text-2xl font-bold text-foreground">{packageName}</p>
-                  {state === "success" && balanceAfter != null ? (
-                    <p className="mt-1 text-sm font-medium text-emerald-800 dark:text-emerald-300">
-                      New balance: {balanceAfter} credits
-                    </p>
-                  ) : null}
                 </div>
               </div>
               {state === "success" ? (
                 <p className="mt-4 border-t border-emerald-500/20 pt-3 text-sm text-emerald-800 dark:text-emerald-300">
-                  {checkoutType === "topup"
-                    ? "Your header credit balance has been updated."
-                    : checkoutType === "upgrade"
-                      ? "The extra credits from your new plan are ready to use."
-                      : "Plan benefits have been applied to your workspace."}
+                  Plan benefits have been applied to your workspace.
                 </p>
               ) : null}
             </div>
@@ -112,9 +99,7 @@ export const PaymentResultPageView = memo(function PaymentResultPageView({
 
           <div className="mt-6 flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
             <Button asChild>
-              <Link href={checkoutType === "topup" ? "/payments" : "/skills"}>
-                {checkoutType === "topup" ? "Back to billing" : "Back to exercises"}
-              </Link>
+              <Link href="/skills">Back to exercises</Link>
             </Button>
             {state === "failed" ? (
               <Button asChild variant="outline">

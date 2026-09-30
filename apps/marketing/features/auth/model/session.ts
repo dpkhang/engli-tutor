@@ -32,7 +32,7 @@ export function getMarketingAuthHref(returnTo?: string): string {
 }
 
 export function getEntryHref(isLoggedIn: boolean): string {
-  return isLoggedIn ? getAppUrl() : getMarketingAuthHref();
+  return isLoggedIn ? getAppUrl() : getAuthHref();
 }
 
 export function goToEntry(isLoggedIn: boolean): void {

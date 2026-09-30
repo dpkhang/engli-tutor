@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import Link from "next/link";
-import { Check, Coins, Crown, ExternalLink, LoaderCircle } from "lucide-react";
+import { Check, Crown, ExternalLink, LoaderCircle, MessageCircle } from "lucide-react";
 import { Alert, AlertDescription, Badge, Button, cn } from "@engli-tutor/ui";
 import { motion } from "motion/react";
 import { PageBackLink } from "@/features/layout";
@@ -37,7 +37,13 @@ const STATUS_LABEL: Record<string, string> = {
 
 const PERIOD_LABEL: Record<string, string> = {
   monthly: "Monthly",
+  quarterly: "3 months",
   yearly: "Yearly",
+};
+
+const ACCESS_SOURCE_LABEL: Record<string, string> = {
+  trial: "Premium trial",
+  bonus: "Premium bonus days",
 };
 
 function formatDate(value: string) {
@@ -45,6 +51,7 @@ function formatDate(value: string) {
 }
 
 function currentPlanId(billing: BillingMe | null): PlanId {
+  if (billing?.entitlements?.planId) return billing.entitlements.planId;
   if (!billing || !billing.hasPaidPlan) return "starter";
   return billing.subscription.planId === "free" ? "starter" : billing.subscription.planId;
 }
@@ -77,6 +84,9 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
   const activePlan = plans.find((p) => p.id === activePlanId) ?? plans[0];
   const benefits = planBenefits(activePlan, billing);
   const paidPlan = billing?.hasPaidPlan ?? false;
+  const accessSource = billing?.entitlements?.source;
+  const proUntil = billing?.entitlements?.proUntil ?? null;
+  const dailyChatLimit = billing?.entitlements?.limits.tutorChatPerDay;
 
   if (redirectingToCurrentPlan) {
     return (
@@ -106,8 +116,8 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
           </h1>
           <p className="text-sm text-muted-foreground sm:text-base">
             {isLoggedIn
-              ? "See your current plan, credits, and benefits. Upgrade or switch anytime."
-              : "Compare benefits across plans. Paid plans checkout via Stripe — fixed credits each period."}
+              ? "See your current plan, daily usage, and benefits. Upgrade or switch anytime."
+              : "Compare daily limits and benefits. Pay monthly, every 3 months (−15%), or yearly (−40%)."}
           </p>
         </motion.div>
 
@@ -115,8 +125,8 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
           <Alert>
             <AlertDescription>
               {checkoutType === "subscription"
-                ? "Subscription successful. Your first-period credits will appear in a few seconds."
-                : "Payment successful. Credits will be added shortly."}
+                ? "Subscription successful. Your plan will be active in a few seconds."
+                : "Payment successful. Your plan will update shortly."}
             </AlertDescription>
           </Alert>
         ) : null}
@@ -159,23 +169,23 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
 
                   <div className="flex flex-wrap gap-4 text-sm">
                     <div className="flex items-center gap-2 rounded-xl border px-4 py-3">
-                      <Coins className="size-4 text-accent" />
+                      <MessageCircle className="size-4 text-accent" />
                       <div>
-                        <p className="text-xs text-muted-foreground">Credit balance</p>
-                        <p className="font-semibold">{billing.balance}</p>
+                        <p className="text-xs text-muted-foreground">AI tutor chats today</p>
+                        <p className="font-semibold">
+                          {billing.usage?.tutor_chat ?? 0}
+                          {dailyChatLimit != null ? ` / ${dailyChatLimit}` : ""}
+                        </p>
                       </div>
                     </div>
-                    {paidPlan && billing.subscription.creditsPerPeriod > 0 ? (
+                    {accessSource && ACCESS_SOURCE_LABEL[accessSource] && proUntil ? (
                       <div className="rounded-xl border px-4 py-3">
-                        <p className="text-xs text-muted-foreground">Credits per period</p>
-                        <p className="font-semibold">{billing.subscription.creditsPerPeriod}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {ACCESS_SOURCE_LABEL[accessSource]}
+                        </p>
+                        <p className="font-semibold">Until {formatDate(proUntil)}</p>
                       </div>
-                    ) : (
-                      <div className="rounded-xl border px-4 py-3">
-                        <p className="text-xs text-muted-foreground">Signup bonus</p>
-                        <p className="font-semibold">{billing.signupBonus} credits</p>
-                      </div>
-                    )}
+                    ) : null}
                   </div>
 
                   {paidPlan ? (
@@ -218,9 +228,12 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
                       </li>
                     ))}
                   </ul>
-                  <p className="text-xs text-muted-foreground">
-                    Includes {billing.signupBonus} welcome credits
-                  </p>
+                  {billing.entitlements?.trialAvailable ? (
+                    <p className="text-xs text-muted-foreground">
+                      Try Premium free for {billing.trialDays} days from the workspace — no card
+                      needed.
+                    </p>
+                  ) : null}
                 </div>
               </div>
             ) : (

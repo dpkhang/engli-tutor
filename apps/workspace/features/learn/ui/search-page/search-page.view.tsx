@@ -4,7 +4,7 @@ import { memo, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, BookOpen, Heart, LoaderCircle, Search, Sparkles } from "lucide-react";
-import { Button, cn } from "@engli-tutor/ui";
+import { Button, cn, Input } from "@engli-tutor/ui";
 import { DataLoadingState } from "@/features/layout";
 import type { LessonPack } from "../../model/curriculum";
 
@@ -51,13 +51,14 @@ export const SearchPageView = memo(function SearchPageView({
         <form onSubmit={onSearch} className="mt-6 grid max-w-2xl gap-2 sm:relative sm:block">
           <div className="relative">
             <Search className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground" />
-            <input
+            <Input
+              clearButtonClassName="sm:right-28"
               key={query}
               name="q"
               defaultValue={query}
               autoFocus
               placeholder="Try “interview”, “speaking”, or “B1”…"
-              className="h-13 w-full rounded-full border border-border bg-background pr-4 pl-12 text-sm shadow-sm outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-3 focus:ring-primary/15 sm:pr-28"
+              className="h-13 w-full rounded-full border border-border bg-background pr-10 pl-12 text-sm shadow-sm outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-3 focus:ring-primary/15 sm:pr-36"
             />
           </div>
           <Button

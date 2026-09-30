@@ -12,6 +12,7 @@ export { LearningSettings } from "./ui/learning-settings";
 export { NotificationSettings } from "./ui/notification-settings";
 export { SecuritySettings } from "./ui/security-settings";
 export { BillingSettings } from "./ui/billing-settings";
+export { ReferralSettings } from "./ui/referral-settings";
 export {
   LEVEL_STORAGE_KEY,
   getAutoPlayListening,

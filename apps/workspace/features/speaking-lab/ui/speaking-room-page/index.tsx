@@ -10,6 +10,13 @@ import {
   type KeyboardEvent,
 } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  UPGRADE_MESSAGE,
+  billingMeQueryKey,
+  upgradeReasonFromError,
+  type UpgradeReason,
+} from "@/features/payments";
 import {
   tutorApi,
   type TutorChatMessage,
@@ -39,6 +46,8 @@ export function SpeakingRoomPage() {
   const [turns, setTurns] = useState<Turn[]>([{ role: "assistant", content: SCENES[0].opener }]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [upgradeReason, setUpgradeReason] = useState<UpgradeReason | null>(null);
+  const queryClient = useQueryClient();
   const [demoMode, setDemoMode] = useState(false);
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [aiSpeaking, setAiSpeaking] = useState(false);
@@ -147,6 +156,7 @@ export function SpeakingRoomPage() {
       pendingRef.current = true;
       setPending(true);
       setError(null);
+      setUpgradeReason(null);
       aiSpeech.stop();
       setAiSpeaking(false);
       playSfx(() => speakingSfx.send());
@@ -172,10 +182,15 @@ export function SpeakingRoomPage() {
         turnsRef.current = withReply;
         playSfx(() => speakingSfx.aiReady());
         speakLastAssistant(result.reply);
+        void queryClient.invalidateQueries({ queryKey: billingMeQueryKey });
       } catch (err) {
         if (!aliveRef.current) return;
         playSfx(() => speakingSfx.error());
-        setError(err instanceof Error ? err.message : "Couldn't send your turn");
+        const reason = upgradeReasonFromError(err);
+        setUpgradeReason(reason);
+        setError(
+          reason ? UPGRADE_MESSAGE[reason] : err instanceof Error ? err.message : "Couldn't send your turn",
+        );
         setTurns(turnsRef.current.slice(0, -1));
         turnsRef.current = turnsRef.current.slice(0, -1);
         setDraft(trimmed);
@@ -189,7 +204,7 @@ export function SpeakingRoomPage() {
         voice.clearAudio({ revoke: false });
       }
     },
-    [aiSpeech, level, playSfx, scene, speakLastAssistant, voice],
+    [aiSpeech, level, playSfx, queryClient, scene, speakLastAssistant, voice],
   );
 
   useEffect(() => {
@@ -221,6 +236,7 @@ export function SpeakingRoomPage() {
       turnsRef.current = initial;
       setDraft("");
       setError(null);
+      setUpgradeReason(null);
       setDemoMode(false);
       pendingRef.current = false;
       setPending(false);
@@ -313,6 +329,7 @@ export function SpeakingRoomPage() {
       draft={draft}
       pending={pending}
       error={error}
+      showUpgrade={upgradeReason !== null}
       demoMode={demoMode}
       autoSpeak={autoSpeak}
       aiSpeaking={aiSpeaking}

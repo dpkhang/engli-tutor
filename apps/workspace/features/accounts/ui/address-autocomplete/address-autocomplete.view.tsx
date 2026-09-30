@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import { Check, LoaderCircle, MapPin, Search } from "lucide-react";
-import { cn } from "@engli-tutor/ui";
+import { cn, Input } from "@engli-tutor/ui";
 
 export type AddressSuggestion = {
   id: string;
@@ -43,7 +43,8 @@ export const AddressAutocompleteView = memo(function AddressAutocompleteView({
   return (
     <div className="relative">
       <MapPin className="pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
-      <input
+      <Input
+        clearButtonClassName="right-9"
         id={id}
         value={value}
         disabled={disabled}
@@ -54,7 +55,7 @@ export const AddressAutocompleteView = memo(function AddressAutocompleteView({
         aria-expanded={open && suggestions.length > 0}
         aria-controls={listId}
         aria-invalid={Boolean(value) && open}
-        className="h-9 w-full rounded-md border border-input bg-transparent pr-10 pl-9 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/40 disabled:opacity-50 dark:bg-input/30"
+        className="h-9 w-full rounded-md border border-input bg-transparent pr-16 pl-9 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/40 disabled:opacity-50 dark:bg-input/30"
         onFocus={onFocus}
         onChange={(event) => onChange(event.target.value)}
         onBlur={onBlur}

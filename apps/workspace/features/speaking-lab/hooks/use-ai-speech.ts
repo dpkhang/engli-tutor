@@ -15,7 +15,7 @@ function pickEnglishVoice(): SpeechSynthesisVoice | null {
   );
 }
 
-function speakBrowser(text: string, rate: number, onEnd?: () => void) {
+function speakBrowser(text: string, rate: number, onEnd?: () => void, onStart?: () => void) {
   if (typeof window === "undefined" || !window.speechSynthesis) {
     onEnd?.();
     return;
@@ -26,6 +26,7 @@ function speakBrowser(text: string, rate: number, onEnd?: () => void) {
   utter.rate = rate;
   const voice = pickEnglishVoice();
   if (voice) utter.voice = voice;
+  utter.onstart = () => onStart?.();
   utter.onend = () => onEnd?.();
   utter.onerror = () => onEnd?.();
   window.speechSynthesis.speak(utter);
@@ -109,6 +110,7 @@ export function useAiSpeech() {
       cleaned: string,
       gen: number,
       onEnd?: () => void,
+      onStart?: () => void,
     ): Promise<AiSpeechResult> => {
       if (!isCurrent(gen)) {
         onEnd?.();
@@ -138,7 +140,7 @@ export function useAiSpeech() {
           onEnd?.();
           return;
         }
-        speakBrowser(cleaned, resolveSpeechRates().tts, onEnd);
+        speakBrowser(cleaned, resolveSpeechRates().tts, onEnd, onStart);
       };
 
       try {
@@ -148,7 +150,7 @@ export function useAiSpeech() {
           onEnd?.();
           return { source: "ai", stop };
         }
-        speakBrowser(cleaned, resolveSpeechRates().tts, onEnd);
+        speakBrowser(cleaned, resolveSpeechRates().tts, onEnd, onStart);
         return { source: "browser", stop };
       }
 
@@ -157,6 +159,7 @@ export function useAiSpeech() {
         onEnd?.();
         return { source: "ai", stop };
       }
+      onStart?.();
 
       return { source: "ai", stop };
     },
@@ -164,7 +167,7 @@ export function useAiSpeech() {
   );
 
   const speak = useCallback(
-    async (text: string, onEnd?: () => void): Promise<AiSpeechResult> => {
+    async (text: string, onEnd?: () => void, onStart?: () => void): Promise<AiSpeechResult> => {
       const cleaned = text.trim();
       if (!cleaned) {
         onEnd?.();
@@ -193,7 +196,7 @@ export function useAiSpeech() {
           return { source: "ai", stop };
         }
 
-        return await playBlob(blob, cleaned, gen, onEnd);
+        return await playBlob(blob, cleaned, gen, onEnd, onStart);
       } catch (err) {
         if (abort.signal.aborted || !isCurrent(gen)) {
           onEnd?.();
@@ -210,7 +213,7 @@ export function useAiSpeech() {
         onEnd?.();
         return { source: "browser", stop };
       }
-      speakBrowser(cleaned, resolveSpeechRates().tts, onEnd);
+      speakBrowser(cleaned, resolveSpeechRates().tts, onEnd, onStart);
       return { source: "browser", stop };
     },
     [isCurrent, playBlob, stop],

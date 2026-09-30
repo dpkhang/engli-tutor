@@ -3,17 +3,128 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Bookmark, Check, ChevronLeft, Gamepad2, House, Lightbulb, Mic2, RotateCcw, Volume2, X } from "lucide-react";
-import { Button, cn } from "@engli-tutor/ui";
+import { Button, SegmentedSwitch, cn } from "@engli-tutor/ui";
 import { DataLoadingState, NotFoundPage } from "@/features/layout";
 import { ClickableTranslateText } from "@/features/translate";
 import { useAiSpeech } from "@/features/speaking-lab/hooks/use-ai-speech";
 import { useVoiceInput } from "@/features/tutor-chat/hooks/use-voice-input";
-import { isFlashcardSaved, saveFlashcard, saveFlashcardForReview } from "../../model/flashcard-review";
 import { sampleAnswerFor, scoreGameRound, shuffleInPlace } from "../../model/games";
-import type { LearningGame, LearningGameRound, LearningQuestion } from "../../api/types";
+import type {
+  LearningGame,
+  LearningGameDeck,
+  LearningGameRound,
+  LearningLevel,
+  LearningQuestion,
+} from "../../api/types";
 import type { LessonPack } from "../../model/curriculum";
+import { VOCAB_MODES, type VocabMode } from "../../model/vocab-trainer";
 
 export type GamePlayPhase = "intro" | "playing" | "results";
+
+export type FlashcardDeckOption = LearningGameDeck & {
+  reviewCount: number;
+  masteredCount: number;
+  pictureCount: number;
+};
+
+function DeckPicker({
+  levels,
+  level,
+  decks,
+  deckId,
+  mode,
+  onPickLevel,
+  onPickDeck,
+  onPickMode,
+  onReviewDeck,
+}: {
+  levels: LearningLevel[];
+  level: LearningLevel | null;
+  decks: FlashcardDeckOption[];
+  deckId: string | null;
+  mode: VocabMode;
+  onPickLevel: (level: LearningLevel) => void;
+  onPickDeck: (deckId: string) => void;
+  onPickMode: (mode: VocabMode) => void;
+  onReviewDeck: (deckId: string) => void;
+}) {
+  const activeDeck = decks.find((deck) => deck.id === deckId);
+  return (
+    <div className="space-y-4">
+      {level ? (
+        <SegmentedSwitch
+          value={level}
+          onChange={onPickLevel}
+          ariaLabel="Flashcard level"
+          className="max-w-md"
+          options={levels.map((item) => ({ id: item, label: item }))}
+        />
+      ) : null}
+      <div className="grid gap-3 sm:grid-cols-2">
+        {decks.map((deck) => {
+          const active = deck.id === deckId;
+          return (
+            <div
+              key={deck.id}
+              className={cn(
+                "flex flex-col rounded-2xl border transition-colors",
+                active
+                  ? "border-primary bg-primary/10 ring-1 ring-primary/30"
+                  : "border-border/70 hover:border-primary/40 hover:bg-muted/50",
+              )}
+            >
+              <button
+                type="button"
+                aria-pressed={active}
+                onClick={() => onPickDeck(deck.id)}
+                className="flex-1 px-4 py-3 text-left"
+              >
+                <span className="block text-sm font-semibold text-foreground">{deck.title}</span>
+                <span className="mt-1 block text-xs text-muted-foreground">
+                  {deck.cardCount} words
+                  {deck.masteredCount > 0 ? ` · ${deck.masteredCount} mastered` : ""}
+                </span>
+                <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-muted">
+                  <span
+                    className="block h-full rounded-full bg-emerald-500"
+                    style={{ width: `${Math.round((deck.masteredCount / Math.max(1, deck.cardCount)) * 100)}%` }}
+                  />
+                </span>
+              </button>
+              {deck.reviewCount > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => onReviewDeck(deck.id)}
+                  className="mx-4 mb-3 inline-flex w-fit items-center gap-1.5 rounded-full border border-rose-200 px-3 py-1 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:border-rose-400/30 dark:text-rose-300 dark:hover:bg-rose-400/10"
+                >
+                  <RotateCcw className="size-3.5" />
+                  Review now ({deck.reviewCount})
+                </button>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+      <div className="space-y-2">
+        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Mode</p>
+        <SegmentedSwitch
+          value={mode}
+          onChange={onPickMode}
+          ariaLabel="Practice mode"
+          className="max-w-md"
+          options={VOCAB_MODES.map((item) => ({ id: item.id, label: item.label }))}
+        />
+        {mode === "picture" && activeDeck && activeDeck.pictureCount < activeDeck.cardCount ? (
+          <p className="text-xs text-muted-foreground">
+            {activeDeck.pictureCount
+              ? `${activeDeck.pictureCount} of ${activeDeck.cardCount} words have pictures yet.`
+              : "No pictures in this deck yet — it will play as flip cards."}
+          </p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
 
 function parseJson<T>(value: string, fallback: T): T {
   try {
@@ -422,33 +533,30 @@ function ShortcutTip({ label }: { label: string }) {
 function FlashRound({
   question,
   imageUrl,
-  wordId,
+  saved,
   locked,
   canGoBack,
   enter,
   onSpeak,
+  onSave,
   onBack,
   onRate,
 }: {
   question: Extract<LearningQuestion, { kind: "flash" }>;
   imageUrl?: string;
-  wordId: string;
+  saved: boolean;
   locked: boolean;
   canGoBack: boolean;
   enter: "next" | "back";
   onSpeak: () => void;
+  onSave: () => void;
   onBack: () => void;
   onRate: (value: "xmart" | "check") => void;
 }) {
   const [flipped, setFlipped] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
-  const [saved, setSaved] = useState(false);
   const outline = "h-14 rounded-2xl border bg-transparent shadow-none";
   const mark = "h-14 w-full rounded-full border bg-card shadow-none";
-
-  useEffect(() => {
-    setSaved(isFlashcardSaved(wordId));
-  }, [wordId]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -473,13 +581,13 @@ function FlashRound({
   }, [locked, onRate]);
 
   return (
-    <div className="mx-auto w-full max-w-lg space-y-5">
+    <div className="mx-auto w-full max-w-md space-y-5">
       <div className="[perspective:1400px]">
         <button
           type="button"
           aria-label={flipped ? question.word : `Flip ${question.word}`}
           className={cn(
-            "relative grid min-h-[34rem] w-full [transform-style:preserve-3d] transition-transform duration-500",
+            "relative grid min-h-[28rem] w-full [transform-style:preserve-3d] transition-transform duration-500",
             !locked && !flipped && "hover:-translate-y-1",
             flipped && "[transform:rotateY(180deg)]",
             locked && "cursor-default",
@@ -488,29 +596,38 @@ function FlashRound({
           onClick={() => setFlipped((open) => !open)}
         >
           <span className="col-start-1 row-start-1 flex flex-col overflow-hidden rounded-[2rem] border border-black/8 bg-card dark:border-white/10 text-left shadow-[0_18px_40px_-28px_rgba(15,23,42,0.35)] ring-1 ring-black/5 dark:shadow-[0_24px_50px_-28px_rgba(0,0,0,0.65)] dark:ring-white/10 [backface-visibility:hidden]">
-            <span className="relative block h-72 overflow-hidden bg-card">
+            <span className="relative block aspect-square max-h-[50svh] w-full overflow-hidden border-b border-black/5 bg-muted/40 dark:border-white/10">
               {imageUrl && !imageFailed ? (
-                // eslint-disable-next-line @next/next/no-img-element -- flashcard art in /public
-                <img
-                  src={imageUrl}
-                  alt=""
-                  decoding="sync"
-                  className="size-full object-cover"
-                  onError={() => setImageFailed(true)}
-                />
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- blurred fill behind the contained art */}
+                  <img
+                    src={imageUrl}
+                    alt=""
+                    aria-hidden
+                    className="absolute inset-0 size-full scale-110 object-cover opacity-60 blur-2xl"
+                  />
+                  {/* eslint-disable-next-line @next/next/no-img-element -- flashcard art from R2 */}
+                  <img
+                    src={imageUrl}
+                    alt=""
+                    decoding="sync"
+                    className="relative size-full object-contain"
+                    onError={() => setImageFailed(true)}
+                  />
+                </>
               ) : (
                 <span className="grid size-full place-items-center text-6xl" aria-hidden>
                   Aa
                 </span>
               )}
             </span>
-              <span className={cn("flex flex-1 flex-col items-center justify-center px-6 py-7 text-center", enter === "back" ? "flashcard-enter-back" : "flashcard-enter-next")}>
-              <span className="text-5xl font-semibold tracking-[-0.04em] capitalize sm:text-6xl">{question.word}</span>
-              <span className="mt-3 text-xs text-muted-foreground">Tap the card to reveal</span>
+            <span className={cn("flex flex-1 flex-col items-center justify-center px-6 py-5 text-center", enter === "back" ? "flashcard-enter-back" : "flashcard-enter-next")}>
+              <span className="text-4xl font-semibold tracking-[-0.04em] capitalize sm:text-5xl">{question.word}</span>
+              <span className="mt-2 text-xs text-muted-foreground">Tap the card to reveal</span>
             </span>
           </span>
 
-          <span className="col-start-1 row-start-1 flex min-h-[34rem] flex-col justify-between overflow-hidden rounded-[2rem] border border-black/8 bg-card dark:border-white/10 p-7 text-left shadow-[0_18px_40px_-28px_rgba(15,23,42,0.35)] ring-1 ring-black/5 dark:shadow-[0_24px_50px_-28px_rgba(0,0,0,0.65)] dark:ring-white/10 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+          <span className="col-start-1 row-start-1 flex flex-col justify-between overflow-hidden rounded-[2rem] border border-black/8 bg-card dark:border-white/10 p-7 text-left shadow-[0_18px_40px_-28px_rgba(15,23,42,0.35)] ring-1 ring-black/5 dark:shadow-[0_24px_50px_-28px_rgba(0,0,0,0.65)] dark:ring-white/10 [backface-visibility:hidden] [transform:rotateY(180deg)]">
             <span>
               <span className="text-[11px] font-semibold tracking-[0.16em] text-muted-foreground uppercase">
                 {question.word}
@@ -548,10 +665,7 @@ function FlashRound({
               ? "border-amber-600 bg-amber-500/15 text-amber-800 dark:text-amber-200"
               : "border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-400/40 dark:text-amber-300 dark:hover:bg-amber-400/10",
           )}
-          onClick={() => {
-            saveFlashcard(wordId);
-            setSaved(true);
-          }}
+          onClick={onSave}
         >
           <Bookmark className="size-5" />
         </Button>
@@ -602,6 +716,8 @@ function RoundPlay({
   gameId,
   canGoBack,
   enter,
+  savedCards,
+  onSaveCard,
   onBack,
   onSubmit,
 }: {
@@ -609,6 +725,8 @@ function RoundPlay({
   gameId: string;
   canGoBack: boolean;
   enter: "next" | "back";
+  savedCards: Set<string>;
+  onSaveCard: (cardId: string) => void;
   onBack: () => void;
   onSubmit: (value: string, correct: boolean) => void;
 }) {
@@ -616,10 +734,12 @@ function RoundPlay({
   const [value, setValue] = useState("");
   const [seconds, setSeconds] = useState(round.seconds);
   const [hears, setHears] = useState(0);
+  const [audioStarted, setAudioStarted] = useState(false);
   const [locked, setLocked] = useState(false);
   const [correct, setCorrect] = useState<boolean | null>(null);
   const question = round.question;
   const timed = question.kind !== "flash";
+  const waitsForAudio = timed && Boolean(round.material?.speakable);
 
   const valueRef = useRef(value);
   valueRef.current = value;
@@ -653,6 +773,7 @@ function RoundPlay({
     );
     setSeconds(round.seconds);
     setHears(0);
+    setAudioStarted(false);
     setLocked(false);
     setCorrect(null);
     lockedRef.current = false;
@@ -660,9 +781,16 @@ function RoundPlay({
 
   useEffect(() => {
     if (!round.material?.speakable) return;
-    void speak(round.material.body);
+    let active = true;
+    const markStarted = () => {
+      if (active) setAudioStarted(true);
+    };
+    void speak(round.material.body, markStarted, markStarted);
     setHears(1);
-    return () => stop();
+    return () => {
+      active = false;
+      stop();
+    };
   }, [round.id, round.material?.body, round.material?.speakable, speak, stop]);
 
   const finish = useCallback(
@@ -679,7 +807,7 @@ function RoundPlay({
   finishRef.current = finish;
 
   useEffect(() => {
-    if (locked || !timed) return;
+    if (locked || !timed || (waitsForAudio && !audioStarted)) return;
     const timer = window.setInterval(() => {
       setSeconds((current) => {
         if (current <= 1) {
@@ -690,7 +818,7 @@ function RoundPlay({
       });
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [locked, round.id, timed]);
+  }, [audioStarted, locked, round.id, timed, waitsForAudio]);
 
   useEffect(() => {
     if (!timed || seconds !== 0 || locked) return;
@@ -725,7 +853,13 @@ function RoundPlay({
           <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
             {round.level} · {gameId.replaceAll("-", " ")}
           </p>
-          {timed ? <TimerRing seconds={seconds} total={round.seconds} /> : null}
+          {timed ? (
+            waitsForAudio && !audioStarted ? (
+              <span className="text-xs text-muted-foreground">Timer starts with the audio…</span>
+            ) : (
+              <TimerRing seconds={seconds} total={round.seconds} />
+            )
+          ) : null}
         </div>
       )}
       {question.kind === "flash" ? null : (
@@ -745,7 +879,8 @@ function RoundPlay({
                 disabled={!canHear && hears >= hearMax}
                 onClick={() => {
                   if (!round.material?.speakable) return;
-                  void speak(round.material.body);
+                  const markStarted = () => setAudioStarted(true);
+                  void speak(round.material.body, markStarted, markStarted);
                   setHears((count) => count + 1);
                 }}
               >
@@ -769,9 +904,7 @@ function RoundPlay({
           value={value}
           locked={locked}
           allowMic={gameId === "speed-reply"}
-          placeholder={
-            gameId === "rewrite-race" ? "Type a shorter version…" : "Type your answer in English…"
-          }
+          placeholder="Type your answer in English…"
           onChange={setValue}
         />
       ) : null}
@@ -814,16 +947,14 @@ function RoundPlay({
         <FlashRound
           question={question}
           imageUrl={round.material?.imageUrl}
-          wordId={round.id}
+          saved={savedCards.has(round.id)}
           locked={locked}
           canGoBack={canGoBack}
           enter={enter}
           onSpeak={() => void speak(question.word)}
+          onSave={() => onSaveCard(round.id)}
           onBack={onBack}
-          onRate={(rating) => {
-            if (rating === "xmart") saveFlashcardForReview(round.id);
-            finish(rating === "check" ? "know" : "again");
-          }}
+          onRate={(rating) => finish(rating === "check" ? "know" : "again")}
         />
       ) : null}
 
@@ -865,10 +996,26 @@ export type GamePlayPageViewProps = {
   enter: "next" | "back";
   round: LearningGameRound | undefined;
   correctCount: number;
+  deckLevels: LearningLevel[];
+  deckLevel: LearningLevel | null;
+  decks: FlashcardDeckOption[];
+  deckId: string | null;
+  onPickLevel: (level: LearningLevel) => void;
+  onPickDeck: (deckId: string) => void;
+  mode: VocabMode;
+  autoAdvance: boolean;
+  onPickMode: (mode: VocabMode) => void;
+  onReviewDeck: (deckId: string) => void;
+  reviewRound: number;
+  missedRounds: LearningGameRound[];
+  onPracticeMissed: () => void;
   onStart: () => void;
   onRoundSubmit: (value: string, isCorrect: boolean) => void;
   onNextRound: () => void;
   onPreviousRound: () => void;
+  onBackToDecks: () => void;
+  savedCards: Set<string>;
+  onSaveCard: (cardId: string) => void;
 };
 
 export const GamePlayPageView = memo(function GamePlayPageView({
@@ -883,11 +1030,29 @@ export const GamePlayPageView = memo(function GamePlayPageView({
   enter,
   round,
   correctCount,
+  deckLevels,
+  deckLevel,
+  decks,
+  deckId,
+  onPickLevel,
+  onPickDeck,
+  mode,
+  autoAdvance,
+  onPickMode,
+  onReviewDeck,
+  reviewRound,
+  missedRounds,
+  onPracticeMissed,
   onStart,
   onRoundSubmit,
   onNextRound,
   onPreviousRound,
+  onBackToDecks,
+  savedCards,
+  onSaveCard,
 }: GamePlayPageViewProps) {
+  const activeDeck = decks.find((deck) => deck.id === deckId);
+  const inDeck = decks.length > 0 && phase !== "intro";
   useEffect(() => {
     if (game?.id !== "flashcard" || phase !== "playing") return;
     for (const item of session) {
@@ -924,11 +1089,17 @@ export const GamePlayPageView = memo(function GamePlayPageView({
 
   return (
     <div className="w-full min-w-0 space-y-8 overflow-x-clip pb-10">
-      <Button variant="ghost" size="sm" asChild className="-ml-2 text-muted-foreground">
-        <Link href="/games">
-          <ArrowLeft /> All games
-        </Link>
-      </Button>
+      {inDeck ? (
+        <Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={onBackToDecks}>
+          <ArrowLeft /> All levels
+        </Button>
+      ) : (
+        <Button variant="ghost" size="sm" asChild className="-ml-2 text-muted-foreground">
+          <Link href="/games">
+            <ArrowLeft /> All games
+          </Link>
+        </Button>
+      )}
 
       <header className="workspace-hero-accent relative overflow-hidden rounded-3xl bg-linear-to-br from-rose-500 to-orange-400 px-5 py-6 text-white sm:rounded-[1.75rem] sm:px-9 sm:py-10">
         <p className="hidden text-[11px] font-semibold tracking-[0.18em] text-white/70 uppercase sm:block">
@@ -947,11 +1118,27 @@ export const GamePlayPageView = memo(function GamePlayPageView({
         <section className="space-y-5 rounded-3xl border border-border/70 bg-card p-6">
           <p className="flex gap-2 text-sm leading-6 text-muted-foreground">
             <Lightbulb className="mt-0.5 size-4 shrink-0 text-accent" />
-            {game.body} You will play up to 5 short rounds, then see your score.
+            {game.body}{" "}
+            {decks.length
+              ? "Each session plays up to 10 words: missed and due words first, then new ones."
+              : "You will play up to 5 short rounds, then see your score."}
           </p>
+          {decks.length ? (
+            <DeckPicker
+              levels={deckLevels}
+              level={deckLevel}
+              decks={decks}
+              deckId={deckId}
+              onPickLevel={onPickLevel}
+              onPickDeck={onPickDeck}
+              mode={mode}
+              onPickMode={onPickMode}
+              onReviewDeck={onReviewDeck}
+            />
+          ) : null}
           <div className="flex flex-wrap gap-3">
             <Button className="h-11 rounded-full px-6" onClick={onStart}>
-              Start playing
+              {activeDeck ? `Start ${activeDeck.title}` : "Start playing"}
             </Button>
             <Button asChild variant="outline" className="h-11 rounded-full">
               <Link href={`/skills/${game.relatedSkill}`}>Related skill drill</Link>
@@ -963,6 +1150,11 @@ export const GamePlayPageView = memo(function GamePlayPageView({
       {phase === "playing" && round ? (
         <section className="space-y-4">
           <p className="text-sm text-muted-foreground">
+            {reviewRound > 0 ? (
+              <span className="mr-2 rounded-full bg-rose-500/10 px-2 py-0.5 text-xs font-medium text-rose-600 dark:text-rose-300">
+                Review round {reviewRound}
+              </span>
+            ) : null}
             Round {index + 1} of {session.length}
           </p>
           <div className="h-2 overflow-hidden rounded-full bg-muted">
@@ -979,10 +1171,12 @@ export const GamePlayPageView = memo(function GamePlayPageView({
             gameId={game.id}
             canGoBack={index > 0}
             enter={enter}
+            savedCards={savedCards}
+            onSaveCard={onSaveCard}
             onBack={onPreviousRound}
             onSubmit={onRoundSubmit}
           />
-          {game.id !== "flashcard" && scores[index] !== undefined ? (
+          {!autoAdvance && scores[index] !== undefined ? (
             <Button className="h-11 rounded-full px-6" onClick={onNextRound}>
               {index + 1 >= session.length ? "See results" : "Next round"}
             </Button>
@@ -990,7 +1184,84 @@ export const GamePlayPageView = memo(function GamePlayPageView({
         </section>
       ) : null}
 
-      {phase === "results" ? (
+      {phase === "results" && game.id === "flashcard" ? (
+        <div className="space-y-5 overflow-hidden rounded-[1.75rem] border border-primary/20 bg-linear-to-br from-primary to-primary/80 px-6 py-8 text-primary-foreground">
+          <div>
+            <p className="text-[11px] font-semibold tracking-[0.18em] text-primary-foreground/70 uppercase">
+              {missedRounds.length ? "Keep going" : "All learned"}
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+              {missedRounds.length
+                ? `You know ${correctCount}/${session.length} words`
+                : "You know every word in this set!"}
+            </h2>
+            <p className="mt-2 max-w-xl text-sm text-primary-foreground/75">
+              {missedRounds.length
+                ? `Practice the ${missedRounds.length} word${missedRounds.length > 1 ? "s" : ""} you marked ✗ until none are left.`
+                : "Pick another deck or play this one again."}
+            </p>
+          </div>
+          {missedRounds.length ? (
+            <ul className="grid gap-2 sm:grid-cols-2">
+              {missedRounds.map((item) =>
+                item.question.kind === "flash" ? (
+                  <li key={item.id} className="rounded-2xl bg-white/10 px-4 py-2.5">
+                    <span className="block text-sm font-semibold capitalize">{item.question.word}</span>
+                    <span className="block text-xs text-primary-foreground/75">{item.question.meaningVi}</span>
+                  </li>
+                ) : null,
+              )}
+            </ul>
+          ) : null}
+          <div className="flex flex-wrap gap-3">
+            {missedRounds.length ? (
+              <Button
+                type="button"
+                className="rounded-full border-0 bg-white text-[#0b1524] hover:bg-white/90"
+                onClick={onPracticeMissed}
+              >
+                <RotateCcw className="size-4" />
+                Practice {missedRounds.length} word{missedRounds.length > 1 ? "s" : ""} again
+              </Button>
+            ) : decks.length ? (
+              <Button
+                type="button"
+                className="rounded-full border-0 bg-white text-[#0b1524] hover:bg-white/90"
+                onClick={onBackToDecks}
+              >
+                <ArrowLeft className="size-4" />
+                All levels
+              </Button>
+            ) : null}
+            <Button
+              type="button"
+              className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25"
+              onClick={onStart}
+            >
+              Play again
+            </Button>
+            {missedRounds.length && decks.length ? (
+              <Button
+                type="button"
+                className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25"
+                onClick={onBackToDecks}
+              >
+                <ArrowLeft className="size-4" />
+                All levels
+              </Button>
+            ) : null}
+            <Button
+              asChild
+              variant="outline"
+              className="rounded-full border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+            >
+              <Link href="/games">More games</Link>
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      {phase === "results" && game.id !== "flashcard" ? (
         <div className="overflow-hidden rounded-[1.75rem] border border-primary/20 bg-linear-to-br from-primary to-primary/80 px-6 py-8 text-primary-foreground">
           <p className="text-[11px] font-semibold tracking-[0.18em] text-primary-foreground/70 uppercase">
             Nice work

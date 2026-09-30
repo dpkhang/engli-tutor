@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import type { PolicyCta } from "../../model/policy";
+import type { PolicyCta } from "../model/policy";
 
 const CTA_CLASS =
   "mt-2 inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-background px-3 text-sm font-medium text-foreground transition-colors hover:border-primary/50 hover:text-primary";

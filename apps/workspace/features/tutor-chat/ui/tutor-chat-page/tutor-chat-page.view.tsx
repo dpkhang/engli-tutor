@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, type FormEvent, type KeyboardEvent, type RefObject } from "react";
+import Link from "next/link";
 import {
   LoaderCircle,
   MessageCircle,
@@ -58,6 +59,7 @@ export type TutorChatPageViewProps = {
   draft: string;
   pending: boolean;
   error: string | null;
+  showUpgrade: boolean;
   demoMode: boolean;
   pendingAudioUrl: string | null;
   voiceRecording: boolean;
@@ -85,6 +87,7 @@ export const TutorChatPageView = memo(function TutorChatPageView({
   draft,
   pending,
   error,
+  showUpgrade,
   demoMode,
   pendingAudioUrl,
   voiceRecording,
@@ -244,6 +247,11 @@ export const TutorChatPageView = memo(function TutorChatPageView({
         >
           {error || voiceError ? (
             <p className="mb-2 text-sm text-destructive">{error || voiceError}</p>
+          ) : null}
+          {showUpgrade ? (
+            <Button asChild size="sm" className="mb-3">
+              <Link href="/payments">See plans</Link>
+            </Button>
           ) : null}
 
           {voiceRecording ? (
