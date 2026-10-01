@@ -90,8 +90,8 @@ export function BillingPeriodSwitch({
   className,
   disabled,
 }: {
-  value: "monthly" | "yearly";
-  onChange: (value: "monthly" | "yearly") => void;
+  value: "monthly" | "quarterly" | "yearly";
+  onChange: (value: "monthly" | "quarterly" | "yearly") => void;
   className?: string;
   disabled?: boolean;
 }) {
@@ -104,7 +104,8 @@ export function BillingPeriodSwitch({
       className={className}
       options={[
         { id: "monthly", label: "Monthly" },
-        { id: "yearly", label: "Yearly", badge: "−2 mo" },
+        { id: "quarterly", label: "3 months", badge: "−15%" },
+        { id: "yearly", label: "Yearly", badge: "−40%" },
       ]}
     />
   );

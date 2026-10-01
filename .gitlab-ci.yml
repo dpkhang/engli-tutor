@@ -1,11 +1,10 @@
-# GitLab CI — fe workspace (packages + apps/web + apps/landing-page-web)
+# GitLab CI — fe workspace (packages + apps/workspace + apps/marketing)
 # Repo root = fe/
 
 workflow:
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME == "develop" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TITLE =~ /^Merge branch .develop./'
 
 stages:
   - lint
@@ -35,43 +34,48 @@ default:
       - .pnpm-store
     policy: pull-push
 
+.changes_packages: &changes_packages
+  - packages/**/*
+  - pnpm-lock.yaml
+  - package.json
+  - pnpm-workspace.yaml
+
+.changes_web: &changes_web
+  - apps/workspace/**/*
+  - apps/workspace/vercel.json
+  - packages/**/*
+  - pnpm-lock.yaml
+  - package.json
+  - pnpm-workspace.yaml
+
+.changes_landing: &changes_landing
+  - apps/marketing/**/*
+  - apps/marketing/vercel.json
+  - packages/**/*
+  - pnpm-lock.yaml
+  - package.json
+  - pnpm-workspace.yaml
+
 .rules_packages:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes:
-        - packages/**/*
-        - pnpm-lock.yaml
-        - package.json
-        - pnpm-workspace.yaml
-        - .gitlab-ci.yml
+      changes: *changes_packages
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    - if: $CI_COMMIT_TAG
+      changes: *changes_packages
 
 .rules_web:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes:
-        - apps/web/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
-        - package.json
-        - pnpm-workspace.yaml
-        - .gitlab-ci.yml
+      changes: *changes_web
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    - if: $CI_COMMIT_TAG
+      changes: *changes_web
 
 .rules_landing:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes:
-        - apps/landing-page-web/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
-        - package.json
-        - pnpm-workspace.yaml
-        - .gitlab-ci.yml
+      changes: *changes_landing
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    - if: $CI_COMMIT_TAG
+      changes: *changes_landing
 
 # ── Packages ────────────────────────────────────────────────────────────────
 lint:packages:
@@ -105,7 +109,7 @@ lint:web:
   stage: lint
   script:
     - pnpm --filter "./packages/*" run build
-    - pnpm --filter landing-page-generator-fe lint
+    - pnpm --filter engli-tutor-fe lint
 
 build:web:
   extends:
@@ -117,12 +121,12 @@ build:web:
       optional: true
   script:
     - pnpm --filter "./packages/*" run build
-    - pnpm --filter landing-page-generator-fe build
+    - pnpm --filter engli-tutor-fe build
   artifacts:
     paths:
-      - apps/web/.next/
+      - apps/workspace/.next/
     exclude:
-      - apps/web/.next/cache/**
+      - apps/workspace/.next/cache/**
     expire_in: 1 day
 
 # ── App: landing ────────────────────────────────────────────────────────────
@@ -133,7 +137,7 @@ lint:landing:
   stage: lint
   script:
     - pnpm --filter "./packages/*" run build
-    - pnpm --filter landing-page-web lint
+    - pnpm --filter engli-tutor-web lint
 
 build:landing:
   extends:
@@ -145,12 +149,12 @@ build:landing:
       optional: true
   script:
     - pnpm --filter "./packages/*" run build
-    - pnpm --filter landing-page-web build
+    - pnpm --filter engli-tutor-web build
   artifacts:
     paths:
-      - apps/landing-page-web/.next/
+      - apps/marketing/.next/
     exclude:
-      - apps/landing-page-web/.next/cache/**
+      - apps/marketing/.next/cache/**
     expire_in: 1 day
 
 # ── Deploy (Vercel) ─────────────────────────────────────────────────────────
@@ -191,14 +195,7 @@ deploy:landing:preview:
     name: preview/landing
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes:
-        - apps/landing-page-web/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
-        - package.json
-        - pnpm-workspace.yaml
-        - apps/landing-page-web/vercel.json
-        - .gitlab-ci.yml
+      changes: *changes_landing
 
 deploy:landing:production:
   extends: .vercel_deploy
@@ -216,15 +213,7 @@ deploy:landing:production:
     name: production/landing
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      changes:
-        - apps/landing-page-web/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
-        - package.json
-        - pnpm-workspace.yaml
-        - apps/landing-page-web/vercel.json
-        - .gitlab-ci.yml
-    - if: $CI_COMMIT_TAG
+      changes: *changes_landing
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: manual
       allow_failure: true
@@ -245,14 +234,7 @@ deploy:web:preview:
     name: preview/web
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes:
-        - apps/web/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
-        - package.json
-        - pnpm-workspace.yaml
-        - apps/web/vercel.json
-        - .gitlab-ci.yml
+      changes: *changes_web
 
 deploy:web:production:
   extends: .vercel_deploy
@@ -270,15 +252,7 @@ deploy:web:production:
     name: production/web
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      changes:
-        - apps/web/**/*
-        - packages/**/*
-        - pnpm-lock.yaml
-        - package.json
-        - pnpm-workspace.yaml
-        - apps/web/vercel.json
-        - .gitlab-ci.yml
-    - if: $CI_COMMIT_TAG
+      changes: *changes_web
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: manual
       allow_failure: true

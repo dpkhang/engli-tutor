@@ -12,20 +12,23 @@ importers:
         specifier: ^0.61.0
         version: 0.61.0
 
-  apps/landing-page-web:
+  apps/marketing:
     dependencies:
+      '@engli-tutor/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
+      '@engli-tutor/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
+      '@engli-tutor/legal':
+        specifier: workspace:*
+        version: link:../../packages/legal
+      '@engli-tutor/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@hookform/resolvers':
         specifier: ^5.5.7
         version: 5.5.7(@standard-schema/spec@1.1.0)(ajv@8.20.0)(effect@3.20.0)(react-hook-form@7.83.0(react@19.2.8))(valibot@1.4.2(typescript@5.9.3))(zod@4.4.3)
-      '@landing-page-generator/api-client':
-        specifier: workspace:*
-        version: link:../../packages/api-client
-      '@landing-page-generator/auth':
-        specifier: workspace:*
-        version: link:../../packages/auth
-      '@landing-page-generator/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       lucide-react:
         specifier: ^1.28.0
         version: 1.28.0(react@19.2.8)
@@ -70,20 +73,23 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
-  apps/web:
+  apps/workspace:
     dependencies:
+      '@engli-tutor/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
+      '@engli-tutor/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
+      '@engli-tutor/legal':
+        specifier: workspace:*
+        version: link:../../packages/legal
+      '@engli-tutor/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@hookform/resolvers':
         specifier: ^5.5.7
         version: 5.5.7(@standard-schema/spec@1.1.0)(ajv@8.20.0)(effect@3.20.0)(react-hook-form@7.83.0(react@19.2.8))(valibot@1.4.2(typescript@5.9.3))(zod@4.4.3)
-      '@landing-page-generator/api-client':
-        specifier: workspace:*
-        version: link:../../packages/api-client
-      '@landing-page-generator/auth':
-        specifier: workspace:*
-        version: link:../../packages/auth
-      '@landing-page-generator/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       '@tanstack/react-query':
         specifier: ^5.101.4
         version: 5.101.4(react@19.2.8)
@@ -161,6 +167,12 @@ importers:
       react:
         specifier: ^19.2.8
         version: 19.2.8
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+
+  packages/legal:
+    devDependencies:
       typescript:
         specifier: ~5.9.3
         version: 5.9.3

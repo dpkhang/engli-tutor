@@ -6,11 +6,11 @@ pnpm workspace: hai app Next.js + ba package dùng chung. Marketing site định
 
 | Workspace | Package name | Purpose |
 | --- | --- | --- |
-| `apps/web` | `landing-page-generator-fe` | Workspace dashboard (auth) |
-| `apps/landing-page-web` | `landing-page-web` | Marketing + checkout |
-| `packages/api-client` | `@landing-page-generator/api-client` | Fetch client + interceptors |
-| `packages/auth` | `@landing-page-generator/auth` | Better Auth client factory |
-| `packages/ui` | `@landing-page-generator/ui` | Shared components / tokens |
+| `apps/workspace` | `engli-tutor-fe` | Workspace dashboard (auth) |
+| `apps/marketing` | `engli-tutor-web` | Marketing + checkout |
+| `packages/api-client` | `@engli-tutor/api-client` | Fetch client + interceptors |
+| `packages/auth` | `@engli-tutor/auth` | Better Auth client factory |
+| `packages/ui` | `@engli-tutor/ui` | Shared components / tokens |
 
 ## Install
 
@@ -22,8 +22,8 @@ pnpm install:landing-page
 Targeted:
 
 ```bash
-pnpm install:web
-pnpm install:landing
+pnpm install:workspace
+pnpm install:marketing
 pnpm install:packages
 ```
 
@@ -37,18 +37,18 @@ pnpm module:add vitest @testing-library/react --dev
 ## Development
 
 ```bash
-pnpm dev:web       # http://localhost:3000  (HTTPS local: local.app.pagecraft-ai.site)
-pnpm dev:landing   # http://localhost:3002  (HTTPS local: local.pagecraft-ai.site)
+pnpm dev:workspace   # http://localhost:3000  (HTTPS local: local.app.pagecraft-ai.site)
+pnpm dev:marketing   # http://localhost:3002  (HTTPS local: local.pagecraft-ai.site)
 ```
 
 Env:
 
 ```bash
-cp apps/web/.env.local.example apps/web/.env.local
-cp apps/landing-page-web/.env.local.example apps/landing-page-web/.env.local
+cp apps/workspace/.env.local.example apps/workspace/.env.local
+cp apps/marketing/.env.local.example apps/marketing/.env.local
 ```
 
-### Workspace (`apps/web`)
+### Workspace (`apps/workspace`)
 
 | Variable | Purpose |
 | --- | --- |
@@ -58,7 +58,7 @@ cp apps/landing-page-web/.env.local.example apps/landing-page-web/.env.local
 
 Browser gọi `/api/*` same-origin; Next proxy/route forward tới `NEXT_PUBLIC_API_URL` để cookie first-party.
 
-### Marketing (`apps/landing-page-web`)
+### Marketing (`apps/marketing`)
 
 | Variable | Purpose |
 | --- | --- |
@@ -101,7 +101,7 @@ Thiếu R2 write permission → generate vẫn ra page, không có ảnh (xem [b
 ## API client
 
 ```text
-@landing-page-generator/api-client
+@engli-tutor/api-client
   └── ApiClient
       ├── WorkspaceApiClient   # credentials + 401 → /login
       └── MarketingApiClient
@@ -132,10 +132,10 @@ Thiếu R2 write permission → generate vẫn ra page, không có ảnh (xem [b
 | `pnpm build:pkg` | Build packages |
 | `pnpm build` | Packages + cả hai apps |
 | `pnpm lint` | Typecheck |
-| `pnpm ci:web` | Web lint/build |
-| `pnpm ci:landing` | Marketing lint/build |
-| `pnpm deploy:web:prod` | Deploy workspace → Vercel |
-| `pnpm deploy:landing:prod` | Deploy marketing → Vercel |
+| `pnpm ci:workspace` | Workspace lint/build |
+| `pnpm ci:marketing` | Marketing lint/build |
+| `pnpm deploy:workspace:prod` | Deploy workspace → Vercel |
+| `pnpm deploy:marketing:prod` | Deploy marketing → Vercel |
 
 ## Formatting
 
@@ -158,9 +158,9 @@ Hai project từ repo `fe`:
 
 | Project | Root Directory |
 | --- | --- |
-| Workspace | `apps/web` |
-| Marketing | `apps/landing-page-web` |
+| Workspace | `apps/workspace` |
+| Marketing | `apps/marketing` |
 
 CI variables: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID_WEB`, `VERCEL_PROJECT_ID_LANDING`, cùng các `NEXT_PUBLIC_*` ở trên.
 
-> Cloudflare Workers: monorepo cần **Root directory** = `apps/web` hoặc `apps/landing-page-web` (không để `/`). Repo hiện deploy chính qua Vercel; OpenNext/Workers cần adapter riêng.
+> Cloudflare Workers: monorepo cần **Root directory** = `apps/workspace` hoặc `apps/marketing` (không để `/`). Repo hiện deploy chính qua Vercel; OpenNext/Workers cần adapter riêng.

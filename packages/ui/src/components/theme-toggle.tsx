@@ -15,10 +15,8 @@ export function ThemeToggle({ className }: { className?: string }) {
     };
     sync();
     window.addEventListener("pagecraft-theme", sync);
-    window.addEventListener("storage", sync);
     return () => {
       window.removeEventListener("pagecraft-theme", sync);
-      window.removeEventListener("storage", sync);
     };
   }, []);
 
@@ -26,12 +24,13 @@ export function ThemeToggle({ className }: { className?: string }) {
     const nextTheme: Theme = theme === "dark" ? "light" : "dark";
     document.documentElement.classList.toggle("dark", nextTheme === "dark");
     document.documentElement.style.colorScheme = nextTheme;
-    localStorage.setItem("pagecraft-theme", nextTheme);
     window.dispatchEvent(new Event("pagecraft-theme"));
     setTheme(nextTheme);
   };
 
-  const nextThemeLabel = theme === "dark" ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối";
+  const isDark = theme === "dark";
+  const label = isDark ? "Light mode" : "Dark mode";
+  const Icon = isDark ? Sun : Moon;
 
   return (
     <button
@@ -41,10 +40,10 @@ export function ThemeToggle({ className }: { className?: string }) {
         className,
       )}
       onClick={toggleTheme}
-      aria-label={nextThemeLabel}
-      title={nextThemeLabel}
+      aria-label={label}
+      title={label}
     >
-      {theme === "dark" ? <Sun className="size-4.5" /> : <Moon className="size-4.5" />}
+      <Icon className="size-4.5" />
     </button>
   );
 }

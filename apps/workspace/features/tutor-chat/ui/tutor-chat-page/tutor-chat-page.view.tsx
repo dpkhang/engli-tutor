@@ -1,0 +1,371 @@
+"use client";
+
+import { memo, type FormEvent, type KeyboardEvent, type RefObject } from "react";
+import Link from "next/link";
+import {
+  LoaderCircle,
+  MessageCircle,
+  Mic,
+  MicOff,
+  RefreshCw,
+  Send,
+  Sparkles,
+  Square,
+} from "lucide-react";
+import { Button, cn } from "@engli-tutor/ui";
+import { type TutorChatMessage, type TutorScenario } from "../../api";
+
+export const SCENARIOS: { id: TutorScenario; label: string; hint: string }[] = [
+  { id: "interview", label: "Interview", hint: "Behavioral & project questions" },
+  { id: "standup", label: "Stand-up", hint: "Short daily update" },
+  { id: "smalltalk", label: "Small talk", hint: "Office conversation" },
+  { id: "email", label: "Email", hint: "Draft / edit a short email" },
+  { id: "free", label: "Free", hint: "You pick the topic" },
+];
+
+export const STARTERS: Record<TutorScenario, string> = {
+  interview:
+    "Hi! I'm EngliTutor. Let's practice a job interview. Tell me briefly about yourself and your current role.",
+  standup:
+    "Good morning! Let's do a quick standup. What did you finish yesterday, and what's on your plate today?",
+  smalltalk: "Hey! How's your week going so far? Feel free to answer in a few short sentences.",
+  email:
+    "Let's practice work writing. Describe the email you need — who it's for and what you want them to do.",
+  free: "Hi! I'm ready to practice English with you. What topic would you like to talk about today?",
+};
+
+type ChatMessage = TutorChatMessage & { audioUrl?: string };
+
+function splitCoach(content: string): { english: string; tip: string | null } {
+  const marker = content.indexOf("💬");
+  if (marker === -1) return { english: content.trim(), tip: null };
+  return {
+    english: content.slice(0, marker).trim(),
+    tip: content.slice(marker).trim(),
+  };
+}
+
+export type TutorChatLesson = {
+  title: string;
+  skills: string[];
+  duration: string;
+  focus: string;
+};
+
+export type TutorChatPageViewProps = {
+  lesson: TutorChatLesson | undefined;
+  scenario: TutorScenario;
+  messages: ChatMessage[];
+  draft: string;
+  pending: boolean;
+  error: string | null;
+  showUpgrade: boolean;
+  demoMode: boolean;
+  pendingAudioUrl: string | null;
+  voiceRecording: boolean;
+  voiceSupported: boolean;
+  voiceSpeechSupported: boolean;
+  voiceError: string | null;
+  micDisabled: boolean;
+  scenarioLabel: string | undefined;
+  messageListRef: RefObject<HTMLDivElement | null>;
+  composerRef: RefObject<HTMLDivElement | null>;
+  inputRef: RefObject<HTMLTextAreaElement | null>;
+  onResetCurrent: () => void;
+  onSelectScenario: (id: TutorScenario) => void;
+  onDraftChange: (value: string) => void;
+  onDraftKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
+  onSubmit: (event: FormEvent) => void;
+  onToggleMic: () => void;
+  onDeleteAudio: () => void;
+};
+
+export const TutorChatPageView = memo(function TutorChatPageView({
+  lesson,
+  scenario,
+  messages,
+  draft,
+  pending,
+  error,
+  showUpgrade,
+  demoMode,
+  pendingAudioUrl,
+  voiceRecording,
+  voiceSupported,
+  voiceSpeechSupported,
+  voiceError,
+  micDisabled,
+  scenarioLabel,
+  messageListRef,
+  composerRef,
+  inputRef,
+  onResetCurrent,
+  onSelectScenario,
+  onDraftChange,
+  onDraftKeyDown,
+  onSubmit,
+  onToggleMic,
+  onDeleteAudio,
+}: TutorChatPageViewProps) {
+  return (
+    <div className="flex min-h-[calc(100svh-8rem)] flex-col gap-5">
+      <header className="workspace-hero-accent relative space-y-3 overflow-hidden rounded-3xl bg-linear-to-br from-primary to-primary/80 px-5 py-5 text-primary-foreground sm:space-y-4 sm:rounded-[1.75rem] sm:px-7 sm:py-7">
+        <div
+          aria-hidden
+          className="absolute -right-12 -top-16 hidden size-52 rounded-full border-26 border-white/7 sm:block"
+        />
+        <p className="relative hidden items-center gap-2 text-[11px] font-semibold tracking-[0.18em] text-primary-foreground/70 uppercase sm:inline-flex">
+          <Sparkles className="size-3.5 text-amber-300" />
+          Your judgment-free practice space
+        </p>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="relative max-w-2xl space-y-2">
+            <h1 className="text-xl font-semibold tracking-tight text-white sm:text-4xl">
+              {lesson ? lesson.title : "Chat EngliTutor"}
+            </h1>
+            <p className="hidden text-sm leading-relaxed text-white/70 sm:block sm:text-base">
+              {lesson
+                ? `${lesson.skills.join(" · ")} · ${lesson.duration} · ${lesson.focus}`
+                : "Type or record English — AI replies in English and suggests corrections in Vietnamese."}
+            </p>
+          </div>
+          <Button
+            type="button"
+            className="relative h-9 rounded-full border-0 bg-white text-primary hover:bg-white/90 sm:h-10"
+            onClick={onResetCurrent}
+          >
+            <RefreshCw className="size-4" />
+            New conversation
+          </Button>
+        </div>
+
+        <div className="flex flex-wrap gap-2 pt-1">
+          {SCENARIOS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onSelectScenario(item.id)}
+              className={cn(
+                "shrink-0 rounded-full border px-3 py-1.5 text-left text-sm transition-colors sm:px-3.5 sm:py-2",
+                scenario === item.id
+                  ? "border-white bg-white text-primary"
+                  : "border-white/15 bg-white/6 text-white/65 hover:bg-white/10 hover:text-white",
+              )}
+            >
+              <span className="font-medium">{item.label}</span>
+              <span
+                className={cn(
+                  "ml-2 hidden text-xs sm:inline",
+                  scenario === item.id ? "text-primary/70" : "text-white/40",
+                )}
+              >
+                {item.hint}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {demoMode ? (
+          <p className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-xs text-accent">
+            <Sparkles className="size-3.5" />
+            Running in demo mode (OpenAI not configured) — chat UI still works.
+          </p>
+        ) : null}
+      </header>
+
+      <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-border/70 bg-card shadow-[0_24px_60px_-35px_rgba(79,70,229,0.28)]">
+        <div className="flex items-center gap-2 border-b border-border px-4 py-3 sm:px-5">
+          <span className="grid size-9 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm">
+            <MessageCircle className="size-4" />
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-foreground">EngliTutor AI</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {scenarioLabel} · A2–B1 · voice input supported
+            </p>
+          </div>
+        </div>
+
+        <div ref={messageListRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-5">
+          {messages.map((message, index) => {
+            const isUser = message.role === "user";
+            const { english, tip } = isUser
+              ? { english: message.content, tip: null }
+              : splitCoach(message.content);
+
+            return (
+              <div
+                key={`${message.role}-${index}`}
+                className={cn("flex", isUser ? "justify-end" : "justify-start")}
+              >
+                <div
+                  className={cn(
+                    "max-w-[min(100%,36rem)] space-y-2",
+                    isUser ? "items-end" : "items-start",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap",
+                      isUser
+                        ? "rounded-br-md bg-primary text-primary-foreground"
+                        : "rounded-bl-md bg-muted text-foreground",
+                    )}
+                  >
+                    {english}
+                  </div>
+                  {message.audioUrl ? (
+                    <audio
+                      controls
+                      src={message.audioUrl}
+                      className={cn("h-9 max-w-full", isUser ? "accent-white" : undefined)}
+                    />
+                  ) : null}
+                  {tip ? (
+                    <div className="rounded-2xl border border-accent/25 bg-accent/8 px-3.5 py-2.5 text-sm leading-relaxed text-foreground whitespace-pre-wrap">
+                      {tip}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            );
+          })}
+
+          {pending ? (
+            <div className="flex justify-start">
+              <div className="inline-flex items-center gap-2 rounded-2xl rounded-bl-md bg-muted px-4 py-3 text-sm text-muted-foreground">
+                <LoaderCircle className="size-4 animate-spin" />
+                EngliTutor is replying…
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <div
+          ref={composerRef}
+          className="scroll-mb-4 border-t border-border px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4"
+        >
+          {error || voiceError ? (
+            <p className="mb-2 text-sm text-destructive">{error || voiceError}</p>
+          ) : null}
+          {showUpgrade ? (
+            <Button asChild size="sm" className="mb-3">
+              <Link href="/payments">See plans</Link>
+            </Button>
+          ) : null}
+
+          {voiceRecording ? (
+            <div className="mb-3 flex items-center gap-2 rounded-2xl border border-destructive/30 bg-destructive/5 px-3.5 py-2.5 text-sm text-foreground">
+              <span className="relative flex size-2.5">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-destructive opacity-60" />
+                <span className="relative inline-flex size-2.5 rounded-full bg-destructive" />
+              </span>
+              Recording… speak English, then tap stop.
+              {!voiceSpeechSupported ? (
+                <span className="text-muted-foreground">
+                  {" "}
+                  (No STT in this browser — type after listening back)
+                </span>
+              ) : null}
+            </div>
+          ) : null}
+
+          {pendingAudioUrl && !voiceRecording ? (
+            <div className="mb-3 grid grid-cols-[1fr_auto] items-center gap-2 rounded-2xl border border-border bg-muted/50 p-3 sm:flex sm:gap-3 sm:px-3.5 sm:py-2.5">
+              <p className="text-xs font-medium text-muted-foreground sm:shrink-0">
+                Last recording
+              </p>
+              <audio
+                controls
+                src={pendingAudioUrl}
+                className="col-span-2 h-9 w-full min-w-0 sm:order-0 sm:col-auto sm:h-8 sm:flex-1"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="row-start-1 rounded-full text-muted-foreground sm:row-auto"
+                onClick={onDeleteAudio}
+              >
+                Delete audio
+              </Button>
+            </div>
+          ) : null}
+
+          <form
+            className="grid grid-cols-[auto_1fr_auto] items-center gap-2 rounded-[1.25rem] border border-border bg-muted/40 p-2 shadow-sm sm:flex sm:items-end sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none"
+            onSubmit={onSubmit}
+          >
+            <Button
+              type="button"
+              variant={voiceRecording ? "destructive" : "outline"}
+              size="lg"
+              disabled={micDisabled}
+              className={cn(
+                "order-2 h-11 w-11 shrink-0 rounded-full p-0 sm:order-0",
+                voiceRecording && "animate-pulse",
+              )}
+              aria-label={voiceRecording ? "Stop recording" : "Record"}
+              title={
+                !voiceSupported
+                  ? "Browser does not support recording"
+                  : voiceRecording
+                    ? "Stop recording"
+                    : "Record spoken English"
+              }
+              onClick={onToggleMic}
+            >
+              {voiceRecording ? (
+                <Square className="size-4 fill-current" />
+              ) : (
+                <Mic className="size-4" />
+              )}
+            </Button>
+            <textarea
+              ref={inputRef}
+              rows={1}
+              value={draft}
+              onChange={(event) => onDraftChange(event.target.value)}
+              onKeyDown={onDraftKeyDown}
+              placeholder={
+                voiceRecording
+                  ? "Listening… tap stop when finished"
+                  : "Write a message in English…"
+              }
+              disabled={pending || voiceRecording}
+              className="order-1 col-span-3 max-h-32 min-h-20 w-full resize-none overflow-y-auto rounded-xl border-0 bg-background px-3.5 py-3 text-base leading-6 shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30 disabled:opacity-60 sm:order-0 sm:col-auto sm:max-h-36 sm:min-h-11 sm:flex-1 sm:rounded-2xl sm:border sm:border-border sm:px-4 sm:py-2.5 sm:text-sm sm:shadow-none sm:focus-visible:border-primary sm:focus-visible:ring-primary/40"
+            />
+            <span className="order-2 min-w-0 truncate text-xs text-muted-foreground sm:hidden">
+              {voiceRecording ? "Tap stop when finished" : "Voice input"}
+            </span>
+            <Button
+              type="submit"
+              size="lg"
+              disabled={pending || voiceRecording || !draft.trim()}
+              className="order-3 h-11 shrink-0 rounded-full px-4 sm:order-0 sm:px-5"
+            >
+              {pending ? (
+                <LoaderCircle className="size-4 animate-spin" />
+              ) : (
+                <Send className="size-4" />
+              )}
+              Send
+            </Button>
+          </form>
+          <p className="mt-2 hidden flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground sm:flex">
+            <span className="inline-flex items-center gap-1">
+              <Mic className="size-3" />
+              Record → recognize (Chrome/Edge works best) → quick edit → Send
+            </span>
+            {!voiceSupported ? (
+              <span className="inline-flex items-center gap-1 text-destructive">
+                <MicOff className="size-3" />
+                This device does not support a microphone
+              </span>
+            ) : null}
+          </p>
+        </div>
+      </section>
+    </div>
+  );
+});
