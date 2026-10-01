@@ -633,11 +633,19 @@ function FlashRound({
                 {question.word}
               </span>
               <span className="mt-4 block text-base text-primary">{question.ipa}</span>
+              {question.partOfSpeech ? (
+                <span className="mt-2 inline-flex w-fit rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold tracking-[0.08em] text-primary uppercase">
+                  {question.partOfSpeech}
+                </span>
+              ) : null}
               <span className="mt-2 block text-4xl font-semibold tracking-tight">{question.meaningVi}</span>
               <span className="mt-4 block text-sm leading-6 text-muted-foreground">{question.gloss}</span>
             </span>
-            <span className="rounded-2xl bg-muted/70 px-4 py-3 text-sm leading-6 text-foreground">
-              {question.example}
+            <span className="space-y-2 rounded-2xl bg-muted/70 px-4 py-3 text-sm leading-6 text-foreground">
+              <span className="block">{question.example}</span>
+              {question.exampleVi ? (
+                <span className="block border-t border-border/60 pt-2 text-muted-foreground">{question.exampleVi}</span>
+              ) : null}
             </span>
           </span>
         </button>
@@ -1120,7 +1128,7 @@ export const GamePlayPageView = memo(function GamePlayPageView({
             <Lightbulb className="mt-0.5 size-4 shrink-0 text-accent" />
             {game.body}{" "}
             {decks.length
-              ? "Each session plays up to 10 words: missed and due words first, then new ones."
+              ? "Play the full deck: missed and due words first, then new ones. Picture quiz includes only words with pictures; decks without pictures use Flip."
               : "You will play up to 5 short rounds, then see your score."}
           </p>
           {decks.length ? (
@@ -1138,7 +1146,9 @@ export const GamePlayPageView = memo(function GamePlayPageView({
           ) : null}
           <div className="flex flex-wrap gap-3">
             <Button className="h-11 rounded-full px-6" onClick={onStart}>
-              {activeDeck ? `Start ${activeDeck.title}` : "Start playing"}
+              {activeDeck
+                ? `Start ${activeDeck.title} · ${mode === "picture" && activeDeck.pictureCount > 0 ? activeDeck.pictureCount : activeDeck.cardCount} words`
+                : "Start playing"}
             </Button>
             <Button asChild variant="outline" className="h-11 rounded-full">
               <Link href={`/skills/${game.relatedSkill}`}>Related skill drill</Link>

@@ -106,6 +106,7 @@ function notifyPreferences() {
   window.dispatchEvent(new Event(PREFERENCES_EVENT));
 }
 
+let appearanceGeneration = 0;
 let appearanceSyncArmed = false;
 let applyingRemoteAppearance = false;
 let appearanceSyncTimer: ReturnType<typeof setTimeout> | null = null;
@@ -115,29 +116,44 @@ function queueAppearanceSync() {
   if (appearanceSyncTimer) clearTimeout(appearanceSyncTimer);
   appearanceSyncTimer = setTimeout(() => {
     appearanceSyncTimer = null;
-    void import("@/features/accounts/api").then(({ accountApi }) =>
-      accountApi.update({
-        appearanceTheme: getThemePreference(),
-        appearanceAccent: getAccentPreference(),
-        appearanceTextSize: getTextSizePreference(),
-      }),
-    );
+    const generation = appearanceGeneration;
+    const appearance = {
+      appearanceTheme: getThemePreference(),
+      appearanceAccent: getAccentPreference(),
+      appearanceTextSize: getTextSizePreference(),
+    };
+    void import("@/features/accounts/api").then(({ accountApi }) => {
+      if (!appearanceSyncArmed || generation !== appearanceGeneration) return;
+      return accountApi.update(appearance);
+    }).catch(() => undefined);
   }, 300);
 }
 
 export function disarmAppearanceSync() {
+  appearanceGeneration += 1;
   appearanceSyncArmed = false;
   if (appearanceSyncTimer) clearTimeout(appearanceSyncTimer);
+  appearanceSyncTimer = null;
 }
 
-export async function hydrateAppearancePreferences() {
+/** Local reset only: never overwrite the account's saved appearance. */
+export function resetAccountAppearance() {
+  disarmAppearanceSync();
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(THEME_STORAGE_KEY);
+  localStorage.removeItem(ACCENT_STORAGE_KEY);
+  paintTheme("system");
+  paintAccent("indigo");
+  window.dispatchEvent(new Event(THEME_EVENT));
+  notifyPreferences();
+}
+
+export async function hydrateAppearancePreferences(expectedUserId?: string) {
+  disarmAppearanceSync();
+  const generation = appearanceGeneration;
   const { accountApi } = await import("@/features/accounts/api");
-  let profile;
-  try {
-    profile = await accountApi.get();
-  } catch {
-    return;
-  }
+  const profile = await accountApi.get();
+  if (generation !== appearanceGeneration || (expectedUserId && profile.id !== expectedUserId)) return false;
   applyingRemoteAppearance = true;
   const missing: {
     appearanceTheme?: ThemePreference;
@@ -148,13 +164,15 @@ export async function hydrateAppearancePreferences() {
     paintTheme(profile.appearanceTheme);
     localStorage.setItem(THEME_STORAGE_KEY, profile.appearanceTheme);
   } else {
-    missing.appearanceTheme = getThemePreference();
+    paintTheme("system");
+    localStorage.removeItem(THEME_STORAGE_KEY);
   }
   if (isAccentId(profile.appearanceAccent)) {
     paintAccent(profile.appearanceAccent);
     localStorage.setItem(ACCENT_STORAGE_KEY, profile.appearanceAccent);
   } else {
-    missing.appearanceAccent = getAccentPreference();
+    paintAccent("indigo");
+    localStorage.removeItem(ACCENT_STORAGE_KEY);
   }
   if (isTextSizeId(profile.appearanceTextSize)) {
     paintTextSize(profile.appearanceTextSize);
@@ -169,6 +187,7 @@ export async function hydrateAppearancePreferences() {
   if (Object.keys(missing).length > 0) {
     await accountApi.update(missing);
   }
+  return generation === appearanceGeneration;
 }
 
 export function getPreferredLevel(): SkillLevel | null {

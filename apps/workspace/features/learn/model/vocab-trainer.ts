@@ -10,7 +10,6 @@ export const VOCAB_MODES: Array<{ id: VocabMode; label: string }> = [
   { id: "listen", label: "Listen & pick" },
 ];
 
-export const VOCAB_SESSION_SIZE = 10;
 export const MASTERED_BOX = 5;
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** Mirrors the backend Leitner intervals so optimistic updates match the server. */
@@ -60,7 +59,6 @@ export function pickVocabSession(
   pool: LearningGameRound[],
   progress: VocabProgressMap,
   mode: VocabMode,
-  size = VOCAB_SESSION_SIZE,
 ) {
   const now = Date.now();
   const usable = pool.filter((round) => supportsMode(round, mode));
@@ -76,7 +74,7 @@ export function pickVocabSession(
     else rest.push(round);
   }
   rest.sort((a, b) => (progress.get(a.id)?.box ?? 0) - (progress.get(b.id)?.box ?? 0));
-  return [...shuffleInPlace(missed), ...shuffleInPlace(due), ...shuffleInPlace(fresh), ...rest].slice(0, size);
+  return [...shuffleInPlace(missed), ...shuffleInPlace(due), ...shuffleInPlace(fresh), ...rest];
 }
 
 export function reviewRounds(pool: LearningGameRound[], progress: VocabProgressMap, mode: VocabMode) {
@@ -109,7 +107,7 @@ export function toModeRound(round: LearningGameRound, mode: VocabMode, all: Lear
     prompt: mode === "picture" ? "What is this? Choose the English word." : "Listen, then pick the word you heard.",
     options,
     correctIndex: options.indexOf(card.word),
-    explanation: `${card.word} ${card.ipa} — ${card.meaningVi}. ${card.gloss}`,
+    explanation: `${card.word} ${card.ipa}${card.partOfSpeech ? ` · ${card.partOfSpeech}` : ""} — ${card.meaningVi}. ${card.gloss}${card.exampleVi ? ` ${card.exampleVi}` : ""}`,
   };
   return {
     ...round,

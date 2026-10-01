@@ -71,6 +71,8 @@ export type LearningQuestion =
       meaningVi: string;
       gloss: string;
       example: string;
+      partOfSpeech?: string;
+      exampleVi?: string;
       explanation: string;
     };
 

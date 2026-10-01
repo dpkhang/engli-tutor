@@ -1,5 +1,7 @@
 "use client";
 
+import { resetAccountAppearance } from "@/features/settings/model/preferences";
+
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { authClient, useSession } from "@/lib/auth-client";
@@ -162,8 +164,10 @@ function AppShellFrame({ children }: { children: ReactNode }) {
     setAccountOpen(false);
     beginSignOut();
     try {
+      const result = await authClient.signOut();
+      if (result.error) throw new Error("Sign out failed");
+      resetAccountAppearance();
       queryClient.clear();
-      await authClient.signOut();
       window.location.assign("/login");
     } catch {
       endSignOut();

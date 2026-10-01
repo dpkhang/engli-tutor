@@ -1,5 +1,7 @@
 "use client";
 
+import { resetAccountAppearance } from "@/features/settings/model/preferences";
+
 import { useCallback, useLayoutEffect, useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useActionDialog, useToast } from "@engli-tutor/ui";
@@ -107,8 +109,10 @@ export function AccountsPage({ embedded = false }: { embedded?: boolean }) {
     if (!accepted) return;
     beginSignOut();
     try {
+      const result = await authClient.signOut();
+      if (result.error) throw new Error("Sign out failed");
+      resetAccountAppearance();
       queryClient.clear();
-      await authClient.signOut();
       window.location.assign("/login");
     } catch {
       endSignOut();
