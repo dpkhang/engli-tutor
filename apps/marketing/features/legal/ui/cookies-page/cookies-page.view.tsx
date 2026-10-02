@@ -1,3 +1,5 @@
+"use client";
+
 import { CookieConsentManageButton } from "@engli-tutor/ui";
 import { useMarketingI18n } from "@/features/i18n";
 import { LegalDocumentView } from "../legal-document";

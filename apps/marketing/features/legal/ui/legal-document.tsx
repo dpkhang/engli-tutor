@@ -1,3 +1,5 @@
+"use client";
+
 import type { LegalCtaCard } from "../model/legal-ctas";
 import type { PolicySection } from "../model/policy";
 import type { ReactNode } from "react";

@@ -1,3 +1,5 @@
+"use client";
+
 import { LegalDocumentView } from "../legal-document";
 import { PRIVACY_HUB_CTAS } from "../../model/legal-ctas";
 import { POLICY_SECTIONS, POLICY_UPDATED_AT } from "../../model/policy";

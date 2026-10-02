@@ -37,7 +37,7 @@ export const STARTERS: Record<TutorScenario, string> = {
   free: "Hi! I'm ready to practice English with you. What topic would you like to talk about today?",
 };
 
-type ChatMessage = TutorChatMessage & { audioUrl?: string };
+type ChatMessage = TutorChatMessage & { audioUrl?: string; streaming?: boolean };
 
 function splitCoach(content: string): { english: string; tip: string | null } {
   const marker = content.indexOf("💬");
@@ -164,7 +164,9 @@ export const TutorChatPageView = memo(function TutorChatPageView({
                 <span
                   className={cn(
                     "ml-1.5 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase",
-                    scenario === item.id ? "bg-primary/10 text-primary" : "bg-amber-300/20 text-amber-200",
+                    scenario === item.id
+                      ? "bg-primary/10 text-primary"
+                      : "bg-amber-300/20 text-amber-200",
                   )}
                 >
                   <Crown className="size-2.5" />
@@ -247,7 +249,10 @@ export const TutorChatPageView = memo(function TutorChatPageView({
                     ) : null}
                     {english}
                     {!isUser && message.streaming ? (
-                      <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse rounded-full bg-primary align-[-2px]" aria-hidden />
+                      <span
+                        className="ml-0.5 inline-block h-4 w-0.5 animate-pulse rounded-full bg-primary align-[-2px]"
+                        aria-hidden
+                      />
                     ) : null}
                   </div>
                   {message.audioUrl ? (
@@ -282,7 +287,9 @@ export const TutorChatPageView = memo(function TutorChatPageView({
                     <span className="size-1.5 animate-bounce rounded-full bg-primary" />
                   </span>
                 </div>
-                <p className="mt-1 pl-9 text-xs text-muted-foreground">{t("workspace.aiPreparingReply")}</p>
+                <p className="mt-1 pl-9 text-xs text-muted-foreground">
+                  {t("workspace.aiPreparingReply")}
+                </p>
               </div>
             </div>
           ) : null}
@@ -309,10 +316,7 @@ export const TutorChatPageView = memo(function TutorChatPageView({
               </span>
               {t("workspace.recordEnglishInstruction")}
               {!voiceSpeechSupported ? (
-                <span className="text-muted-foreground">
-                  {" "}
-                  ({t("workspace.noSttBrowser")})
-                </span>
+                <span className="text-muted-foreground"> ({t("workspace.noSttBrowser")})</span>
               ) : null}
             </div>
           ) : null}
@@ -375,9 +379,7 @@ export const TutorChatPageView = memo(function TutorChatPageView({
               onChange={(event) => onDraftChange(event.target.value)}
               onKeyDown={onDraftKeyDown}
               placeholder={
-                voiceRecording
-                  ? t("workspace.listeningStop")
-                  : t("workspace.writeMessage")
+                voiceRecording ? t("workspace.listeningStop") : t("workspace.writeMessage")
               }
               disabled={pending || voiceRecording}
               className="order-1 col-span-3 max-h-32 min-h-20 w-full resize-none overflow-y-auto rounded-xl border-0 bg-background px-3.5 py-3 text-base leading-6 shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30 disabled:opacity-60 sm:order-0 sm:col-auto sm:max-h-36 sm:min-h-11 sm:flex-1 sm:rounded-2xl sm:border sm:border-border sm:px-4 sm:py-2.5 sm:text-sm sm:shadow-none sm:focus-visible:border-primary sm:focus-visible:ring-primary/40"

@@ -8,6 +8,7 @@ export type TutorExplanationLocale = "en" | "vi";
 export type TutorChatMessage = {
   role: "user" | "assistant";
   content: string;
+  streaming?: boolean;
 };
 
 export type TutorChatResponse = {
@@ -42,7 +43,11 @@ export const tutorApi = {
       method: "POST",
       credentials: "include",
       signal: input.signal,
-      headers: { Accept: "text/event-stream", "Content-Type": "application/json", "X-Client": "pagecraft-workspace" },
+      headers: {
+        Accept: "text/event-stream",
+        "Content-Type": "application/json",
+        "X-Client": "pagecraft-workspace",
+      },
       body: JSON.stringify({
         messages: input.messages,
         scenario: input.scenario,
@@ -63,12 +68,22 @@ export const tutorApi = {
       const events = buffer.split("\n\n");
       buffer = events.pop() ?? "";
       for (const event of events) {
-        const data = event.split("\n").find((line) => line.startsWith("data: "))?.slice(6);
+        const data = event
+          .split("\n")
+          .find((line) => line.startsWith("data: "))
+          ?.slice(6);
         if (!data) continue;
-        const payload = JSON.parse(data) as { text?: string; reply?: string; demo?: boolean; message?: string };
+        const payload = JSON.parse(data) as {
+          text?: string;
+          reply?: string;
+          demo?: boolean;
+          message?: string;
+        };
         if (event.startsWith("event: chunk")) input.onChunk(payload.text ?? "");
-        if (event.startsWith("event: done")) result = { reply: payload.reply ?? "", demo: payload.demo ?? false };
-        if (event.startsWith("event: error")) throw new Error(payload.message ?? "Unable to chat with AI");
+        if (event.startsWith("event: done"))
+          result = { reply: payload.reply ?? "", demo: payload.demo ?? false };
+        if (event.startsWith("event: error"))
+          throw new Error(payload.message ?? "Unable to chat with AI");
       }
       if (done) break;
     }
@@ -77,11 +92,7 @@ export const tutorApi = {
   },
 
   /** Returns MPEG audio when TTS is configured; throws on non-OK responses. */
-  speak: async (input: {
-    text: string;
-    voice?: string;
-    signal?: AbortSignal;
-  }): Promise<Blob> => {
+  speak: async (input: { text: string; voice?: string; signal?: AbortSignal }): Promise<Blob> => {
     const response = await fetch(`${getApiBase()}/api/tutor/speak`, {
       method: "POST",
       credentials: "include",
