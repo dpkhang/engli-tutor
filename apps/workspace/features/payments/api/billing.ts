@@ -5,8 +5,15 @@ export type BillingPeriod = "monthly" | "quarterly" | "yearly";
 export type PlanLimits = {
   tutorChatPerDay: number | null;
   ttsPerDay: number | null;
+  aiTranslatePerDay?: number | null;
+  gameSessionsPerDay?: number | null;
+  vocabReviewsPerDay?: number | null;
   enforcement: "block" | "throttle";
   proScenarios: boolean;
+  fullVocabModes?: boolean;
+  advancedProgress?: boolean;
+  deepFeedback?: boolean;
+  customPractice?: boolean;
 };
 
 export type PeriodPrice = {
@@ -38,7 +45,7 @@ export type Entitlements = {
   trialAvailable: boolean;
 };
 
-export type UsageMetric = "tutor_chat" | "tts";
+export type UsageMetric = "tutor_chat" | "tts" | "ai_translate" | "game_session";
 
 export type BillingMe = {
   subscription: {

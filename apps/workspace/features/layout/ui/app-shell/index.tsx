@@ -8,11 +8,12 @@ import { authClient, useSession } from "@/lib/auth-client";
 import { useActionDialog } from "@engli-tutor/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useBillingMe } from "@/features/payments/hooks/use-billing";
-import { hasPremiumAccess, planBadgeLabel } from "@/features/payments/model/plans";
+import { hasPremiumAccess } from "@/features/payments/model/plans";
 import { usePendingReferral } from "@/features/referrals";
 import { useSignOutLoading } from "../shared";
 import { TranslateSessionProvider, useTranslateSession, isLessonTranslatePath } from "@/features/translate";
 import { LessonSearch } from "../lesson-search";
+import { getPathLocale } from "@/lib/locale-path";
 import { AppShellView } from "./app-shell.view";
 
 function isAiDockHiddenPath(pathname: string) {
@@ -24,15 +25,21 @@ function isAiDockHiddenPath(pathname: string) {
   );
 }
 
+function stripLocalePath(pathname: string) {
+  const locale = getPathLocale(pathname);
+  return locale ? pathname.slice(locale.length + 1) || "/" : pathname;
+}
+
 function isBareShellPath(pathname: string) {
+  const routePath = stripLocalePath(pathname);
   return (
-    pathname === "/login" ||
-    pathname === "/onboarding" ||
-    pathname === "/welcome" ||
-    pathname === "/speaking" ||
-    pathname.startsWith("/demo/") ||
-    pathname === "/domain-unavailable" ||
-    pathname === "/payments/result"
+    routePath === "/login" ||
+    routePath === "/onboarding" ||
+    routePath === "/welcome" ||
+    routePath === "/speaking" ||
+    routePath.startsWith("/demo/") ||
+    routePath === "/domain-unavailable" ||
+    routePath === "/payments/result"
   );
 }
 
@@ -211,8 +218,6 @@ function AppShellFrame({ children }: { children: ReactNode }) {
       clipAiTools={clipAiTools}
       aiToolsHeight={aiToolsHeight}
       user={user}
-      planLoading={billing.isLoading}
-      planLabel={planBadgeLabel(billing.data)}
       hasPaidPlan={hasPremiumAccess(billing.data)}
       displayName={displayName}
       initials={initials}

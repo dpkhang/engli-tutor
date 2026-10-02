@@ -1,9 +1,10 @@
 "use client";
 
 import { memo } from "react";
-import Link from "next/link";
 import { ArrowRight, BookOpen, Headphones, Mic, PenLine, Sparkles } from "lucide-react";
 import { LEVELS, SKILLS, type SkillId } from "../../model/skill-exercises";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { LocalizedLink } from "@/features/i18n/localized-link";
 
 const THEMES: Record<
   SkillId,
@@ -46,6 +47,7 @@ export const SkillsHubPageView = memo(function SkillsHubPageView({
   loading,
   source,
 }: SkillsHubPageViewProps) {
+  const t = useWorkspaceI18n();
   return (
     <div className="space-y-10 pb-8">
       <header className="workspace-hero-accent relative overflow-hidden rounded-3xl bg-linear-to-br from-primary to-primary/80 px-5 py-6 text-primary-foreground sm:rounded-4xl sm:px-10 sm:py-11">
@@ -56,15 +58,13 @@ export const SkillsHubPageView = memo(function SkillsHubPageView({
         <div className="relative">
           <span className="hidden items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium sm:inline-flex">
             <Sparkles className="size-3.5 text-amber-300" />
-            Practice your way
+            {t("workspace.practiceYourWay")}
           </span>
           <h1 className="max-w-xl text-xl font-semibold tracking-[-0.035em] sm:mt-5 sm:text-4xl">
-            Four skills. One more confident you.
+            {t("workspace.fourSkillsTitle")}
           </h1>
           <p className="mt-3 hidden max-w-2xl text-sm leading-6 text-white/70 sm:block sm:text-base">
-            Choose what feels useful today. Every short exercise moves you forward — from A2 and B1
-            to TOEIC and IELTS. Save individual exercises to find them quickly in My progress.
-            {!loading && source === "api" ? " Fresh activities are ready for you." : ""}
+            {t("workspace.fourSkillsDescription")}{!loading && source === "api" ? t("workspace.freshActivities") : ""}
           </p>
         </div>
       </header>
@@ -75,7 +75,7 @@ export const SkillsHubPageView = memo(function SkillsHubPageView({
           const Icon = theme.icon;
           const stats = coverage?.[skill.id];
           return (
-            <Link
+            <LocalizedLink
               key={skill.id}
               href={`/skills/${skill.id}`}
               className={`group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border/70 bg-linear-to-br ${theme.gradient} via-card to-card p-6 transition-all hover:-translate-y-1 hover:border-transparent hover:shadow-xl`}
@@ -101,40 +101,40 @@ export const SkillsHubPageView = memo(function SkillsHubPageView({
                   </span>
                 ))}
               </div>
-            </Link>
+            </LocalizedLink>
           );
         })}
       </section>
 
       <section className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div>
-          <p className="font-semibold">Want something shorter?</p>
+          <p className="font-semibold">{t("workspace.wantSomethingShorter")}</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Mini-games take one to three minutes and reuse the same workplace English.
+            {t("workspace.miniGamesDescription")}
           </p>
         </div>
-        <Link
+        <LocalizedLink
           href="/games"
           className="inline-flex shrink-0 items-center gap-2 self-start rounded-full border border-border px-5 py-2.5 text-sm font-semibold hover:bg-muted sm:self-auto"
         >
-          Play a game
-        </Link>
+          {t("workspace.playGame")}
+        </LocalizedLink>
       </section>
 
       <section className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div>
-          <p className="font-semibold">Not sure where to begin?</p>
+          <p className="font-semibold">{t("workspace.notSureWhereToBegin")}</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Start with speaking—the fastest way to turn what you know into confidence.
+            {t("workspace.startSpeakingDescription")}
           </p>
         </div>
-        <Link
+        <LocalizedLink
           href="/speaking"
           className="inline-flex shrink-0 items-center gap-2 self-start rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 sm:self-auto"
         >
           <Mic className="size-4" />
-          Talk with AI
-        </Link>
+          {t("workspace.talkWithAi")}
+        </LocalizedLink>
       </section>
     </div>
   );

@@ -1,9 +1,9 @@
 "use client";
 
 import { memo } from "react";
-import Link from "next/link";
 import { Check, CircleX, LoaderCircle } from "lucide-react";
 import { Button, Card, CardContent } from "@engli-tutor/ui";
+import { LocalizedLink } from "@/features/i18n/localized-link";
 
 export type PaymentResultState = "processing" | "success" | "failed";
 
@@ -99,11 +99,11 @@ export const PaymentResultPageView = memo(function PaymentResultPageView({
 
           <div className="mt-6 flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
             <Button asChild>
-              <Link href="/skills">Back to exercises</Link>
+              <LocalizedLink href="/skills">Back to exercises</LocalizedLink>
             </Button>
             {state === "failed" ? (
               <Button asChild variant="outline">
-                <Link href="/payments">Try payment again</Link>
+                <LocalizedLink href="/payments">Try payment again</LocalizedLink>
               </Button>
             ) : null}
           </div>

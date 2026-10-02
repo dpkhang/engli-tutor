@@ -27,6 +27,9 @@ import {
 } from "@engli-tutor/ui";
 import { AnimatePresence, motion } from "motion/react";
 import { PageBackLink } from "@/features/layout";
+import { useMarketingI18n } from "@/features/i18n";
+import { isLocale, type Locale } from "@engli-tutor/i18n";
+import { usePathname } from "next/navigation";
 import {
   billingPeriodLabel,
   type BillingPeriod,
@@ -81,15 +84,20 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
   onSubscribe,
   onUpgrade,
 }: PaymentCheckoutPageViewProps) {
+  const t = useMarketingI18n();
+  const pathname = usePathname();
+  const segment = pathname.split("/")[1];
+  const locale: Locale = isLocale(segment) ? segment : "en";
+  const localize = (href: string) => href.startsWith("/") ? `/${locale}${href}` : href;
   const [showUpgradeOptions, setShowUpgradeOptions] = useState(false);
   useLockScroll(showUpgradeOptions && upgradePlans.length > 0);
 
   if (isFree || checkingBilling) {
     return (
-      <main className="grid min-h-svh place-items-center px-5">
+      <main className="marketing-container marketing-page grid min-h-svh place-items-center">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <LoaderCircle className="size-4 animate-spin" />
-          {isFree ? "Redirecting to free signup…" : "Checking your plan…"}
+          {isFree ? t("checkout.redirectingFree") : t("checkout.checkingPlan")}
         </div>
       </main>
     );
@@ -104,22 +112,22 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
       : null;
 
     return (
-      <main className="min-h-svh bg-background px-5 py-20 sm:px-8 sm:py-24">
+      <main className="marketing-page min-h-svh bg-background">
         <motion.section
-          className="mx-auto max-w-4xl"
+          className="marketing-container"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <div className="flex flex-col gap-4 rounded-lg border border-primary/25 px-4 py-4 text-primary sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div className="flex flex-col gap-4 rounded-2xl border border-primary/25 bg-background/90 p-5 text-primary shadow-sm backdrop-blur lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-start gap-3" role="status">
               <CheckCircle2 className="mt-0.5 size-6 shrink-0 drop-shadow-sm" />
               <div className="max-w-lg">
                 <p className="text-base font-semibold sm:text-lg">
-                  You&apos;re subscribed to {ownedPlan.name}
+                  {t("checkout.subscribedTo")} {ownedPlan.name}
                 </p>
                 <p className="mt-1 text-sm text-foreground/70">
-                  Your plan is active and benefits are ready in the workspace.
+                  {t("checkout.activeBenefitsReady")}
                 </p>
               </div>
             </div>
@@ -131,7 +139,7 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
                   disabled={pending}
                   onClick={() => setShowUpgradeOptions(true)}
                 >
-                  <ArrowUpCircle /> Upgrade plan
+                  <ArrowUpCircle /> {t("checkout.upgradePlan")}
                 </Button>
               ) : null}
               <Button
@@ -139,7 +147,7 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
                 variant={upgradePlans.length > 0 ? "outline" : "default"}
                 className="w-full sm:w-auto"
               >
-                <a href={workspaceUrl}>Go to workspace</a>
+                <a href={workspaceUrl}>{t("checkout.workspace")}</a>
               </Button>
             </div>
           </div>
@@ -150,7 +158,7 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
             </Alert>
           ) : null}
 
-          <div className="relative mt-6 h-52 overflow-hidden rounded-lg sm:h-64">
+          <div className="relative mt-6 h-52 overflow-hidden rounded-2xl border border-border/70 shadow-lg sm:h-64">
             <img
               src={ownedPlan.imageUrl}
               alt={`${ownedPlan.name} plan`}
@@ -159,7 +167,7 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
             <div aria-hidden className="absolute inset-0 bg-black/35" />
             <div className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-7">
               <p className="text-xs font-semibold tracking-[0.14em] text-white/75 uppercase">
-                Current plan · {periodLabel}
+                {t("checkout.currentPlan")} · {periodLabel}
               </p>
               <h1 className="mt-1 font-display text-4xl tracking-tight sm:text-5xl">
                 {ownedPlan.name}
@@ -168,32 +176,32 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
             </div>
           </div>
 
-          <dl className="mt-6 grid grid-cols-2 border-y text-sm sm:grid-cols-4">
+          <dl className="mt-6 grid grid-cols-2 overflow-hidden rounded-2xl border border-border/80 bg-background/90 text-sm shadow-sm sm:grid-cols-4">
             <div className="border-r border-b px-3 py-5 sm:border-b-0 sm:px-5">
-              <dt className="text-xs text-muted-foreground">Billing cycle</dt>
+              <dt className="text-xs text-muted-foreground">{t("checkout.billingCycle")}</dt>
               <dd className="mt-1.5 font-semibold text-foreground">{periodLabel}</dd>
             </div>
             <div className="border-b px-3 py-5 sm:border-r sm:border-b-0 sm:px-5">
-              <dt className="text-xs text-muted-foreground">AI tutor chats / day</dt>
+              <dt className="text-xs text-muted-foreground">{t("checkout.tutorChatsPerDay")}</dt>
               <dd className="mt-1.5 flex items-center gap-1.5 font-semibold text-foreground">
                 <MessageCircle className="size-4 text-primary" />
-                {dailyChatLimit === null ? "Unlimited" : (dailyChatLimit ?? "—")}
+                {dailyChatLimit === null ? t("checkout.unlimited") : (dailyChatLimit ?? "—")}
               </dd>
             </div>
             <div className="border-r px-3 py-5 sm:px-5">
-              <dt className="text-xs text-muted-foreground">Chats used today</dt>
+              <dt className="text-xs text-muted-foreground">{t("checkout.chatsUsedToday")}</dt>
               <dd className="mt-1.5 font-semibold text-foreground">{chatsUsedToday ?? 0}</dd>
             </div>
             <div className="px-3 py-5 sm:px-5">
-              <dt className="text-xs text-muted-foreground">Next renewal</dt>
+              <dt className="text-xs text-muted-foreground">{t("checkout.nextRenewal")}</dt>
               <dd className="mt-1.5 font-semibold text-foreground">{renewalDate ?? "—"}</dd>
             </div>
           </dl>
 
-          <div className="mt-8">
+          <div className="mt-8 rounded-2xl border border-border/80 bg-background/90 p-5 shadow-sm sm:p-6">
             <div className="flex items-end justify-between gap-4 border-b pb-3">
-              <h2 className="text-base font-semibold text-foreground">Plan benefits</h2>
-              <span className="text-xs text-muted-foreground">Active</span>
+              <h2 className="text-base font-semibold text-foreground">{t("checkout.planBenefits")}</h2>
+              <span className="text-xs text-muted-foreground">{t("checkout.active")}</span>
             </div>
             <ul className="grid gap-x-8 gap-y-3 pt-5 text-sm sm:grid-cols-2">
               {ownedPlan.features.map((feature) => (
@@ -223,7 +231,7 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
                   aria-modal="true"
                   aria-labelledby="upgrade-dialog-title"
                   className={cn(
-                    "relative my-auto w-full rounded-2xl border bg-popover p-6 text-popover-foreground shadow-2xl",
+                    "relative my-auto w-full min-w-0 rounded-2xl border border-border/80 bg-popover p-5 text-popover-foreground shadow-2xl sm:p-6",
                     upgradePlans.length === 1 && "max-w-md",
                     upgradePlans.length === 2 && "max-w-3xl",
                     upgradePlans.length >= 3 && "max-w-5xl",
@@ -238,7 +246,7 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
                     variant="ghost"
                     size="icon"
                     className="absolute top-4 right-4"
-                    aria-label="Close"
+                    aria-label={t("common.actions.cancel")}
                     onClick={() => setShowUpgradeOptions(false)}
                   >
                     <X />
@@ -248,10 +256,10 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
                       id="upgrade-dialog-title"
                       className="flex items-center gap-2 text-xl font-semibold"
                     >
-                      <ArrowUpCircle className="size-5 text-primary" /> Choose a plan to upgrade
+                      <ArrowUpCircle className="size-5 shrink-0 text-primary" /> {t("checkout.chooseUpgrade")}
                     </h2>
                     <p className="text-sm text-muted-foreground">
-                      Only plans above {ownedPlan.name} are shown.
+                      {t("checkout.onlyPlansAbove")} {ownedPlan.name} {t("checkout.plans")}
                     </p>
                   </div>
                   <div
@@ -263,7 +271,7 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
                     )}
                   >
                     {upgradePlans.map((upgradePlan) => (
-                      <Card key={upgradePlan.id} className="shadow-none">
+                      <Card key={upgradePlan.id} className="rounded-2xl border-border/80 shadow-sm">
                         <CardHeader className="space-y-2">
                           <CardTitle className="text-xl">{upgradePlan.name}</CardTitle>
                           <CardDescription>{upgradePlan.description}</CardDescription>
@@ -309,31 +317,31 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
 
   return (
     <main className="relative min-h-svh bg-[radial-gradient(ellipse_at_top,hsl(214_22%_92%),hsl(var(--background))_55%)] dark:bg-[radial-gradient(ellipse_at_top,hsl(222_28%_14%),hsl(var(--background))_55%)]">
-      <div className="mx-auto grid max-w-6xl gap-10 px-5 pt-24 pb-16 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14 lg:pt-28 lg:pb-20">
+      <div className="marketing-container marketing-page grid gap-6 sm:gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-10">
         <motion.div
-          className="space-y-8"
+          className="min-w-0 space-y-6 sm:space-y-8"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45 }}
         >
           <div className="space-y-3">
-            <PageBackLink href={`/payment?plan=${plan.id}`} label="plans" />
+            <PageBackLink href={localize(`/payment?plan=${plan.id}`)} label={t("checkout.plans")} />
             <div className="space-y-2">
               <p className="text-xs font-semibold tracking-[0.18em] text-accent uppercase">
                 Checkout
               </p>
               <h1 className="font-display text-3xl tracking-tight text-foreground sm:text-4xl">
-                Complete your subscription
+                {t("checkout.completeSubscription")}
               </h1>
               <p className="max-w-lg text-sm text-muted-foreground sm:text-base">
                 <span className="font-medium text-foreground">{plan.name}</span> plan — secure
-                payment via Stripe (international cards).
+                {t("checkout.securePayment")}
               </p>
             </div>
           </div>
 
           <div className="space-y-3">
-            <p className="text-sm font-medium text-foreground">Billing period</p>
+            <p className="text-sm font-medium text-foreground">{t("checkout.billingPeriod")}</p>
             <BillingPeriodSwitch value={period} onChange={onPeriodChange} />
             <p className="text-xs text-muted-foreground">{PERIOD_NOTE[period]}</p>
           </div>
@@ -344,20 +352,19 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
             </Alert>
           ) : null}
 
-          <div className="space-y-4 rounded-2xl border border-border bg-background p-6">
+          <div className="space-y-4 rounded-2xl border border-border/80 bg-background/90 p-5 shadow-sm backdrop-blur sm:p-6">
             <div className="flex items-start gap-3">
               <CreditCard className="mt-0.5 size-5 text-accent" />
               <div className="space-y-1">
-                <p className="text-sm font-medium text-foreground">Pay by card</p>
+                <p className="text-sm font-medium text-foreground">{t("checkout.payByCard")}</p>
                 <p className="text-sm text-muted-foreground">
-                  You&apos;ll be redirected to Stripe Checkout. Your plan unlocks automatically
-                  after a successful payment.
+                  {t("checkout.stripeDescription")}
                 </p>
               </div>
             </div>
             <Button
               type="button"
-              className="h-11 w-full"
+              className="h-auto min-h-11 w-full py-2 whitespace-normal"
               size="lg"
               disabled={pending}
               onClick={onSubscribe}
@@ -366,16 +373,16 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
                 <LoaderCircle className="animate-spin" />
               ) : (
                 <>
-                  <CreditCard /> Pay {billing.label} with Stripe
+                  <CreditCard /> {t("checkout.payWithStripe")} {billing.label}
                 </>
               )}
             </Button>
             <div className="flex flex-wrap justify-center gap-2">
-              <Button asChild variant="outline" size="sm">
-                <Link href="/policy" target="_blank" rel="noopener noreferrer">Privacy Policy</Link>
+              <Button asChild variant="outline" size="sm" className="min-h-11">
+                <Link href={localize("/policy")} target="_blank" rel="noopener noreferrer">{t("checkout.privacy")}</Link>
               </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link href="/policy/cookies" target="_blank" rel="noopener noreferrer">Cookie Policy</Link>
+              <Button asChild variant="outline" size="sm" className="min-h-11">
+                <Link href={localize("/policy/cookies")} target="_blank" rel="noopener noreferrer">{t("checkout.cookies")}</Link>
               </Button>
             </div>
             <p className="text-center text-xs text-muted-foreground">
@@ -389,12 +396,12 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
         </motion.div>
 
         <motion.aside
-          className="h-fit space-y-6 overflow-hidden rounded-sm border border-border bg-background p-7 sm:p-8 lg:sticky lg:top-24"
+          className="h-fit min-w-0 space-y-5 overflow-hidden rounded-2xl border border-border/80 bg-background/90 p-5 shadow-lg backdrop-blur sm:space-y-6 sm:p-8 lg:sticky lg:top-24"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.08 }}
         >
-          <div className="-mx-7 -mt-7 aspect-video overflow-hidden border-b sm:-mx-8 sm:-mt-8">
+          <div className="-mx-5 -mt-5 aspect-video overflow-hidden border-b sm:-mx-8 sm:-mt-8">
             <img src={plan.imageUrl} alt={`${plan.name} plan`} className="size-full object-cover" />
           </div>
           <div className="space-y-1">
@@ -414,9 +421,9 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
             ))}
           </ul>
 
-          <div className="flex items-end justify-between gap-4">
+          <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
             <div>
-              <p className="text-xs text-muted-foreground">Total</p>
+              <p className="text-xs text-muted-foreground">{t("checkout.total")}</p>
               <p className="font-display text-3xl tracking-tight text-foreground">
                 {billing.label}
               </p>
@@ -430,7 +437,7 @@ export const PaymentCheckoutPageView = memo(function PaymentCheckoutPageView({
           </p>
 
           <Link href="/payment">
-            <Button type="button" variant="outline" className="w-full">
+            <Button type="button" variant="outline" className="min-h-11 w-full">
               View all plans
             </Button>
           </Link>

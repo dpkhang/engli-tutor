@@ -7,10 +7,11 @@ import { cn } from "@engli-tutor/ui";
 import { PageHeader } from "@/features/layout";
 import { SETTINGS_NAV, isSettingsNavActive, type SettingsSection } from "../../model/nav";
 import { SettingsContentLoading } from "../shared";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 
 const SIDEBAR_PRIVACY = [
-  { href: "/policy", label: "Privacy Policy", icon: ShieldCheck },
-  { href: "/policy/cookies", label: "Cookie Policy", icon: Cookie },
+  { href: "/policy", key: "workspace.privacyPolicy", icon: ShieldCheck },
+  { href: "/policy/cookies", key: "workspace.cookiePolicy", icon: Cookie },
 ];
 
 export type SettingsShellViewProps = {
@@ -24,18 +25,19 @@ export const SettingsShellView = memo(function SettingsShellView({
   section,
   children,
 }: SettingsShellViewProps) {
+  const t = useWorkspaceI18n();
   return (
     <div className="space-y-4 sm:space-y-5">
       <PageHeader
-        eyebrow="Personal"
-        title="Settings"
-        description={section?.description ?? "Manage your EngliTutor workspace."}
+        eyebrow={t("workspace.personal")}
+        title={t("workspace.settings")}
+        description={section?.description ?? t("workspace.manageWorkspace")}
       />
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
         <aside className="sticky top-16 z-30 -mx-4 border-y border-border/70 bg-background/95 py-2 backdrop-blur-md sm:-mx-6 sm:px-2 lg:top-24 lg:mx-0 lg:w-56 lg:shrink-0 lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
           <nav
-            aria-label="Settings"
+            aria-label={t("workspace.settings")}
             className="scrollbar-none flex snap-x gap-1 overflow-x-auto px-4 lg:flex-col lg:overflow-visible lg:px-0"
           >
             {SETTINGS_NAV.map((item) => {
@@ -54,7 +56,7 @@ export const SettingsShellView = memo(function SettingsShellView({
                   )}
                 >
                   <Icon className="size-4" />
-                  {item.label}
+                  {t(`workspace.${item.href === "/settings" ? "appearance" : item.href.split("/").at(-1)}`)}
                 </Link>
               );
             })}
@@ -70,7 +72,7 @@ export const SettingsShellView = memo(function SettingsShellView({
                   className="inline-flex h-11 shrink-0 snap-start items-center gap-2 rounded-xl px-3.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:h-auto lg:gap-2.5 lg:px-3 lg:py-2.5"
                 >
                   <Icon className="size-4" />
-                  {item.label}
+                  {t(item.key)}
                 </Link>
               );
             })}

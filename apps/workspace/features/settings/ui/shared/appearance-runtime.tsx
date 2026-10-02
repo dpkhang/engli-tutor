@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { MotionConfig } from "motion/react";
 import { useSession } from "@/lib/auth-client";
+import { AuthSplash } from "@/providers/auth-gate";
 import {
   applyStoredAppearance,
   disarmAppearanceSync,
@@ -18,6 +19,7 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
   const userId = session?.user?.id ?? null;
   const [readyUserId, setReadyUserId] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const [sessionTimedOut, setSessionTimedOut] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [reducedMotion, setReducedMotion] = useState<"user" | "always" | "never">("user");
 
@@ -38,6 +40,13 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
       window.removeEventListener(THEME_EVENT, sync);
     };
   }, []);
+
+  useEffect(() => {
+    setSessionTimedOut(false);
+    if (!isPending) return;
+    const timeout = window.setTimeout(() => setSessionTimedOut(true), 15_000);
+    return () => window.clearTimeout(timeout);
+  }, [isPending]);
 
   useEffect(() => {
     if (isPending) return;
@@ -71,17 +80,27 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
   }, [isPending, userId, attempt]);
 
   if (isPending || (userId && readyUserId !== userId)) {
+    const hasError = isPending ? sessionTimedOut : failed;
     return (
-      <div className="grid min-h-screen place-items-center bg-background text-foreground">
-        <div className="space-y-4 p-6 text-center" role="status" aria-live="polite">
-          <p>{failed ? "Could not load your appearance settings." : "Preparing your workspace…"}</p>
-          {failed ? (
-            <button type="button" className="rounded-full border px-5 py-2" onClick={() => setAttempt((value) => value + 1)}>
-              Try again
-            </button>
-          ) : null}
-        </div>
-      </div>
+      <AuthSplash
+        busy={!hasError}
+        message={hasError
+          ? isPending ? "We could not finish checking your session. Please try again." : "Could not load your appearance settings. Please try again."
+          : "Preparing workspace..."}
+      >
+        {hasError ? (
+          <button
+            type="button"
+            className="rounded-full border px-5 py-2 text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            onClick={() => {
+              if (isPending) window.location.reload();
+              else setAttempt((value) => value + 1);
+            }}
+          >
+            Try again
+          </button>
+        ) : null}
+      </AuthSplash>
     );
   }
   return <MotionConfig reducedMotion={reducedMotion}>{children}</MotionConfig>;

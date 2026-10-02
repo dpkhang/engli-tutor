@@ -17,6 +17,8 @@ import { Button, cn, Input } from "@engli-tutor/ui";
 import { DataLoadingState } from "@/features/layout";
 import type { LessonPack } from "../../model/curriculum";
 import type { LessonProgressStatus } from "../../model/lesson-progress";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { LocalizedLink } from "@/features/i18n/localized-link";
 
 export const SKILL_FILTERS = ["All", "Listening", "Speaking", "Reading", "Writing"] as const;
 export type LessonSkillFilter = (typeof SKILL_FILTERS)[number];
@@ -42,6 +44,7 @@ export const LessonsPageView = memo(function LessonsPageView({
   favoriteIds,
   onToggleFavorite,
 }: LessonsPageViewProps) {
+  const t = useWorkspaceI18n();
   const router = useRouter();
 
   const onSearch = (event: FormEvent<HTMLFormElement>) => {
@@ -62,20 +65,19 @@ export const LessonsPageView = memo(function LessonsPageView({
         />
         <div className="relative">
           <p className="hidden text-xs font-semibold tracking-[0.16em] text-white/70 uppercase sm:block">
-            Your learning path
+            {t("workspace.learningPath")}
           </p>
           <h1 className="text-xl font-semibold tracking-[-0.035em] sm:mt-3 sm:text-4xl">
-            Learn through real-life moments
+            {t("workspace.learnRealLife")}
           </h1>
           <p className="mt-3 hidden max-w-2xl text-sm leading-6 text-white/75 sm:block sm:text-base">
-            Choose a lesson that feels useful right now. Each one blends practical English, helpful
-            tips and a little play. You can also explore{" "}
+            {t("workspace.lessonsDescription")} You can also explore{" "}
             <Link href="/skills" className="font-semibold text-white underline underline-offset-4">
-              focused skill practice
+              {t("workspace.focusedSkillPractice")}
             </Link>{" "}
             when you want to train one area.
             {!loading && source === "api"
-              ? " Showing integrated lessons from the learning API."
+              ? t("workspace.integratedLessons")
               : null}
           </p>
           <div className="mt-5">
@@ -84,7 +86,7 @@ export const LessonsPageView = memo(function LessonsPageView({
               className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/25"
             >
               <BookOpenCheck className="size-4" />
-              Manage favorites & progress
+              {t("workspace.manageFavoritesProgress")}
             </Link>
           </div>
         </div>
@@ -97,14 +99,14 @@ export const LessonsPageView = memo(function LessonsPageView({
             clearable={!query}
             name="q"
             defaultValue={query}
-            placeholder="Search lessons by topic, skill, or level…"
+            placeholder={t("workspace.searchLessons")}
             className="h-11 w-full rounded-full border border-border bg-card pr-10 pl-10 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-3 focus:ring-primary/15"
           />
           {query ? (
             <Link
               href="/lessons"
               className="absolute top-1/2 right-2.5 grid size-7 -translate-y-1/2 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
-              aria-label="Clear lesson search"
+              aria-label={t("workspace.clearLessonSearch")}
             >
               <X className="size-3.5" />
             </Link>
@@ -116,13 +118,13 @@ export const LessonsPageView = memo(function LessonsPageView({
             href="/progress"
             className="rounded-full border border-teal-500/35 bg-teal-500/10 px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-teal-500/15"
           >
-            My progress →
+            {t("workspace.myProgressArrow")}
           </Link>
           <Link
             href="/skills"
             className="rounded-full border border-accent/40 bg-accent/10 px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent/15"
           >
-            4-skill exercises →
+            {t("workspace.fourSkillExercises")}
           </Link>
           {SKILL_FILTERS.map((skill) => {
             const params = new URLSearchParams();
@@ -150,8 +152,8 @@ export const LessonsPageView = memo(function LessonsPageView({
 
       {loading ? (
         <DataLoadingState
-          title="Loading lesson packs"
-          description="Finding the right activities for your current level."
+          title={t("workspace.loadingLessonPacks")}
+          description={t("workspace.loadingLessonDescription")}
           cards={4}
         />
       ) : null}
@@ -183,12 +185,12 @@ export const LessonsPageView = memo(function LessonsPageView({
             <div className="flex flex-wrap items-center gap-2 pr-10">
               {status === "started" ? (
                 <span className="rounded-full bg-amber-500/12 px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300">
-                  In progress
+                  {t("workspace.inProgress")}
                 </span>
               ) : null}
               {status === "completed" ? (
                 <span className="rounded-full bg-emerald-500/12 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
-                  Completed
+                  {t("workspace.completed")}
                 </span>
               ) : null}
               <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
@@ -210,14 +212,14 @@ export const LessonsPageView = memo(function LessonsPageView({
               <p className="flex gap-2 text-sm text-muted-foreground">
                 <Lightbulb className="mt-0.5 size-4 shrink-0 text-accent" />
                 <span>
-                  <span className="font-medium text-foreground">Tip: </span>
+                  <span className="font-medium text-foreground">{t("workspace.tip")}</span>
                   {lesson.tip}
                 </span>
               </p>
               <p className="flex gap-2 text-sm text-muted-foreground">
                 <Gamepad2 className="mt-0.5 size-4 shrink-0 text-accent" />
                 <span>
-                  <span className="font-medium text-foreground">Game: </span>
+                  <span className="font-medium text-foreground">{t("workspace.game")}</span>
                   {lesson.gameSlug ? (
                     <Link
                       href={`/games/${lesson.gameSlug}?lesson=${lesson.id}`}
@@ -239,14 +241,14 @@ export const LessonsPageView = memo(function LessonsPageView({
               >
                 <Link href={`/practice?scenario=${lesson.scenario}&lesson=${lesson.id}`}>
                   <MessageCircle className="size-4" />
-                  Practice with AI
+                  {t("workspace.practiceWithAi")}
                 </Link>
               </Button>
               {lesson.gameSlug ? (
                 <Button asChild variant="outline" className="h-10 rounded-full">
                   <Link href={`/games/${lesson.gameSlug}?lesson=${lesson.id}`}>
                     <Gamepad2 className="size-4" />
-                    Play mini-game
+                    {t("workspace.playMiniGame")}
                   </Link>
                 </Button>
               ) : null}
@@ -258,12 +260,12 @@ export const LessonsPageView = memo(function LessonsPageView({
 
       {!loading && lessons.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-card/60 px-6 py-10 text-center">
-          <p className="font-semibold">No lessons found</p>
+          <p className="font-semibold">{t("workspace.noLessonsFound")}</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Try another keyword or clear the active filters.
+            {t("workspace.tryAnotherKeyword")}
           </p>
           <Button asChild variant="outline" className="mt-4 rounded-full">
-            <Link href="/lessons">Clear search</Link>
+            <Link href="/lessons">{t("workspace.clearSearch")}</Link>
           </Button>
         </div>
       ) : null}

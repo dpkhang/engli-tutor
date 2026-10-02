@@ -3,13 +3,13 @@ import { ArrowRight } from "lucide-react";
 import type { PolicyCta } from "../model/policy";
 
 const CTA_CLASS =
-  "mt-2 inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-background px-3 text-sm font-medium text-foreground transition-colors hover:border-primary/50 hover:text-primary";
+  "mt-2 inline-flex min-h-11 max-w-full items-center gap-2 rounded-2xl border border-border/80 bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:text-primary hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/60";
 
 export function LegalSectionCta({ href, label, external }: PolicyCta) {
   const body = (
     <>
       {label}
-      <ArrowRight className="size-3.5" aria-hidden />
+      <ArrowRight className="size-3.5 shrink-0" aria-hidden />
     </>
   );
 

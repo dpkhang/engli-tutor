@@ -5,8 +5,15 @@ export type WorkspacePlanId = string;
 const FREE_LIMITS: PlanLimits = {
   tutorChatPerDay: 10,
   ttsPerDay: 20,
+  aiTranslatePerDay: 30,
   enforcement: "block",
   proScenarios: false,
+  gameSessionsPerDay: 5,
+  vocabReviewsPerDay: 50,
+  fullVocabModes: false,
+  advancedProgress: false,
+  deepFeedback: false,
+  customPractice: false,
 };
 
 const FALLBACK_STARTER: SubscriptionPlan = {
@@ -62,6 +69,8 @@ export const PERIOD_SUFFIX: Record<BillingPeriod, string> = {
 export const USAGE_LABEL: Record<UsageMetric, string> = {
   tutor_chat: "AI tutor messages",
   tts: "AI voice",
+  ai_translate: "AI translations",
+  game_session: "Game plays",
 };
 
 export function formatVnd(value: number) {
@@ -83,7 +92,28 @@ export function planPeriodPrice(plan: Pick<SubscriptionPlan, "priceVndMonthly" |
 }
 
 export function metricLimit(limits: PlanLimits, metric: UsageMetric) {
-  return metric === "tutor_chat" ? limits.tutorChatPerDay : limits.ttsPerDay;
+  if (metric === "tutor_chat") return limits.tutorChatPerDay;
+  if (metric === "tts") return limits.ttsPerDay;
+  if (metric === "game_session") return limits.gameSessionsPerDay ?? null;
+  return limits.aiTranslatePerDay ?? null;
+}
+
+export type PlanFlag = "proScenarios" | "fullVocabModes";
+
+/** Unknown plan state stays unlocked; the API remains the source of truth for paid features. */
+export function planAllows(data: BillingMe | undefined, flag: PlanFlag): boolean {
+  const limits = data?.entitlements?.limits;
+  if (!limits) return true;
+  return Boolean(limits[flag]);
+}
+
+/** Units left today under a hard cap, or null when the metric is not capped. */
+export function dailyRemaining(data: BillingMe | undefined, metric: UsageMetric): number | null {
+  const limits = data?.entitlements?.limits;
+  if (!data || !limits || limits.enforcement !== "block") return null;
+  const limit = metricLimit(limits, metric);
+  if (limit === null) return null;
+  return Math.max(0, limit - (data.usage?.[metric] ?? 0));
 }
 
 /** Rows for "today's usage": hard caps show `used / limit`; fair-use shows unlimited. */
@@ -102,9 +132,22 @@ export function usageRows(data: BillingMe | undefined) {
   });
 }
 
-function planBullets(plan: Pick<SubscriptionPlan, "benefits" | "features">): string[] {
-  if (plan.benefits?.length) return plan.benefits;
-  return plan.features ?? [];
+function planBullets(plan: Pick<SubscriptionPlan, "benefits" | "features" | "limits">): string[] {
+  const benefits = plan.benefits?.length ? plan.benefits : plan.features ?? [];
+  const { limits } = plan;
+  const allowance = (metric: UsageMetric, label: string) => {
+    const limit = metricLimit(limits, metric);
+    return limits.enforcement === "block" && limit !== null
+      ? `${limit} ${label} a day`
+      : `Unlimited ${label}${limits.enforcement === "throttle" && metric !== "game_session" ? " (fair use)" : ""}`;
+  };
+  return [...new Set([
+    ...benefits,
+    allowance("ai_translate", "AI translations"),
+    allowance("game_session", "game plays"),
+    limits.fullVocabModes ? "Vocabulary: Flip, Picture quiz and Listen & pick" : "Vocabulary: Flip mode",
+    limits.proScenarios ? "Interview and Standup scenarios included" : "Everyday tutor scenarios (Interview and Standup require Premium)",
+  ])];
 }
 
 function isFreePlan(plan: Pick<SubscriptionPlan, "id" | "priceVndMonthly" | "isFree">): boolean {
@@ -137,7 +180,7 @@ export function currentPlanDetails(data: BillingMe | undefined): {
       features: planBullets(fromApi),
     };
   }
-  if (id === "starter") return STARTER_PLAN;
+  if (id === "starter") return { ...STARTER_PLAN, features: planBullets(STARTER_PLAN) };
   return { id, name: id, description: "", features: [] };
 }
 
@@ -196,7 +239,7 @@ export function allPlansForCompare(subscriptionPlans: SubscriptionPlan[]): Compa
         description: STARTER_PLAN.description,
         priceVndMonthly: 0,
         periodPrices: STARTER_PLAN.periodPrices,
-        features: STARTER_PLAN.features,
+        features: planBullets(STARTER_PLAN),
         isFree: true,
       },
       ...mapped,

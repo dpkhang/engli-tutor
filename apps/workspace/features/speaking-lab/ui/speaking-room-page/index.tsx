@@ -14,7 +14,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   UPGRADE_MESSAGE,
   billingMeQueryKey,
+  planAllows,
   upgradeReasonFromError,
+  useBillingMe,
   type UpgradeReason,
 } from "@/features/payments";
 import {
@@ -29,6 +31,8 @@ import { useAiSpeech } from "../../hooks/use-ai-speech";
 import { SCENES, SpeakingRoomPageView } from "./speaking-room-page.view";
 
 type Turn = TutorChatMessage & { audioUrl?: string };
+
+const PRO_SCENES: TutorScenario[] = ["interview", "standup"];
 
 function splitCoach(content: string): { english: string; tip: string | null } {
   const marker = content.indexOf("💬");
@@ -48,6 +52,12 @@ export function SpeakingRoomPage() {
   const [error, setError] = useState<string | null>(null);
   const [upgradeReason, setUpgradeReason] = useState<UpgradeReason | null>(null);
   const queryClient = useQueryClient();
+  const billing = useBillingMe();
+  const lockedScenes = useMemo(
+    () => (planAllows(billing.data, "proScenarios") ? [] : PRO_SCENES),
+    [billing.data],
+  );
+  const sceneLocked = lockedScenes.includes(scene);
   const [demoMode, setDemoMode] = useState(false);
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [aiSpeaking, setAiSpeaking] = useState(false);
@@ -151,7 +161,7 @@ export function SpeakingRoomPage() {
   const sendUtterance = useCallback(
     async (text: string, audioUrl?: string) => {
       const trimmed = text.trim();
-      if (!trimmed || pendingRef.current || !aliveRef.current) return;
+      if (!trimmed || pendingRef.current || !aliveRef.current || sceneLocked) return;
 
       pendingRef.current = true;
       setPending(true);
@@ -204,7 +214,7 @@ export function SpeakingRoomPage() {
         voice.clearAudio({ revoke: false });
       }
     },
-    [aiSpeech, level, playSfx, queryClient, scene, speakLastAssistant, voice],
+    [aiSpeech, level, playSfx, queryClient, scene, sceneLocked, speakLastAssistant, voice],
   );
 
   useEffect(() => {
@@ -244,6 +254,14 @@ export function SpeakingRoomPage() {
     },
     [aiSpeech, level, scene, speakLastAssistant, voice],
   );
+
+  // Free users open on Small talk rather than a Premium scene; later picks are left alone.
+  const defaultChecked = useRef(false);
+  useEffect(() => {
+    if (defaultChecked.current || !billing.data) return;
+    defaultChecked.current = true;
+    if (sceneLocked && turnsRef.current.length <= 1) resetRoom("smalltalk", level);
+  }, [billing.data, level, resetRoom, sceneLocked]);
 
   const onMicClick = useCallback(async () => {
     setError(null);
@@ -328,8 +346,9 @@ export function SpeakingRoomPage() {
       level={level}
       draft={draft}
       pending={pending}
-      error={error}
-      showUpgrade={upgradeReason !== null}
+      error={error ?? (sceneLocked ? UPGRADE_MESSAGE.pro : null)}
+      showUpgrade={upgradeReason !== null || sceneLocked}
+      lockedScenes={lockedScenes}
       demoMode={demoMode}
       autoSpeak={autoSpeak}
       aiSpeaking={aiSpeaking}

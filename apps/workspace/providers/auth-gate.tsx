@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { BrandLogo } from "@engli-tutor/ui";
 import { getMarketingUrl, useSession } from "@/lib/auth-client";
+import { isLocale, type Locale } from "@engli-tutor/i18n";
 import { accountApi } from "@/features/accounts";
 import {
   hasSeenWelcome,
@@ -17,6 +18,13 @@ import { CACHE_TIMES, queryKeys } from "@/lib/query";
 
 const LOGIN_PATH = "/login";
 
+function stripLocale(pathname: string): { locale: Locale | null; path: string } {
+  const segment = pathname.split("/")[1];
+  return isLocale(segment)
+    ? { locale: segment, path: pathname.slice(segment.length + 1) || "/" }
+    : { locale: null, path: pathname };
+}
+
 function isPublicPath(pathname: string) {
   return (
     pathname === LOGIN_PATH ||
@@ -25,11 +33,11 @@ function isPublicPath(pathname: string) {
   );
 }
 
-function AuthSplash({ message }: { message: string }) {
+export function AuthSplash({ message, busy = true, children }: { message: string; busy?: boolean; children?: React.ReactNode }) {
   return (
     <main
       className="flex min-h-svh items-center justify-center bg-background px-6"
-      aria-busy="true"
+      aria-busy={busy}
       aria-live="polite"
     >
       <div className="flex flex-col items-center gap-6 text-center">
@@ -38,6 +46,7 @@ function AuthSplash({ message }: { message: string }) {
           <div className="h-full w-1/2 animate-[splash-progress_1.1s_ease-in-out_infinite] rounded-full bg-primary" />
         </div>
         <p className="text-sm text-muted-foreground">{message}</p>
+        {children}
       </div>
     </main>
   );
@@ -58,11 +67,13 @@ function getSafeReturnTo(): string {
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const isLogin = pathname === LOGIN_PATH;
-  const isOnboarding = pathname === ONBOARDING_PATH;
-  const isWelcome = pathname === WELCOME_PATH;
-  const isPaymentResult = pathname === "/payments/result";
-  const isPublic = isPublicPath(pathname);
+  const { locale, path: routePath } = stripLocale(pathname);
+  const withLocale = (path: string) => locale ? (path === "/" ? `/${locale}` : `/${locale}${path}`) : path;
+  const isLogin = routePath === LOGIN_PATH;
+  const isOnboarding = routePath === ONBOARDING_PATH;
+  const isWelcome = routePath === WELCOME_PATH;
+  const isPaymentResult = routePath === "/payments/result";
+  const isPublic = isPublicPath(routePath);
   const { data, isPending } = useSession();
   const user = data?.user;
   const redirected = useRef(false);
@@ -107,7 +118,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     if (user && isWelcome && profileQuery.isSuccess && needsSetup) {
       redirected.current = true;
       window.location.replace(
-        `${ONBOARDING_PATH}?returnTo=${encodeURIComponent(safeOnboardingReturnTo(getSafeReturnTo()))}`,
+        `${withLocale(ONBOARDING_PATH)}?returnTo=${encodeURIComponent(safeOnboardingReturnTo(getSafeReturnTo()))}`,
       );
       return;
     }
@@ -115,7 +126,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     if (user && !isOnboarding && !isWelcome && !isPublic && profileQuery.isSuccess && needsSetup) {
       redirected.current = true;
       const returnTo = encodeURIComponent(safeOnboardingReturnTo(pathname));
-      window.location.replace(`${ONBOARDING_PATH}?returnTo=${returnTo}`);
+      window.location.replace(`${withLocale(ONBOARDING_PATH)}?returnTo=${returnTo}`);
       return;
     }
 
@@ -130,7 +141,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     if (isPublic || user) return;
     redirected.current = true;
     const returnTo = encodeURIComponent(pathname || "/");
-    window.location.replace(`/login?returnTo=${returnTo}`);
+    window.location.replace(`${withLocale(LOGIN_PATH)}?returnTo=${returnTo}`);
   }, [
     isLogin,
     isOnboarding,

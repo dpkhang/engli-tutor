@@ -33,6 +33,49 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+@layer components {
+  .marketing-container {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 72rem;
+    padding-inline: 1.25rem;
+  }
+
+  .marketing-section {
+    padding-block: 3rem;
+  }
+
+  .marketing-page {
+    padding-top: 6rem;
+    padding-bottom: 3rem;
+  }
+
+  @media (min-width: 40rem) {
+    .marketing-container {
+      padding-inline: 2rem;
+    }
+
+    .marketing-section {
+      padding-block: 4rem;
+    }
+
+    .marketing-page {
+      padding-top: 7rem;
+      padding-bottom: 4rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .marketing-section {
+      padding-block: 5rem;
+    }
+
+    .marketing-page {
+      padding-bottom: 5rem;
+    }
+  }
+}
+
 @layer base {
   :root {
     color-scheme: light;
@@ -90,16 +133,12 @@
 
   html {
     scroll-behavior: auto;
+    scroll-padding-top: 5rem;
   }
 
-  html.section-scroll .section-snap {
-    min-height: 100svh;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    html.section-scroll .section-snap {
-      min-height: auto;
-    }
+  :where(a, button, input, select, textarea, summary):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 4px;
   }
 
   body {
@@ -119,7 +158,7 @@
 
   .section-snap {
     content-visibility: auto;
-    contain-intrinsic-size: auto 100svh;
+    contain-intrinsic-size: auto 36rem;
   }
 
   .section-snap:first-of-type {

@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { Button, cn } from "@engli-tutor/ui";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 import { type TranslateResult } from "../../api";
 
 function highlightWordInSentence(sentence: string, word: string) {
@@ -75,6 +76,7 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
   onCopyTranslation,
   onCopyText,
 }: FloatingTranslateViewProps) {
+  const t = useWorkspaceI18n();
   return (
     <div className="pointer-events-none relative">
       <div
@@ -90,7 +92,7 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
         )}
         role="dialog"
         aria-hidden={!open}
-        aria-label="Professional English and Vietnamese translator"
+        aria-label={t("workspace.translateTitle")}
         inert={!open ? true : undefined}
       >
         <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border/70 bg-linear-to-r from-primary/10 to-transparent px-3 py-2.5 sm:px-4 sm:py-3.5">
@@ -100,13 +102,13 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
             </span>
             <div className="min-w-0">
               <p className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
-                Translate{" "}
+                {t("workspace.translateTitle")}{" "}
                 <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-primary">
                   AI
                 </span>
               </p>
               <p className="truncate text-[11px] text-muted-foreground">
-                Context-aware translation · Usage guidance
+                {t("workspace.contextTranslation")}
               </p>
             </div>
           </div>
@@ -114,7 +116,7 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
             type="button"
             className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
             onClick={onClose}
-            aria-label="Close translate"
+            aria-label={t("workspace.closeTranslate")}
           >
             <X className="size-4" />
           </button>
@@ -122,9 +124,9 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
 
         <form className="shrink-0 space-y-2.5 p-3 sm:space-y-3 sm:p-4" onSubmit={onSubmit}>
           <div className="grid grid-cols-2 items-center gap-2 rounded-xl bg-muted/60 p-1">
-            <span className="px-2 text-center text-xs font-semibold text-foreground">English</span>
+            <span className="px-2 text-center text-xs font-semibold text-foreground">{t("workspace.english")}</span>
             <span className="px-2 text-center text-xs font-semibold text-foreground">
-              Vietnamese
+              {t("workspace.vietnamese")}
             </span>
           </div>
 
@@ -136,7 +138,7 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
               onKeyDown={onComposerKeyDown}
               rows={3}
               maxLength={2000}
-              placeholder="Enter an English word, phrase, or sentence…"
+              placeholder={t("workspace.translatePlaceholder")}
               className="max-h-28 w-full resize-none rounded-xl border border-input bg-background/60 px-3 py-2.5 pb-7 text-sm leading-5 shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/20 sm:max-h-none sm:py-3 sm:pb-8 sm:leading-6"
             />
             <div className="absolute right-2.5 bottom-2 flex items-center gap-2 text-[10px] text-muted-foreground">
@@ -147,7 +149,7 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
                   onClick={onClear}
                   className="rounded px-1.5 py-0.5 font-medium hover:bg-muted hover:text-foreground"
                 >
-                  Clear
+                  {t("workspace.clear")}
                 </button>
               ) : null}
             </div>
@@ -168,17 +170,17 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
             {pending ? (
               <>
                 <LoaderCircle className="size-4 animate-spin" />
-                Analysing context…
+                {t("workspace.analyseContext")}
               </>
             ) : (
               <>
                 <Sparkles className="size-4" />
-                Translate with context
+                {t("workspace.translateContext")}
               </>
             )}
           </Button>
           <p className="text-center text-[10px] text-muted-foreground">
-            Click a word in the passage to look it up · ⌘/Ctrl + Enter
+            {t("workspace.translationShortcut")}
           </p>
         </form>
 
@@ -195,14 +197,14 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
             <section className="rounded-xl border border-primary/15 bg-primary/5 p-3.5">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-[10px] font-bold tracking-[0.14em] text-primary uppercase">
-                  Suggested translation
+                  {t("workspace.suggestedTranslation")}
                 </p>
                 <div className="flex">
                   <button
                     type="button"
                     onClick={onSpeakEnglish}
                     className="grid size-7 place-items-center rounded-md text-muted-foreground hover:bg-card hover:text-primary"
-                    aria-label="Listen to English"
+                    aria-label={t("workspace.listenEnglish")}
                   >
                     <Volume2 className="size-3.5" />
                   </button>
@@ -210,7 +212,7 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
                     type="button"
                     onClick={onCopyTranslation}
                     className="grid size-7 place-items-center rounded-md text-muted-foreground hover:bg-card hover:text-primary"
-                    aria-label="Copy translation"
+                    aria-label={t("workspace.copyTranslation")}
                   >
                     {copied ? (
                       <Check className="size-3.5 text-emerald-600" />
@@ -239,7 +241,7 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
             {result.alternatives.length ? (
               <section>
                 <p className="text-[10px] font-bold tracking-[0.14em] text-muted-foreground uppercase">
-                  Alternative expressions
+                  {t("workspace.alternativeExpressions")}
                 </p>
                 <div className="mt-2 space-y-2">
                   {result.alternatives.map((item, index) => (
@@ -278,7 +280,7 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
             activeSentence.trim().toLowerCase() !== pickedWord.trim().toLowerCase() ? (
               <section className="space-y-2">
                 <p className="text-[10px] font-bold tracking-[0.14em] text-muted-foreground uppercase">
-                  In this sentence
+                  {t("workspace.inThisSentence")}
                 </p>
                 <p className="rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5 text-xs leading-5 text-foreground">
                   “{highlightWordInSentence(activeSentence.trim(), pickedWord.trim())}”
@@ -296,7 +298,7 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
               <section className="space-y-3">
                 <div>
                   <p className="text-[10px] font-bold tracking-[0.14em] text-muted-foreground uppercase">
-                    Meaning in this sentence
+                    {t("workspace.meaningInSentence")}
                   </p>
                   <p className="mt-1.5 text-xs leading-5">{result.sentence.meaningVi}</p>
                 </div>

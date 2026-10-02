@@ -8,6 +8,8 @@ import { AppearanceProvider } from "@/features/settings";
 import { LessonProgressSync } from "@/features/learn/ui/lesson-progress-sync";
 import { PushRegistrar } from "@/features/notifications/push-registrar";
 import { ActionDialogProvider, CookieConsentBanner, ToastProvider } from "@engli-tutor/ui";
+import { UpgradeModalProvider } from "@/features/payments/ui/upgrade-modal-provider";
+import { WorkspaceI18n } from "@/features/i18n/workspace-i18n";
 import "./globals.css";
 
 const sans = Plus_Jakarta_Sans({
@@ -41,9 +43,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body suppressHydrationWarning>
         <QueryProvider>
           <AppearanceProvider>
+            <WorkspaceI18n>
             <LessonProgressSync>
             <ActionDialogProvider>
               <ToastProvider>
+                <UpgradeModalProvider>
                 <SignOutLoadingProvider>
                   <Suspense fallback={null}>
                     <GlobalNavigationLoading />
@@ -54,9 +58,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                   </AuthGate>
                   <CookieConsentBanner policyHref="/policy/cookies" />
                 </SignOutLoadingProvider>
+                </UpgradeModalProvider>
               </ToastProvider>
             </ActionDialogProvider>
             </LessonProgressSync>
+            </WorkspaceI18n>
           </AppearanceProvider>
         </QueryProvider>
       </body>

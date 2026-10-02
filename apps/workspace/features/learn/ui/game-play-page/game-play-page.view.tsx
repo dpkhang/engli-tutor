@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useUpgradeModal } from "@/features/payments/ui/upgrade-modal-provider";
 import { ArrowLeft, Bookmark, Check, ChevronLeft, Gamepad2, House, Lightbulb, Mic2, RotateCcw, Volume2, X } from "lucide-react";
 import { Button, SegmentedSwitch, cn } from "@engli-tutor/ui";
 import { DataLoadingState, NotFoundPage } from "@/features/layout";
@@ -18,6 +19,8 @@ import type {
 } from "../../api/types";
 import type { LessonPack } from "../../model/curriculum";
 import { VOCAB_MODES, type VocabMode } from "../../model/vocab-trainer";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { LocalizedLink } from "@/features/i18n/localized-link";
 
 export type GamePlayPhase = "intro" | "playing" | "results";
 
@@ -33,20 +36,25 @@ function DeckPicker({
   decks,
   deckId,
   mode,
+  lockedModes,
+  canReview,
   onPickLevel,
   onPickDeck,
   onPickMode,
   onReviewDeck,
 }: {
+  canReview: boolean;
   levels: LearningLevel[];
   level: LearningLevel | null;
   decks: FlashcardDeckOption[];
   deckId: string | null;
   mode: VocabMode;
+  lockedModes: VocabMode[];
   onPickLevel: (level: LearningLevel) => void;
   onPickDeck: (deckId: string) => void;
   onPickMode: (mode: VocabMode) => void;
   onReviewDeck: (deckId: string) => void;
+  t?: (key: string) => string;
 }) {
   const activeDeck = decks.find((deck) => deck.id === deckId);
   return (
@@ -91,7 +99,7 @@ function DeckPicker({
                   />
                 </span>
               </button>
-              {deck.reviewCount > 0 ? (
+              {canReview && deck.reviewCount > 0 ? (
                 <button
                   type="button"
                   onClick={() => onReviewDeck(deck.id)}
@@ -112,9 +120,16 @@ function DeckPicker({
           onChange={onPickMode}
           ariaLabel="Practice mode"
           className="max-w-md"
-          options={VOCAB_MODES.map((item) => ({ id: item.id, label: item.label }))}
+          options={VOCAB_MODES.map((item) => ({
+            id: item.id,
+            label: lockedModes.includes(item.id) ? `${item.label} · Standard` : item.label,
+          }))}
         />
-        {mode === "picture" && activeDeck && activeDeck.pictureCount < activeDeck.cardCount ? (
+        {lockedModes.includes(mode) ? (
+          <p className="text-xs text-muted-foreground">
+            Picture quiz and Listen &amp; pick are part of Standard. Flip stays free.
+          </p>
+        ) : mode === "picture" && activeDeck && activeDeck.pictureCount < activeDeck.cardCount ? (
           <p className="text-xs text-muted-foreground">
             {activeDeck.pictureCount
               ? `${activeDeck.pictureCount} of ${activeDeck.cardCount} words have pictures yet.`
@@ -1011,6 +1026,9 @@ export type GamePlayPageViewProps = {
   onPickLevel: (level: LearningLevel) => void;
   onPickDeck: (deckId: string) => void;
   mode: VocabMode;
+  lockedModes: VocabMode[];
+  /** Free plays left today; null when plays are not capped. */
+  playsLeft: number | null;
   autoAdvance: boolean;
   onPickMode: (mode: VocabMode) => void;
   onReviewDeck: (deckId: string) => void;
@@ -1045,6 +1063,8 @@ export const GamePlayPageView = memo(function GamePlayPageView({
   onPickLevel,
   onPickDeck,
   mode,
+  lockedModes,
+  playsLeft,
   autoAdvance,
   onPickMode,
   onReviewDeck,
@@ -1059,8 +1079,12 @@ export const GamePlayPageView = memo(function GamePlayPageView({
   savedCards,
   onSaveCard,
 }: GamePlayPageViewProps) {
+  const t = useWorkspaceI18n();
+  const { openUpgradeModal } = useUpgradeModal();
   const activeDeck = decks.find((deck) => deck.id === deckId);
   const inDeck = decks.length > 0 && phase !== "intro";
+  const playsBlocked = playsLeft === 0;
+  const modeLocked = game?.id === "flashcard" && lockedModes.includes(mode);
   useEffect(() => {
     if (game?.id !== "flashcard" || phase !== "playing") return;
     for (const item of session) {
@@ -1075,8 +1099,8 @@ export const GamePlayPageView = memo(function GamePlayPageView({
   if (loading) {
     return (
       <DataLoadingState
-        title="Setting up the game"
-        description="Loading short rounds and audio."
+        title={t("workspace.settingUpGame")}
+        description={t("workspace.loadingShortRounds")}
         cards={3}
       />
     );
@@ -1085,11 +1109,11 @@ export const GamePlayPageView = memo(function GamePlayPageView({
   if (!game) {
     return (
       <NotFoundPage
-        title="This game isn’t in the catalog"
-        description="It may have been removed or the link is outdated. Browse the games hub and pick another round."
+        title={t("workspace.gameUnavailable")}
+        description={t("workspace.gameUnavailableDescription")}
         actions={[
-          { href: "/games", label: "All games", icon: <Gamepad2 />, primary: true },
-          { href: "/", label: "Back to Today", icon: <House /> },
+          { href: "/games", label: t("workspace.allGames"), icon: <Gamepad2 />, primary: true },
+          { href: "/", label: t("workspace.backToToday"), icon: <House /> },
         ]}
       />
     );
@@ -1099,12 +1123,12 @@ export const GamePlayPageView = memo(function GamePlayPageView({
     <div className="w-full min-w-0 space-y-8 overflow-x-clip pb-10">
       {inDeck ? (
         <Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={onBackToDecks}>
-          <ArrowLeft /> All levels
+          <ArrowLeft /> {t("workspace.allLevelsGame")}
         </Button>
       ) : (
         <Button variant="ghost" size="sm" asChild className="-ml-2 text-muted-foreground">
           <Link href="/games">
-            <ArrowLeft /> All games
+            <ArrowLeft /> {t("workspace.allGames")}
           </Link>
         </Button>
       )}
@@ -1117,7 +1141,7 @@ export const GamePlayPageView = memo(function GamePlayPageView({
         <p className="mt-3 hidden max-w-2xl text-sm text-white/80 sm:block">{game.howToPlay}</p>
         {lessonPack ? (
           <p className="mt-4 hidden text-xs text-white/75 sm:block">
-            From lesson: {lessonPack.title}
+            {t("workspace.fromLesson")}{lessonPack.title}
           </p>
         ) : null}
       </header>
@@ -1127,9 +1151,7 @@ export const GamePlayPageView = memo(function GamePlayPageView({
           <p className="flex gap-2 text-sm leading-6 text-muted-foreground">
             <Lightbulb className="mt-0.5 size-4 shrink-0 text-accent" />
             {game.body}{" "}
-            {decks.length
-              ? "Play the full deck: missed and due words first, then new ones. Picture quiz includes only words with pictures; decks without pictures use Flip."
-              : "You will play up to 5 short rounds, then see your score."}
+            {decks.length ? t("workspace.playFullDeck") : t("workspace.shortRoundsDescription")}
           </p>
           {decks.length ? (
             <DeckPicker
@@ -1140,18 +1162,35 @@ export const GamePlayPageView = memo(function GamePlayPageView({
               onPickLevel={onPickLevel}
               onPickDeck={onPickDeck}
               mode={mode}
+              lockedModes={lockedModes}
+              canReview={!playsBlocked}
               onPickMode={onPickMode}
               onReviewDeck={onReviewDeck}
             />
           ) : null}
+          {playsBlocked ? (
+            <p className="rounded-2xl bg-muted/60 px-4 py-3 text-sm text-muted-foreground" role="status">
+              {t("workspace.freePlaysUsedGame")}
+            </p>
+          ) : playsLeft !== null ? (
+            <p className="text-xs text-muted-foreground">
+              {playsLeft} free {playsLeft === 1 ? "play" : "plays"} left today
+            </p>
+          ) : null}
           <div className="flex flex-wrap gap-3">
-            <Button className="h-11 rounded-full px-6" onClick={onStart}>
-              {activeDeck
-                ? `Start ${activeDeck.title} · ${mode === "picture" && activeDeck.pictureCount > 0 ? activeDeck.pictureCount : activeDeck.cardCount} words`
-                : "Start playing"}
-            </Button>
+            {playsBlocked || modeLocked ? (
+              <Button type="button" className="h-11 rounded-full px-6" onClick={openUpgradeModal}>
+                {playsBlocked ? t("workspace.seePlans") : t("workspace.unlockStandard")}
+              </Button>
+            ) : (
+              <Button className="h-11 rounded-full px-6" onClick={onStart}>
+                {activeDeck
+                  ? `Start ${activeDeck.title} · ${mode === "picture" && activeDeck.pictureCount > 0 ? activeDeck.pictureCount : activeDeck.cardCount} words`
+                  : t("workspace.startPlaying")}
+              </Button>
+            )}
             <Button asChild variant="outline" className="h-11 rounded-full">
-              <Link href={`/skills/${game.relatedSkill}`}>Related skill drill</Link>
+              <Link href={`/skills/${game.relatedSkill}`}>{t("workspace.relatedSkillDrill")}</Link>
             </Button>
           </div>
         </section>
@@ -1188,7 +1227,7 @@ export const GamePlayPageView = memo(function GamePlayPageView({
           />
           {!autoAdvance && scores[index] !== undefined ? (
             <Button className="h-11 rounded-full px-6" onClick={onNextRound}>
-              {index + 1 >= session.length ? "See results" : "Next round"}
+              {index + 1 >= session.length ? t("workspace.seeResults") : t("workspace.nextRound")}
             </Button>
           ) : null}
         </section>
@@ -1243,13 +1282,19 @@ export const GamePlayPageView = memo(function GamePlayPageView({
                 All levels
               </Button>
             ) : null}
-            <Button
-              type="button"
-              className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25"
-              onClick={onStart}
-            >
-              Play again
-            </Button>
+            {playsBlocked ? (
+              <Button type="button" className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25" onClick={openUpgradeModal}>
+                See plans
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25"
+                onClick={onStart}
+              >
+                {t("workspace.playAgain")}
+              </Button>
+            )}
             {missedRounds.length && decks.length ? (
               <Button
                 type="button"
@@ -1265,7 +1310,7 @@ export const GamePlayPageView = memo(function GamePlayPageView({
               variant="outline"
               className="rounded-full border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
             >
-              <Link href="/games">More games</Link>
+              <Link href="/games">{t("workspace.moreGames")}</Link>
             </Button>
           </div>
         </div>
@@ -1274,23 +1319,29 @@ export const GamePlayPageView = memo(function GamePlayPageView({
       {phase === "results" && game.id !== "flashcard" ? (
         <div className="overflow-hidden rounded-[1.75rem] border border-primary/20 bg-linear-to-br from-primary to-primary/80 px-6 py-8 text-primary-foreground">
           <p className="text-[11px] font-semibold tracking-[0.18em] text-primary-foreground/70 uppercase">
-            Nice work
+            {t("workspace.niceWork")}
           </p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight">
             You got {correctCount}/{session.length} correct
           </h2>
           <p className="mt-2 max-w-xl text-sm text-primary-foreground/75">
-            Play again, or open a related skill drill to see the same language in a longer exercise.
+            {t("workspace.playAgain")}, or open a related skill drill to see the same language in a longer exercise.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
-            <Button
-              type="button"
-              className="rounded-full border-0 bg-white text-[#0b1524] hover:bg-white/90"
-              onClick={onStart}
-            >
-              <RotateCcw className="size-4" />
-              Play again
-            </Button>
+            {playsBlocked ? (
+              <Button type="button" className="rounded-full border-0 bg-white text-[#0b1524] hover:bg-white/90" onClick={openUpgradeModal}>
+                See plans
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                className="rounded-full border-0 bg-white text-[#0b1524] hover:bg-white/90"
+                onClick={onStart}
+              >
+                <RotateCcw className="size-4" />
+                {t("workspace.playAgain")}
+              </Button>
+            )}
             <Button
               asChild
               className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25"
@@ -1302,7 +1353,7 @@ export const GamePlayPageView = memo(function GamePlayPageView({
               variant="outline"
               className="rounded-full border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
             >
-              <Link href="/games">More games</Link>
+              <Link href="/games">{t("workspace.moreGames")}</Link>
             </Button>
           </div>
         </div>

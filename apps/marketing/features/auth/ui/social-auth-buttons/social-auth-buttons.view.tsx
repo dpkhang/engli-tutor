@@ -2,6 +2,7 @@
 
 import { memo, type ReactNode } from "react";
 import { Button, cn } from "@engli-tutor/ui";
+import { useMarketingI18n } from "@/features/i18n";
 
 export type SocialProvider = "google" | "apple" | "facebook" | "github";
 
@@ -61,6 +62,7 @@ export type SocialAuthButtonsViewProps = SocialAuthButtonsProps & {
 export const SocialAuthButtonsView = memo(function SocialAuthButtonsView({
   className,
 }: SocialAuthButtonsViewProps) {
+  const t = useMarketingI18n();
   return (
     <div className={cn("space-y-2", className)}>
       <div className="grid grid-cols-2 gap-2">
@@ -71,14 +73,14 @@ export const SocialAuthButtonsView = memo(function SocialAuthButtonsView({
             variant="outline"
             className="h-11 justify-start gap-2.5 bg-background px-3 opacity-60"
             disabled
-            title="Coming soon"
+            title={t("auth.comingSoon")}
           >
             {provider.icon}
             <span className="truncate text-sm font-medium">{provider.label}</span>
           </Button>
         ))}
       </div>
-      <p className="text-center text-xs text-muted-foreground">Social sign-in — coming soon</p>
+      <p className="text-center text-xs text-muted-foreground">{t("auth.socialComingSoon")}</p>
     </div>
   );
 });

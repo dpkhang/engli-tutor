@@ -4,6 +4,7 @@ import { memo } from "react";
 import { Bell, CreditCard } from "lucide-react";
 import { CardTitle, Label, cn } from "@engli-tutor/ui";
 import { SettingsCard, SettingsCardContent, SettingsCardHeader, SettingsPanel } from "../shared";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 
 const REMINDER_SLOTS = Array.from({ length: 96 }, (_, index) => index * 15);
 
@@ -80,43 +81,43 @@ export const NotificationSettingsView = memo(function NotificationSettingsView({
   onToggleBilling,
   onReminderTime,
 }: NotificationSettingsViewProps) {
+  const t = useWorkspaceI18n();
   return (
     <SettingsPanel ready={ready}>
       <div className="space-y-4">
         <SettingsCard>
           <SettingsCardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Bell className="size-5 text-primary" /> Practice
+              <Bell className="size-5 text-primary" /> {t("workspace.practice")}
             </CardTitle>
           </SettingsCardHeader>
           <SettingsCardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              On this laptop or phone. On iPhone, add EngliTutor to your Home Screen before this
-              browser tab can receive them.
+              {t("workspace.notificationDeviceDescription")}
             </p>
             <div className="flex items-center justify-between gap-4">
               <div>
-                <Label htmlFor="study-reminders">Daily study reminder</Label>
-                <p className="text-sm text-muted-foreground">One notification a day, at the time you pick.</p>
+                <Label htmlFor="study-reminders">{t("workspace.dailyStudyReminder")}</Label>
+                <p className="text-sm text-muted-foreground">{t("workspace.dailyStudyReminderDescription")}</p>
               </div>
               <Toggle id="study-reminders" checked={notifyReminders} disabled={pending} onClick={onToggleReminders} />
             </div>
             <div className="flex items-center justify-between gap-4">
               <div>
-                <Label htmlFor="open-lesson">Unfinished lesson</Label>
-                <p className="text-sm text-muted-foreground">A nudge when a lesson is still in progress.</p>
+                <Label htmlFor="open-lesson">{t("workspace.unfinishedLesson")}</Label>
+                <p className="text-sm text-muted-foreground">{t("workspace.unfinishedLessonDescription")}</p>
               </div>
               <Toggle id="open-lesson" checked={notifyLessons} disabled={pending} onClick={onToggleLessons} />
             </div>
             <div className="flex items-center justify-between gap-4">
               <div>
-                <Label htmlFor="tutor-alerts">Tutor replies</Label>
-                <p className="text-sm text-muted-foreground">Shown when no EngliTutor window is in front.</p>
+                <Label htmlFor="tutor-alerts">{t("workspace.tutorReplies")}</Label>
+                <p className="text-sm text-muted-foreground">{t("workspace.tutorRepliesDescription")}</p>
               </div>
               <Toggle id="tutor-alerts" checked={notifyTutor} disabled={pending} onClick={onToggleTutor} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="reminder-time">Time</Label>
+              <Label htmlFor="reminder-time">{t("workspace.time")}</Label>
               <select
                 id="reminder-time"
                 value={reminderMinutes}
@@ -137,14 +138,14 @@ export const NotificationSettingsView = memo(function NotificationSettingsView({
         <SettingsCard>
           <SettingsCardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CreditCard className="size-5 text-primary" /> Account
+              <CreditCard className="size-5 text-primary" /> {t("workspace.account")}
             </CardTitle>
           </SettingsCardHeader>
           <SettingsCardContent className="space-y-4">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <Label htmlFor="billing-alerts">Plan and payment</Label>
-                <p className="text-sm text-muted-foreground">When a renewal fails or the plan ends.</p>
+                <Label htmlFor="billing-alerts">{t("workspace.planPayment")}</Label>
+                <p className="text-sm text-muted-foreground">{t("workspace.planPaymentDescription")}</p>
               </div>
               <Toggle id="billing-alerts" checked={notifyBilling} disabled={pending} onClick={onToggleBilling} />
             </div>

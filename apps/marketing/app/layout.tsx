@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
-import { CookieConsentBanner } from "@engli-tutor/ui";
 import "./globals.css";
 
 const sans = Plus_Jakarta_Sans({
@@ -11,13 +10,10 @@ const sans = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: "EngliTutor — AI English Tutor",
-  description:
-    "Practice speaking English with AI every day and get feedback in Vietnamese. Built for A2–B1 working professionals.",
+  description: "Practice speaking English with AI every day and get feedback in Vietnamese.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={sans.variable} suppressHydrationWarning>
       <head>
@@ -27,10 +23,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body suppressHydrationWarning>
-        {children}
-        <CookieConsentBanner policyHref="/policy/cookies" />
-      </body>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

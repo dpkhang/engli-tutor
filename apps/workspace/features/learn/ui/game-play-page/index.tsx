@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { accountApi } from "@/features/accounts/api";
+import { billingMeQueryKey, dailyRemaining, planAllows, useBillingMe } from "@/features/payments";
 import { queryKeys } from "@/lib/query";
 import { LESSON_PACKS } from "../../model/curriculum";
 import { markLessonStarted } from "../../model/lesson-progress";
@@ -52,6 +53,15 @@ export function GamePlayPage({ slug }: { slug: string }) {
   const startedAt = useRef(0);
   const recordedPlayId = useRef(0);
   const { progress, saved, review, saveCard } = useVocabProgress(isVocab);
+  const queryClient = useQueryClient();
+  const billing = useBillingMe();
+  const playsLeft = dailyRemaining(billing.data, "game_session");
+  const playsBlocked = playsLeft === 0;
+  const lockedModes = useMemo<VocabMode[]>(
+    () => (planAllows(billing.data, "fullVocabModes") ? [] : ["picture", "listen"]),
+    [billing.data],
+  );
+  const modeLocked = lockedModes.includes(mode);
 
   const deckLevels = useMemo(
     () => [...new Set(allDecks.map((deck) => deck.level))],
@@ -114,7 +124,8 @@ export function GamePlayPage({ slug }: { slug: string }) {
   );
 
   const onStart = useCallback(() => {
-    if (!game) return;
+    if (!game || playsBlocked) return;
+    if (isVocab && modeLocked) return;
     if (lesson) markLessonStarted(lesson);
     if (!isVocab) {
       begin(pickGameRounds(game.rounds, lesson), 0, "flip");
@@ -125,7 +136,7 @@ export function GamePlayPage({ slug }: { slug: string }) {
     const pool = tagged.length ? tagged : inDeck.length ? inDeck : game.rounds;
     const picked = pickVocabSession(pool, progress, mode);
     vocabSession(picked.length ? picked : pickVocabSession(pool, progress, "flip"), 0, mode);
-  }, [begin, deckId, game, isVocab, lesson, mode, progress, vocabSession]);
+  }, [begin, deckId, game, isVocab, lesson, mode, modeLocked, playsBlocked, progress, vocabSession]);
 
   const cardsById = useMemo(() => new Map((game?.rounds ?? []).map((round) => [round.id, round])), [game]);
 
@@ -147,14 +158,14 @@ export function GamePlayPage({ slug }: { slug: string }) {
 
   const onReviewDeck = useCallback(
     (id: string) => {
-      if (!game) return;
+      if (!game || playsBlocked) return;
       const deckRounds = game.rounds.filter((round) => round.deck === id);
       const rounds = reviewRounds(deckRounds, progress, "flip");
       if (!rounds.length) return;
       setPickedDeckId(id);
-      vocabSession(rounds, 1, mode);
+      vocabSession(rounds, 1, modeLocked ? "flip" : mode);
     },
-    [game, mode, progress, vocabSession],
+    [game, mode, modeLocked, playsBlocked, progress, vocabSession],
   );
 
   const autoAdvance = isVocab && sessionMode === "flip";
@@ -202,8 +213,9 @@ export function GamePlayPage({ slug }: { slug: string }) {
         total: session.length,
         durationMs: Math.min(3_600_000, Date.now() - startedAt.current),
       })
+      .then(() => queryClient.invalidateQueries({ queryKey: billingMeQueryKey }))
       .catch(() => undefined);
-  }, [correctCount, deckId, game, isVocab, phase, playId, session.length, sessionMode]);
+  }, [correctCount, deckId, game, isVocab, phase, playId, queryClient, session.length, sessionMode]);
 
   const round = session[index];
 
@@ -225,6 +237,8 @@ export function GamePlayPage({ slug }: { slug: string }) {
       decks={lesson ? [] : decks}
       deckId={deckId}
       mode={mode}
+      lockedModes={lockedModes}
+      playsLeft={playsLeft}
       autoAdvance={autoAdvance}
       onPickLevel={onPickLevel}
       onPickDeck={setPickedDeckId}

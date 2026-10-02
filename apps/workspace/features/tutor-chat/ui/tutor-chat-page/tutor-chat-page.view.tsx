@@ -1,8 +1,10 @@
 "use client";
 
 import { memo, type FormEvent, type KeyboardEvent, type RefObject } from "react";
-import Link from "next/link";
+import { useUpgradeModal } from "@/features/payments/ui/upgrade-modal-provider";
 import {
+  BrainCircuit,
+  Crown,
   LoaderCircle,
   MessageCircle,
   Mic,
@@ -14,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button, cn } from "@engli-tutor/ui";
 import { type TutorChatMessage, type TutorScenario } from "../../api";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 
 export const SCENARIOS: { id: TutorScenario; label: string; hint: string }[] = [
   { id: "interview", label: "Interview", hint: "Behavioral & project questions" },
@@ -34,7 +37,7 @@ export const STARTERS: Record<TutorScenario, string> = {
   free: "Hi! I'm ready to practice English with you. What topic would you like to talk about today?",
 };
 
-type ChatMessage = TutorChatMessage & { audioUrl?: string };
+type ChatMessage = TutorChatMessage & { audioUrl?: string; streaming?: boolean };
 
 function splitCoach(content: string): { english: string; tip: string | null } {
   const marker = content.indexOf("💬");
@@ -60,6 +63,7 @@ export type TutorChatPageViewProps = {
   pending: boolean;
   error: string | null;
   showUpgrade: boolean;
+  lockedScenarios: TutorScenario[];
   demoMode: boolean;
   pendingAudioUrl: string | null;
   voiceRecording: boolean;
@@ -88,6 +92,7 @@ export const TutorChatPageView = memo(function TutorChatPageView({
   pending,
   error,
   showUpgrade,
+  lockedScenarios,
   demoMode,
   pendingAudioUrl,
   voiceRecording,
@@ -107,6 +112,8 @@ export const TutorChatPageView = memo(function TutorChatPageView({
   onToggleMic,
   onDeleteAudio,
 }: TutorChatPageViewProps) {
+  const t = useWorkspaceI18n();
+  const { openUpgradeModal } = useUpgradeModal();
   return (
     <div className="flex min-h-[calc(100svh-8rem)] flex-col gap-5">
       <header className="workspace-hero-accent relative space-y-3 overflow-hidden rounded-3xl bg-linear-to-br from-primary to-primary/80 px-5 py-5 text-primary-foreground sm:space-y-4 sm:rounded-[1.75rem] sm:px-7 sm:py-7">
@@ -116,17 +123,17 @@ export const TutorChatPageView = memo(function TutorChatPageView({
         />
         <p className="relative hidden items-center gap-2 text-[11px] font-semibold tracking-[0.18em] text-primary-foreground/70 uppercase sm:inline-flex">
           <Sparkles className="size-3.5 text-amber-300" />
-          Your judgment-free practice space
+          {t("workspace.chatPracticeSpace")}
         </p>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="relative max-w-2xl space-y-2">
             <h1 className="text-xl font-semibold tracking-tight text-white sm:text-4xl">
-              {lesson ? lesson.title : "Chat EngliTutor"}
+              {lesson ? lesson.title : t("workspace.chatTutor")}
             </h1>
             <p className="hidden text-sm leading-relaxed text-white/70 sm:block sm:text-base">
               {lesson
                 ? `${lesson.skills.join(" · ")} · ${lesson.duration} · ${lesson.focus}`
-                : "Type or record English — AI replies in English and suggests corrections in Vietnamese."}
+                : t("workspace.chatDescription")}
             </p>
           </div>
           <Button
@@ -135,7 +142,7 @@ export const TutorChatPageView = memo(function TutorChatPageView({
             onClick={onResetCurrent}
           >
             <RefreshCw className="size-4" />
-            New conversation
+            {t("workspace.newConversation")}
           </Button>
         </div>
 
@@ -153,6 +160,19 @@ export const TutorChatPageView = memo(function TutorChatPageView({
               )}
             >
               <span className="font-medium">{item.label}</span>
+              {lockedScenarios.includes(item.id) ? (
+                <span
+                  className={cn(
+                    "ml-1.5 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase",
+                    scenario === item.id
+                      ? "bg-primary/10 text-primary"
+                      : "bg-amber-300/20 text-amber-200",
+                  )}
+                >
+                  <Crown className="size-2.5" />
+                  {t("workspace.premium")}
+                </span>
+              ) : null}
               <span
                 className={cn(
                   "ml-2 hidden text-xs sm:inline",
@@ -168,7 +188,7 @@ export const TutorChatPageView = memo(function TutorChatPageView({
         {demoMode ? (
           <p className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-xs text-accent">
             <Sparkles className="size-3.5" />
-            Running in demo mode (OpenAI not configured) — chat UI still works.
+            {t("workspace.demoMode")}
           </p>
         ) : null}
       </header>
@@ -181,7 +201,7 @@ export const TutorChatPageView = memo(function TutorChatPageView({
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-foreground">EngliTutor AI</p>
             <p className="truncate text-xs text-muted-foreground">
-              {scenarioLabel} · A2–B1 · voice input supported
+              {scenarioLabel} · A2–B1 · {t("workspace.voiceInputSupported")}
             </p>
           </div>
         </div>
@@ -209,10 +229,31 @@ export const TutorChatPageView = memo(function TutorChatPageView({
                       "rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap",
                       isUser
                         ? "rounded-br-md bg-primary text-primary-foreground"
-                        : "rounded-bl-md bg-muted text-foreground",
+                        : message.streaming
+                          ? "rounded-bl-md border border-primary/20 bg-linear-to-br from-primary/10 via-accent/8 to-muted text-foreground shadow-[0_8px_30px_-18px_rgba(79,70,229,0.7)]"
+                          : "rounded-bl-md bg-muted text-foreground",
                     )}
                   >
+                    {!isUser && message.streaming ? (
+                      <span className="mb-2 flex items-center gap-2 text-[11px] font-semibold tracking-wide text-primary/80 uppercase">
+                        <span className="grid size-5 place-items-center rounded-full bg-primary/15">
+                          <BrainCircuit className="size-3.5 animate-pulse" />
+                        </span>
+                        <span>EngliTutor AI</span>
+                        <span className="flex gap-0.5" aria-label="AI is composing">
+                          <span className="size-1 animate-bounce rounded-full bg-primary [animation-delay:-0.2s]" />
+                          <span className="size-1 animate-bounce rounded-full bg-primary [animation-delay:-0.1s]" />
+                          <span className="size-1 animate-bounce rounded-full bg-primary" />
+                        </span>
+                      </span>
+                    ) : null}
                     {english}
+                    {!isUser && message.streaming ? (
+                      <span
+                        className="ml-0.5 inline-block h-4 w-0.5 animate-pulse rounded-full bg-primary align-[-2px]"
+                        aria-hidden
+                      />
+                    ) : null}
                   </div>
                   {message.audioUrl ? (
                     <audio
@@ -231,11 +272,24 @@ export const TutorChatPageView = memo(function TutorChatPageView({
             );
           })}
 
-          {pending ? (
+          {pending && !messages.some((message) => message.streaming) ? (
             <div className="flex justify-start">
-              <div className="inline-flex items-center gap-2 rounded-2xl rounded-bl-md bg-muted px-4 py-3 text-sm text-muted-foreground">
-                <LoaderCircle className="size-4 animate-spin" />
-                EngliTutor is replying…
+              <div className="relative overflow-hidden rounded-2xl rounded-bl-md border border-primary/20 bg-linear-to-br from-primary/10 via-accent/8 to-muted px-4 py-3 shadow-[0_8px_30px_-18px_rgba(79,70,229,0.7)]">
+                <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/70 to-transparent" />
+                <div className="flex items-center gap-2 text-sm text-foreground">
+                  <span className="grid size-7 place-items-center rounded-full bg-primary/15 text-primary">
+                    <BrainCircuit className="size-4 animate-pulse" />
+                  </span>
+                  <span className="font-medium">{t("workspace.aiThinking")}</span>
+                  <span className="flex gap-1" aria-hidden>
+                    <span className="size-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.25s]" />
+                    <span className="size-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.12s]" />
+                    <span className="size-1.5 animate-bounce rounded-full bg-primary" />
+                  </span>
+                </div>
+                <p className="mt-1 pl-9 text-xs text-muted-foreground">
+                  {t("workspace.aiPreparingReply")}
+                </p>
               </div>
             </div>
           ) : null}
@@ -249,8 +303,8 @@ export const TutorChatPageView = memo(function TutorChatPageView({
             <p className="mb-2 text-sm text-destructive">{error || voiceError}</p>
           ) : null}
           {showUpgrade ? (
-            <Button asChild size="sm" className="mb-3">
-              <Link href="/payments">See plans</Link>
+            <Button type="button" size="sm" className="mb-3" onClick={openUpgradeModal}>
+              {t("workspace.seePlans")}
             </Button>
           ) : null}
 
@@ -260,12 +314,9 @@ export const TutorChatPageView = memo(function TutorChatPageView({
                 <span className="absolute inline-flex size-full animate-ping rounded-full bg-destructive opacity-60" />
                 <span className="relative inline-flex size-2.5 rounded-full bg-destructive" />
               </span>
-              Recording… speak English, then tap stop.
+              {t("workspace.recordEnglishInstruction")}
               {!voiceSpeechSupported ? (
-                <span className="text-muted-foreground">
-                  {" "}
-                  (No STT in this browser — type after listening back)
-                </span>
+                <span className="text-muted-foreground"> ({t("workspace.noSttBrowser")})</span>
               ) : null}
             </div>
           ) : null}
@@ -273,7 +324,7 @@ export const TutorChatPageView = memo(function TutorChatPageView({
           {pendingAudioUrl && !voiceRecording ? (
             <div className="mb-3 grid grid-cols-[1fr_auto] items-center gap-2 rounded-2xl border border-border bg-muted/50 p-3 sm:flex sm:gap-3 sm:px-3.5 sm:py-2.5">
               <p className="text-xs font-medium text-muted-foreground sm:shrink-0">
-                Last recording
+                {t("workspace.lastRecording")}
               </p>
               <audio
                 controls
@@ -287,7 +338,7 @@ export const TutorChatPageView = memo(function TutorChatPageView({
                 className="row-start-1 rounded-full text-muted-foreground sm:row-auto"
                 onClick={onDeleteAudio}
               >
-                Delete audio
+                {t("workspace.deleteAudio")}
               </Button>
             </div>
           ) : null}
@@ -305,7 +356,7 @@ export const TutorChatPageView = memo(function TutorChatPageView({
                 "order-2 h-11 w-11 shrink-0 rounded-full p-0 sm:order-0",
                 voiceRecording && "animate-pulse",
               )}
-              aria-label={voiceRecording ? "Stop recording" : "Record"}
+              aria-label={voiceRecording ? t("workspace.stopRecording") : t("workspace.record")}
               title={
                 !voiceSupported
                   ? "Browser does not support recording"
@@ -328,15 +379,13 @@ export const TutorChatPageView = memo(function TutorChatPageView({
               onChange={(event) => onDraftChange(event.target.value)}
               onKeyDown={onDraftKeyDown}
               placeholder={
-                voiceRecording
-                  ? "Listening… tap stop when finished"
-                  : "Write a message in English…"
+                voiceRecording ? t("workspace.listeningStop") : t("workspace.writeMessage")
               }
               disabled={pending || voiceRecording}
               className="order-1 col-span-3 max-h-32 min-h-20 w-full resize-none overflow-y-auto rounded-xl border-0 bg-background px-3.5 py-3 text-base leading-6 shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30 disabled:opacity-60 sm:order-0 sm:col-auto sm:max-h-36 sm:min-h-11 sm:flex-1 sm:rounded-2xl sm:border sm:border-border sm:px-4 sm:py-2.5 sm:text-sm sm:shadow-none sm:focus-visible:border-primary sm:focus-visible:ring-primary/40"
             />
             <span className="order-2 min-w-0 truncate text-xs text-muted-foreground sm:hidden">
-              {voiceRecording ? "Tap stop when finished" : "Voice input"}
+              {voiceRecording ? t("workspace.tapStop") : t("workspace.voiceInput")}
             </span>
             <Button
               type="submit"
@@ -355,12 +404,12 @@ export const TutorChatPageView = memo(function TutorChatPageView({
           <p className="mt-2 hidden flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground sm:flex">
             <span className="inline-flex items-center gap-1">
               <Mic className="size-3" />
-              Record → recognize (Chrome/Edge works best) → quick edit → Send
+              {t("workspace.recordInstruction")}
             </span>
             {!voiceSupported ? (
               <span className="inline-flex items-center gap-1 text-destructive">
                 <MicOff className="size-3" />
-                This device does not support a microphone
+                {t("workspace.microphoneUnsupported")}
               </span>
             ) : null}
           </p>

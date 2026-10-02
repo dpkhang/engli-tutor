@@ -25,16 +25,17 @@ import {
   type ThemePreference,
 } from "../../model/preferences";
 import { SettingsCard, SettingsCardContent, SettingsCardHeader, SettingsPanel } from "../shared";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 
 const THEME_OPTIONS: Array<{ id: ThemePreference; label: string; hint: string }> = [
-  { id: "light", label: "Light", hint: "Bright workspace" },
-  { id: "warm", label: "Warm", hint: "Soft paper tone" },
-  { id: "dark", label: "Dark", hint: "Dim for night study" },
-  { id: "midnight", label: "Midnight", hint: "Deep OLED black" },
-  { id: "forest", label: "Forest", hint: "Calm green night" },
-  { id: "ocean", label: "Ocean", hint: "Cool blue depth" },
-  { id: "dusk", label: "Dusk", hint: "Warm sunset glow" },
-  { id: "system", label: "System", hint: "Follow your device" },
+  { id: "light", label: "light", hint: "Bright workspace" },
+  { id: "warm", label: "warm", hint: "Soft paper tone" },
+  { id: "dark", label: "dark", hint: "Dim for night study" },
+  { id: "midnight", label: "midnight", hint: "Deep OLED black" },
+  { id: "forest", label: "forest", hint: "Calm green night" },
+  { id: "ocean", label: "ocean", hint: "Cool blue depth" },
+  { id: "dusk", label: "dusk", hint: "Warm sunset glow" },
+  { id: "system", label: "system", hint: "Follow your device" },
 ];
 
 const THEME_ICONS: Record<ThemePreference, ReactNode> = {
@@ -119,6 +120,7 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
   onApply,
   onDiscard,
 }: AppearanceSettingsViewProps) {
+  const t = useWorkspaceI18n();
   return (
     <SettingsPanel ready={view !== null}>
       {view ? (
@@ -127,12 +129,12 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
             <SettingsCardHeader>
               <CardTitle className="flex items-center gap-2">
                 {THEME_ICONS[view.theme]}
-                Theme
+                {t("workspace.theme")}
               </CardTitle>
             </SettingsCardHeader>
             <SettingsCardContent className="space-y-2.5">
               <p className="text-sm text-muted-foreground">
-                Choose how EngliTutor looks while you study. System follows your device.
+                {t("workspace.appearanceDescription")}
               </p>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                 {THEME_OPTIONS.map((option) => (
@@ -148,7 +150,7 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
                     )}
                   >
                     <ThemePreview mode={option.id} />
-                    <span className="mt-2 block text-sm font-semibold">{option.label}</span>
+                    <span className="mt-2 block text-sm font-semibold">{t(`workspace.${option.label}`)}</span>
                     <span className="mt-0.5 block text-xs text-muted-foreground">{option.hint}</span>
                   </button>
                 ))}
@@ -159,12 +161,12 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
           <SettingsCard>
             <SettingsCardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Palette className="size-5 text-primary" /> Accent color
+                <Palette className="size-5 text-primary" /> {t("workspace.accentColor")}
               </CardTitle>
             </SettingsCardHeader>
             <SettingsCardContent className="space-y-2.5">
               <p className="text-sm text-muted-foreground">
-                Buttons, links, and highlights use this color across the workspace.
+                {t("workspace.accentColor")}
               </p>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
                 {ACCENTS.map((option) => {
@@ -199,12 +201,12 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
           <SettingsCard>
             <SettingsCardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Type className="size-5 text-primary" /> Text size
+                <Type className="size-5 text-primary" /> {t("workspace.textSize")}
               </CardTitle>
             </SettingsCardHeader>
             <SettingsCardContent className="space-y-2.5">
               <p className="text-sm text-muted-foreground">
-                Scale the workspace for easier reading during longer sessions.
+                {t("workspace.textSize")}
               </p>
               <SegmentedSwitch
                 value={view.textSize}
@@ -230,12 +232,12 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
           <SettingsCard>
             <SettingsCardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Sparkles className="size-5 text-primary" /> Motion
+                <Sparkles className="size-5 text-primary" /> {t("workspace.motion")}
               </CardTitle>
             </SettingsCardHeader>
             <SettingsCardContent className="space-y-2.5">
               <p className="text-sm text-muted-foreground">
-                Reduce movement on welcome, speaking, and loading screens.
+                {t("workspace.motion")}
               </p>
               <SegmentedSwitch
                 value={view.reduceMotion}
@@ -255,13 +257,13 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
           {dirty ? (
             <div className="fixed inset-x-0 bottom-0 z-70 border-t border-border/80 bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-12px_32px_-18px_rgba(15,23,42,0.28)] backdrop-blur-md sm:px-6">
               <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 pr-16 lg:pl-62 lg:pr-4">
-                <p className="text-sm text-muted-foreground">You have unsaved appearance changes.</p>
+                <p className="text-sm text-muted-foreground">{t("workspace.unsavedAppearance")}</p>
                 <div className="flex flex-wrap gap-2">
                   <Button type="button" variant="outline" className="rounded-full" onClick={onDiscard}>
-                    Discard
+                    {t("workspace.discard")}
                   </Button>
                   <Button type="button" className="rounded-full" onClick={onApply}>
-                    Apply
+                    {t("workspace.apply")}
                   </Button>
                 </div>
               </div>

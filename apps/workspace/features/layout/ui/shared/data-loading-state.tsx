@@ -1,4 +1,7 @@
+"use client";
+
 import { cn } from "@engli-tutor/ui";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 
 type DataLoadingStateProps = {
   title?: string;
@@ -9,12 +12,15 @@ type DataLoadingStateProps = {
 };
 
 export function DataLoadingState({
-  title = "Loading your data",
-  description = "Just a moment while we prepare everything for you.",
+  title,
+  description,
   cards = 3,
   compact = false,
   className,
 }: DataLoadingStateProps) {
+  const t = useWorkspaceI18n();
+  const resolvedTitle = title ?? t("workspace.loadingYourData");
+  const resolvedDescription = description ?? t("workspace.loadingDataDescription");
   return (
     <section
       className={cn(
@@ -24,7 +30,7 @@ export function DataLoadingState({
       )}
       aria-busy="true"
       aria-live="polite"
-      aria-label={title}
+      aria-label={resolvedTitle}
       role="status"
     >
       <div className="pointer-events-none absolute -top-24 right-0 -z-10 size-56 rounded-full bg-accent/10 blur-3xl" />
@@ -36,8 +42,8 @@ export function DataLoadingState({
           <span className="size-2 rounded-full bg-accent shadow-[0_0_0_5px_hsl(var(--accent)/0.12)]" />
         </div>
         <div className="min-w-0">
-          <p className="font-semibold tracking-tight text-foreground">{title}</p>
-          <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{description}</p>
+          <p className="font-semibold tracking-tight text-foreground">{resolvedTitle}</p>
+          <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{resolvedDescription}</p>
         </div>
       </div>
 

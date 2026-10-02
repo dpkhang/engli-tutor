@@ -1,4 +1,10 @@
 export { PaymentsPage } from "./ui/payments-page";
 export { PaymentResultPage } from "./ui/payment-result-page";
-export { billingMeQueryKey } from "./hooks/use-billing";
-export { UPGRADE_MESSAGE, upgradeReasonFromError, type UpgradeReason } from "./model/upgrade";
+export { billingMeQueryKey, useBillingMe } from "./hooks/use-billing";
+export { dailyRemaining, planAllows } from "./model/plans";
+export {
+  UPGRADE_MESSAGE,
+  upgradeMessageFromError,
+  upgradeReasonFromError,
+  type UpgradeReason,
+} from "./model/upgrade";

@@ -2,9 +2,11 @@
 
 import { memo, type KeyboardEvent, type RefObject } from "react";
 import Link from "next/link";
+import { useUpgradeModal } from "@/features/payments/ui/upgrade-modal-provider";
 import {
   ArrowLeft,
   ChevronDown,
+  Crown,
   LoaderCircle,
   Mic,
   MicOff,
@@ -18,6 +20,7 @@ import {
 import { Button, cn } from "@engli-tutor/ui";
 import { type TutorLevel, type TutorScenario } from "@/features/tutor-chat/api";
 import { VoiceOrb } from "../shared";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 
 export const SCENES: {
   id: TutorScenario;
@@ -61,6 +64,7 @@ export type SpeakingRoomPageViewProps = {
   pending: boolean;
   error: string | null;
   showUpgrade: boolean;
+  lockedScenes: TutorScenario[];
   demoMode: boolean;
   autoSpeak: boolean;
   aiSpeaking: boolean;
@@ -99,6 +103,7 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
   pending,
   error,
   showUpgrade,
+  lockedScenes,
   demoMode,
   autoSpeak,
   aiSpeaking,
@@ -129,6 +134,8 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
   onDraftKeyDown,
   onSend,
 }: SpeakingRoomPageViewProps) {
+  const t = useWorkspaceI18n();
+  const { openUpgradeModal } = useUpgradeModal();
   return (
     <div className="speaking-room fixed inset-0 z-50 flex h-dvh flex-col overflow-hidden bg-background text-foreground">
       <div aria-hidden className="pointer-events-none absolute inset-0">
@@ -144,14 +151,14 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
             type="button"
             onClick={onExit}
             className="inline-flex size-9 items-center justify-center rounded-full text-muted-foreground transition hover:bg-primary/10 hover:text-foreground"
-            aria-label="Exit"
+            aria-label={t("workspace.exit")}
           >
             <X className="size-4" strokeWidth={1.5} />
           </button>
           <div className="min-w-0">
             <p className="flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.14em] text-primary uppercase">
               <Sparkles className="size-3" strokeWidth={2} />
-              Speak with AI
+              {t("workspace.speakWithAi")}
             </p>
             <p className="truncate text-[15px] font-medium tracking-tight text-foreground">
               {sceneLabel}
@@ -171,7 +178,7 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
                 : "text-muted-foreground hover:bg-primary/8 hover:text-foreground",
             )}
           >
-            {sfxOn ? "SFX" : "SFX off"}
+            {sfxOn ? "SFX" : t("workspace.sfxOff")}
           </button>
           <button
             type="button"
@@ -182,8 +189,8 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
                 ? "bg-primary/10 text-primary"
                 : "text-muted-foreground hover:bg-primary/8 hover:text-foreground",
             )}
-            aria-label="AI voice"
-            title={autoSpeak ? "Mute AI voice" : "Enable AI voice"}
+            aria-label={t("workspace.aiVoice")}
+            title={autoSpeak ? t("workspace.muteAiVoice") : t("workspace.enableAiVoice")}
           >
             {autoSpeak ? (
               <Volume2 className="size-4" strokeWidth={1.5} />
@@ -195,7 +202,7 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
             type="button"
             onClick={onReset}
             className="inline-flex size-9 items-center justify-center rounded-full text-muted-foreground transition hover:bg-primary/8 hover:text-foreground"
-            aria-label="New conversation"
+            aria-label={t("workspace.newConversation")}
           >
             <RefreshCw className="size-4" strokeWidth={1.5} />
           </button>
@@ -209,7 +216,7 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
                 : "text-muted-foreground hover:bg-primary/8 hover:text-foreground",
             )}
           >
-            Scene
+            {t("workspace.scene")}
             <ChevronDown
               className={cn("size-3.5 transition duration-300", panelOpen && "rotate-180")}
               strokeWidth={1.5}
@@ -234,6 +241,12 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
                 )}
               >
                 {item.label}
+                {lockedScenes.includes(item.id) ? (
+                  <span className="ml-1.5 inline-flex items-center gap-0.5 text-[10px] font-semibold uppercase opacity-80">
+                    <Crown className="size-2.5" />
+                    {t("workspace.premium")}
+                  </span>
+                ) : null}
               </button>
             ))}
           </div>
@@ -254,7 +267,7 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
               </button>
             ))}
             <span className="ml-auto text-[11px] text-muted-foreground">
-              {userTurns} turn{userTurns === 1 ? "" : "s"}
+              {userTurns} {t("workspace.turns")}
               {demoMode ? " · demo" : ""}
             </span>
           </div>
@@ -277,14 +290,14 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
               )}
             >
               {voiceRecording
-                ? "Recording…"
+                ? t("workspace.recording")
                 : pending
-                  ? "Thinking…"
+                  ? t("workspace.thinking")
                   : aiSpeaking
                     ? voiceSource === "browser"
-                      ? "AI speaking (browser)"
-                      : "AI speaking"
-                    : "Tap the mic to speak"}
+                      ? t("workspace.aiSpeakingBrowser")
+                      : t("workspace.aiSpeaking")
+                    : t("workspace.tapMic")}
             </p>
 
             <button
@@ -292,7 +305,7 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
               disabled={pending || !voiceSupported}
               onClick={onMicClick}
               className="group relative shrink-0 disabled:opacity-45"
-              aria-label={voiceRecording ? "Stop recording" : "Start recording"}
+              aria-label={voiceRecording ? t("workspace.stopRecording") : t("workspace.startRecording")}
             >
               <VoiceOrb stream={voiceStream} active={voiceRecording} mode={orbMode}>
                 {pending ? (
@@ -314,7 +327,7 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
               className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[12px] text-muted-foreground transition hover:bg-primary/10 hover:text-primary disabled:opacity-30"
             >
               <Volume2 className="size-3.5" strokeWidth={1.5} />
-              Replay AI line
+              {t("workspace.replayAiLine")}
             </button>
 
             <div className="flex h-29 w-full shrink-0 flex-col justify-start overflow-hidden text-center sm:h-32">
@@ -325,9 +338,9 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
                     {showUpgrade ? (
                       <>
                         {" "}
-                        <Link href="/payments" className="font-semibold text-primary underline">
-                          See plans
-                        </Link>
+                        <button type="button" className="font-semibold text-primary underline" onClick={openUpgradeModal}>
+                          {t("workspace.seePlans")}
+                        </button>
                       </>
                     ) : null}
                   </p>
@@ -362,9 +375,9 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
         <footer className="relative z-20 shrink-0 border-t border-primary/10 bg-background/85 px-5 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:px-8 sm:pt-4">
           <div className="mx-auto flex max-w-xl flex-col items-center gap-2.5">
             <p className="flex h-4 items-center justify-center text-center text-[11px] text-muted-foreground">
-              {voiceRecording
-                ? "When you're done, tap again to send"
-                : "Speak naturally — 2 to 4 sentences is enough"}
+{voiceRecording
+                ? t("workspace.whenDoneTapAgain")
+                : t("workspace.speakNaturally")}
             </p>
             <div className="flex w-full items-end gap-2">
               <textarea
@@ -373,7 +386,7 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
                 value={draft}
                 onChange={(e) => onDraftChange(e.target.value)}
                 onKeyDown={onDraftKeyDown}
-                placeholder="Type your answer…"
+                placeholder={t("workspace.typeAnswer")}
                 disabled={pending || voiceRecording}
                 className="h-11 max-h-28 min-h-11 flex-1 resize-none overflow-y-auto rounded-2xl border border-primary/15 bg-card/80 px-4 py-2.5 text-sm leading-6 text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/40 disabled:opacity-50"
               />
@@ -390,7 +403,7 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
                 className="hidden h-11 shrink-0 items-center gap-1 rounded-2xl px-2 text-[12px] text-muted-foreground transition hover:text-primary sm:inline-flex"
               >
                 <ArrowLeft className="size-3.5" strokeWidth={1.5} />
-                Home
+                {t("workspace.home")}
               </Link>
             </div>
           </div>

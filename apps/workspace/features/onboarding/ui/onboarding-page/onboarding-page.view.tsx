@@ -29,6 +29,7 @@ import {
 } from "../../model/onboarding";
 import { OnboardingBackdrop } from "../onboarding-backdrop";
 import { WelcomeScreen } from "../welcome-screen";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 
 const STEPS = [
   { id: "intro", title: "Welcome" },
@@ -127,6 +128,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
   onBack,
   onStayFree,
 }: OnboardingPageViewProps) {
+  const t = useWorkspaceI18n();
   const stepIndex = STEPS.findIndex((item) => item.id === step);
   const wide = step === "plans";
 
@@ -153,7 +155,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
           <BrandLogo size={32} />
         </Link>
         <span className="text-xs font-medium text-muted-foreground">
-          Step {stepIndex + 1} of {STEPS.length}
+          {t("workspace.stepOf").replace("{current}", String(stepIndex + 1)).replace("{total}", String(STEPS.length))}
         </span>
       </header>
 
@@ -170,13 +172,12 @@ export const OnboardingPageView = memo(function OnboardingPageView({
         <div key={step} className="auth-enter">
             {step === "intro" ? (
               <section className="space-y-6">
-                <p className="text-sm font-medium text-primary">Welcome, {firstName}</p>
+                <p className="text-sm font-medium text-primary">{t("workspace.welcomeName").replace("{name}", firstName)}</p>
                 <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                  English that fits into your day
+                  {t("workspace.englishFitsDay")}
                 </h1>
                 <p className="text-sm leading-6 text-muted-foreground sm:text-base">
-                  EngliTutor is your AI coach for speaking, skills practice, and exam prep — with
-                  explanations in Vietnamese when you need them.
+{t("workspace.onboardingIntro")}
                 </p>
                 <ul className="grid gap-2.5">
                   {INTRO_HIGHLIGHTS.map((item, index) => {
@@ -205,12 +206,12 @@ export const OnboardingPageView = memo(function OnboardingPageView({
             {step === "details" ? (
               <section className="space-y-8">
                 <div>
-                  <p className="text-sm font-medium text-primary">Your details</p>
+                  <p className="text-sm font-medium text-primary">{t("workspace.yourDetails")}</p>
                   <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
-                    Tell us how you learn
+                    {t("workspace.tellHowLearn")}
                   </h1>
                   <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                    Native language is Vietnamese. Pick a level and a goal — you can change this later.
+                    {t("workspace.nativeLanguageOnboarding")}
                   </p>
                 </div>
 
@@ -221,7 +222,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
                   <span>
                     <span className="block text-sm font-semibold">Vietnamese</span>
                     <span className="text-xs text-muted-foreground">
-                      Explanations and coaching stay in Tiếng Việt.
+                      {t("workspace.explanationsVietnamese")}
                     </span>
                   </span>
                 </div>
@@ -229,7 +230,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm font-semibold">
                     <Target className="size-4 text-primary" />
-                    Target level
+                    {t("workspace.targetLevel")}
                   </div>
                   <div className="grid gap-2.5">
                     {LEVELS.map((item) => (
@@ -247,7 +248,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm font-semibold">
                     <Sparkles className="size-4 text-primary" />
-                    Learning goal
+                    {t("workspace.learningGoal")}
                   </div>
                   <div className="grid gap-2.5">
                     {LEARNING_GOALS.map((item) => (
@@ -267,7 +268,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
                         onChange={(event) => onCustomGoalChange(event.target.value)}
                         maxLength={280}
                         rows={4}
-                        placeholder="I want to…"
+                        placeholder={t("workspace.iWantTo")}
                         className={cn(
                           "w-full min-w-0 rounded-2xl border border-input bg-card px-3 py-3 text-sm shadow-xs outline-none",
                           "placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/40",
@@ -285,11 +286,10 @@ export const OnboardingPageView = memo(function OnboardingPageView({
                 <div>
                   <p className="text-sm font-medium text-primary">Upgrade</p>
                   <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
-                    Upgrade from Free
+                    {t("workspace.upgradeFromFree")}
                   </h1>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                    You’re on Free. Upgrade to Standard or Premium for unlimited AI tutor chat and
-                    voice. Skip to keep learning on Free.
+                    {t("workspace.upgradeDescription")}
                   </p>
                 </div>
 
@@ -300,7 +300,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
                 />
 
                 {billingLoading ? (
-                  <p className="text-sm text-muted-foreground">Loading plans…</p>
+                  <p className="text-sm text-muted-foreground">{t("workspace.loadingPlansEllipsis")}</p>
                 ) : (
                   <div className="flex flex-wrap justify-center gap-4 sm:grid sm:grid-cols-2 sm:items-stretch">
                     {plans.map((plan) => {
@@ -317,7 +317,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
                         >
                           {plan.featured ? (
                             <Badge className="absolute top-4 right-4 rounded-full">
-                              <Crown className="size-3" /> Most popular
+                              <Crown className="size-3" /> {t("workspace.mostPopular")}
                             </Badge>
                           ) : null}
                           <h2 className="pr-28 text-xl font-semibold">{plan.name}</h2>
@@ -329,7 +329,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
                             </span>
                           </p>
                           {discount > 0 ? (
-                            <p className="mt-1 text-xs text-muted-foreground">Save {discount}% vs monthly</p>
+                            <p className="mt-1 text-xs text-muted-foreground">{t("workspace.saveVsMonthly").replace("{percent}", String(discount))}</p>
                           ) : null}
                           <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                             {plan.features.map((feature) => (
@@ -350,7 +350,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
                                 <LoaderCircle className="animate-spin" />
                               ) : (
                                 <>
-                                  <ArrowUpCircle /> Upgrade to {plan.name}
+                                  <ArrowUpCircle /> {t("workspace.upgradeTo")} {plan.name}
                                 </>
                               )}
                             </Button>
@@ -377,7 +377,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
             ) : (
               <Button type="button" variant="outline" className="h-11 rounded-full px-4" onClick={onBack}>
                 <ArrowLeft />
-                Back
+                {t("workspace.back")}
               </Button>
             )}
             <Button
@@ -386,7 +386,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
               disabled={step === "details" && !detailsReady}
               onClick={onNext}
             >
-              {step === "intro" ? "Get started" : "Continue"}
+              {step === "intro" ? t("workspace.getStarted") : t("workspace.continue")}
               <ArrowRight />
             </Button>
           </div>
@@ -403,7 +403,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
               disabled={busy}
               onClick={onStayFree}
             >
-              {savePending && !pendingPlan ? "Saving…" : "Stay on Free"}
+              {savePending && !pendingPlan ? t("workspace.savingEllipsis") : t("workspace.stayOnFree")}
             </Button>
           </div>
         )}

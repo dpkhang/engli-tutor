@@ -11,6 +11,7 @@ import {
   Label,
 } from "@engli-tutor/ui";
 import { SettingsCard, SettingsCardContent, SettingsCardHeader } from "../shared";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 
 export type SecuritySettingsViewProps = {
   currentPassword: string;
@@ -39,17 +40,18 @@ export const SecuritySettingsView = memo(function SecuritySettingsView({
   onRevokeOthersChange,
   onSubmit,
 }: SecuritySettingsViewProps) {
+  const t = useWorkspaceI18n();
   return (
     <SettingsCard>
       <SettingsCardHeader>
         <CardTitle className="flex items-center gap-2">
-          <KeyRound className="size-5 text-primary" /> Password
+          <KeyRound className="size-5 text-primary" /> {t("workspace.password")}
         </CardTitle>
       </SettingsCardHeader>
       <SettingsCardContent>
         <form className="space-y-3" onSubmit={onSubmit}>
           <div className="space-y-1.5">
-            <Label htmlFor="current-password">Current password</Label>
+            <Label htmlFor="current-password">{t("workspace.currentPassword")}</Label>
             <Input
               id="current-password"
               type="password"
@@ -61,7 +63,7 @@ export const SecuritySettingsView = memo(function SecuritySettingsView({
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="new-password">New password</Label>
+            <Label htmlFor="new-password">{t("workspace.newPassword")}</Label>
             <Input
               id="new-password"
               type="password"
@@ -74,7 +76,7 @@ export const SecuritySettingsView = memo(function SecuritySettingsView({
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="confirm-password">Confirm new password</Label>
+            <Label htmlFor="confirm-password">{t("workspace.confirmNewPassword")}</Label>
             <Input
               id="confirm-password"
               type="password"
@@ -93,7 +95,7 @@ export const SecuritySettingsView = memo(function SecuritySettingsView({
               checked={revokeOthers}
               onChange={(event) => onRevokeOthersChange(event.target.checked)}
             />
-            Sign out other devices after changing password
+            {t("workspace.signOutOtherDevices")}
           </label>
           {passwordError ? (
             <Alert variant="destructive">
@@ -101,7 +103,7 @@ export const SecuritySettingsView = memo(function SecuritySettingsView({
             </Alert>
           ) : null}
           <Button type="submit" disabled={passwordPending} className="h-11 w-full sm:w-auto">
-            {passwordPending ? "Updating..." : "Update password"}
+            {passwordPending ? t("workspace.updating") : t("workspace.updatePassword")}
           </Button>
         </form>
       </SettingsCardContent>

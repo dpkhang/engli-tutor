@@ -6,6 +6,7 @@ import { Button, CardTitle, Label, SegmentedSwitch, cn } from "@engli-tutor/ui";
 import { LEVELS, type SkillLevel } from "@/features/learn/model/skill-exercises";
 import { SPEECH_RATES, type SpeechRateId } from "../../model/preferences";
 import { ChoiceChip, SettingsCard, SettingsCardContent, SettingsCardHeader, SettingsPanel } from "../shared";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 
 export type LearningViewState = {
   level: SkillLevel | null;
@@ -34,6 +35,7 @@ export const LearningSettingsView = memo(function LearningSettingsView({
   onApply,
   onDiscard,
 }: LearningSettingsViewProps) {
+  const t = useWorkspaceI18n();
   return (
     <SettingsPanel ready={view !== null}>
       {view ? (
@@ -41,13 +43,12 @@ export const LearningSettingsView = memo(function LearningSettingsView({
           <SettingsCard>
             <SettingsCardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Target className="size-5 text-primary" /> Preferred level
+                <Target className="size-5 text-primary" /> {t("workspace.preferredLevel")}
               </CardTitle>
             </SettingsCardHeader>
             <SettingsCardContent className="space-y-2.5">
               <p className="text-sm text-muted-foreground">
-                Skills opens this band first. You can still switch to any level on the practice
-                page.
+                {t("workspace.preferredLevelDescription")}
               </p>
               <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                 {LEVELS.map((item) => (
@@ -67,19 +68,19 @@ export const LearningSettingsView = memo(function LearningSettingsView({
           <SettingsCard>
             <SettingsCardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Volume2 className="size-5 text-primary" /> Listening & speech
+                <Volume2 className="size-5 text-primary" /> {t("workspace.listeningSpeech")}
               </CardTitle>
             </SettingsCardHeader>
             <SettingsCardContent className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>Playback speed</Label>
+                <Label>{t("workspace.playbackSpeed")}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Applies to Listen on exercises and AI tutor speech.
+                  {t("workspace.playbackSpeedDescription")}
                 </p>
                 <SegmentedSwitch
                   value={view.speechRate}
                   onChange={onSpeechRateChange}
-                  ariaLabel="Playback speed"
+                  ariaLabel={t("workspace.playbackSpeed")}
                   options={(Object.keys(SPEECH_RATES) as SpeechRateId[]).map((id) => ({
                     id,
                     label: SPEECH_RATES[id].label,
@@ -88,9 +89,9 @@ export const LearningSettingsView = memo(function LearningSettingsView({
                 <p className="text-xs text-muted-foreground">{SPEECH_RATES[view.speechRate].hint}</p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="autoplay-listening">Auto-play listening audio</Label>
+                <Label htmlFor="autoplay-listening">{t("workspace.autoplayListening")}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Start audio automatically when you open a listening exercise.
+                  {t("workspace.autoplayListeningDescription")}
                 </p>
                 <button
                   id="autoplay-listening"
@@ -117,7 +118,7 @@ export const LearningSettingsView = memo(function LearningSettingsView({
           {dirty ? (
             <div className="fixed inset-x-0 bottom-0 z-70 border-t border-border/80 bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-12px_32px_-18px_rgba(15,23,42,0.28)] backdrop-blur-md sm:px-6">
               <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 pr-16 lg:pl-62 lg:pr-4">
-                <p className="text-sm text-muted-foreground">You have unsaved learning changes.</p>
+                <p className="text-sm text-muted-foreground">{t("workspace.unsavedLearning")}</p>
                 <div className="flex flex-wrap gap-2">
                   <Button
                     type="button"

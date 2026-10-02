@@ -4,6 +4,7 @@ import { memo } from "react";
 import Link from "next/link";
 import { BookOpen, Gamepad2, House, Search } from "lucide-react";
 import { Button } from "@engli-tutor/ui";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 
 export type NotFoundAction = {
   href: string;
@@ -48,10 +49,18 @@ export type NotFoundPageViewProps = {
 
 export const NotFoundPageView = memo(function NotFoundPageView({
   code = "404",
-  title = "This page isn’t on today’s lesson plan",
-  description = "The link may be old, or this activity was moved. Pick a path below and keep practicing.",
+  title,
+  description,
   actions = DEFAULT_ACTIONS,
 }: NotFoundPageViewProps) {
+  const t = useWorkspaceI18n();
+  const resolvedTitle = title ?? t("workspace.notFoundTitle");
+  const resolvedDescription = description ?? t("workspace.notFoundDescription");
+  const resolvedActions = actions ?? [
+    { href: "/", label: t("workspace.backToToday"), icon: <House />, primary: true },
+    { href: "/skills", label: t("workspace.practice"), icon: <BookOpen /> },
+    { href: "/games", label: t("workspace.games"), icon: <Gamepad2 /> },
+  ];
   return (
     <div
       data-not-found
@@ -68,7 +77,7 @@ export const NotFoundPageView = memo(function NotFoundPageView({
           <LetterTile letter="Z" className="rotate-8" delay="160ms" />
         </div>
         <span className="absolute top-4 left-5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-medium tracking-wide uppercase">
-          Missing page
+          {t("workspace.missingPage")}
         </span>
       </div>
 
@@ -76,14 +85,14 @@ export const NotFoundPageView = memo(function NotFoundPageView({
         {code}
       </p>
       <h1 className="mt-3 max-w-lg text-xl font-semibold tracking-tight text-foreground sm:text-3xl">
-        {title}
+        {resolvedTitle}
       </h1>
       <p className="mt-3 max-w-md text-sm leading-6 text-muted-foreground sm:text-base">
-        {description}
+        {resolvedDescription}
       </p>
 
       <div className="mt-8 flex w-full flex-col items-stretch justify-center gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
-        {actions.map((action) => (
+        {resolvedActions.map((action) => (
           <Button
             key={action.href + action.label}
             asChild
@@ -100,7 +109,7 @@ export const NotFoundPageView = memo(function NotFoundPageView({
 
       <p className="mt-8 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
         <Search className="size-3.5" />
-        Try search from the header, or pick a shortcut above.
+        {t("workspace.notFoundHint")}
       </p>
     </div>
   );

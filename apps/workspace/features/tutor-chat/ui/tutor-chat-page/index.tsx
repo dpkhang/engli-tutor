@@ -16,14 +16,18 @@ import { LESSON_PACKS, markLessonStarted } from "@/features/learn";
 import {
   UPGRADE_MESSAGE,
   billingMeQueryKey,
+  planAllows,
   upgradeReasonFromError,
+  useBillingMe,
   type UpgradeReason,
 } from "@/features/payments";
 import { tutorApi, type TutorChatMessage, type TutorScenario } from "../../api";
 import { useVoiceInput } from "../../hooks/use-voice-input";
 import { SCENARIOS, STARTERS, TutorChatPageView } from "./tutor-chat-page.view";
 
-type ChatMessage = TutorChatMessage & { audioUrl?: string };
+type ChatMessage = TutorChatMessage & { audioUrl?: string; streaming?: boolean };
+
+const PRO_SCENARIOS: TutorScenario[] = ["interview", "standup"];
 
 function isScenario(value: string | null): value is TutorScenario {
   return SCENARIOS.some((item) => item.id === value);
@@ -57,6 +61,12 @@ export function TutorChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [upgradeReason, setUpgradeReason] = useState<UpgradeReason | null>(null);
   const queryClient = useQueryClient();
+  const billing = useBillingMe();
+  const lockedScenarios = useMemo(
+    () => (planAllows(billing.data, "proScenarios") ? [] : PRO_SCENARIOS),
+    [billing.data],
+  );
+  const scenarioLocked = lockedScenarios.includes(scenario);
   const [demoMode, setDemoMode] = useState(false);
   const [pendingAudioUrl, setPendingAudioUrl] = useState<string | null>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
@@ -138,9 +148,18 @@ export function TutorChatPage() {
     [voice],
   );
 
+  // Free users without a ?scenario link start on Small talk instead of a Premium scenario.
+  const defaultChecked = useRef(false);
+  useEffect(() => {
+    if (defaultChecked.current || !billing.data) return;
+    defaultChecked.current = true;
+    if (!scenarioLocked || searchParams.get("scenario") || messages.length > 1) return;
+    resetChat("smalltalk");
+  }, [billing.data, messages.length, resetChat, scenarioLocked, searchParams]);
+
   const send = useCallback(async () => {
     const text = draft.trim();
-    if (!text || pending || voice.recording) return;
+    if (!text || pending || voice.recording || scenarioLocked) return;
 
     const audioUrl = pendingAudioUrl ?? undefined;
     const nextMessages: ChatMessage[] = [...messages, { role: "user", content: text, audioUrl }];
@@ -154,9 +173,23 @@ export function TutorChatPage() {
 
     try {
       const payload = nextMessages.map(({ role, content }) => ({ role, content }));
-      const result = await tutorApi.chat({ messages: payload, scenario });
+      let streamedReply = "";
+      const result = await tutorApi.chatStream({
+        messages: payload,
+        scenario,
+        onChunk: (chunk) => {
+          streamedReply += chunk;
+          setMessages((prev) => {
+            const withoutStreaming = prev.filter((message) => !message.streaming);
+            return [...withoutStreaming, { role: "assistant", content: streamedReply, streaming: true }];
+          });
+        },
+      });
       setDemoMode(result.demo);
-      setMessages((prev) => [...prev, { role: "assistant", content: result.reply }]);
+      setMessages((prev) => [
+        ...prev.filter((message) => !message.streaming),
+        { role: "assistant", content: result.reply },
+      ]);
       void queryClient.invalidateQueries({ queryKey: billingMeQueryKey });
     } catch (err) {
       const reason = upgradeReasonFromError(err);
@@ -171,7 +204,7 @@ export function TutorChatPage() {
       setPending(false);
       inputRef.current?.focus();
     }
-  }, [draft, messages, pending, pendingAudioUrl, queryClient, scenario, voice]);
+  }, [draft, messages, pending, pendingAudioUrl, queryClient, scenario, scenarioLocked, voice]);
 
   const onResetCurrent = useCallback(() => resetChat(scenario), [resetChat, scenario]);
   const onDraftChange = useCallback((value: string) => setDraft(value), []);
@@ -210,8 +243,9 @@ export function TutorChatPage() {
       messages={messages}
       draft={draft}
       pending={pending}
-      error={error}
-      showUpgrade={upgradeReason !== null}
+      error={error ?? (scenarioLocked ? UPGRADE_MESSAGE.pro : null)}
+      showUpgrade={upgradeReason !== null || scenarioLocked}
+      lockedScenarios={lockedScenarios}
       demoMode={demoMode}
       pendingAudioUrl={pendingAudioUrl}
       voiceRecording={voice.recording}

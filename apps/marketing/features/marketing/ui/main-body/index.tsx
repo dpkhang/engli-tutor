@@ -9,11 +9,12 @@ import { MainBodyView } from "./main-body.view";
 export function MainBody() {
   const { entryLabel, isLoggedIn } = useAuthSession();
   const catalog = useBillingCatalog();
-  const plans = useMemo(() => plansFromCatalog(catalog.data), [catalog.data]);
+  const plans = useMemo(() => (catalog.data ? plansFromCatalog(catalog.data) : []), [catalog.data]);
   const visiblePlans = useMemo(
     () => (isLoggedIn ? plans.filter((plan) => plan.id !== "starter") : plans),
     [isLoggedIn, plans],
   );
+  const pricingStatus = catalog.isLoading ? "loading" : catalog.error ? "error" : "ready";
 
   const onEntryClick = useCallback(() => goToEntry(isLoggedIn), [isLoggedIn]);
   const onPlanClick = useCallback(
@@ -27,13 +28,19 @@ export function MainBody() {
     },
     [isLoggedIn, plans],
   );
+  const onRetryPricing = useCallback(() => {
+    window.location.reload();
+  }, []);
 
   return (
     <MainBodyView
       entryLabel={entryLabel}
       plans={visiblePlans}
+      pricingStatus={pricingStatus}
+      pricingError={catalog.error?.message ?? null}
       onEntryClick={onEntryClick}
       onPlanClick={onPlanClick}
+      onRetryPricing={onRetryPricing}
     />
   );
 }

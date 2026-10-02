@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 
 type PageLoadingOverlayProps = {
   open: boolean;
@@ -11,10 +12,14 @@ type PageLoadingOverlayProps = {
 
 export function PageLoadingOverlay({
   open,
-  title = "Loading page",
-  description = "Getting everything ready…",
-  label = "Loading page",
+  title,
+  description,
+  label,
 }: PageLoadingOverlayProps) {
+  const t = useWorkspaceI18n();
+  const resolvedTitle = title ?? t("workspace.loadingPage");
+  const resolvedDescription = description ?? t("workspace.loadingPageDescription");
+  const resolvedLabel = label ?? t("workspace.loadingPage");
   return (
     <AnimatePresence>
       {open ? (
@@ -27,7 +32,7 @@ export function PageLoadingOverlay({
           transition={{ duration: 0.16 }}
           role="status"
           aria-live="polite"
-          aria-label={label}
+          aria-label={resolvedLabel}
           aria-busy="true"
         >
           <motion.div
@@ -43,8 +48,8 @@ export function PageLoadingOverlay({
               <span className="size-1.5 rounded-full bg-accent" />
             </span>
             <span>
-              <span className="block text-sm font-semibold tracking-tight text-foreground">{title}</span>
-              <span className="mt-0.5 block text-xs text-muted-foreground">{description}</span>
+              <span className="block text-sm font-semibold tracking-tight text-foreground">{resolvedTitle}</span>
+              <span className="mt-0.5 block text-xs text-muted-foreground">{resolvedDescription}</span>
             </span>
           </motion.div>
 

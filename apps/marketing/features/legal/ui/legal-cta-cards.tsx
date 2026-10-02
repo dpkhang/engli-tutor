@@ -11,8 +11,8 @@ function CtaLink({
   className?: string;
 }) {
   const classes = cn(
-    "group flex items-start justify-between gap-3 rounded-sm border border-border bg-background p-4 text-left transition-colors",
-    "hover:border-primary/40 hover:bg-muted/40",
+    "group flex min-h-28 items-start justify-between gap-3 rounded-2xl border border-border/80 bg-background/90 p-5 text-left shadow-sm transition-all duration-200",
+    "hover:-translate-y-0.5 hover:border-primary/40 hover:bg-background hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/60",
     className,
   );
   const body = (
