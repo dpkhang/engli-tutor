@@ -6,6 +6,8 @@ import { ArrowLeft, BookOpen, Check, Heart, House, Lightbulb, RotateCcw, Volume2
 import { Button, cn } from "@engli-tutor/ui";
 import { DataLoadingState, NotFoundPage } from "@/features/layout";
 import { ClickableTranslateText } from "@/features/translate";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { LocalizedLink } from "@/features/i18n/localized-link";
 import type {
   ChoiceQuestion,
   OpenQuestion,
@@ -27,6 +29,7 @@ function QuestionCard({
   correct,
   locked,
   onChange,
+  t,
 }: {
   index: number;
   question: SkillQuestion;
@@ -34,12 +37,13 @@ function QuestionCard({
   correct?: boolean;
   locked: boolean;
   onChange: (value: string) => void;
+  t: (key: string) => string;
 }) {
   return (
     <article className="min-w-0 space-y-4 rounded-[1.35rem] border border-border/70 bg-card p-5 transition-shadow hover:shadow-md sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-          Question {index + 1}
+          {t("workspace.question")} {index + 1}
         </p>
         {locked ? (
           <span
@@ -48,7 +52,7 @@ function QuestionCard({
               correct ? "bg-accent/15 text-accent" : "bg-destructive/10 text-destructive",
             )}
           >
-            {correct ? "Correct" : "Review"}
+            {correct ? t("workspace.correct") : t("workspace.review")}
           </span>
         ) : null}
       </div>
@@ -87,7 +91,7 @@ function QuestionCard({
           value={value}
           disabled={locked}
           onChange={(event) => onChange(event.target.value)}
-          placeholder="Type your answer in English…"
+          placeholder={t("workspace.typeAnswerEnglish")}
           className="w-full resize-y rounded-xl border border-border bg-background px-3.5 py-3 text-sm outline-none focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/40 disabled:opacity-70"
         />
       )}
@@ -96,12 +100,12 @@ function QuestionCard({
         <div className="space-y-3 rounded-xl border border-accent/25 bg-accent/8 px-4 py-3">
           <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <Check className="size-4 text-accent" />
-            {correct ? "On track / correct" : "Review the hint"}
+            {correct ? t("workspace.onTrackCorrect") : t("workspace.reviewHint")}
           </p>
           <p className="text-sm leading-relaxed text-muted-foreground">{question.explainVi}</p>
           {question.kind === "open" ? (
             <p className="text-sm leading-relaxed text-foreground">
-              <span className="font-medium">Sample: </span>
+              <span className="font-medium">{t("workspace.sample")}</span>
               {(question as OpenQuestion).sampleAnswer}
             </p>
           ) : null}
@@ -152,11 +156,12 @@ export const SkillExercisePageView = memo(function SkillExercisePageView({
   onSpeak,
   onToggleScript,
 }: SkillExercisePageViewProps) {
+  const t = useWorkspaceI18n();
   if (loading) {
     return (
       <DataLoadingState
-        title="Preparing your exercise"
-        description="Loading the questions, tips, and learning materials."
+        title={t("workspace.preparingExercise")}
+        description={t("workspace.loadingQuestions")}
         cards={3}
       />
     );
@@ -165,12 +170,12 @@ export const SkillExercisePageView = memo(function SkillExercisePageView({
   if (!exercise) {
     return (
       <NotFoundPage
-        title="This exercise isn’t available"
-        description="It may have been moved or the link is incomplete. Go back to this skill and pick another activity."
+        title={t("workspace.exerciseUnavailable")}
+        description={t("workspace.exerciseUnavailableDescription")}
         actions={[
-          { href: backHref, label: "Back to skill", icon: <BookOpen />, primary: true },
-          { href: "/skills", label: "All skills" },
-          { href: "/", label: "Back to Today", icon: <House /> },
+          { href: backHref, label: t("workspace.backToSkill"), icon: <BookOpen />, primary: true },
+          { href: "/skills", label: t("workspace.backToSkills") },
+          { href: "/", label: t("workspace.backToToday"), icon: <House /> },
         ]}
       />
     );
@@ -210,7 +215,7 @@ export const SkillExercisePageView = memo(function SkillExercisePageView({
                   ? "border-white/50 bg-white text-rose-600 shadow-sm"
                   : "border-white/25 bg-white/10 text-white hover:bg-white/20",
               )}
-              aria-label={favorited ? "Remove from favorites" : "Save exercise"}
+              aria-label={favorited ? t("workspace.removeFavorite") : t("workspace.saveExercise")}
               aria-pressed={favorited}
               onClick={onToggleFavorite}
             >
@@ -227,7 +232,7 @@ export const SkillExercisePageView = memo(function SkillExercisePageView({
             {exercise.material.speakable ? (
               <Button type="button" variant="outline" className="rounded-full" onClick={onSpeak}>
                 <Volume2 className="size-4" />
-                Listen
+                {t("workspace.listen")}
               </Button>
             ) : null}
             {skill === "listening" ? (
@@ -237,7 +242,7 @@ export const SkillExercisePageView = memo(function SkillExercisePageView({
                 className="rounded-full"
                 onClick={onToggleScript}
               >
-                {showScript ? "Hide script" : "Show script"}
+                {showScript ? t("workspace.hideScript") : t("workspace.showScript")}
               </Button>
             ) : null}
           </div>
@@ -249,7 +254,7 @@ export const SkillExercisePageView = memo(function SkillExercisePageView({
           </pre>
         ) : (
           <p className="text-sm text-muted-foreground">
-            Tap “Listen” first, answer the questions, then open the script to check.
+            {t("workspace.listenFirst")}
           </p>
         )}
       </section>
@@ -257,15 +262,15 @@ export const SkillExercisePageView = memo(function SkillExercisePageView({
       <section className="min-w-0 space-y-4">
         <div className="flex items-end justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold tracking-wider text-primary uppercase">Your turn</p>
+            <p className="text-xs font-semibold tracking-wider text-primary uppercase">{t("workspace.yourTurn")}</p>
             <h2 className="mt-1 text-xl font-semibold tracking-tight">
-              Take it one question at a time
+              {t("workspace.oneQuestionAtTime")}
             </h2>
           </div>
           <p className="shrink-0 text-sm text-muted-foreground">
             {submitted
-              ? `${correctCount}/${exercise.questions.length} correct`
-              : `Answered ${answeredCount}/${exercise.questions.length}`}
+              ? t("workspace.correctScore").replace("{correct}", String(correctCount)).replace("{total}", String(exercise.questions.length))
+              : t("workspace.answeredScore").replace("{answered}", String(answeredCount)).replace("{total}", String(exercise.questions.length))}
           </p>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-muted">
@@ -277,7 +282,7 @@ export const SkillExercisePageView = memo(function SkillExercisePageView({
           />
         </div>
         <p className="text-sm text-muted-foreground">
-          Choose or type every answer. You can review everything before submitting.
+          {t("workspace.answerEveryQuestion")}
         </p>
 
         {exercise.questions.map((question, index) => (
@@ -289,6 +294,7 @@ export const SkillExercisePageView = memo(function SkillExercisePageView({
             correct={answers[question.id]?.correct}
             locked={submitted}
             onChange={(value) => onAnswerChange(question.id, value)}
+            t={t}
           />
         ))}
       </section>
@@ -302,10 +308,10 @@ export const SkillExercisePageView = memo(function SkillExercisePageView({
               <div className="pointer-events-auto mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                 <p className="min-w-0 flex-1 text-sm text-muted-foreground">
                   {allAnswered
-                    ? "All questions answered — ready to submit."
-                    : `Answer ${exercise.questions.length - answeredCount} more question${
-                        exercise.questions.length - answeredCount === 1 ? "" : "s"
-                      } to submit.`}
+                    ? t("workspace.allAnswered")
+                    : t("workspace.answerMore")
+                        .replace("{count}", String(exercise.questions.length - answeredCount))
+                        .replace("{plural}", exercise.questions.length - answeredCount === 1 ? "" : "s")}
                 </p>
                 <Button
                   type="button"
@@ -313,7 +319,7 @@ export const SkillExercisePageView = memo(function SkillExercisePageView({
                   disabled={!allAnswered}
                   onClick={onSubmitAll}
                 >
-                  Submit all answers
+                  {t("workspace.submitAnswers")}
                 </Button>
               </div>
             </div>
@@ -324,10 +330,10 @@ export const SkillExercisePageView = memo(function SkillExercisePageView({
       {submitted ? (
         <div className="min-w-0 overflow-hidden rounded-[1.75rem] border border-primary/20 bg-linear-to-br from-primary to-primary/80 px-6 py-8 text-primary-foreground">
           <p className="text-[11px] font-semibold tracking-[0.18em] text-primary-foreground/70 uppercase">
-            Nice work!
+            {t("workspace.niceWorkExclamation")}
           </p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight">
-            You got {correctCount}/{exercise.questions.length} correct
+            {t("workspace.youGotScore").replace("{correct}", String(correctCount)).replace("{total}", String(exercise.questions.length))}
           </h2>
           <p className="mt-2 max-w-xl text-sm text-primary-foreground/75">
             Review the explanations above, then try again or practice another skill.
@@ -339,20 +345,20 @@ export const SkillExercisePageView = memo(function SkillExercisePageView({
               onClick={onTryAgain}
             >
               <RotateCcw className="size-4" />
-              Try again
+              {t("workspace.tryAgain")}
             </Button>
             <Button
               asChild
               className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25"
             >
-              <Link href={backHref}>More in this skill</Link>
+              <LocalizedLink href={backHref}>More in this skill</LocalizedLink>
             </Button>
             <Button
               asChild
               variant="outline"
               className="rounded-full border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
             >
-              <Link href="/practice">AI Chat</Link>
+              <LocalizedLink href="/practice">AI Chat</LocalizedLink>
             </Button>
           </div>
         </div>

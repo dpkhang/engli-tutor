@@ -4,6 +4,7 @@ import { memo } from "react";
 import { Check, Copy, Gift, LoaderCircle, Share2, TicketPercent, UsersRound } from "lucide-react";
 import { Alert, AlertDescription, Button, CardTitle, Input } from "@engli-tutor/ui";
 import { SettingsCard, SettingsCardContent, SettingsCardHeader, SettingsPanel } from "../shared";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 
 export type ReferralRedemptionRow = {
   id: string;
@@ -53,27 +54,28 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
   onCopyCode,
   onCopyLink,
 }: ReferralSettingsViewProps) {
+  const t = useWorkspaceI18n();
   return (
     <SettingsPanel ready={ready}>
       <div className="space-y-4">
         <SettingsCard className="overflow-hidden">
           <SettingsCardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Gift className="size-5 text-primary" /> Refer friends
+              <Gift className="size-5 text-primary" /> {t("workspace.referFriends")}
             </CardTitle>
           </SettingsCardHeader>
           <SettingsCardContent className="space-y-5">
             <p className="text-sm leading-6 text-muted-foreground">
-              Share your invite link with a friend. They get {referredDays} days of Premium after redeeming it
+              {t("workspace.shareInvite")} They get {referredDays} days of Premium after redeeming it
               {referrerDays > 0
                 ? `, and you get ${referrerDays} days too (up to ${referrerMaxDays} days in total).`
                 : `. You have reached the ${referrerMaxDays}-day referral reward limit.`}
             </p>
 
             <div className="grid gap-2 sm:grid-cols-3">
-              <ReferralStat label="Friends referred" value={totalReferred.toLocaleString("en-US")} />
-              <ReferralStat label="Premium days earned" value={`${proDaysEarned} / ${referrerMaxDays}`} />
-              <ReferralStat label="Friend bonus" value={`${referredDays} days`} />
+              <ReferralStat label={t("workspace.friendsReferred")} value={totalReferred.toLocaleString("en-US")} />
+              <ReferralStat label={t("workspace.premiumDaysEarned")} value={`${proDaysEarned} / ${referrerMaxDays}`} />
+              <ReferralStat label={t("workspace.friendBonus")} value={`${referredDays} days`} />
             </div>
 
             <div className="grid gap-3 rounded-3xl border border-border/70 bg-muted/20 p-3.5 sm:grid-cols-[minmax(0,1fr)_auto]">
@@ -85,11 +87,11 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
               <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                 <Button type="button" variant="outline" className="rounded-full" onClick={onCopyCode}>
                   {copied === "code" ? <Check className="size-4" /> : <Copy className="size-4" />}
-                  {copied === "code" ? "Copied" : "Copy code"}
+                  {copied === "code" ? t("workspace.copied") : t("workspace.copyCode")}
                 </Button>
                 <Button type="button" className="rounded-full" onClick={onCopyLink}>
                   {copied === "link" ? <Check className="size-4" /> : <Share2 className="size-4" />}
-                  {copied === "link" ? "Copied" : "Copy link"}
+                  {copied === "link" ? t("workspace.copied") : t("workspace.copyLink")}
                 </Button>
               </div>
             </div>
@@ -99,7 +101,7 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
         <SettingsCard>
           <SettingsCardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TicketPercent className="size-5 text-primary" /> Redeem an invite code
+              <TicketPercent className="size-5 text-primary" /> {t("workspace.redeemInvite")}
             </CardTitle>
           </SettingsCardHeader>
           <SettingsCardContent className="space-y-4">
@@ -112,7 +114,7 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
             ) : (
               <>
                 <p className="text-sm leading-6 text-muted-foreground">
-                  Got a code from a friend? Redeem it once to get {referredDays} days of Premium.
+                  {t("workspace.redeemInviteDescription").replace("{days}", String(referredDays))}
                 </p>
                 <form
                   className="flex flex-col gap-2 sm:flex-row"
@@ -124,7 +126,7 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
                   <Input
                     value={manualCode}
                     onChange={(event) => onManualCodeChange(event.target.value)}
-                    placeholder="Enter referral code"
+                    placeholder={t("workspace.enterReferralCode")}
                     className="h-11 rounded-2xl font-mono uppercase"
                     autoComplete="off"
                     disabled={pendingRedeem}
@@ -148,7 +150,7 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
         <SettingsCard>
           <SettingsCardHeader>
             <CardTitle className="flex items-center gap-2">
-              <UsersRound className="size-5 text-primary" /> Recent referrals
+              <UsersRound className="size-5 text-primary" /> {t("workspace.recentReferrals")}
             </CardTitle>
           </SettingsCardHeader>
           <SettingsCardContent>
@@ -166,7 +168,7 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
               </ul>
             ) : (
               <div className="rounded-2xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground">
-                No referrals yet. Share your link to invite your first friend.
+                {t("workspace.noReferrals")}
               </div>
             )}
           </SettingsCardContent>

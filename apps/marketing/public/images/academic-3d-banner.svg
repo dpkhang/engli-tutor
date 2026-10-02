@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="900" viewBox="0 0 1920 900">
+  <defs>
+    <linearGradient id="background" x2="1" y2=".6"><stop stop-color="#343b80"/><stop offset=".48" stop-color="#6267bc"/><stop offset="1" stop-color="#a5dce7"/></linearGradient>
+    <radialGradient id="light"><stop stop-color="#dcfbff" stop-opacity=".65"/><stop offset="1" stop-color="#d2eaff" stop-opacity="0"/></radialGradient>
+    <linearGradient id="purple" x2=".8" y2="1"><stop stop-color="#bdadff"/><stop offset=".45" stop-color="#8b70f0"/><stop offset="1" stop-color="#5544ad"/></linearGradient>
+    <linearGradient id="cyan" x2=".7" y2="1"><stop stop-color="#c1ffff"/><stop offset=".45" stop-color="#5cdeed"/><stop offset="1" stop-color="#2896b8"/></linearGradient>
+    <linearGradient id="gold" x2=".8" y2="1"><stop stop-color="#fff0b0"/><stop offset=".5" stop-color="#ffc66e"/><stop offset="1" stop-color="#ed8b42"/></linearGradient>
+    <linearGradient id="leftPage" x1="0" x2="1"><stop stop-color="#fffdf3"/><stop offset=".65" stop-color="#f4edf9"/><stop offset="1" stop-color="#bab9df"/></linearGradient>
+    <linearGradient id="rightPage" x1="0" x2="1"><stop stop-color="#bfc0df"/><stop offset=".16" stop-color="#fffdf5"/><stop offset="1" stop-color="#e6eaff"/></linearGradient>
+    <linearGradient id="platform" x2="0" y2="1"><stop stop-color="#d5d8fa"/><stop offset="1" stop-color="#8b93d1"/></linearGradient>
+    <radialGradient id="sphere" cx=".28" cy=".22" r=".8"><stop stop-color="#fff7da"/><stop offset=".45" stop-color="#ffd58b"/><stop offset="1" stop-color="#cc783e"/></radialGradient>
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="200%"><feDropShadow dx="8" dy="22" stdDeviation="18" flood-color="#24285a" flood-opacity=".3"/></filter>
+    <filter id="blur"><feGaussianBlur stdDeviation="18"/></filter>
+  </defs>
+  <path fill="url(#background)" d="M0 0h1920v900H0z"/>
+  <ellipse cx="1500" cy="340" rx="530" ry="480" fill="url(#light)"/>
+  <g fill="none" stroke="#e6faff" opacity=".17">
+    <ellipse cx="1485" cy="448" rx="359" ry="289" transform="rotate(-26 1485 448)"/>
+    <ellipse cx="1485" cy="448" rx="405" ry="327" transform="rotate(-26 1485 448)"/>
+  </g>
+  <ellipse cx="1455" cy="788" rx="347" ry="42" fill="#242e63" opacity=".25" filter="url(#blur)"/>
+  <!-- Raised display plinth. -->
+  <path d="M1070 706v35c0 94 738 94 738 0v-35z" fill="url(#platform)"/>
+  <ellipse cx="1439" cy="706" rx="369" ry="79" fill="#dfe9ff"/>
+  <ellipse cx="1439" cy="712" rx="294" ry="53" fill="#8793c7" opacity=".24" filter="url(#blur)"/>
+  <!-- Open book: separate covers, layered page edges and curved sheets. -->
+  <g filter="url(#shadow)">
+    <path d="m1094 552 288 23 314-65 82 157-350 89-324-103z" fill="#5944b0"/>
+    <path d="m1104 548 299 37 285-80 77 150-336 88-316-105z" fill="url(#purple)"/>
+    <path d="M1125 536q137-45 284 42 130-101 264-82l67 143q-145-13-312 86-157-90-293-106z" fill="#c9c9e0"/>
+    <path d="M1125 523q141-36 282 37 136-95 269-79l61 145q-149-8-311 88-155-87-291-109z" fill="#f7f3ed"/>
+    <path d="M1125 504q143-22 283 40l18 157q-148-93-285-110z" fill="url(#leftPage)"/>
+    <path d="M1408 544q122-104 266-85l58 153q-155-10-306 89z" fill="url(#rightPage)"/>
+    <path d="M1408 544q-8 65 18 157" fill="none" stroke="#a4a3c9" stroke-width="3"/>
+    <g fill="none" stroke="#aaa8c5" stroke-width="4" stroke-linecap="round" opacity=".65">
+      <path d="M1173 544q96 3 181 46m-171-26q93 10 175 49m-169-27q82 11 136 38"/>
+      <path d="M1460 548q86-53 172-49m-165 70q86-50 175-47m-169 69q66-40 128-45"/>
+    </g>
+    <path d="m1483 650 22-12 22 82-17-8-12 19z" fill="url(#gold)"/>
+  </g>
+  <!-- Floating dimensional letter tiles. -->
+  <g transform="translate(1215 239) rotate(-14)" filter="url(#shadow)">
+    <rect x="8" y="15" width="153" height="161" rx="30" fill="#50439b"/>
+    <rect width="153" height="161" rx="30" fill="url(#purple)" stroke="#d5c9ff" stroke-opacity=".7" stroke-width="2"/>
+    <text x="76" y="118" text-anchor="middle" font-family="Arial,sans-serif" font-size="106" font-weight="700" fill="#514491">A</text>
+    <text x="73" y="112" text-anchor="middle" font-family="Arial,sans-serif" font-size="106" font-weight="700" fill="#fff8f0">A</text>
+  </g>
+  <g transform="translate(1430 333) rotate(12)" filter="url(#shadow)">
+    <rect x="6" y="12" width="110" height="115" rx="24" fill="#28879f"/>
+    <rect width="110" height="115" rx="24" fill="url(#cyan)" stroke="#d7ffff" stroke-width="2"/>
+    <text x="55" y="85" text-anchor="middle" font-family="Arial,sans-serif" font-size="77" font-weight="700" fill="#26728f">a</text>
+    <text x="52" y="81" text-anchor="middle" font-family="Arial,sans-serif" font-size="77" font-weight="700" fill="#fff">a</text>
+  </g>
+  <!-- Speech bubble with a voice waveform. -->
+  <g transform="translate(1480 136) rotate(7)" filter="url(#shadow)">
+    <path d="M31 9h166q31 0 31 31v71q0 31-31 31h-94l-39 31v-31H31Q0 142 0 111V40Q0 9 31 9" fill="#ce9149"/>
+    <path d="M31 0h166q31 0 31 31v71q0 31-31 31h-94l-39 31v-31H31Q0 133 0 102V31Q0 0 31 0" fill="url(#gold)" stroke="#ffeac0" stroke-width="2"/>
+    <g stroke="#9a582f" stroke-width="9" stroke-linecap="round"><path d="M55 58v20m24-37v54m24-65v77m24-58v39m24-51v64m24-46v28"/></g>
+  </g>
+  <!-- Headphones with highlighted headband and padded ear cups. -->
+  <g transform="rotate(18 1710 445)" filter="url(#shadow)">
+    <path d="M1629 457v-67c0-117 168-117 168 0v67" fill="none" stroke="#3a428f" stroke-width="35"/>
+    <path d="M1629 444v-57c0-111 168-111 168 0v57" fill="none" stroke="url(#purple)" stroke-width="25"/>
+    <path d="M1631 377c13-91 138-91 162 0" fill="none" stroke="#d5c4ff" stroke-width="5" stroke-linecap="round"/>
+    <rect x="1602" y="425" width="51" height="97" rx="23" fill="#45417f"/>
+    <rect x="1600" y="421" width="34" height="87" rx="16" fill="url(#cyan)"/>
+    <rect x="1773" y="425" width="51" height="97" rx="23" fill="#45417f"/>
+    <rect x="1788" y="421" width="34" height="87" rx="16" fill="url(#cyan)"/>
+  </g>
+  <g filter="url(#shadow)"><circle cx="1160" cy="430" r="26" fill="url(#sphere)"/><circle cx="1787" cy="201" r="37" fill="url(#sphere)"/><circle cx="1650" cy="760" r="16" fill="url(#cyan)"/></g>
+  <g fill="#f5fcff"><path d="m1420 165 7 19 20 7-20 7-7 20-7-20-20-7 20-7z"/><path d="m1800 589 6 16 17 6-17 6-6 17-6-17-17-6 17-6z"/></g>
+  <g fill="#d8efff" opacity=".55"><circle cx="1180" cy="183" r="4"/><circle cx="1730" cy="107" r="5"/><circle cx="1840" cy="370" r="4"/><circle cx="1080" cy="463" r="4"/></g>
+</svg>

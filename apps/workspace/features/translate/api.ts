@@ -1,6 +1,7 @@
 import { workspaceApiClient } from "@/lib/workspace-api-client";
 
 export type TranslateDirection = "en-vi";
+export type ExplanationLocale = "en" | "vi";
 export type TranslateKind = "word" | "sentence";
 
 export type TranslateSense = {
@@ -43,16 +44,18 @@ export type TranslateResult = {
 };
 
 export const translateApi = {
-  lookup: (input: { text: string; direction: TranslateDirection; focusWord?: string; mode?: "full" | "dictionary" }) =>
+  lookup: (input: { text: string; direction: TranslateDirection; focusWord?: string; mode?: "full" | "dictionary"; explanationLocale?: ExplanationLocale }) =>
     workspaceApiClient.post<TranslateResult>("/api/tutor/translate", {
       text: input.text,
       direction: input.direction,
       ...(input.focusWord ? { focusWord: input.focusWord } : {}),
       ...(input.mode ? { mode: input.mode } : {}),
+      ...(input.explanationLocale ? { explanationLocale: input.explanationLocale } : {}),
     }),
-  prefetch: (input: { direction: TranslateDirection; words: string[] }) =>
+  prefetch: (input: { direction: TranslateDirection; words: string[]; explanationLocale?: ExplanationLocale }) =>
     workspaceApiClient.post<{ results: Record<string, TranslateResult> }>("/api/tutor/translate/batch", {
       direction: input.direction,
       words: input.words,
+      ...(input.explanationLocale ? { explanationLocale: input.explanationLocale } : {}),
     }),
 };

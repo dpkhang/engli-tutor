@@ -20,6 +20,9 @@ import { BrandLogo, Button, Input, SegmentedSwitch } from "@engli-tutor/ui";
 import { AnimatePresence, motion } from "motion/react";
 import type { AuthFormValues } from "../../model/auth-schema";
 import { SocialAuthButtons } from "../social-auth-buttons";
+import { useMarketingI18n } from "@/features/i18n";
+import { isLocale, type Locale } from "@engli-tutor/i18n";
+import { usePathname } from "next/navigation";
 
 export type AuthMode = "login" | "register";
 type Props = {
@@ -53,6 +56,11 @@ export const AuthPageView = memo(function AuthPageView({
   onModeChange,
   onSubmit,
 }: Props) {
+  const t = useMarketingI18n();
+  const pathname = usePathname();
+  const segment = pathname.split("/")[1];
+  const locale: Locale = isLocale(segment) ? segment : "en";
+  const localize = (href: string) => href.startsWith("/") ? `/${locale}${href}` : href;
   const [showPassword, setShowPassword] = useState(false);
   const isLogin = mode === "login";
   const inputClass =
@@ -73,7 +81,7 @@ export const AuthPageView = memo(function AuthPageView({
         className="absolute inset-0 bg-[linear-gradient(white_1px,transparent_1px),linear-gradient(90deg,white_1px,transparent_1px)] bg-size-[56px_56px] opacity-[0.035] mask-[linear-gradient(to_bottom,black,transparent_85%)]"
       />
 
-      <header className="absolute inset-x-0 top-0 z-20 mx-auto flex max-w-7xl items-center justify-between px-5 py-6 sm:px-8 lg:px-12">
+      <header className="marketing-container absolute inset-x-0 top-0 z-20 flex items-center justify-between py-5 sm:py-6">
         <Link
           href="/"
           className="group inline-flex items-center gap-2.5 text-sm font-semibold tracking-wide text-white"
@@ -84,19 +92,19 @@ export const AuthPageView = memo(function AuthPageView({
           href="/"
           className="hidden text-sm text-white/55 transition-colors hover:text-white sm:block"
         >
-          Back to home
+          {t("auth.backHome")}
         </Link>
       </header>
 
-      <div className="relative z-10 mx-auto grid min-h-svh max-w-7xl items-center gap-10 px-5 pt-24 pb-8 sm:px-8 lg:grid-cols-[1fr_31rem] lg:px-12 lg:py-28">
+      <div className="marketing-container marketing-page relative z-10 grid min-h-svh items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,29rem)] lg:gap-10">
         <motion.section
-          className="hidden pr-6 lg:block"
+          className="hidden min-w-0 lg:block"
           initial={{ opacity: 0, x: -24 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
         >
           <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-1.5 text-xs font-medium text-indigo-200 backdrop-blur-xl">
-            <WandSparkles className="size-3.5" /> Your personal AI English coach
+            <WandSparkles className="size-3.5" /> {t("auth.coach")}
           </div>
           <h1 className="max-w-2xl text-5xl font-semibold leading-[1.07] tracking-[-0.045em] text-white xl:text-6xl">
             Make every conversation feel{" "}
@@ -117,13 +125,13 @@ export const AuthPageView = memo(function AuthPageView({
                     <Sparkles className="size-4 text-white" />
                   </span>
                   <div>
-                    <p className="text-sm font-medium text-white">Daily speaking session</p>
-                    <p className="text-xs text-white/40">Workplace conversations · 8 min</p>
+                    <p className="text-sm font-medium text-white">{t("auth.dailySession")}</p>
+                    <p className="text-xs text-white/40">{t("auth.workplace")}</p>
                   </div>
                 </div>
                 <span className="flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-2.5 py-1 text-[11px] font-medium text-emerald-300">
                   <span className="size-1.5 rounded-full bg-emerald-400" />
-                  Live
+                  {t("auth.live")}
                 </span>
               </div>
               <div className="space-y-3">
@@ -164,28 +172,28 @@ export const AuthPageView = memo(function AuthPageView({
                 <ShieldCheck className="size-4 text-emerald-600" />
               </span>
               <div>
-                <p className="text-xs font-semibold text-slate-900">Great clarity!</p>
-                <p className="text-[11px] text-slate-500">Pronunciation +12%</p>
+                <p className="text-xs font-semibold text-slate-900">{t("auth.clarity")}</p>
+                <p className="text-[11px] text-slate-500">{t("auth.pronunciation")}</p>
               </div>
             </motion.div>
           </div>
         </motion.section>
 
         <motion.section
-          className="mx-auto w-full max-w-124 rounded-[1.75rem] border border-white/40 bg-white/96 p-6 shadow-[0_30px_90px_rgba(0,0,0,.4)] backdrop-blur-2xl sm:p-9 dark:border-white/10 dark:bg-slate-950/80"
+          className="mx-auto w-full min-w-0 max-w-124 rounded-[1.75rem] border border-white/40 bg-white/96 p-5 shadow-[0_30px_90px_rgba(0,0,0,.4)] backdrop-blur-2xl sm:p-8 dark:border-white/10 dark:bg-slate-950/80"
           initial={{ opacity: 0, y: 20, scale: 0.985 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.48, delay: 0.08 }}
         >
-          <div className="mb-7">
+          <div className="mb-5 sm:mb-6">
             <p className="mb-2 text-xs font-semibold tracking-[0.14em] text-indigo-600 uppercase dark:text-indigo-300">
-              {isLogin ? "Welcome back" : "Let’s get started"}
+              {isLogin ? t("auth.welcomeBack") : t("auth.getStarted")}
             </p>
             <h2 className="text-3xl font-semibold tracking-[-0.035em] text-slate-950 dark:text-white">
-              {isLogin ? "Sign in to your account" : "Create your account"}
+              {isLogin ? t("auth.signInTitle") : t("auth.createTitle")}
             </h2>
             <p className="mt-2.5 text-sm leading-6 text-slate-500 dark:text-slate-400">
-              {isLogin ? "Continue where you left off." : "Start speaking more confidently today."}
+              {isLogin ? t("auth.continueWhereLeft") : t("auth.startConfidently")}
             </p>
           </div>
 
@@ -196,15 +204,15 @@ export const AuthPageView = memo(function AuthPageView({
             ariaLabel="Authentication mode"
             className="mb-5"
             options={[
-              { id: "login", label: "Sign in" },
-              { id: "register", label: "Sign up" },
+              { id: "login", label: t("auth.signIn") },
+              { id: "register", label: t("auth.signUp") },
             ]}
           />
 
           <SocialAuthButtons mode={mode} disabled={pending} />
           <div className="my-5 flex items-center gap-3 text-[10px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
             <span className="h-px flex-1 bg-slate-200 dark:bg-white/10" />
-            <span>or continue with email</span>
+            <span>{t("auth.orEmail")}</span>
             <span className="h-px flex-1 bg-slate-200 dark:bg-white/10" />
           </div>
 
@@ -218,12 +226,12 @@ export const AuthPageView = memo(function AuthPageView({
                   exit={{ opacity: 0, height: 0 }}
                 >
                   <span className="mb-1.5 block font-medium text-slate-700 dark:text-slate-200">
-                    Full name
+                    {t("auth.fullName")}
                   </span>
                   <div className="relative">
                     <UserRound className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
                     <Input
-                      placeholder="Your full name"
+                      placeholder={t("auth.fullNamePlaceholder")}
                       autoComplete="name"
                       disabled={pending}
                       aria-invalid={Boolean(errors.name)}
@@ -238,7 +246,7 @@ export const AuthPageView = memo(function AuthPageView({
             </AnimatePresence>
             <label className="block text-sm">
               <span className="mb-1.5 block font-medium text-slate-700 dark:text-slate-200">
-                Email address
+                {t("auth.email")}
               </span>
               <div className="relative">
                 <Mail className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
@@ -258,13 +266,13 @@ export const AuthPageView = memo(function AuthPageView({
             </label>
             <label className="block text-sm">
               <span className="mb-1.5 block font-medium text-slate-700 dark:text-slate-200">
-                Password
+                {t("auth.password")}
               </span>
               <div className="relative">
                 <LockKeyhole className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Minimum 8 characters"
+                  placeholder={t("auth.passwordPlaceholder")}
                   autoComplete={isLogin ? "current-password" : "new-password"}
                   disabled={pending}
                   aria-invalid={Boolean(errors.password)}
@@ -278,7 +286,7 @@ export const AuthPageView = memo(function AuthPageView({
                   disabled={pending}
                   onClick={() => setShowPassword((value) => !value)}
                   className="absolute top-1/2 right-3 grid size-7 -translate-y-1/2 place-items-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-white"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
@@ -301,41 +309,41 @@ export const AuthPageView = memo(function AuthPageView({
               {pending ? (
                 <>
                   <LoaderCircle className="size-4 animate-spin" />
-                  <span>{isLogin ? "Signing you in…" : "Creating account…"}</span>
+                  <span>{isLogin ? t("auth.signingIn") : t("auth.creatingAccount")}</span>
                 </>
               ) : (
                 <>
-                  <span>{isLogin ? "Continue" : "Create account"}</span>
+                  <span>{isLogin ? t("auth.continue") : t("auth.createAccount")}</span>
                   <ArrowRight className="size-4" />
                 </>
               )}
             </Button>
             <span className="sr-only" aria-live="polite">
-              {pending ? "Your request is being processed" : ""}
+              {pending ? t("auth.requestProcessing") : ""}
             </span>
           </form>
           <div className="mt-6 space-y-2 text-center text-[11px] leading-5 text-slate-400 dark:text-slate-500">
             <p className="inline-flex items-center justify-center gap-2">
               <ShieldCheck className="size-3.5" />
-              Secure, encrypted authentication
+              {t("auth.secureAuth")}
             </p>
             <p>
               <Link
-                href="/policy"
+                href={localize("/policy")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium text-slate-500 underline decoration-slate-300 underline-offset-2 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
               >
-                Privacy Policy
+                {t("auth.privacy")}
               </Link>
               {" · "}
               <Link
-                href="/policy/cookies"
+                href={localize("/policy/cookies")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium text-slate-500 underline decoration-slate-300 underline-offset-2 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
               >
-                Cookie Policy
+                {t("auth.cookies")}
               </Link>
             </p>
           </div>

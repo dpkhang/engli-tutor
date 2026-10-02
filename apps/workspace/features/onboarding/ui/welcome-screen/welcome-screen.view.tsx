@@ -3,6 +3,7 @@
 import { memo, useEffect, useRef } from "react";
 import { BrandLogo, Button } from "@engli-tutor/ui";
 import { WELCOME_DURATION_MS } from "../../model/onboarding";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 
 export type WelcomeScreenViewProps = {
   firstName: string;
@@ -13,6 +14,7 @@ export const WelcomeScreenView = memo(function WelcomeScreenView({
   firstName,
   onFinished,
 }: WelcomeScreenViewProps) {
+  const t = useWorkspaceI18n();
   const finished = useRef(false);
   const onFinishedRef = useRef(onFinished);
   onFinishedRef.current = onFinished;
@@ -40,19 +42,19 @@ export const WelcomeScreenView = memo(function WelcomeScreenView({
       </div>
 
       <p className="auth-enter text-sm font-medium text-primary" style={{ animationDelay: "60ms" }}>
-        You’re in
+        {t("workspace.youAreIn")}
       </p>
       <h1
         className="auth-enter mt-2 max-w-md text-3xl font-semibold tracking-tight sm:text-4xl"
         style={{ animationDelay: "120ms" }}
       >
-        Welcome, {firstName}
+        {t("workspace.welcomeName").replace("{name}", firstName)}
       </h1>
       <p
         className="auth-enter mt-3 max-w-sm text-sm leading-6 text-muted-foreground sm:text-base"
         style={{ animationDelay: "180ms" }}
       >
-        Your workspace is ready. Opening Today so you can start speaking, practicing, and playing.
+        {t("workspace.workspaceReady")}
       </p>
 
       <div
@@ -72,7 +74,7 @@ export const WelcomeScreenView = memo(function WelcomeScreenView({
           className="rounded-full text-muted-foreground"
           onClick={finish}
         >
-          Enter workspace
+          {t("workspace.enterWorkspace")}
         </Button>
       </div>
     </div>

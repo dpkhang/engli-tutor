@@ -38,6 +38,7 @@ import {
   type usageRows,
 } from "../../model/plans";
 import { PlanPeriodSwitch } from "../plan-period-switch";
+import { UpgradePlansModal } from "../upgrade-plans-modal";
 
 export type PaymentsPageViewProps = {
   checkoutState: string | null;
@@ -92,13 +93,11 @@ export const PaymentsPageView = memo(function PaymentsPageView({
   onOpenUpgrade,
   onCloseUpgrade,
 }: PaymentsPageViewProps) {
+  // Kept for the unreachable legacy modal markup below until its next cleanup pass.
   const sheetDragControls = useDragControls();
   const [mounted, setMounted] = useState(false);
-  useLockScroll(showUpgradeOptions && higherPlans.length > 0);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useLockScroll(false);
+  useEffect(() => setMounted(true), []);
 
   return (
     <div className="space-y-5 pb-10 sm:space-y-8">
@@ -190,6 +189,13 @@ export const PaymentsPageView = memo(function PaymentsPageView({
                         <p className="font-semibold">
                           {row.limit === null ? "Unlimited" : `${row.used} / ${row.limit}`}
                         </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {row.limit === null
+                            ? `${row.used} used today`
+                            : row.used >= row.limit
+                              ? "Daily allowance used — resets at midnight"
+                              : `${Math.max(0, row.limit - row.used)} left today`}
+                        </p>
                         {row.limit !== null ? (
                           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-primary/10">
                             <div
@@ -201,7 +207,8 @@ export const PaymentsPageView = memo(function PaymentsPageView({
                       </div>
                     ))}
                   </div>
-                  <p className="text-xs text-muted-foreground">Daily allowances reset at midnight (Vietnam time).</p>
+                  <p className="text-xs text-muted-foreground">Daily allowances reset at midnight (Vietnam time). Unlimited AI usage is subject to fair use and may slow down during heavy use.</p>
+                  <p className="text-xs text-muted-foreground">Only AI-generated translations count; dictionary and cached results do not. Game usage counts completed plays.</p>
                 </div>
 
                 <dl className="grid gap-3 text-sm sm:grid-cols-2">
@@ -268,7 +275,22 @@ export const PaymentsPageView = memo(function PaymentsPageView({
         </CardContent>
       </Card>
 
-      {mounted
+      <UpgradePlansModal
+        open={showUpgradeOptions}
+        plans={higherPlans}
+        hasPaidPlan={hasPaidPlan}
+        activePlanName={activePlan.name}
+        billingPeriod={billingPeriod}
+        period={period}
+        stripeReady={stripeReady}
+        pending={pending}
+        error={error}
+        onPeriodChange={onPeriodChange}
+        onSubscribe={onSubscribe}
+        onUpgrade={onUpgrade}
+        onClose={onCloseUpgrade}
+      />
+      {false
         ? createPortal(
             <AnimatePresence>
               {showUpgradeOptions && higherPlans.length > 0 ? (

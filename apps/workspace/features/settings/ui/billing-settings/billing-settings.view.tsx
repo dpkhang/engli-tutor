@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Check, CreditCard, Crown, Gauge, Sparkles } from "lucide-react";
 import { Badge, Button, CardTitle } from "@engli-tutor/ui";
 import { SettingsCard, SettingsCardContent, SettingsCardHeader, SettingsPanel } from "../shared";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 
 export type BillingFact = {
   label: string;
@@ -46,13 +47,14 @@ export const BillingSettingsView = memo(function BillingSettingsView({
   usage,
   otherPlans,
 }: BillingSettingsViewProps) {
+  const t = useWorkspaceI18n();
   return (
     <SettingsPanel ready={ready}>
       <div className="space-y-4">
       <SettingsCard>
         <SettingsCardHeader>
           <CardTitle className="flex items-center gap-2">
-            <CreditCard className="size-5 text-primary" /> Current plan
+            <CreditCard className="size-5 text-primary" /> {t("workspace.currentPlan")}
           </CardTitle>
         </SettingsCardHeader>
         <SettingsCardContent className="space-y-4">
@@ -60,7 +62,7 @@ export const BillingSettingsView = memo(function BillingSettingsView({
             <p className="text-lg font-semibold tracking-tight">{planName}</p>
             <Badge variant={hasPaidPlan ? "default" : "secondary"} className="gap-1">
               {hasPaidPlan ? <Crown className="size-3" /> : null}
-              {hasPaidPlan ? "Premium access" : "Free"}
+              {hasPaidPlan ? t("workspace.premiumAccess") : t("workspace.free")}
             </Badge>
           </div>
           {planDescription ? (
@@ -81,7 +83,7 @@ export const BillingSettingsView = memo(function BillingSettingsView({
 
           {features.length ? (
             <div className="space-y-2">
-              <p className="text-sm font-semibold">Included in this plan</p>
+              <p className="text-sm font-semibold">{t("workspace.includedPlan")}</p>
               <ul className="space-y-2 rounded-2xl border border-border/70 bg-muted/20 p-3.5 text-sm">
                 {features.map((feature) => (
                   <li key={feature} className="flex gap-2.5 text-muted-foreground">
@@ -97,7 +99,7 @@ export const BillingSettingsView = memo(function BillingSettingsView({
 
           <div className="flex flex-wrap gap-2">
             <Button asChild className="rounded-full">
-              <Link href="/payments">{hasPaidPlan ? "Manage plan" : "Explore paid plans"}</Link>
+              <Link href="/payments">{hasPaidPlan ? t("workspace.managePlan") : t("workspace.explorePaidPlans")}</Link>
             </Button>
           </div>
         </SettingsCardContent>
@@ -106,12 +108,12 @@ export const BillingSettingsView = memo(function BillingSettingsView({
       <SettingsCard>
         <SettingsCardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Gauge className="size-5 text-primary" /> Today&apos;s usage
+            <Gauge className="size-5 text-primary" /> {t("workspace.todaysUsage")}
           </CardTitle>
         </SettingsCardHeader>
         <SettingsCardContent className="space-y-4">
           <p className="text-sm leading-6 text-muted-foreground">
-            Daily allowances for AI tutor chat and AI voice reset at midnight (Vietnam time).
+            {t("workspace.dailyAllowances")}
           </p>
           <div className="grid grid-cols-2 gap-2">
             {usage.map((row) => (
@@ -128,12 +130,12 @@ export const BillingSettingsView = memo(function BillingSettingsView({
         <SettingsCard>
           <SettingsCardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Sparkles className="size-5 text-primary" /> Other plans
+              <Sparkles className="size-5 text-primary" /> {t("workspace.otherPlans")}
             </CardTitle>
           </SettingsCardHeader>
           <SettingsCardContent className="space-y-3">
             <p className="text-sm leading-6 text-muted-foreground">
-              Compare what you would get if you change plans. Checkout stays on the Plans page.
+              {t("workspace.comparePlansDescription")}
             </p>
             <ul className="grid gap-2 sm:grid-cols-2">
               {otherPlans.map((item) => (
@@ -144,7 +146,7 @@ export const BillingSettingsView = memo(function BillingSettingsView({
                   <div className="flex items-center justify-between gap-2">
                     <p className="font-semibold">{item.name}</p>
                     {item.featured ? (
-                      <Badge className="rounded-full">Popular</Badge>
+                      <Badge className="rounded-full">{t("workspace.popular")}</Badge>
                     ) : null}
                   </div>
                   <p className="mt-1 text-sm">{item.price}</p>
@@ -155,7 +157,7 @@ export const BillingSettingsView = memo(function BillingSettingsView({
               ))}
             </ul>
             <Button asChild variant="outline" className="rounded-full">
-              <Link href="/payments">Compare and change plan</Link>
+              <Link href="/payments">{t("workspace.compareChangePlan")}</Link>
             </Button>
           </SettingsCardContent>
         </SettingsCard>

@@ -22,35 +22,37 @@ import {
 } from "lucide-react";
 import { Button, cn } from "@engli-tutor/ui";
 import { MINI_GAMES, QUICK_TIPS, type LessonPack } from "../../model/curriculum";
+import { LocalizedLink } from "@/features/i18n/localized-link";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 
 const SKILLS = [
   {
-    label: "Listening",
-    note: "Train your ear",
+    labelKey: "workspace.listening",
+    noteKey: "workspace.trainYourEar",
     href: "/skills/listening",
     icon: Headphones,
     style: "bg-sky-100 text-sky-700 dark:bg-sky-400/15 dark:text-sky-300",
     wash: "from-sky-500/20 via-sky-500/5",
   },
   {
-    label: "Speaking",
-    note: "Talk with confidence",
+    labelKey: "workspace.speaking",
+    noteKey: "workspace.talkWithConfidence",
     href: "/skills/speaking",
     icon: Mic2,
     style: "bg-violet-100 text-violet-700 dark:bg-violet-400/15 dark:text-violet-300",
     wash: "from-violet-500/20 via-violet-500/5",
   },
   {
-    label: "Reading",
-    note: "Understand naturally",
+    labelKey: "workspace.reading",
+    noteKey: "workspace.understandNaturally",
     href: "/skills/reading",
     icon: BookOpen,
     style: "bg-amber-100 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300",
     wash: "from-amber-500/20 via-amber-500/5",
   },
   {
-    label: "Writing",
-    note: "Express your ideas",
+    labelKey: "workspace.writing",
+    noteKey: "workspace.expressYourIdeas",
     href: "/skills/writing",
     icon: PenLine,
     style: "bg-emerald-100 text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-300",
@@ -59,24 +61,24 @@ const SKILLS = [
 ] as const;
 
 const QUICK_START = [
-  { label: "Speak", href: "/speaking", icon: Mic2 },
-  { label: "Chat", href: "/practice", icon: MessageCircle },
-  { label: "Skills", href: "/skills", icon: BookOpenCheck },
-  { label: "Progress", href: "/progress", icon: CirclePlay },
+  { labelKey: "workspace.speak", href: "/speaking", icon: Mic2 },
+  { labelKey: "workspace.chat", href: "/practice", icon: MessageCircle },
+  { labelKey: "workspace.skills", href: "/skills", icon: BookOpenCheck },
+  { labelKey: "workspace.progress", href: "/progress", icon: CirclePlay },
 ] as const;
 
 const SPEAKING_SCENARIOS = [
-  { id: "interview", label: "Interview", blurb: "Self-intro & behavioral" },
-  { id: "standup", label: "Stand-up", blurb: "Yesterday / today / blockers" },
-  { id: "smalltalk", label: "Small talk", blurb: "Chat with a colleague" },
-  { id: "free", label: "Free talk", blurb: "You pick the topic" },
+  { id: "interview", labelKey: "workspace.interview", blurbKey: "workspace.selfIntroBehavioral" },
+  { id: "standup", labelKey: "workspace.standUp", blurbKey: "workspace.yesterdayTodayBlockers" },
+  { id: "smalltalk", labelKey: "workspace.smallTalk", blurbKey: "workspace.chatWithColleague" },
+  { id: "free", labelKey: "workspace.freeTalk", blurbKey: "workspace.youPickTopic" },
 ] as const;
 
 const EXPLORE_MORE = [
-  { label: "Lessons", note: "Full lesson packs", href: "/lessons" },
-  { label: "Games", note: "Quick drills", href: "/games" },
-  { label: "Search", note: "Find anything", href: "/search" },
-  { label: "Plans", note: "Unlock more practice", href: "/payments" },
+  { labelKey: "workspace.lessons", noteKey: "workspace.fullLessonPacks", href: "/lessons" },
+  { labelKey: "workspace.games", noteKey: "workspace.quickDrills", href: "/games" },
+  { labelKey: "workspace.search", noteKey: "workspace.findAnything", href: "/search" },
+  { labelKey: "workspace.plans", noteKey: "workspace.unlockMorePractice", href: "/payments" },
 ] as const;
 
 export type HomeContinueItem = {
@@ -167,12 +169,12 @@ function SectionHeader({
         {description ? <p className="mt-1 max-w-xl text-sm text-muted-foreground">{description}</p> : null}
       </div>
       {href && linkLabel ? (
-        <Link
+        <LocalizedLink
           href={href}
           className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground"
         >
           {linkLabel} <ArrowRight className="size-4" />
-        </Link>
+        </LocalizedLink>
       ) : null}
     </div>
   );
@@ -188,6 +190,7 @@ export const LearnHomeView = memo(function LearnHomeView({
   snapshot,
   dailyChallenge,
 }: LearnHomeViewProps) {
+  const t = useWorkspaceI18n();
   const [nextLesson, ...moreLessons] = discoverLessons;
   const [featuredMore, ...restMore] = moreLessons;
   const tips = QUICK_TIPS.slice(0, 3);
@@ -195,12 +198,12 @@ export const LearnHomeView = memo(function LearnHomeView({
   const otherContinue = continueItems.slice(1);
   const snapshotStats = [
     {
-      label: "Plan",
+      label: t("workspace.plans"),
       value: snapshot.planLoading ? "…" : (snapshot.plan ?? "Free"),
     },
-    { label: "In progress", value: String(snapshot.started) },
-    { label: "Done", value: String(snapshot.completed) },
-    { label: "Saved", value: String(snapshot.saved) },
+    { label: t("workspace.inProgress"), value: String(snapshot.started) },
+    { label: t("workspace.done"), value: String(snapshot.completed) },
+    { label: t("workspace.saved"), value: String(snapshot.saved) },
   ];
 
   return (
@@ -214,15 +217,15 @@ export const LearnHomeView = memo(function LearnHomeView({
         <div className="relative grid items-center gap-8 lg:grid-cols-[1fr_auto]">
           <div>
             <div className="mb-5 hidden items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-primary-foreground/80 sm:inline-flex">
-              <Sparkles className="size-3.5 text-amber-300" />A little English every day
+              <Sparkles className="size-3.5 text-amber-300" />{t("workspace.dailyEnglish")}
             </div>
             <h1 className="max-w-2xl text-xl font-semibold leading-tight tracking-[-0.035em] sm:text-4xl lg:text-[2.75rem]">
-              Hi {firstName}, what do you feel like learning today?
+              {t("workspace.todayPrompt").replace("{name}", firstName)}
             </h1>
             <p className="mt-4 hidden max-w-xl text-sm leading-6 text-white/65 sm:block sm:text-base">
               {latestContinue
-                ? `You still have “${latestContinue.title}” waiting. Jump back in or start a fresh speaking session.`
-                : "No pressure, no complicated dashboard. Pick one small activity and make today count."}
+                ? t("workspace.continueWaiting").replace("{title}", latestContinue.title)
+                : t("workspace.noPressure")}
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               {latestContinue ? (
@@ -231,20 +234,20 @@ export const LearnHomeView = memo(function LearnHomeView({
                     asChild
                     className="h-11 rounded-full bg-white px-5 font-semibold text-slate-950 hover:bg-indigo-50"
                   >
-                    <Link href={latestContinue.href}>
+                    <LocalizedLink href={latestContinue.href}>
                       <CirclePlay className="size-4 text-primary" />
-                      Continue “{latestContinue.title}”
-                    </Link>
+                      {t("workspace.continueLesson").replace("{title}", latestContinue.title)}
+                    </LocalizedLink>
                   </Button>
                   <Button
                     asChild
                     variant="outline"
                     className="h-11 rounded-full border-white/25 bg-white/10 px-5 font-semibold text-white hover:bg-white/15 hover:text-white"
                   >
-                    <Link href="/speaking">
+                    <LocalizedLink href="/speaking">
                       <Mic2 className="size-4" />
-                      Speak with AI
-                    </Link>
+                      {t("workspace.speakWithAi")}
+                    </LocalizedLink>
                   </Button>
                 </>
               ) : (
@@ -252,10 +255,10 @@ export const LearnHomeView = memo(function LearnHomeView({
                   asChild
                   className="h-11 rounded-full bg-white px-5 font-semibold text-slate-950 hover:bg-indigo-50"
                 >
-                  <Link href="/speaking">
+                  <LocalizedLink href="/speaking">
                     <Mic2 className="size-4 text-primary" />
-                    Speak with AI now
-                  </Link>
+                    {t("workspace.speakWithAiNow")}
+                  </LocalizedLink>
                 </Button>
               )}
             </div>
@@ -271,17 +274,17 @@ export const LearnHomeView = memo(function LearnHomeView({
 
       {/* Quick start — pill strip */}
       <section>
-        <p className="mb-3 text-xs font-semibold tracking-wider text-primary uppercase">Jump in</p>
+        <p className="mb-3 text-xs font-semibold tracking-wider text-primary uppercase">{t("workspace.jumpIn")}</p>
         <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible">
-          {QUICK_START.map(({ label, href, icon: Icon }) => (
-            <Link
-              key={label}
+          {QUICK_START.map(({ labelKey, href, icon: Icon }) => (
+            <LocalizedLink
+              key={labelKey}
               href={href}
               className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border/80 bg-background px-4 py-2.5 text-sm font-medium transition-colors hover:border-primary/40 hover:bg-primary/5"
             >
               <Icon className="size-4 text-primary" />
-              {label}
-            </Link>
+              {t(labelKey)}
+            </LocalizedLink>
           ))}
         </div>
       </section>
@@ -290,15 +293,15 @@ export const LearnHomeView = memo(function LearnHomeView({
       <section className="overflow-hidden rounded-2xl border border-border/70 bg-card">
         <div className="flex items-center justify-between gap-3 border-b border-border/60 px-4 py-3 sm:px-5">
           <div>
-            <p className="text-xs font-semibold tracking-wider text-primary uppercase">At a glance</p>
-            <h2 className="mt-0.5 text-lg font-semibold tracking-tight">Study snapshot</h2>
+            <p className="text-xs font-semibold tracking-wider text-primary uppercase">{t("workspace.atAGlance")}</p>
+            <h2 className="mt-0.5 text-lg font-semibold tracking-tight">{t("workspace.studySnapshot")}</h2>
           </div>
-          <Link
+          <LocalizedLink
             href="/settings/billing"
             className="text-sm font-medium text-muted-foreground hover:text-foreground"
           >
-            Billing →
-          </Link>
+            {t("workspace.billing")} →
+          </LocalizedLink>
         </div>
         <div className="grid grid-cols-2 divide-x divide-y divide-border/60 sm:grid-cols-4 sm:divide-y-0">
           {snapshotStats.map((stat) => (
@@ -316,19 +319,19 @@ export const LearnHomeView = memo(function LearnHomeView({
       {latestContinue ? (
         <section>
           <SectionHeader
-            eyebrow="Pick up where you left off"
-            title="Continue learning"
+            eyebrow={t("workspace.pickUpWhereLeftOff")}
+            title={t("workspace.continueLearning")}
             href="/progress"
-            linkLabel="My progress"
+            linkLabel={t("workspace.myProgress")}
           />
           <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-            <Link
+            <LocalizedLink
               href={latestContinue.href}
               className="group relative overflow-hidden rounded-[1.5rem] bg-linear-to-br from-amber-500/15 via-card to-card p-6 ring-1 ring-amber-500/25 transition hover:ring-amber-500/40 sm:p-7"
             >
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300">
                 <CirclePlay className="size-3.5" />
-                In progress · {latestContinue.duration}
+                {t("workspace.inProgress")} · {latestContinue.duration}
               </span>
               <h3 className="mt-4 text-2xl font-semibold tracking-tight group-hover:text-primary sm:text-3xl">
                 {latestContinue.title}
@@ -337,13 +340,13 @@ export const LearnHomeView = memo(function LearnHomeView({
                 {latestContinue.focus}
               </p>
               <span className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-primary">
-                Continue <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                {t("workspace.continue")} <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
               </span>
-            </Link>
+            </LocalizedLink>
             {otherContinue.length > 0 ? (
               <div className="flex flex-col justify-center divide-y divide-border/70 rounded-[1.5rem] border border-border/70 bg-card px-1">
                 {otherContinue.map((item) => (
-                  <Link
+                  <LocalizedLink
                     key={item.id}
                     href={item.href}
                     className="flex items-center justify-between gap-3 px-4 py-4 transition-colors hover:bg-muted/40"
@@ -355,12 +358,12 @@ export const LearnHomeView = memo(function LearnHomeView({
                       </p>
                     </div>
                     <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
-                  </Link>
+                  </LocalizedLink>
                 ))}
               </div>
             ) : (
               <div className="flex items-center rounded-[1.5rem] border border-dashed border-border/80 px-5 py-6 text-sm text-muted-foreground">
-                More in-progress lessons will stack here as you start them.
+                {t("workspace.moreInProgressLessons")}
               </div>
             )}
           </div>
@@ -370,24 +373,24 @@ export const LearnHomeView = memo(function LearnHomeView({
       {/* Skills — wash tiles, no shared border chrome */}
       <section>
         <SectionHeader
-          eyebrow="Choose your mood"
-          title="What would you like to practice?"
+          eyebrow={t("workspace.chooseYourMood")}
+          title={t("workspace.whatPractice")}
           href="/skills"
-          linkLabel="See all"
+          linkLabel={t("workspace.seeAll")}
         />
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {SKILLS.map(({ label, note, href, icon: Icon, style, wash }) => (
-            <Link
-              key={label}
+          {SKILLS.map(({ labelKey, noteKey, href, icon: Icon, style, wash }) => (
+            <LocalizedLink
+              key={labelKey}
               href={href}
               className={`group relative overflow-hidden rounded-3xl bg-linear-to-br ${wash} to-transparent p-5 transition hover:scale-[1.01] sm:p-6`}
             >
               <span className={`grid size-12 place-items-center rounded-2xl ${style}`}>
                 <Icon className="size-5" />
               </span>
-              <p className="mt-6 text-lg font-semibold tracking-tight">{label}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{note}</p>
-            </Link>
+              <p className="mt-6 text-lg font-semibold tracking-tight">{t(labelKey)}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{t(noteKey)}</p>
+            </LocalizedLink>
           ))}
         </div>
       </section>
@@ -395,15 +398,15 @@ export const LearnHomeView = memo(function LearnHomeView({
       {/* Speaking — numbered menu rows */}
       <section>
         <SectionHeader
-          eyebrow="Talk it out"
-          title="Speaking scenarios"
-          description="Open Speak with AI and warm up with a familiar workplace scene."
+          eyebrow={t("workspace.talkItOut")}
+          title={t("workspace.speakingScenarios")}
+          description={t("workspace.speakingScenariosDescription")}
           href="/speaking"
-          linkLabel="Open room"
+          linkLabel={t("workspace.openRoom")}
         />
         <div className="overflow-hidden rounded-[1.5rem] border border-border/70">
           {SPEAKING_SCENARIOS.map((scene, index) => (
-            <Link
+            <LocalizedLink
               key={scene.id}
               href="/speaking"
               className={cn(
@@ -415,11 +418,11 @@ export const LearnHomeView = memo(function LearnHomeView({
                 {String(index + 1).padStart(2, "0")}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="font-semibold tracking-tight group-hover:text-primary">{scene.label}</p>
-                <p className="mt-0.5 text-sm text-muted-foreground">{scene.blurb}</p>
+                <p className="font-semibold tracking-tight group-hover:text-primary">{t(scene.labelKey)}</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">{t(scene.blurbKey)}</p>
               </div>
               <ArrowRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
-            </Link>
+            </LocalizedLink>
           ))}
         </div>
       </section>
@@ -428,15 +431,15 @@ export const LearnHomeView = memo(function LearnHomeView({
       {drillItems.length > 0 ? (
         <section>
           <SectionHeader
-            eyebrow="Short drills"
-            title="Skill drills"
-            description="One ready exercise from each skill."
+            eyebrow={t("workspace.shortDrills")}
+            title={t("workspace.skillDrills")}
+            description={t("workspace.skillDrillsDescription")}
             href="/skills"
-            linkLabel="All skills"
+            linkLabel={t("workspace.allSkills")}
           />
           <div className="space-y-2">
             {drillItems.map((item) => (
-              <Link
+              <LocalizedLink
                 key={item.id}
                 href={item.href}
                 className="group flex items-center gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-muted/50 sm:gap-4 sm:px-3"
@@ -451,7 +454,7 @@ export const LearnHomeView = memo(function LearnHomeView({
                   {item.level} · {item.duration}
                 </span>
                 <ArrowRight className="size-4 shrink-0 text-muted-foreground opacity-0 transition group-hover:opacity-100" />
-              </Link>
+              </LocalizedLink>
             ))}
           </div>
         </section>
@@ -461,14 +464,14 @@ export const LearnHomeView = memo(function LearnHomeView({
       {savedItems.length > 0 ? (
         <section>
           <SectionHeader
-            eyebrow="Come back anytime"
-            title="Saved for later"
+            eyebrow={t("workspace.comeBackAnytime")}
+            title={t("workspace.savedForLater")}
             href="/progress"
-            linkLabel="Manage"
+            linkLabel={t("workspace.manage")}
           />
           <div className="flex flex-wrap gap-2">
             {savedItems.map((item) => (
-              <Link
+              <LocalizedLink
                 key={item.id}
                 href={item.href}
                 className="inline-flex max-w-full items-center gap-2 rounded-full border border-border/70 bg-card py-2 pr-3 pl-2.5 text-sm transition hover:border-rose-400/40 hover:bg-rose-500/5"
@@ -476,7 +479,7 @@ export const LearnHomeView = memo(function LearnHomeView({
                 <Heart className="size-3.5 shrink-0 fill-current text-rose-500" />
                 <span className="truncate font-medium">{item.title}</span>
                 <span className="hidden text-xs text-muted-foreground sm:inline">{item.meta}</span>
-              </Link>
+              </LocalizedLink>
             ))}
           </div>
         </section>
@@ -489,7 +492,7 @@ export const LearnHomeView = memo(function LearnHomeView({
             <div className="relative">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground">
-                  Recommended next
+                  {t("workspace.recommendedNext")}
                 </span>
                 <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                   <Timer className="size-3.5" />
@@ -503,10 +506,10 @@ export const LearnHomeView = memo(function LearnHomeView({
                 {nextLesson.focus}
               </p>
               <Button asChild className="mt-6 h-11 rounded-full px-5">
-                <Link href={`/practice?scenario=${nextLesson.scenario}&lesson=${nextLesson.id}`}>
+                <LocalizedLink href={`/practice?scenario=${nextLesson.scenario}&lesson=${nextLesson.id}`}>
                   <Play className="size-4 fill-current" />
-                  Start lesson
-                </Link>
+                  {t("workspace.startLesson")}
+                </LocalizedLink>
               </Button>
             </div>
           </div>
@@ -516,8 +519,8 @@ export const LearnHomeView = memo(function LearnHomeView({
                 <Lightbulb className="size-5" />
               </span>
               <div>
-                <p className="text-xs font-medium text-muted-foreground">Tiny tip</p>
-                <h2 className="font-semibold">Speak first, perfect later</h2>
+                <p className="text-xs font-medium text-muted-foreground">{t("workspace.tinyTip")}</p>
+                <h2 className="font-semibold">{t("workspace.speakFirst")}</h2>
               </div>
             </div>
             <p className="mt-6 text-sm leading-7 text-muted-foreground">{QUICK_TIPS[0]}</p>
@@ -534,7 +537,7 @@ export const LearnHomeView = memo(function LearnHomeView({
         <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-xl">
             <p className="text-xs font-semibold tracking-[0.2em] text-background/55 uppercase">
-              Daily challenge
+              {t("workspace.dailyChallenge")}
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
               {dailyChallenge.title}
@@ -545,10 +548,10 @@ export const LearnHomeView = memo(function LearnHomeView({
             asChild
             className="h-12 shrink-0 rounded-full bg-background px-6 font-semibold text-foreground hover:bg-background/90"
           >
-            <Link href={dailyChallenge.href}>
+            <LocalizedLink href={dailyChallenge.href}>
               <Gamepad2 className="size-4" />
-              Play now
-            </Link>
+              {t("workspace.playNow")}
+            </LocalizedLink>
           </Button>
         </div>
       </section>
@@ -557,15 +560,15 @@ export const LearnHomeView = memo(function LearnHomeView({
       {finishedItems.length > 0 ? (
         <section>
           <SectionHeader
-            eyebrow="Nice work"
-            title="Recently finished"
+            eyebrow={t("workspace.niceWork")}
+            title={t("workspace.recentlyFinished")}
             href="/progress"
-            linkLabel="All done"
+            linkLabel={t("workspace.allDone")}
           />
           <ul className="space-y-1">
             {finishedItems.map((item) => (
               <li key={item.id}>
-                <Link
+                <LocalizedLink
                   href={item.href}
                   className="group flex items-center gap-3 rounded-lg px-1 py-2.5 transition-colors hover:bg-muted/40"
                 >
@@ -574,7 +577,7 @@ export const LearnHomeView = memo(function LearnHomeView({
                     {item.title}
                   </span>
                   <span className="text-xs text-muted-foreground">{item.level}</span>
-                </Link>
+                </LocalizedLink>
               </li>
             ))}
           </ul>
@@ -585,13 +588,13 @@ export const LearnHomeView = memo(function LearnHomeView({
       {featuredMore ? (
         <section>
           <SectionHeader
-            title="More ways to learn"
-            description="Short activities for whichever energy level you have today."
+            title={t("workspace.moreWaysToLearn")}
+            description={t("workspace.moreWaysToLearnDescription")}
             href="/lessons"
-            linkLabel="Explore"
+            linkLabel={t("workspace.explore")}
           />
           <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
-            <Link
+            <LocalizedLink
               href={`/practice?scenario=${featuredMore.scenario}&lesson=${featuredMore.id}`}
               className="group flex min-h-48 flex-col justify-end rounded-[1.5rem] bg-linear-to-br from-primary/15 via-card to-card p-6 ring-1 ring-border/60 transition hover:ring-primary/30 sm:p-8"
             >
@@ -605,10 +608,10 @@ export const LearnHomeView = memo(function LearnHomeView({
               <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
                 {featuredMore.focus}
               </p>
-            </Link>
+            </LocalizedLink>
             <div className="flex flex-col gap-3">
               {restMore.map((lesson) => (
-                <Link
+                <LocalizedLink
                   key={lesson.id}
                   href={`/practice?scenario=${lesson.scenario}&lesson=${lesson.id}`}
                   className="group flex flex-1 flex-col justify-center rounded-2xl bg-muted/45 px-5 py-4 transition hover:bg-muted/70"
@@ -617,7 +620,7 @@ export const LearnHomeView = memo(function LearnHomeView({
                   <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
                     {lesson.focus}
                   </p>
-                </Link>
+                </LocalizedLink>
               ))}
             </div>
           </div>
@@ -629,20 +632,20 @@ export const LearnHomeView = memo(function LearnHomeView({
         <div className="grid md:grid-cols-[.8fr_1.2fr]">
           <div className="bg-linear-to-br from-rose-500 to-orange-400 p-7 text-white sm:p-8">
             <Gamepad2 className="size-8" />
-            <h2 className="mt-8 text-2xl font-semibold tracking-tight">Learn by playing</h2>
+            <h2 className="mt-8 text-2xl font-semibold tracking-tight">{t("workspace.learnByPlaying")}</h2>
             <p className="mt-2 text-sm leading-6 text-white/75">
-              A quick game can be the best way to remember something new.
+              {t("workspace.gameMemoryTip")}
             </p>
-            <Link
+            <LocalizedLink
               href="/games"
               className="mt-6 inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
             >
-              All games <ArrowRight className="size-4" />
-            </Link>
+              {t("workspace.allGames")} <ArrowRight className="size-4" />
+            </LocalizedLink>
           </div>
           <div className="divide-y divide-border/60 bg-card">
             {MINI_GAMES.slice(0, 4).map((game, index) => (
-              <Link
+              <LocalizedLink
                 key={game.title}
                 href={game.href}
                 className="flex items-start gap-4 px-5 py-4 transition-colors hover:bg-muted/40"
@@ -654,7 +657,7 @@ export const LearnHomeView = memo(function LearnHomeView({
                   <h3 className="text-sm font-semibold">{game.title}</h3>
                   <p className="mt-1 text-xs leading-5 text-muted-foreground">{game.body}</p>
                 </div>
-              </Link>
+              </LocalizedLink>
             ))}
           </div>
         </div>
@@ -662,23 +665,23 @@ export const LearnHomeView = memo(function LearnHomeView({
 
       {/* Explore — text links */}
       <section>
-        <SectionHeader eyebrow="Go further" title="Explore more" />
+        <SectionHeader eyebrow={t("workspace.goFurther")} title={t("workspace.exploreMore")} />
         <div className="grid gap-x-10 gap-y-5 sm:grid-cols-2">
           {EXPLORE_MORE.map((item) => (
-            <Link key={item.label} href={item.href} className="group border-b border-border/50 pb-4">
+            <LocalizedLink key={item.labelKey} href={item.href} className="group border-b border-border/50 pb-4">
               <span className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight underline-offset-4 group-hover:underline">
-                {item.label}
+                {t(item.labelKey)}
                 <ArrowRight className="size-4 opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100" />
               </span>
-              <p className="mt-1 text-sm text-muted-foreground">{item.note}</p>
-            </Link>
+              <p className="mt-1 text-sm text-muted-foreground">{t(item.noteKey)}</p>
+            </LocalizedLink>
           ))}
         </div>
       </section>
 
       {/* Tips — numbered list / blockquotes */}
       <section>
-        <SectionHeader eyebrow="Study smarter" title="Quick tips" />
+        <SectionHeader eyebrow={t("workspace.studySmarter")} title={t("workspace.quickTips")} />
         <ol className="space-y-6">
           {tips.map((tip, index) => (
             <li key={tip} className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 sm:gap-x-4">

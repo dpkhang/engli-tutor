@@ -5,6 +5,8 @@ import Link from "next/link";
 import { ArrowLeft, Heart, Timer } from "lucide-react";
 import { Button, cn } from "@engli-tutor/ui";
 import { DataLoadingState } from "@/features/layout";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { LocalizedLink } from "@/features/i18n/localized-link";
 import {
   LEVELS,
   skillExerciseHref,
@@ -40,13 +42,14 @@ export const SkillListPageView = memo(function SkillListPageView({
   favoriteExerciseIds,
   onToggleFavorite,
 }: SkillListPageViewProps) {
+  const t = useWorkspaceI18n();
   return (
     <div className="space-y-8 pb-8">
       <div className="space-y-4">
         <Button variant="ghost" size="sm" asChild className="-ml-2 text-muted-foreground">
-          <Link href="/skills">
-            <ArrowLeft /> All skills
-          </Link>
+          <LocalizedLink href="/skills">
+            <ArrowLeft /> {t("workspace.backToSkills")}
+          </LocalizedLink>
         </Button>
         <header className="workspace-hero-accent relative overflow-hidden rounded-3xl bg-linear-to-br from-primary to-primary/80 px-5 py-6 text-primary-foreground sm:rounded-[1.75rem] sm:px-9 sm:py-10">
           <div
@@ -69,22 +72,22 @@ export const SkillListPageView = memo(function SkillListPageView({
                   asChild
                   className="h-10 rounded-full border-0 bg-white px-5 text-primary hover:bg-white/90"
                 >
-                  <Link href="/speaking">Speaking conversation with AI</Link>
+                  <LocalizedLink href="/speaking">{t("workspace.speakingConversationAi")}</LocalizedLink>
                 </Button>
               </div>
             ) : null}
             <p className="mt-4 hidden text-xs text-white/50 sm:block">
               {loading
-                ? "Loading exercises…"
-                : `${total} exercises · grouped A2 → B1 → TOEIC → IELTS`}
-              {!loading && source === "api" ? " · live curriculum" : null}
+                ? t("workspace.loadingExercises")
+                : `${total} ${t("workspace.exerciseGroups")}`}
+              {!loading && source === "api" ? t("workspace.liveCurriculum") : null}
             </p>
           </div>
         </header>
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Link
+        <LocalizedLink
           href={skillListHref(skill, "all")}
           className={cn(
             "rounded-full border px-3.5 py-2 text-sm font-medium transition-colors",
@@ -93,12 +96,12 @@ export const SkillListPageView = memo(function SkillListPageView({
               : "border-border bg-card text-muted-foreground hover:text-foreground",
           )}
         >
-          All levels
-        </Link>
+          {t("workspace.allLevels")}
+        </LocalizedLink>
         {LEVELS.map((level) => {
           const count = countsByLevel[level.id] ?? 0;
           return (
-            <Link
+            <LocalizedLink
               key={level.id}
               href={skillListHref(skill, level.id)}
               className={cn(
@@ -110,7 +113,7 @@ export const SkillListPageView = memo(function SkillListPageView({
             >
               {level.id}
               <span className="ml-1.5 opacity-70">· {count}</span>
-            </Link>
+            </LocalizedLink>
           );
         })}
       </div>
@@ -118,8 +121,8 @@ export const SkillListPageView = memo(function SkillListPageView({
       <div className="space-y-10">
         {loading ? (
           <DataLoadingState
-            title="Loading exercises"
-            description={`Preparing ${meta.labelEn.toLowerCase()} practice for this level.`}
+            title={t("workspace.loadingExercises")}
+            description={t("workspace.preparingSkillPractice").replace("{skill}", meta.labelEn.toLowerCase())}
             cards={3}
           />
         ) : (
@@ -152,13 +155,13 @@ export const SkillListPageView = memo(function SkillListPageView({
                           <Timer className="size-3.5" />
                           {exercise.duration}
                         </span>
-                        <span>{exercise.questions.length} questions</span>
+                        <span>{exercise.questions.length} {t("workspace.questionsCount")}</span>
                       </div>
                       <h3 className="text-lg font-semibold tracking-tight transition-colors group-hover:text-primary">
                         {exercise.title}
                       </h3>
                       <p className="text-sm text-muted-foreground">
-                        <span className="font-medium text-foreground">Tip: </span>
+                        <span className="font-medium text-foreground">{t("workspace.tip")}</span>
                         {exercise.tip}
                       </p>
                     </div>
@@ -171,7 +174,7 @@ export const SkillListPageView = memo(function SkillListPageView({
                             ? "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400"
                             : "border-border bg-background text-muted-foreground hover:border-rose-500/30 hover:text-rose-500",
                         )}
-                        aria-label={favorited ? "Remove from favorites" : "Save exercise"}
+                        aria-label={favorited ? t("workspace.removeFavorite") : t("workspace.saveExercise")}
                         aria-pressed={favorited}
                         onClick={() => onToggleFavorite(exercise.id)}
                       >
@@ -181,7 +184,7 @@ export const SkillListPageView = memo(function SkillListPageView({
                         asChild
                         className="h-10 rounded-full bg-primary px-5 text-primary-foreground hover:bg-primary/90"
                       >
-                        <Link href={skillExerciseHref(skill, exercise.id, activeLevel)}>Start exercise</Link>
+                        <LocalizedLink href={skillExerciseHref(skill, exercise.id, activeLevel)}>{t("workspace.startExercise")}</LocalizedLink>
                       </Button>
                     </div>
                   </article>
@@ -194,7 +197,7 @@ export const SkillListPageView = memo(function SkillListPageView({
       </div>
 
       {!loading && groups.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No exercises for this level.</p>
+        <p className="text-sm text-muted-foreground">{t("workspace.noExercises")}</p>
       ) : null}
     </div>
   );

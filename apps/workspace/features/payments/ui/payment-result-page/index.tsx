@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { peekWelcomePending, clearWelcomePending, WELCOME_PATH } from "@/features/onboarding";
 import { billingApi } from "../../api/billing";
 import { billingMeQueryKey } from "../../hooks/use-billing";
 import { PaymentResultPageView, type PaymentResultState } from "./payment-result-page.view";
+import { getPathLocale, withLocalePath } from "@/lib/locale-path";
 
 const PLAN_NAMES: Record<string, string> = {
   growth: "Standard",
@@ -17,6 +18,8 @@ export function PaymentResultPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const locale = getPathLocale(pathname);
   const checkout = searchParams.get("checkout");
   const sessionId = searchParams.get("session_id");
   const itemId = searchParams.get("item");
@@ -51,7 +54,7 @@ export function PaymentResultPage() {
       const applySuccess = (result: { planId?: string | null }) => {
         setConfirmedPlanId(result.planId ?? itemId ?? null);
         if (peekWelcomePending()) {
-          router.replace(WELCOME_PATH);
+          router.replace(withLocalePath(WELCOME_PATH, locale));
           return;
         }
         setState("success");
@@ -104,11 +107,11 @@ export function PaymentResultPage() {
   useEffect(() => {
     if (state !== "success") return;
     if (peekWelcomePending()) {
-      router.replace(WELCOME_PATH);
+      router.replace(withLocalePath(WELCOME_PATH, locale));
       return;
     }
     if (countdown <= 0) {
-      router.replace("/skills");
+      router.replace(withLocalePath("/skills", locale));
       return;
     }
     const timer = window.setTimeout(() => setCountdown((value) => value - 1), 1_000);

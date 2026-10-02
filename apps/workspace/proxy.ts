@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE, type Locale } from "@engli-tutor/i18n";
 import { isCustomDomainHost, normalizeHostname } from "./lib/platform-hosts";
 
 type ResolvePayload = {
@@ -48,6 +49,17 @@ async function resolveSlug(request: NextRequest, host: string): Promise<string |
   }
 }
 
+function detectLocale(request: NextRequest): Locale {
+  const cookie = request.cookies.get(LOCALE_COOKIE)?.value;
+  if (isLocale(cookie)) return cookie;
+  const accepted = request.headers.get("accept-language")?.split(",")[0]?.trim().toLowerCase().split("-")[0];
+  return isLocale(accepted) ? accepted : DEFAULT_LOCALE;
+}
+
+function localePath(pathname: string, locale: Locale): string {
+  return pathname === "/" ? `/${locale}` : `/${locale}${pathname}`;
+}
+
 function workspaceReturnTo(request: NextRequest): URL {
   const dest = request.nextUrl.clone();
   const returnTo = request.nextUrl.searchParams.get("returnTo");
@@ -91,6 +103,25 @@ async function hasWorkspaceSession(request: NextRequest): Promise<boolean> {
 export async function proxy(request: NextRequest) {
   const host = requestHost(request);
   const { pathname } = request.nextUrl;
+  const localeSegment = pathname.split("/")[1];
+  const locale = isLocale(localeSegment) ? localeSegment : detectLocale(request);
+  const hasLocalePrefix = isLocale(localeSegment);
+
+  if (!isCustomDomainHost(host) && !shouldBypass(pathname) && !hasLocalePrefix) {
+    const redirect = request.nextUrl.clone();
+    redirect.pathname = localePath(pathname, locale);
+    const response = NextResponse.redirect(redirect);
+    response.cookies.set(LOCALE_COOKIE, locale, { path: "/", maxAge: 31_536_000, sameSite: "lax" });
+    return response;
+  }
+
+  if (!isCustomDomainHost(host) && hasLocalePrefix && !shouldBypass(pathname)) {
+    const target = request.nextUrl.clone();
+    target.pathname = pathname.slice(locale.length + 1) || "/";
+    const response = NextResponse.rewrite(target);
+    response.cookies.set(LOCALE_COOKIE, locale, { path: "/", maxAge: 31_536_000, sameSite: "lax" });
+    return response;
+  }
 
   if (pathname === "/login" && !isCustomDomainHost(host)) {
     if (await hasWorkspaceSession(request)) {

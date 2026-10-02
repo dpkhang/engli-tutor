@@ -5,6 +5,8 @@ import Link from "next/link";
 import { ArrowRight, BriefcaseBusiness, Coffee, Mail, Mic2, Sparkles, Users } from "lucide-react";
 import { Button } from "@engli-tutor/ui";
 import { LESSON_PACKS } from "../../model/curriculum";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { LocalizedLink } from "@/features/i18n/localized-link";
 
 const SCENARIOS = [
   {
@@ -45,6 +47,7 @@ const SCENARIOS = [
 ] as const;
 
 export const StartPracticePageView = memo(function StartPracticePageView() {
+  const t = useWorkspaceI18n();
   return (
     <div className="mx-auto max-w-4xl space-y-10 pb-8">
       <header className="workspace-hero-accent relative overflow-hidden rounded-3xl bg-primary px-5 py-6 text-primary-foreground sm:rounded-4xl sm:px-10 sm:py-11">
@@ -55,23 +58,22 @@ export const StartPracticePageView = memo(function StartPracticePageView() {
         <div className="relative">
           <p className="hidden items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium sm:inline-flex">
             <Sparkles className="size-3.5 text-amber-300" />
-            Your AI tutor is ready
+            {t("workspace.aiTutorReady")}
           </p>
           <h1 className="max-w-xl text-xl font-semibold tracking-[-0.035em] sm:mt-5 sm:text-4xl">
-            What shall we talk about?
+            {t("workspace.whatTalkAbout")}
           </h1>
           <p className="mt-3 hidden max-w-xl text-sm leading-6 text-white/65 sm:block sm:text-base">
-            Pick a situation that feels useful—or simply talk about your day. There are no wrong
-            choices here.
+            {t("workspace.practiceDescription")}
           </p>
         </div>
       </header>
 
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold tracking-tight">Choose a conversation</h2>
+        <h2 className="text-xl font-semibold tracking-tight">{t("workspace.chooseConversation")}</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {SCENARIOS.map((item) => (
-            <Link
+            <LocalizedLink
               key={item.id}
               href={`/practice?scenario=${item.id}`}
               className="group rounded-2xl border border-border/70 bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-transparent hover:shadow-lg"
@@ -85,7 +87,7 @@ export const StartPracticePageView = memo(function StartPracticePageView() {
                 Let&apos;s talk{" "}
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
               </span>
-            </Link>
+            </LocalizedLink>
           ))}
         </div>
       </section>
@@ -93,12 +95,12 @@ export const StartPracticePageView = memo(function StartPracticePageView() {
       <section className="space-y-4">
         <div className="flex items-center gap-2">
           <Sparkles className="size-4 text-accent" />
-          <h2 className="text-xl font-semibold tracking-tight">Prefer a guided lesson?</h2>
+          <h2 className="text-xl font-semibold tracking-tight">{t("workspace.preferGuidedLesson")}</h2>
         </div>
         <ul className="overflow-hidden rounded-2xl border border-border/70 bg-card">
           {LESSON_PACKS.slice(0, 4).map((lesson) => (
             <li key={lesson.id}>
-              <Link
+              <LocalizedLink
                 href={`/practice?scenario=${lesson.scenario}&lesson=${lesson.id}`}
                 className="group flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-muted/50"
               >
@@ -109,12 +111,12 @@ export const StartPracticePageView = memo(function StartPracticePageView() {
                   </p>
                 </div>
                 <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-foreground" />
-              </Link>
+              </LocalizedLink>
             </li>
           ))}
         </ul>
         <Button asChild variant="outline" className="rounded-full">
-          <Link href="/lessons">View full path</Link>
+          <LocalizedLink href="/lessons">{t("workspace.viewFullPath")}</LocalizedLink>
         </Button>
       </section>
     </div>

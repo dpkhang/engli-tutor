@@ -13,6 +13,8 @@ export type AccountProfile = {
   company: string | null;
   city: string | null;
   nativeLanguage: string | null;
+  uiLocale: "en" | "vi" | null;
+  tutorExplanationLocale: "en" | "vi" | null;
   targetLevel: SkillLevel | null;
   learningGoal: string | null;
   welcomeSeenAt: string | null;
@@ -30,6 +32,8 @@ export type UpdateAccountInput = {
   company?: string;
   city?: string;
   nativeLanguage?: string;
+  uiLocale?: "en" | "vi";
+  tutorExplanationLocale?: "en" | "vi";
   targetLevel?: SkillLevel | "";
   learningGoal?: string;
   welcomeSeen?: boolean;

@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useReducedMotion } from "motion/react";
 import { ApiError } from "@engli-tutor/api-client";
+import { upgradeMessageFromError } from "@/features/payments";
 import { type TranslateDirection, type TranslateResult } from "../../api";
 import { lookupTranslation } from "../../model/translate-lookup";
 import { getCachedLookup } from "../../model/translate-cache";
@@ -51,6 +52,8 @@ function mergeWordWithSentence(
 }
 
 function errorMessage(error: unknown) {
+  const upgradeMessage = upgradeMessageFromError(error);
+  if (upgradeMessage) return upgradeMessage;
   if (error instanceof ApiError) return error.message;
   if (error instanceof Error) return error.message;
   return "Translation is unavailable right now. Please try again.";

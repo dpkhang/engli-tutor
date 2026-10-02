@@ -18,13 +18,16 @@ import {
 import { Button, BrandLogo, cn, ThemeToggle } from "@engli-tutor/ui";
 import { AnimatePresence, motion } from "motion/react";
 import { FloatingTranslate } from "@/features/translate";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { WorkspaceLanguageSwitcher } from "@/features/i18n/workspace-language-switcher";
+import { withLocalePath, getPathLocale } from "@/lib/locale-path";
 
 const PRIMARY_NAV = [
-  { href: "/", label: "Today" },
-  { href: "/skills", label: "Skills" },
-  { href: "/games", label: "Games" },
-  { href: "/lessons", label: "My path" },
-  { href: "/progress", label: "My progress", private: true },
+  { href: "/", key: "workspace.today" },
+  { href: "/skills", key: "workspace.skills" },
+  { href: "/games", key: "workspace.games" },
+  { href: "/lessons", key: "workspace.myPath" },
+  { href: "/progress", key: "workspace.myProgress", private: true },
 ] as const;
 
 function isActivePath(pathname: string, href: string) {
@@ -56,8 +59,6 @@ export type AppShellViewProps = {
   clipAiTools: boolean;
   aiToolsHeight: number;
   user: { name?: string | null; email?: string | null } | undefined;
-  planLoading: boolean;
-  planLabel: string | undefined;
   hasPaidPlan: boolean;
   displayName: string;
   initials: string;
@@ -87,8 +88,6 @@ export const AppShellView = memo(function AppShellView({
   clipAiTools,
   aiToolsHeight,
   user,
-  planLoading,
-  planLabel,
   hasPaidPlan,
   displayName,
   initials,
@@ -105,6 +104,9 @@ export const AppShellView = memo(function AppShellView({
   onToggleAiDock,
   onAiToolsAnimationComplete,
 }: AppShellViewProps) {
+  const t = useWorkspaceI18n();
+  const locale = getPathLocale(pathname);
+  const localize = (href: string) => withLocalePath(href, locale);
   const raiseFabForExerciseBar = isPracticeExercise;
   const navItems = PRIMARY_NAV.filter((item) => !("private" in item && item.private) || Boolean(user));
   const hideHeader = pathname.startsWith("/policy");
@@ -121,20 +123,20 @@ export const AppShellView = memo(function AppShellView({
               variant="ghost"
               size="icon"
               className="lg:hidden"
-              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              aria-label={mobileOpen ? t("workspace.closeMenu") : t("workspace.openMenu")}
               onClick={onToggleMobile}
             >
               {mobileOpen ? <X /> : <Menu />}
             </Button>
 
             <Link
-              href="/"
+              href={localize("/")}
               className="group flex shrink-0 items-center text-foreground"
             >
               <BrandLogo size={30} />
             </Link>
 
-            <nav className="ml-4 hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
+            <nav className="ml-4 hidden items-center gap-1 lg:flex" aria-label={t("workspace.primaryNavigation")}>
               {navItems.map((item) => {
                 const active = isActivePath(pathname, item.href);
                 return (
@@ -148,7 +150,7 @@ export const AppShellView = memo(function AppShellView({
                         : "text-muted-foreground hover:bg-muted hover:text-foreground",
                     )}
                   >
-                    {item.label}
+                    {t(item.key)}
                   </Link>
                 );
               })}
@@ -157,19 +159,6 @@ export const AppShellView = memo(function AppShellView({
 
           <div className="flex items-center gap-1.5">
             {search}
-            {user ? (
-              <Button
-                variant="outline"
-                size="sm"
-                asChild
-                className="hidden h-9 rounded-full sm:inline-flex"
-              >
-                <Link href="/payments" className="gap-1.5">
-                  {hasPaidPlan ? <Crown className="size-3.5" /> : <Gauge className="size-3.5" />}
-                  {planLoading ? "…" : (planLabel ?? "Plans")}
-                </Link>
-              </Button>
-            ) : null}
             {user ? null : <ThemeToggle />}
             {user ? (
               <div className="relative" ref={accountMenuRef}>
@@ -221,31 +210,35 @@ export const AppShellView = memo(function AppShellView({
                       </div>
                       <div className="py-1">
                         <Link
-                          href="/settings/account"
+                          href={localize("/settings/account")}
                           role="menuitem"
                           className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-muted"
                         >
                           <UserRound className="size-4 text-muted-foreground" />
-                          Account
+                          {t("workspace.account")}
                         </Link>
                         <Link
-                          href="/payments"
+                          href={localize("/payments")}
                           role="menuitem"
                           className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-muted"
                         >
                           <Gauge className="size-4 text-muted-foreground" />
-                          Plans
+                          {t("workspace.plans")}
                         </Link>
                         <Link
-                          href="/settings"
+                          href={localize("/settings")}
                           role="menuitem"
                           className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-muted"
                         >
                           <Settings className="size-4 text-muted-foreground" />
-                          Settings
+                          {t("workspace.settings")}
                         </Link>
                       </div>
                       <div className="border-t border-border pt-1">
+                        <div className="flex items-center justify-between gap-3 rounded-xl px-3 py-2">
+                          <span className="text-sm text-muted-foreground">{t("workspace.language")}</span>
+                          <WorkspaceLanguageSwitcher />
+                        </div>
                         <button
                           type="button"
                           role="menuitem"
@@ -253,7 +246,7 @@ export const AppShellView = memo(function AppShellView({
                           onClick={onSignOut}
                         >
                           <LogOut className="size-4" />
-                          Sign out
+                          {t("workspace.signOut")}
                         </button>
                       </div>
                     </motion.div>
@@ -272,7 +265,7 @@ export const AppShellView = memo(function AppShellView({
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.18 }}
-              aria-label="Mobile menu"
+              aria-label={t("workspace.mobileMenu")}
             >
               <div className="mx-auto flex max-w-6xl flex-col gap-1 pb-2">
                 {navItems.map((item) => (
@@ -287,7 +280,7 @@ export const AppShellView = memo(function AppShellView({
                     )}
                     onClick={onCloseMobile}
                   >
-                    {item.label}
+                    {t(item.key)}
                   </Link>
                 ))}
               </div>
@@ -330,8 +323,8 @@ export const AppShellView = memo(function AppShellView({
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.94 }}
           aria-expanded={aiToolsOpen}
-          aria-label={aiToolsOpen ? "Hide AI tools" : "Show AI tools"}
-          title={aiToolsOpen ? "Hide AI tools" : "Show AI tools"}
+          aria-label={aiToolsOpen ? t("workspace.hideAiTools") : t("workspace.showAiTools")}
+          title={aiToolsOpen ? t("workspace.hideAiTools") : t("workspace.showAiTools")}
         >
           <motion.span
             className="absolute inset-0 grid place-items-center"
@@ -390,7 +383,7 @@ export const AppShellView = memo(function AppShellView({
             className="pointer-events-none flex flex-col items-end gap-2 pt-2"
           >
             <Link
-              href="/speaking"
+              href={localize("/speaking")}
               tabIndex={aiToolsOpen ? 0 : -1}
               className="pointer-events-auto group flex h-13 max-w-[calc(100vw-2rem)] items-center justify-end rounded-full bg-primary px-2.5 text-primary-foreground shadow-[0_12px_32px_-10px_hsl(var(--primary)/0.7)] transition-colors hover:bg-primary/90"
               aria-label="Start speaking with AI"
@@ -408,7 +401,7 @@ export const AppShellView = memo(function AppShellView({
             </Link>
 
             <Link
-              href="/practice"
+              href={localize("/practice")}
               tabIndex={aiToolsOpen ? 0 : -1}
               className="pointer-events-auto group relative flex h-13 max-w-[calc(100vw-2rem)] items-center justify-end rounded-full border border-border bg-card px-2.5 text-foreground shadow-lg transition-colors hover:border-primary/30"
               aria-label="Open AI tutor chat"

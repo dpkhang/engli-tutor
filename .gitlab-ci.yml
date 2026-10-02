@@ -3,8 +3,9 @@
 
 workflow:
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME == "develop" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+    # Only run after develop is merged into the default branch (main).
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TITLE =~ /^Merge branch .develop./'
+    - when: never
 
 stages:
   - lint
@@ -58,22 +59,16 @@ default:
 
 .rules_packages:
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes: *changes_packages
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes: *changes_packages
 
 .rules_web:
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes: *changes_web
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes: *changes_web
 
 .rules_landing:
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes: *changes_landing
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes: *changes_landing
 

@@ -3,91 +3,108 @@
 import { memo, type ReactNode } from "react";
 import Link from "next/link";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button } from "@engli-tutor/ui";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import type { Plan, PlanId } from "../../model/plans";
+import { useMarketingI18n } from "@/features/i18n";
+import { isLocale, type Locale } from "@engli-tutor/i18n";
+import { usePathname } from "next/navigation";
 
 const LEARNER_NEEDS = [
   {
-    title: "Nervous speaking in meetings",
-    body: "You know the words but freeze in stand-ups or client calls.",
+    title: "Speak clearly when work gets real",
+    body: "Practice the exact moments that matter: stand-ups, client calls, interviews, and project updates.",
   },
   {
-    title: "Upcoming IT interview",
-    body: "You need to practice answering about experience, projects, and behavioral questions in English.",
+    title: "Get useful feedback fast",
+    body: "See what to fix after you try: grammar, pronunciation, vocabulary, and a more natural answer.",
   },
   {
-    title: "Learn, then forget",
-    body: "You've taken courses but lack a daily speaking loop to keep skills sharp.",
+    title: "Build a daily habit",
+    body: "Short sessions keep English active without asking you to sit through a long course after work.",
   },
   {
-    title: "Want feedback in Vietnamese",
-    body: "You grasp mistakes faster when AI explains errors and better phrasing in Vietnamese.",
+    title: "Understand mistakes in Vietnamese",
+    body: "Vietnamese explanations help you notice why a sentence sounds wrong and how to say it better next time.",
   },
 ];
 
 const SESSION_BEATS = [
-  { time: "0–5′", title: "Short listen", detail: "Workplace / interview clip — catch the main idea" },
-  { time: "5–10′", title: "Quick read", detail: "Email, job description, or short passage on the session topic" },
-  { time: "10–22′", title: "Speak with AI", detail: "Voice conversation matching the situation you just heard and read" },
-  { time: "22–30′", title: "Write + VI feedback", detail: "Write 2–4 summary / answer sentences; AI corrects and suggests more natural phrasing" },
+  {
+    step: "01",
+    time: "0–5′",
+    title: "Listen for the situation",
+    detail: "Hear a short workplace or interview prompt and catch the main task, keywords, and tone.",
+  },
+  {
+    step: "02",
+    time: "5–10′",
+    title: "Read the context",
+    detail: "Scan an email, job description, or short brief so your answer has the right details.",
+  },
+  {
+    step: "03",
+    time: "10–22′",
+    title: "Speak with the AI tutor",
+    detail: "Answer follow-up questions out loud, then retry with clearer grammar and pronunciation.",
+  },
+  {
+    step: "04",
+    time: "22–30′",
+    title: "Write and review",
+    detail: "Write a short summary or reply; get Vietnamese feedback and a natural rewrite to practice aloud.",
+  },
 ];
 
 const SKILL_PATH = [
   {
     skill: "Listening",
-    en: "Listening",
-    focus: "Comprehension in meetings & calls",
-    practice: "Short clips, stand-ups, customer Q&A — catch keywords and the main idea.",
-    outcome: "A2–B1: follow meeting requirements without constantly pausing.",
+    focus: "Catch meaning in meetings and calls",
+    practice: "Short clips, stand-ups, customer questions, and interview prompts.",
+    outcome: "Follow the main idea, key requirements, and next actions with less pausing.",
   },
   {
     skill: "Speaking",
-    en: "Speaking",
-    focus: "Speaking in meetings & interviews",
-    practice: "AI conversations by scenario: intro, project, behavioral.",
-    outcome: "A2–B1: clear answers for 10–15 minutes, with pronunciation & grammar feedback in Vietnamese.",
+    focus: "Answer with structure and confidence",
+    practice: "Scenario conversations for introductions, projects, decisions, and behavioral questions.",
+    outcome: "Give clearer A2–B1 answers and retry after pronunciation and grammar feedback.",
   },
   {
     skill: "Reading",
-    en: "Reading",
-    focus: "Emails, JDs, short docs",
-    practice: "Real workplace passages — skim for meaning, vocabulary in context.",
-    outcome: "A2–B1: understand job requirements / briefs without translating word by word.",
+    focus: "Understand workplace text faster",
+    practice: "Emails, job descriptions, short docs, and lesson notes with vocabulary in context.",
+    outcome: "Find the useful details without translating every word.",
   },
   {
     skill: "Writing",
-    en: "Writing",
-    focus: "Short answers & emails",
-    practice: "Write 2–5 reply sentences; AI flags errors and rewrites a more natural version.",
-    outcome: "A2–B1: send updates / interview answers in clear writing with correct tense.",
+    focus: "Send simple, natural replies",
+    practice: "Write short updates, summaries, and interview answers after each speaking task.",
+    outcome: "Use better tense, word choice, and sentence order in practical writing.",
   },
 ];
 
 const WHY_IT_WORKS = [
   {
-    title: "Four skills in one study loop",
-    body: "Each session cycles listening → reading → speaking → writing around the same workplace topic — not isolated drills.",
+    title: "One topic, four skills",
+    body: "Listening, reading, speaking, and writing reinforce the same situation instead of becoming separate drills.",
   },
   {
-    title: "Vietnamese feedback after you practice",
-    body: "AI explains listening, pronunciation, reading, and writing mistakes — plus better sentences and phrasing.",
+    title: "Feedback after action",
+    body: "You try first, then receive Vietnamese explanations and improved phrasing you can immediately repeat.",
   },
   {
-    title: "Remembers your weak spots",
-    body: "Your error profile (tense, s/es, collocation, listening keywords…) carries into the next session so you review what matters.",
+    title: "Practice follows weak spots",
+    body: "Common errors such as tense, s/es, collocation, or missed keywords can carry into the next session.",
   },
 ];
 
-const STORIES = [
+const USE_CASES = [
   {
-    quote: "Before interviews I practiced 20 minutes every night. Feedback in Vietnamese helped me lock it in fast.",
-    name: "Minh Lê",
-    role: "Frontend · targeting B1",
+    title: "Before a project interview",
+    body: "Practice explaining your role, the problem, your solution, and what you learned — then tighten the answer.",
   },
   {
-    quote: "Short enough after work. AI flags exactly what I keep forgetting — I don't have to relearn whole lessons.",
-    name: "Hà Phạm",
-    role: "Product Ops · B1",
+    title: "Before a weekly meeting",
+    body: "Rehearse a status update, answer follow-up questions, and turn your notes into a short written summary.",
   },
 ];
 
@@ -107,19 +124,19 @@ function PolicyFaqLink({ href, children }: { href: string; children: ReactNode }
 const FAQS: { q: string; a: ReactNode }[] = [
   {
     q: "I'm A2 and weak at speaking — can I start?",
-    a: "Yes. The placement test covers listening, speaking, reading, and writing, then your path starts at the right level — you still practice all four skills, including the weak ones.",
+    a: "Yes. The placement test covers listening, speaking, reading, and writing, then your path starts at the right level. You still practice all four skills, including the weak ones.",
   },
   {
     q: "Can I only practice speaking?",
-    a: "No. Every session includes listening, reading, speaking, and writing on the same topic. Speaking gets the most time, but it's always tied to listening–reading input and a short writing output.",
+    a: "Every session connects speaking with listening, reading, and a short writing task. Speaking gets focused time, but the input and review make your answers stronger.",
   },
   {
     q: "How many minutes a day?",
-    a: "About 20–30 minutes for a full four-skill loop: listen → read → speak with AI → write + Vietnamese feedback.",
+    a: "Plan for about 20–30 minutes for a complete loop: listen, read, speak with AI, then write and review feedback in Vietnamese.",
   },
   {
-    q: "How is Free different from Standard / Premium?",
-    a: "Free limits practice minutes per day. Standard/Premium unlock more time, a deeper path, and interview / workplace scenario practice.",
+    q: "How is Free different from paid plans?",
+    a: "Free lets you try the daily learning loop with limited AI tutor usage. Paid plans use the live billing catalog shown above, so the exact price and included benefits stay up to date.",
   },
   {
     q: "What happens to my speaking audio?",
@@ -144,52 +161,92 @@ const FAQS: { q: string; a: ReactNode }[] = [
 ];
 
 const viewport = { once: true, amount: 0.18, margin: "0px 0px -6% 0px" } as const;
-const fadeUp = {
-  initial: { opacity: 0, y: 14 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport,
-  transition: { duration: 0.35, ease: "easeOut" as const },
-};
+
+type PricingStatus = "loading" | "error" | "ready";
 
 export type MainBodyViewProps = {
   entryLabel: string;
   plans: Plan[];
+  pricingStatus: PricingStatus;
+  pricingError: string | null;
   onEntryClick: () => void;
   onPlanClick: (planId: PlanId) => void;
+  onRetryPricing: () => void;
 };
 
 export const MainBodyView = memo(function MainBodyView({
   entryLabel,
   plans,
+  pricingStatus,
+  pricingError,
   onEntryClick,
   onPlanClick,
+  onRetryPricing,
 }: MainBodyViewProps) {
+  const t = useMarketingI18n();
+  const pathname = usePathname();
+  const segment = pathname.split("/")[1];
+  const locale: Locale = isLocale(segment) ? segment : "en";
+  const localize = (href: string) => href.startsWith("/") ? `/${locale}${href}` : href;
+  const prefersReducedMotion = useReducedMotion();
+  const fadeUp = prefersReducedMotion
+    ? {
+        initial: false,
+        whileInView: undefined,
+        viewport,
+        transition: { duration: 0 },
+      }
+    : {
+        initial: { opacity: 0, y: 14 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport,
+        transition: { duration: 0.35, ease: "easeOut" as const },
+      };
+  const previewMotion = prefersReducedMotion
+    ? {
+        initial: false,
+        whileInView: undefined,
+        viewport,
+        transition: { duration: 0 },
+      }
+    : {
+        initial: { opacity: 0, y: 18 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport,
+        transition: { duration: 0.4, delay: 0.08, ease: "easeOut" as const },
+      };
+
   return (
     <div className="bg-background">
       {/* 1. Recognition — for English learners */}
       <section
         id="for-you"
-        className="section-snap mx-auto flex w-full max-w-6xl flex-col justify-center px-5 py-24 sm:px-8"
+        className="section-snap marketing-container marketing-section"
       >
         <motion.div {...fadeUp}>
           <p className="text-[11px] font-medium tracking-[0.18em] text-accent uppercase">
-            Built for you
+            {t("home.builtForPractical")}
           </p>
-          <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            If you&apos;re learning English to use it — not just to pass a test.
-          </h2>
-          <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-            EngliTutor is for A2–B1 working professionals who need to speak at work — not another long theory course.
-          </p>
+          <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-end lg:gap-12">
+            <div>
+              <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+                {t("home.recognitionTitle")}
+              </h2>
+              <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                {t("home.recognitionDescription")}
+              </p>
+            </div>
+            <p className="rounded-2xl border border-border bg-card p-5 text-sm leading-relaxed text-muted-foreground shadow-sm sm:text-base">
+              {t("home.recognitionNote")}
+            </p>
+          </div>
 
-          <div className="mt-14 grid gap-x-10 gap-y-10 sm:grid-cols-2">
+          <div className="mt-8 grid gap-4 sm:mt-10 sm:grid-cols-2 lg:grid-cols-4">
             {LEARNER_NEEDS.map((item, index) => (
-              <article key={item.title} className="space-y-2 border-t border-border pt-6">
-                <p className="text-xs font-medium tracking-wide text-muted-foreground">
-                  {String(index + 1).padStart(2, "0")}
-                </p>
-                <h3 className="text-xl font-semibold tracking-tight text-foreground">{item.title}</h3>
-                <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">{item.body}</p>
+              <article key={item.title} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+                <p className="text-xs font-semibold tracking-wide text-accent">{String(index + 1).padStart(2, "0")}</p>
+                <h3 className="mt-4 text-lg font-semibold tracking-tight text-foreground">{t(`home.learnerNeeds.${index}.title`)}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t(`home.learnerNeeds.${index}.body`)}</p>
               </article>
             ))}
           </div>
@@ -198,24 +255,29 @@ export const MainBodyView = memo(function MainBodyView({
 
       {/* 2. Practice session preview */}
       <section id="practice" className="section-snap border-y border-border bg-surface/80">
-        <div className="mx-auto flex w-full max-w-6xl flex-col justify-center gap-12 px-5 py-24 lg:flex-row lg:items-center lg:gap-16 sm:px-8">
+        <div className="marketing-container marketing-section flex flex-col gap-8 lg:flex-row lg:items-center lg:gap-12">
           <motion.div className="flex-1" {...fadeUp}>
             <p className="text-[11px] font-medium tracking-[0.18em] text-accent uppercase">
-              Sample session
+              {t("home.sampleLesson")}
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              20–30 minutes a day — listening, speaking, reading, writing.
+              {t("home.sampleTitle")}
             </h2>
             <p className="mt-4 max-w-md text-base leading-relaxed text-muted-foreground">
-              One workplace topic throughout. Input (listen–read) first, output (speak–write) next, then Vietnamese feedback.
+              {t("home.sampleDescription")}
             </p>
-            <ol className="mt-10 space-y-5">
+            <ol className="mt-10 grid gap-4" aria-label={t("home.sampleSteps")}>
               {SESSION_BEATS.map((beat) => (
-                <li key={beat.time} className="grid grid-cols-[4.5rem_1fr] gap-4">
-                  <span className="pt-0.5 text-sm font-medium text-accent">{beat.time}</span>
-                  <div>
-                    <p className="font-semibold text-foreground">{beat.title}</p>
-                    <p className="mt-0.5 text-sm text-muted-foreground">{beat.detail}</p>
+                <li key={beat.step} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+                  <div className="flex items-start gap-4">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/12 text-sm font-semibold text-accent">
+                      {beat.step}
+                    </span>
+                    <div>
+                      <p className="text-xs font-medium tracking-wide text-muted-foreground">{beat.time}</p>
+                      <p className="mt-1 font-semibold text-foreground">{t(`home.sessionBeats.${SESSION_BEATS.indexOf(beat)}.title`)}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{t(`home.sessionBeats.${SESSION_BEATS.indexOf(beat)}.detail`)}</p>
+                    </div>
                   </div>
                 </li>
               ))}
@@ -224,28 +286,25 @@ export const MainBodyView = memo(function MainBodyView({
 
           <motion.div
             className="w-full max-w-md flex-1 lg:max-w-lg"
-            initial={{ opacity: 0, y: 18 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={viewport}
-            transition={{ duration: 0.4, delay: 0.08, ease: "easeOut" }}
+            {...previewMotion}
           >
-            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_24px_60px_-36px_rgba(15,23,42,0.35)]">
-              <div className="flex items-center justify-between border-b border-border px-4 py-3">
+            <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-[0_24px_60px_-36px_rgba(15,23,42,0.35)]">
+              <div className="flex items-center justify-between gap-4 border-b border-border px-4 py-3">
                 <div>
-                  <p className="text-sm font-semibold text-foreground">Session · 4 skills</p>
-                  <p className="text-xs text-muted-foreground">Listen → Read → Speak → Write · TOEIC · IELTS</p>
+                  <p className="text-sm font-semibold text-foreground">{t("home.lessonPreview")}</p>
+                  <p className="text-xs text-muted-foreground">Listen → Read → Speak → Write</p>
                 </div>
                 <span className="rounded-full bg-accent/15 px-2.5 py-1 text-[11px] font-medium text-accent">
-                  Live AI
+                  AI tutor
                 </span>
               </div>
 
               <div className="space-y-4 px-4 py-5">
                 <div className="max-w-[88%] rounded-2xl rounded-tl-md bg-muted px-3.5 py-2.5 text-sm leading-relaxed text-foreground">
                   <span className="mb-1 block text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
-                    Listen / read
+                    {t("home.listenRead")}
                   </span>
-                  Clip + JD: “Tell me about a challenging project you worked on recently.”
+                  Prompt: “Tell me about a challenging project you worked on recently.”
                 </div>
                 <div className="ml-auto max-w-[88%] rounded-2xl rounded-tr-md bg-primary px-3.5 py-2.5 text-sm leading-relaxed text-primary-foreground">
                   <span className="mb-1 block text-[10px] font-semibold tracking-wide text-primary-foreground/65 uppercase">
@@ -253,18 +312,18 @@ export const MainBodyView = memo(function MainBodyView({
                   </span>
                   Last year I work on payment feature. It was difficult because deadline is short…
                 </div>
-                <div className="rounded-xl border border-accent/25 bg-accent/8 px-3.5 py-3">
+                <div className="rounded-2xl border border-accent/25 bg-accent/8 px-3.5 py-3">
                   <p className="text-[11px] font-semibold tracking-wide text-accent uppercase">
-                    Write + Vietnamese feedback
+                    {t("home.feedback")}
                   </p>
-                  <p className="mt-1.5 text-sm leading-relaxed text-foreground">
-                    Rewrite: use <span className="font-medium">worked</span> (past tense). Try: “Last year I{" "}
-                    <em>worked</em> on a payment feature…” — then say the corrected sentence aloud.
+                  <p lang="vi" className="mt-1.5 text-sm leading-relaxed text-foreground">
+                    Dùng <span className="font-medium">worked</span> thay vì “work” vì bạn đang nói về năm ngoái. Thử nói lại: <span lang="en">“Last year I worked on a payment feature…”</span>
                   </p>
                 </div>
               </div>
 
               <div className="border-t border-border px-4 py-3">
+                <p className="mb-3 text-xs leading-relaxed text-muted-foreground">{t("home.illustrativePreview")}</p>
                 <Button
                   type="button"
                   className="h-11 w-full rounded-full text-[15px] font-medium"
@@ -281,35 +340,35 @@ export const MainBodyView = memo(function MainBodyView({
       {/* 3. Four-skill path */}
       <section
         id="path"
-        className="section-snap mx-auto flex w-full max-w-6xl flex-col justify-center px-5 py-24 sm:px-8"
+        className="section-snap marketing-container marketing-section"
       >
         <motion.div {...fadeUp}>
           <p className="text-[11px] font-medium tracking-[0.18em] text-accent uppercase">
-            Four-skill path
+            {t("home.skills")}
           </p>
           <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Listening · Speaking · Reading · Writing — one A2–B1 path.
+            {t("home.skillsTitle")}
           </h2>
           <p className="mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
-            Placement measures all four skills. Each week you see what&apos;s strong or weak and which lessons to practice next.
+            {t("home.skillsDescription")}
           </p>
 
-          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid gap-4 sm:mt-10 sm:grid-cols-2 lg:grid-cols-4">
             {SKILL_PATH.map((item, index) => (
               <article
                 key={item.skill}
-                className="relative flex flex-col border-t-2 border-primary pt-6"
+                className="flex min-h-full flex-col rounded-2xl border border-border bg-card p-5 shadow-sm"
               >
-                <p className="text-xs font-medium tracking-wide text-muted-foreground">
-                  {String(index + 1).padStart(2, "0")} · {item.en}
+                <p className="text-xs font-semibold tracking-wide text-accent">
+                  {String(index + 1).padStart(2, "0")}
                 </p>
-                <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
-                  {item.skill}
-                </p>
-                <p className="mt-3 text-sm font-medium text-accent">{item.focus}</p>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.practice}</p>
-                <p className="mt-auto pt-4 text-sm leading-relaxed text-foreground/80">
-                  {item.outcome}
+                <h3 className="mt-4 text-2xl font-semibold tracking-tight text-foreground">
+                  {t(`home.skillPath.${index}.skill`)}
+                </h3>
+                <p className="mt-3 text-sm font-medium text-foreground">{t(`home.skillPath.${SKILL_PATH.indexOf(item)}.focus`)}</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t(`home.skillPath.${SKILL_PATH.indexOf(item)}.practice`)}</p>
+                <p className="mt-auto pt-5 text-sm leading-relaxed text-foreground/80">
+                  {t(`home.skillPath.${SKILL_PATH.indexOf(item)}.outcome`)}
                 </p>
               </article>
             ))}
@@ -319,19 +378,19 @@ export const MainBodyView = memo(function MainBodyView({
 
       {/* 4. Why it works for learners */}
       <section id="why" className="section-snap border-y border-border bg-primary text-primary-foreground">
-        <div className="mx-auto flex w-full max-w-6xl flex-col justify-center px-5 py-24 sm:px-8">
+        <div className="marketing-container marketing-section">
           <motion.div {...fadeUp}>
             <p className="text-[11px] font-medium tracking-[0.18em] text-accent uppercase">
-              Why it works
+              {t("home.why")}
             </p>
             <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
-              Designed around English learners — not around “AI features”.
+              {t("home.whyTitle")}
             </h2>
-            <div className="mt-14 grid gap-10 md:grid-cols-3">
+            <div className="mt-8 grid gap-4 sm:mt-10 md:grid-cols-3">
               {WHY_IT_WORKS.map((item) => (
-                <article key={item.title} className="space-y-3">
-                  <h3 className="text-lg font-semibold tracking-tight">{item.title}</h3>
-                  <p className="text-sm leading-relaxed text-primary-foreground/70">{item.body}</p>
+                <article key={item.title} className="rounded-2xl border border-white/14 bg-white/6 p-5">
+                  <h3 className="text-lg font-semibold tracking-tight">{t(`home.whyItems.${WHY_IT_WORKS.indexOf(item)}.title`)}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-primary-foreground/72">{t(`home.whyItems.${WHY_IT_WORKS.indexOf(item)}.body`)}</p>
                 </article>
               ))}
             </div>
@@ -339,29 +398,27 @@ export const MainBodyView = memo(function MainBodyView({
         </div>
       </section>
 
-      {/* 5. Stories */}
+      {/* 5. Use cases */}
       <section
         id="stories"
-        className="section-snap mx-auto flex w-full max-w-6xl flex-col justify-center px-5 py-24 sm:px-8"
+        className="section-snap marketing-container marketing-section"
       >
         <motion.div {...fadeUp}>
           <p className="text-[11px] font-medium tracking-[0.18em] text-accent uppercase">
-            Learners like you
+            {t("home.useCases")}
           </p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            They practice speaking to use it at work right away.
+          <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            {t("home.useCasesTitle")}
           </h2>
-          <div className="mt-12 grid gap-10 md:grid-cols-2 md:gap-14">
-            {STORIES.map((story) => (
-              <blockquote key={story.name} className="space-y-5">
-                <p className="text-xl leading-snug font-medium tracking-tight text-foreground sm:text-2xl">
-                  “{story.quote}”
-                </p>
-                <footer className="text-sm">
-                  <p className="font-semibold text-foreground">{story.name}</p>
-                  <p className="text-muted-foreground">{story.role}</p>
-                </footer>
-              </blockquote>
+          <p className="mt-4 max-w-xl text-base text-muted-foreground">
+            {t("home.useCasesDescription")}
+          </p>
+          <div className="mt-8 grid gap-5 sm:mt-10 md:grid-cols-2">
+            {USE_CASES.map((item) => (
+              <article key={item.title} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+                <h3 className="text-xl font-semibold tracking-tight text-foreground">{t(`home.useCasesItems.${USE_CASES.indexOf(item)}.title`)}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">{t(`home.useCasesItems.${USE_CASES.indexOf(item)}.body`)}</p>
+              </article>
             ))}
           </div>
         </motion.div>
@@ -369,126 +426,162 @@ export const MainBodyView = memo(function MainBodyView({
 
       {/* 6. Pricing */}
       <section id="pricing" className="section-snap border-y border-border bg-surface/60">
-        <div className="mx-auto flex min-h-svh w-full max-w-6xl flex-col justify-center px-5 py-24 sm:px-8">
+        <div className="marketing-container marketing-section">
           <motion.div {...fadeUp}>
-            <p className="text-[11px] font-medium tracking-[0.18em] text-accent uppercase">
-              Pricing
-            </p>
-            <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              Start free — upgrade when you need more speaking time.
-            </h2>
-            <p className="mt-4 max-w-xl text-base text-muted-foreground">
-              Pricing follows practice time and path depth — not a generic “AI package”.
-            </p>
+            <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-end lg:gap-12">
+              <div>
+                <p className="text-[11px] font-medium tracking-[0.18em] text-accent uppercase">
+                  {t("home.pricing")}
+                </p>
+                <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+                  {t("home.pricingTitle")}
+                </h2>
+              </div>
+              <p className="rounded-2xl border border-border bg-card p-5 text-sm leading-relaxed text-muted-foreground shadow-sm sm:text-base">
+                {t("home.pricingNote")}
+              </p>
+            </div>
 
-            <div
-              className={`mt-12 grid gap-5 ${
-                plans.length === 2 ? "mx-auto w-full max-w-190 lg:grid-cols-2" : "lg:grid-cols-3"
-              }`}
-            >
-              {plans.map((plan) => (
-                <article
-                  key={plan.id}
-                  className={`flex flex-col gap-5 rounded-2xl border p-6 ${
-                    plan.featured
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-card text-card-foreground"
-                  }`}
-                >
-                  <div className="space-y-1 border-b border-current/12 pb-4">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <h3 className="text-xl font-semibold tracking-tight">{plan.name}</h3>
-                      {plan.featured ? (
-                        <span className="text-[10px] font-semibold tracking-[0.14em] text-accent uppercase">
-                          Popular
+            {pricingStatus === "loading" ? (
+              <div className="mt-8 rounded-3xl border border-border bg-card p-6 shadow-sm sm:mt-10" role="status" aria-live="polite">
+                <p className="text-lg font-semibold tracking-tight text-foreground">{t("home.loadingPlans")}</p>
+                <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+                  We are checking the latest catalog before showing paid options. You can still start a free lesson now.
+                </p>
+                <Button type="button" className="mt-5 rounded-full" onClick={onEntryClick}>
+                  {entryLabel}
+                </Button>
+              </div>
+            ) : pricingStatus === "error" ? (
+              <div className="mt-8 rounded-3xl border border-border bg-card p-6 shadow-sm sm:mt-10" role="alert">
+                <p className="text-lg font-semibold tracking-tight text-foreground">Plans could not load</p>
+                <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+                  {pricingError ?? "The pricing catalog is temporarily unavailable. We will not show fallback plans as current pricing."}
+                </p>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <Button type="button" className="rounded-full" onClick={onEntryClick}>
+                    {entryLabel}
+                  </Button>
+                  <Button type="button" variant="outline" className="rounded-full" onClick={onRetryPricing}>
+                    Retry pricing
+                  </Button>
+                  <Button asChild type="button" variant="outline" className="rounded-full">
+                    <Link href="/payment">Open payment page</Link>
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div
+                className={`mt-8 grid gap-5 sm:mt-10 ${
+                  plans.length === 2 ? "mx-auto w-full max-w-190 lg:grid-cols-2" : "lg:grid-cols-3"
+                }`}
+              >
+                {plans.map((plan) => (
+                  <article
+                    key={plan.id}
+                    className={`flex flex-col gap-5 rounded-3xl border p-6 shadow-sm ${
+                      plan.featured
+                        ? "border-primary bg-primary text-primary-foreground shadow-[0_24px_60px_-36px_rgba(15,23,42,0.5)]"
+                        : "border-border bg-card text-card-foreground"
+                    }`}
+                  >
+                    <div className="space-y-1 border-b border-current/12 pb-5">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <h3 className="text-xl font-semibold tracking-tight">{plan.name}</h3>
+                        {plan.featured ? (
+                          <span className="rounded-full bg-accent/16 px-2.5 py-1 text-[10px] font-semibold tracking-[0.14em] text-accent uppercase">
+                            Popular
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="pt-3 text-4xl font-semibold tracking-tight">
+                        {plan.price}
+                        <span
+                          className={`ml-1 text-sm font-normal ${
+                            plan.featured ? "text-primary-foreground/65" : "text-muted-foreground"
+                          }`}
+                        >
+                          {plan.period}
                         </span>
-                      ) : null}
-                    </div>
-                    <p className="text-3xl font-semibold tracking-tight">
-                      {plan.price}
-                      <span
-                        className={`ml-1 text-xs font-normal ${
-                          plan.featured ? "text-primary-foreground/65" : "text-muted-foreground"
+                      </p>
+                      <p
+                        className={`pt-2 text-sm leading-relaxed ${
+                          plan.featured ? "text-primary-foreground/72" : "text-muted-foreground"
                         }`}
                       >
-                        {plan.period}
-                      </span>
-                    </p>
-                    <p
-                      className={`pt-2 text-sm ${
-                        plan.featured ? "text-primary-foreground/70" : "text-muted-foreground"
+                        {plan.description}
+                      </p>
+                    </div>
+
+                    <ul className="space-y-3 text-sm" aria-label={`${plan.name} benefits`}>
+                      {plan.features.map((feature) => (
+                        <li key={feature} className="flex gap-2.5">
+                          <span className="mt-0.5 text-accent" aria-hidden="true">✓</span>
+                          <span
+                            className={
+                              plan.featured ? "text-primary-foreground/82" : "text-muted-foreground"
+                            }
+                          >
+                            {feature}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <Button
+                      type="button"
+                      className={`mt-auto h-11 w-full rounded-full text-[15px] font-medium ${
+                        plan.featured
+                          ? "bg-white text-[#0b1524] hover:bg-white/92"
+                          : ""
                       }`}
+                      variant={plan.featured ? "default" : "outline"}
+                      onClick={() => onPlanClick(plan.id)}
                     >
-                      {plan.description}
-                    </p>
-                  </div>
-
-                  <ul className="space-y-2.5 text-sm">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex gap-2.5">
-                        <span className="text-accent">·</span>
-                        <span
-                          className={
-                            plan.featured ? "text-primary-foreground/80" : "text-muted-foreground"
-                          }
-                        >
-                          {feature}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Button
-                    type="button"
-                    className={`mt-auto h-11 w-full rounded-full text-[15px] font-medium ${
-                      plan.featured
-                        ? "bg-white text-[#0b1524] hover:bg-white/92"
-                        : ""
-                    }`}
-                    variant={plan.featured ? "default" : "outline"}
-                    onClick={() => onPlanClick(plan.id)}
-                  >
-                    {plan.cta}
-                  </Button>
-                </article>
-              ))}
-            </div>
+                      {plan.cta}
+                    </Button>
+                  </article>
+                ))}
+              </div>
+            )}
           </motion.div>
         </div>
       </section>
 
       {/* 7. FAQ */}
       <section id="faq" className="section-snap w-full">
-        <div className="mx-auto flex min-h-svh w-full max-w-6xl flex-col justify-center px-5 py-24 sm:px-8">
+        <div className="marketing-container marketing-section">
           <motion.div {...fadeUp}>
             <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
               <div>
                 <p className="text-[11px] font-medium tracking-[0.18em] text-accent uppercase">
-                  FAQ
+                  {t("home.faq")}
                 </p>
                 <h2 className="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-                  Before your first speaking session.
+                  {t("home.faqTitle")}
                 </h2>
-                <p className="mt-4 text-base text-muted-foreground">
-                  Focused on level, study time, and how EngliTutor gives feedback.
+                <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+                  {t("home.faqDescription")}
                 </p>
                 <div className="mt-6 flex flex-wrap gap-2">
                   <Button asChild variant="outline" size="sm" className="rounded-full">
-                    <Link href="/policy" target="_blank" rel="noopener noreferrer">Privacy Policy</Link>
+                    <Link href={localize("/policy")} target="_blank" rel="noopener noreferrer">Privacy Policy</Link>
                   </Button>
                   <Button asChild variant="outline" size="sm" className="rounded-full">
-                    <Link href="/policy/cookies" target="_blank" rel="noopener noreferrer">Cookie Policy</Link>
+                    <Link href={localize("/policy/cookies")} target="_blank" rel="noopener noreferrer">Cookie Policy</Link>
                   </Button>
                 </div>
               </div>
-              <Accordion type="single" collapsible defaultValue={FAQS[0]?.q}>
-                {FAQS.map((item) => (
-                  <AccordionItem key={item.q} value={item.q}>
-                    <AccordionTrigger>{item.q}</AccordionTrigger>
-                    <AccordionContent>{item.a}</AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
+              <div className="rounded-3xl border border-border bg-card p-2 shadow-sm">
+                <Accordion type="single" collapsible defaultValue={FAQS[0]?.q}>
+                  {FAQS.map((item, index) => (
+                    <AccordionItem key={item.q} value={item.q}>
+                      <AccordionTrigger>{t(`home.faqItems.${index}.q`)}</AccordionTrigger>
+                      <AccordionContent>{t(`home.faqItems.${index}.a`)}</AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -497,21 +590,21 @@ export const MainBodyView = memo(function MainBodyView({
       {/* 8. Final CTA */}
       <section
         id="start"
-        className="section-snap mx-auto flex w-full max-w-6xl flex-col justify-center px-5 py-24 sm:px-8"
+        className="section-snap marketing-container pb-12 sm:pb-16 lg:pb-20"
       >
         <motion.div
-          className="relative overflow-hidden rounded-3xl bg-primary px-8 py-14 text-primary-foreground sm:px-12"
+          className="relative overflow-hidden rounded-3xl bg-primary px-6 py-8 text-primary-foreground sm:px-10 sm:py-10 lg:px-12 lg:py-12"
           {...fadeUp}
         >
           <div className="relative max-w-lg space-y-5">
             <p className="text-[11px] font-medium tracking-[0.18em] text-accent uppercase">
-              Start today
+              {t("home.finalEyebrow")}
             </p>
             <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Your first speaking session takes just a few minutes to begin.
+              {t("home.finalTitle")}
             </h2>
-            <p className="text-base text-primary-foreground/72">
-              Create an account, take a quick placement, then practice a situation you need now — a meeting or an interview.
+            <p className="text-base leading-relaxed text-primary-foreground/72">
+              {t("home.finalDescription")}
             </p>
             <Button
               type="button"

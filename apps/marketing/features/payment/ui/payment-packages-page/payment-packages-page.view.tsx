@@ -8,6 +8,9 @@ import { motion } from "motion/react";
 import { PageBackLink } from "@/features/layout";
 import type { Plan, PlanId } from "@/features/marketing";
 import type { BillingMe } from "../../api/billing";
+import { useMarketingI18n } from "@/features/i18n";
+import { isLocale, type Locale } from "@engli-tutor/i18n";
+import { usePathname } from "next/navigation";
 
 export type PaymentPackagesPageViewProps = {
   plans: Plan[];
@@ -80,6 +83,11 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
   planHrefs,
   redirectingToCurrentPlan,
 }: PaymentPackagesPageViewProps) {
+  const t = useMarketingI18n();
+  const pathname = usePathname();
+  const segment = pathname.split("/")[1];
+  const locale: Locale = isLocale(segment) ? segment : "en";
+  const localize = (href: string) => href.startsWith("/") ? `/${locale}${href}` : href;
   const activePlanId = currentPlanId(billing);
   const activePlan = plans.find((p) => p.id === activePlanId) ?? plans[0];
   const benefits = planBenefits(activePlan, billing);
@@ -90,7 +98,7 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
 
   if (redirectingToCurrentPlan) {
     return (
-      <main className="grid min-h-svh place-items-center px-5">
+      <main className="marketing-container marketing-page grid min-h-svh place-items-center">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <LoaderCircle className="size-4 animate-spin" />
           Opening your plan details…
@@ -101,8 +109,8 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
 
   return (
     <main className="relative min-h-svh bg-[radial-gradient(ellipse_at_top,hsl(214_22%_92%),hsl(var(--background))_55%)] dark:bg-[radial-gradient(ellipse_at_top,hsl(222_28%_14%),hsl(var(--background))_55%)]">
-      <div className="mx-auto max-w-6xl space-y-10 px-5 pt-24 pb-16 sm:px-8 lg:pt-28 lg:pb-20">
-        <PageBackLink href="/" label="home" />
+      <div className="marketing-container marketing-page space-y-6 sm:space-y-8">
+        <PageBackLink href={localize("/")} label={t("header.backToHome")} />
 
         <motion.div
           className="mx-auto max-w-2xl space-y-3 text-center"
@@ -110,14 +118,14 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45 }}
         >
-          <p className="text-xs font-semibold tracking-[0.18em] text-accent uppercase">Plans</p>
+          <p className="text-xs font-semibold tracking-[0.18em] text-accent uppercase">{t("header.plans")}</p>
           <h1 className="font-display text-3xl tracking-tight text-foreground sm:text-4xl">
-            {isLoggedIn && !billingLoading ? "Your plan & benefits" : "Choose the right plan"}
+            {isLoggedIn && !billingLoading ? t("payment.yourPlan") : t("payment.choosePlan")}
           </h1>
           <p className="text-sm text-muted-foreground sm:text-base">
             {isLoggedIn
-              ? "See your current plan, daily usage, and benefits. Upgrade or switch anytime."
-              : "Compare daily limits and benefits. Pay monthly, every 3 months (−15%), or yearly (−40%)."}
+              ? t("payment.loggedInDescription")
+              : t("payment.guestDescription")}
           </p>
         </motion.div>
 
@@ -132,26 +140,26 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
         ) : null}
         {checkoutState === "cancel" ? (
           <Alert variant="destructive">
-            <AlertDescription>Checkout was canceled on Stripe.</AlertDescription>
+            <AlertDescription>{t("workspace.checkoutCanceled")}</AlertDescription>
           </Alert>
         ) : null}
 
         {authReady && isLoggedIn ? (
           <motion.section
-            className="rounded-sm border border-primary/25 bg-background p-6 sm:p-8"
+            className="rounded-2xl border border-primary/25 bg-background/90 p-5 shadow-sm backdrop-blur sm:p-8"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
             {billingLoading ? (
-              <p className="text-sm text-muted-foreground">Loading plan details…</p>
+              <p className="text-sm text-muted-foreground">{t("workspace.loadingPlanDetails")}</p>
             ) : billing ? (
-              <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
+              <div className="grid gap-6 sm:gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
                 <div className="space-y-4">
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant={paidPlan ? "default" : "secondary"} className="gap-1">
                       {paidPlan ? <Crown className="size-3" /> : null}
-                      Current plan
+                      {t("payment.currentPlan")}
                     </Badge>
                     {paidPlan ? (
                       <Badge variant="outline">
@@ -168,10 +176,10 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
                   </div>
 
                   <div className="flex flex-wrap gap-4 text-sm">
-                    <div className="flex items-center gap-2 rounded-xl border px-4 py-3">
+                    <div className="flex min-h-16 items-center gap-2 rounded-2xl border border-border/80 bg-background/70 px-4 py-3 shadow-sm">
                       <MessageCircle className="size-4 text-accent" />
                       <div>
-                        <p className="text-xs text-muted-foreground">AI tutor chats today</p>
+                        <p className="text-xs text-muted-foreground">{t("workspace.aiTutorChatsToday")}</p>
                         <p className="font-semibold">
                           {billing.usage?.tutor_chat ?? 0}
                           {dailyChatLimit != null ? ` / ${dailyChatLimit}` : ""}
@@ -179,7 +187,7 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
                       </div>
                     </div>
                     {accessSource && ACCESS_SOURCE_LABEL[accessSource] && proUntil ? (
-                      <div className="rounded-xl border px-4 py-3">
+                      <div className="min-h-16 rounded-2xl border border-border/80 bg-background/70 px-4 py-3 shadow-sm">
                         <p className="text-xs text-muted-foreground">
                           {ACCESS_SOURCE_LABEL[accessSource]}
                         </p>
@@ -192,7 +200,7 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
                     <dl className="grid gap-2 text-sm sm:grid-cols-2">
                       {billing.subscription.billingPeriod ? (
                         <div>
-                          <dt className="text-muted-foreground">Billing cycle</dt>
+                          <dt className="text-muted-foreground">{t("checkout.billingCycle")}</dt>
                           <dd className="font-medium">
                             {PERIOD_LABEL[billing.subscription.billingPeriod] ??
                               billing.subscription.billingPeriod}
@@ -201,7 +209,7 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
                       ) : null}
                       {billing.subscription.currentPeriodEnd ? (
                         <div>
-                          <dt className="text-muted-foreground">Next renewal</dt>
+                          <dt className="text-muted-foreground">{t("checkout.nextRenewal")}</dt>
                           <dd className="font-medium">
                             {formatDate(billing.subscription.currentPeriodEnd)}
                           </dd>
@@ -211,16 +219,16 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
                   ) : null}
 
                   <a href={`${workspaceUrl}/payments`}>
-                    <Button type="button" variant="outline" className="gap-2">
+                    <Button type="button" variant="outline" className="h-auto min-h-11 max-w-full gap-2 py-2 whitespace-normal">
                       <ExternalLink className="size-4" />
-                      Manage plan in workspace
+                      {t("checkout.workspace")}
                     </Button>
                   </a>
                 </div>
 
                 <div className="space-y-3">
-                  <p className="text-sm font-semibold text-foreground">Active benefits</p>
-                  <ul className="space-y-2.5 rounded-sm border bg-muted/30 p-5 text-sm">
+                  <p className="text-sm font-semibold text-foreground">{t("payment.activeBenefits")}</p>
+                  <ul className="space-y-2.5 rounded-2xl border border-border/80 bg-muted/30 p-5 text-sm shadow-sm">
                     {benefits.map((feature) => (
                       <li key={feature} className="flex gap-2.5 text-muted-foreground">
                         <Check className="mt-0.5 size-4 shrink-0 text-accent" />
@@ -246,7 +254,7 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
 
         <div className="space-y-4">
           <h2 className="text-center text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-            {isLoggedIn ? "Compare plans" : "Pricing"}
+            {isLoggedIn ? t("payment.comparePlans") : t("payment.pricing")}
           </h2>
           <div className="grid gap-5 lg:grid-cols-3">
             {plans.map((plan, index) => {
@@ -257,24 +265,24 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
                 <motion.article
                   key={plan.id}
                   className={cn(
-                    "relative flex flex-col rounded-sm border p-6 sm:p-7",
+                    "relative flex min-w-0 flex-col overflow-hidden rounded-2xl border p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg sm:p-7",
                     isCurrent
-                      ? "border-primary bg-primary text-primary-foreground"
+                      ? "border-primary bg-primary text-primary-foreground shadow-lg"
                       : emphasize
-                        ? "border-primary/40 bg-card text-card-foreground"
-                        : "border-border bg-background",
+                        ? "border-primary/40 bg-card text-card-foreground shadow-md"
+                        : "border-border/80 bg-background/90",
                   )}
                   initial={{ opacity: 0, y: 18 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.45, delay: 0.06 * index }}
                 >
                   {isCurrent ? (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-sm bg-accent px-3 py-0.5 text-[11px] font-semibold tracking-wide text-accent-foreground uppercase">
+                    <span className="absolute top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-1 text-[11px] font-semibold tracking-wide text-accent-foreground uppercase shadow-sm">
                       Current
                     </span>
                   ) : null}
 
-                  <div className="-mx-6 -mt-6 mb-5 aspect-video overflow-hidden border-b sm:-mx-7 sm:-mt-7">
+                  <div className="-mx-5 -mt-5 mb-5 aspect-video overflow-hidden border-b sm:-mx-7 sm:-mt-7">
                     <img
                       src={plan.imageUrl}
                       alt={`${plan.name} plan`}
@@ -288,13 +296,13 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
                       {plan.featured && !isCurrent ? (
                         <span
                           className={cn(
-                            "rounded-md px-2 py-0.5 text-[11px] font-semibold tracking-wide uppercase",
+                            "rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase shadow-sm",
                             emphasize
                               ? "bg-accent text-accent-foreground"
                               : "bg-accent/15 text-accent",
                           )}
                         >
-                          Popular
+                          {t("payment.popular")}
                         </span>
                       ) : null}
                     </div>
@@ -336,7 +344,7 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
                   </ul>
 
                   {isCurrent ? (
-                    <Button type="button" className="mt-auto w-full" variant="secondary" disabled>
+                    <Button type="button" className="mt-auto min-h-11 w-full" variant="secondary" disabled>
                       Current plan
                     </Button>
                   ) : (
@@ -344,7 +352,7 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
                       <Button
                         type="button"
                         className={cn(
-                          "w-full",
+                          "min-h-11 w-full",
                           emphasize ? "bg-accent text-accent-foreground hover:bg-accent/90" : "",
                         )}
                         variant={emphasize ? "default" : "outline"}
@@ -359,23 +367,23 @@ export const PaymentPackagesPageView = memo(function PaymentPackagesPageView({
           </div>
 
           <p className="flex flex-wrap items-center justify-center gap-2 pt-4 text-center text-sm text-muted-foreground">
-            <span>Billing is processed by Stripe.</span>
+            <span>{t("payment.billingProcessed")}</span>
             <Link
               href="/policy"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-medium text-foreground underline-offset-4 hover:underline"
+              className="inline-flex min-h-11 items-center rounded-xl font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/60"
             >
-              Privacy Policy
+              {t("payment.privacy")}
             </Link>
             <span aria-hidden>·</span>
             <Link
               href="/policy/cookies"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-medium text-foreground underline-offset-4 hover:underline"
+              className="inline-flex min-h-11 items-center rounded-xl font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/60"
             >
-              Cookie Policy
+              {t("payment.cookies")}
             </Link>
           </p>
         </div>

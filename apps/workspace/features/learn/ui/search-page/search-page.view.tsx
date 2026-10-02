@@ -7,6 +7,8 @@ import { ArrowRight, BookOpen, Heart, LoaderCircle, Search, Sparkles } from "luc
 import { Button, cn, Input } from "@engli-tutor/ui";
 import { DataLoadingState } from "@/features/layout";
 import type { LessonPack } from "../../model/curriculum";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { LocalizedLink } from "@/features/i18n/localized-link";
 
 export type SearchPageViewProps = {
   query: string;
@@ -23,6 +25,7 @@ export const SearchPageView = memo(function SearchPageView({
   favoriteIds,
   onToggleFavorite,
 }: SearchPageViewProps) {
+  const t = useWorkspaceI18n();
   const router = useRouter();
 
   const onSearch = (event: FormEvent<HTMLFormElement>) => {
@@ -39,13 +42,13 @@ export const SearchPageView = memo(function SearchPageView({
           aria-hidden
         />
         <p className="hidden text-xs font-semibold tracking-[0.16em] text-primary uppercase sm:block">
-          Discover your next lesson
+          {t("workspace.searchDiscover")}
         </p>
         <h1 className="text-xl font-semibold tracking-tight sm:mt-2 sm:text-3xl">
-          Search learning content
+          {t("workspace.searchContent")}
         </h1>
         <p className="mt-2 hidden max-w-xl text-sm leading-6 text-muted-foreground sm:block">
-          Find lessons by topic, skill, level, or a real-life situation you want to practise.
+          {t("workspace.searchDescription")}
         </p>
 
         <form onSubmit={onSearch} className="mt-6 grid max-w-2xl gap-2 sm:relative sm:block">
@@ -57,7 +60,7 @@ export const SearchPageView = memo(function SearchPageView({
               name="q"
               defaultValue={query}
               autoFocus
-              placeholder="Try “interview”, “speaking”, or “B1”…"
+              placeholder={t("workspace.searchPlaceholder")}
               className="h-13 w-full rounded-full border border-border bg-background pr-10 pl-12 text-sm shadow-sm outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-3 focus:ring-primary/15 sm:pr-36"
             />
           </div>
@@ -67,7 +70,7 @@ export const SearchPageView = memo(function SearchPageView({
             disabled={loading}
           >
             {loading ? <LoaderCircle className="size-4 animate-spin" /> : null}
-            {loading ? "Searching" : "Search"}
+            {loading ? t("workspace.searching") : t("workspace.search")}
           </Button>
         </form>
       </section>
@@ -75,23 +78,23 @@ export const SearchPageView = memo(function SearchPageView({
       {query ? (
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <h2 className="text-xl font-semibold tracking-tight">Results for “{query}”</h2>
+            <h2 className="text-xl font-semibold tracking-tight">{t("workspace.resultsFor").replace("{query}", query)}</h2>
             {!loading ? (
               <p className="mt-1 text-sm text-muted-foreground">
-                {lessons.length} {lessons.length === 1 ? "lesson" : "lessons"} found
+                {lessons.length} {t("workspace.lessonsFound")}
               </p>
             ) : null}
           </div>
           <Button asChild variant="outline" className="rounded-full">
-            <Link href="/lessons">Browse all lessons</Link>
+            <LocalizedLink href="/lessons">{t("workspace.browseAllLessons")}</LocalizedLink>
           </Button>
         </div>
       ) : null}
 
       {loading && query ? (
         <DataLoadingState
-          title="Searching lessons"
-          description="Finding learning content that matches your goal."
+          title={t("workspace.searchingLessons")}
+          description={t("workspace.searchingLessonsDescription")}
           cards={4}
         />
       ) : null}
@@ -140,7 +143,7 @@ export const SearchPageView = memo(function SearchPageView({
                 <div className="mt-auto flex flex-wrap gap-2 pt-5">
                   <Button asChild className="rounded-full">
                     <Link href={`/practice?scenario=${lesson.scenario}&lesson=${lesson.id}`}>
-                      Start lesson <ArrowRight className="size-4" />
+                      {t("workspace.startLesson")} <ArrowRight className="size-4" />
                     </Link>
                   </Button>
                 </div>
@@ -153,9 +156,9 @@ export const SearchPageView = memo(function SearchPageView({
       {!loading && query && lessons.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-border bg-card/60 px-6 py-12 text-center">
           <Search className="mx-auto size-7 text-muted-foreground" />
-          <h2 className="mt-4 font-semibold">No lessons found</h2>
+          <h2 className="mt-4 font-semibold">{t("workspace.noLessonsSearch")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Try a broader topic, another skill, or a CEFR level such as A2 or B1.
+            {t("workspace.broaderSearch")}
           </p>
         </div>
       ) : null}
@@ -163,9 +166,9 @@ export const SearchPageView = memo(function SearchPageView({
       {!query ? (
         <div className="rounded-3xl border border-dashed border-border bg-card/60 px-6 py-12 text-center">
           <BookOpen className="mx-auto size-7 text-primary" />
-          <h2 className="mt-4 font-semibold">What would you like to learn?</h2>
+          <h2 className="mt-4 font-semibold">{t("workspace.whatLearn")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Enter a topic above or use the search shortcut from anywhere with ⌘/Ctrl + K.
+            {t("workspace.searchHint")}
           </p>
         </div>
       ) : null}

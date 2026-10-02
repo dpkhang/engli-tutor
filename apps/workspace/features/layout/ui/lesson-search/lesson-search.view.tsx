@@ -4,6 +4,7 @@ import { memo, type FormEvent, type RefObject } from "react";
 import Link from "next/link";
 import { BookOpen, Search, X } from "lucide-react";
 import type { LessonPack } from "@/features/learn/model/curriculum";
+import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 
 export type LessonSearchViewProps = {
   open: boolean;
@@ -34,6 +35,7 @@ export const LessonSearchView = memo(function LessonSearchView({
   onSelectLesson,
   onViewAll,
 }: LessonSearchViewProps) {
+  const t = useWorkspaceI18n();
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     onSubmit();
@@ -47,10 +49,10 @@ export const LessonSearchView = memo(function LessonSearchView({
         className="flex h-9 items-center gap-2 rounded-full border border-border bg-background px-3 text-sm text-muted-foreground shadow-xs transition-colors hover:border-primary/35 hover:text-foreground"
         aria-expanded={open}
         aria-haspopup="listbox"
-        aria-label="Search lessons"
+        aria-label={t("workspace.searchLessons")}
       >
         <Search className="size-4" />
-        <span className="hidden xl:inline">Search lessons</span>
+        <span className="hidden xl:inline">{t("workspace.searchLessons")}</span>
         <kbd className="hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium xl:inline">
           ⌘K
         </kbd>
@@ -64,7 +66,7 @@ export const LessonSearchView = memo(function LessonSearchView({
               ref={inputRef}
               value={query}
               onChange={(event) => onQueryChange(event.target.value)}
-              placeholder="Search by topic, skill, or level…"
+              placeholder={t("workspace.searchLessonsPlaceholder")}
               className="h-12 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
               role="combobox"
               aria-controls="lesson-search-results"
@@ -75,7 +77,7 @@ export const LessonSearchView = memo(function LessonSearchView({
                 type="button"
                 onClick={onClearQuery}
                 className="grid size-7 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
-                aria-label="Clear search"
+                aria-label={t("workspace.clearSearch")}
               >
                 <X className="size-3.5" />
               </button>
@@ -85,7 +87,7 @@ export const LessonSearchView = memo(function LessonSearchView({
           <div id="lesson-search-results" role="listbox" className="max-h-80 overflow-y-auto p-2">
             {loading ? (
               <p className="px-3 py-5 text-center text-sm text-muted-foreground">
-                Finding lessons…
+                {t("workspace.findingLessons")}
               </p>
             ) : matches.length ? (
               matches.map((lesson) => (
@@ -112,8 +114,8 @@ export const LessonSearchView = memo(function LessonSearchView({
               ))
             ) : (
               <div className="px-3 py-6 text-center">
-                <p className="text-sm font-medium">No lessons found</p>
-                <p className="mt-1 text-xs text-muted-foreground">Try a topic, skill, or level.</p>
+                <p className="text-sm font-medium">{t("workspace.noLessonsFound")}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{t("workspace.tryLessonSearch")}</p>
               </div>
             )}
           </div>
@@ -123,7 +125,9 @@ export const LessonSearchView = memo(function LessonSearchView({
             onClick={onViewAll}
             className="w-full border-t border-border px-4 py-3 text-left text-xs font-semibold text-primary hover:bg-muted"
           >
-            {query.trim() ? `View all results for “${query.trim()}”` : "Browse all lessons"}
+            {query.trim()
+              ? t("workspace.viewAllResultsFor").replace("{query}", query.trim())
+              : t("workspace.browseAllLessons")}
           </button>
         </div>
       ) : null}

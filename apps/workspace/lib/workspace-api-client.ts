@@ -1,6 +1,7 @@
 "use client";
 
 import { ApiClient, ApiError } from "@engli-tutor/api-client";
+import { getPathLocale, withLocalePath } from "./locale-path";
 
 export class WorkspaceApiClient extends ApiClient {
   constructor() {
@@ -16,10 +17,11 @@ export class WorkspaceApiClient extends ApiClient {
         error instanceof ApiError &&
         error.status === 401 &&
         typeof window !== "undefined" &&
-        window.location.pathname !== "/login"
+        !window.location.pathname.endsWith("/login")
       ) {
         const returnTo = encodeURIComponent(`${window.location.pathname}${window.location.search}`);
-        window.location.assign(`/login?returnTo=${returnTo}`);
+        const loginPath = withLocalePath("/login", getPathLocale(window.location.pathname));
+        window.location.assign(`${loginPath}?returnTo=${returnTo}`);
       }
       return error;
     });

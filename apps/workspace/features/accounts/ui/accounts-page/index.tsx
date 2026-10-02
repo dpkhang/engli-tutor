@@ -7,6 +7,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useActionDialog, useToast } from "@engli-tutor/ui";
 import { useSignOutLoading } from "@/features/layout";
 import { ApiError } from "@engli-tutor/api-client";
+import { LOCALE_COOKIE } from "@engli-tutor/i18n";
+import { getPathLocale, withLocalePath } from "@/lib/locale-path";
 import { authClient, useSession } from "@/lib/auth-client";
 import { queryKeys } from "@/lib/query";
 import { setPreferredLevel } from "@/features/settings";
@@ -23,6 +25,8 @@ const EMPTY_FORM: ProfileForm = {
   nativeLanguage: "",
   targetLevel: "",
   learningGoal: "",
+  uiLocale: "en",
+  tutorExplanationLocale: "vi",
 };
 
 function profileToForm(profile: AccountProfile, fallbackName = ""): ProfileForm {
@@ -33,6 +37,8 @@ function profileToForm(profile: AccountProfile, fallbackName = ""): ProfileForm 
     company: profile.company ?? "",
     city: profile.city ?? "",
     nativeLanguage: profile.nativeLanguage ?? "",
+    uiLocale: profile.uiLocale ?? "en",
+    tutorExplanationLocale: profile.tutorExplanationLocale ?? "vi",
     targetLevel: profile.targetLevel ?? "",
     learningGoal: profile.learningGoal ?? "",
   };
@@ -83,6 +89,8 @@ export function AccountsPage({ embedded = false }: { embedded?: boolean }) {
         company: form.company,
         city: form.city,
         nativeLanguage: form.nativeLanguage,
+        uiLocale: form.uiLocale,
+        tutorExplanationLocale: form.tutorExplanationLocale,
         targetLevel: form.targetLevel,
         learningGoal: form.learningGoal,
       });
@@ -90,6 +98,7 @@ export function AccountsPage({ embedded = false }: { embedded?: boolean }) {
     onSuccess: async (profile) => {
       queryClient.setQueryData(["account"], profile);
       if (form?.targetLevel) setPreferredLevel(form.targetLevel);
+      document.cookie = `${LOCALE_COOKIE}=${profile.uiLocale ?? "en"}; Path=/; Max-Age=31536000; SameSite=Lax`;
       try {
         await authClient.updateUser({ name: profile.name });
       } catch {
@@ -113,7 +122,7 @@ export function AccountsPage({ embedded = false }: { embedded?: boolean }) {
       if (result.error) throw new Error("Sign out failed");
       resetAccountAppearance();
       queryClient.clear();
-      window.location.assign("/login");
+      window.location.assign(withLocalePath("/login", getPathLocale(window.location.pathname)));
     } catch {
       endSignOut();
     }
