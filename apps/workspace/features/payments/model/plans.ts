@@ -91,7 +91,29 @@ export function planPeriodPrice(plan: Pick<SubscriptionPlan, "priceVndMonthly" |
   return plan.periodPrices?.[period]?.totalVnd ?? plan.priceVndMonthly;
 }
 
-export function metricLimit(limits: PlanLimits, metric: UsageMetric) {
+function fallbackLimitsForPlan(planId: string): PlanLimits {
+  if (planId === "starter" || planId === "free") return FREE_LIMITS;
+  return {
+    tutorChatPerDay: null,
+    ttsPerDay: null,
+    aiTranslatePerDay: null,
+    gameSessionsPerDay: null,
+    vocabReviewsPerDay: null,
+    enforcement: "throttle",
+    proScenarios: true,
+    fullVocabModes: true,
+    advancedProgress: true,
+    deepFeedback: true,
+    customPractice: true,
+  };
+}
+
+function normalizedLimits(planId: string, limits: PlanLimits | undefined): PlanLimits {
+  return limits ?? fallbackLimitsForPlan(planId);
+}
+
+export function metricLimit(limits: PlanLimits | undefined, metric: UsageMetric) {
+  if (!limits) return null;
   if (metric === "tutor_chat") return limits.tutorChatPerDay;
   if (metric === "tts") return limits.ttsPerDay;
   if (metric === "game_session") return limits.gameSessionsPerDay ?? null;
@@ -132,9 +154,9 @@ export function usageRows(data: BillingMe | undefined) {
   });
 }
 
-function planBullets(plan: Pick<SubscriptionPlan, "benefits" | "features" | "limits">): string[] {
+function planBullets(plan: Pick<SubscriptionPlan, "id" | "benefits" | "features" | "limits">): string[] {
   const benefits = plan.benefits?.length ? plan.benefits : plan.features ?? [];
-  const { limits } = plan;
+  const limits = normalizedLimits(plan.id, plan.limits);
   const allowance = (metric: UsageMetric, label: string) => {
     const limit = metricLimit(limits, metric);
     return limits.enforcement === "block" && limit !== null
