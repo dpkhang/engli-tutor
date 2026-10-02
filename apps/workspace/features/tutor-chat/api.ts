@@ -57,35 +57,46 @@ export const tutorApi = {
       }),
     });
     if (!response.ok) throw new Error(`Chat request failed (${response.status})`);
+
+    // Demo/fallback mode still returns the legacy JSON response.
+    const contentType = response.headers.get("content-type") ?? "";
+    if (!contentType.includes("text/event-stream")) {
+      const payload = (await response.json()) as TutorChatResponse & { message?: string };
+      if (payload.message && !payload.reply) throw new Error(payload.message);
+      if (payload.reply) input.onChunk(payload.reply);
+      return { reply: payload.reply ?? "", demo: payload.demo ?? false };
+    }
+
     if (!response.body) throw new Error("Chat response stream unavailable");
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
     let result: TutorChatResponse | null = null;
+    const consumeEvent = (event: string) => {
+      const lines = event.split(/\r?\n/);
+      const eventName = lines.find((line) => line.startsWith("event:"))?.slice(6).trim();
+      const data = lines.find((line) => line.startsWith("data:"))?.slice(5).trim();
+      if (!data) return;
+      const payload = JSON.parse(data) as {
+        text?: string;
+        reply?: string;
+        demo?: boolean;
+        message?: string;
+      };
+      if (eventName === "chunk") input.onChunk(payload.text ?? "");
+      if (eventName === "done") result = { reply: payload.reply ?? "", demo: payload.demo ?? false };
+      if (eventName === "error") throw new Error(payload.message ?? "Unable to chat with AI");
+    };
     while (true) {
       const { value, done } = await reader.read();
-      buffer += decoder.decode(value, { stream: !done });
-      const events = buffer.split("\n\n");
+      buffer += decoder.decode(value ?? new Uint8Array(), { stream: !done });
+      const events = buffer.split(/\r?\n\r?\n/);
       buffer = events.pop() ?? "";
-      for (const event of events) {
-        const data = event
-          .split("\n")
-          .find((line) => line.startsWith("data: "))
-          ?.slice(6);
-        if (!data) continue;
-        const payload = JSON.parse(data) as {
-          text?: string;
-          reply?: string;
-          demo?: boolean;
-          message?: string;
-        };
-        if (event.startsWith("event: chunk")) input.onChunk(payload.text ?? "");
-        if (event.startsWith("event: done"))
-          result = { reply: payload.reply ?? "", demo: payload.demo ?? false };
-        if (event.startsWith("event: error"))
-          throw new Error(payload.message ?? "Unable to chat with AI");
+      for (const event of events) consumeEvent(event);
+      if (done) {
+        if (buffer.trim()) consumeEvent(buffer);
+        break;
       }
-      if (done) break;
     }
     if (!result) throw new Error("Chat stream ended without a result");
     return result;
