@@ -149,6 +149,58 @@ If you cannot come, message An before 10:00.`,
     ],
   },
   {
+    id: "reading-a2-calendar-invite",
+    skill: "reading",
+    title: "Read a calendar invite",
+    level: "A2",
+    duration: "10 min",
+    tip: "Read the subject, time, and agenda first.",
+    material: {
+      title: "Calendar invite — Weekly product sync",
+      body: `Subject: Weekly product sync
+When: Friday 10:00–10:45 (ICT)
+Where: Zoom link in the invite
+Organizer: Mai (Product)
+
+Agenda
+1. Last week's release (5 min)
+2. This week's priorities (20 min)
+3. Open questions (15 min)
+
+Please update the shared status sheet before the meeting.
+If you are presenting a demo, upload the link by Thursday 17:00.
+
+See you on Friday,
+Mai`,
+    },
+    questions: [
+      {
+        id: "ra2b-1",
+        kind: "choice",
+        prompt: "How long is the meeting?",
+        options: ["30 minutes", "45 minutes", "60 minutes", "90 minutes"],
+        correctIndex: 1,
+        explainVi: "10:00–10:45 là 45 phút.",
+      },
+      {
+        id: "ra2b-2",
+        kind: "choice",
+        prompt: "What should everyone update before the meeting?",
+        options: ["The Zoom password", "The shared status sheet", "The release notes only", "Their salary form"],
+        correctIndex: 1,
+        explainVi: "Cần cập nhật shared status sheet trước cuộc họp.",
+      },
+      {
+        id: "ra2b-3",
+        kind: "open",
+        prompt: "If you present a demo, what is the deadline?",
+        expectKeywords: ["thursday", "17:00", "upload"],
+        sampleAnswer: "Upload the demo link by Thursday 17:00.",
+        explainVi: "Hạn chót là upload demo link trước thứ Năm lúc 17:00.",
+      },
+    ],
+  },
+  {
     id: "read-jd-frontend",
     skill: "reading",
     title: "Read a Frontend JD",

@@ -80,8 +80,9 @@ function AppShellFrame({ children }: { children: ReactNode }) {
   const billing = useBillingMe(Boolean(user));
   const displayName = user?.name?.trim() || user?.email?.split("@")[0] || "Account";
   const initials = displayName.slice(0, 1).toUpperCase();
-  const isPracticeExercise = /^\/skills\/[^/]+\/[^/]+/.test(pathname);
-  const showTranslate = isLessonTranslatePath(pathname);
+  const routePath = stripLocalePath(pathname);
+  const isPracticeExercise = /^\/skills\/[^/]+\/[^/]+/.test(routePath);
+  const showTranslate = isLessonTranslatePath(routePath);
   const showAiDock = !isAiDockHiddenPath(pathname);
   const search = useMemo(() => <LessonSearch />, []);
   usePendingReferral(Boolean(user));
