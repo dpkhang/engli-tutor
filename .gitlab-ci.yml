@@ -1,5 +1,11 @@
 # GitLab CI — fe workspace (packages + apps/workspace + apps/marketing)
 # Repo root = fe/
+#
+# Deploy: rsync source to the VPS, then `docker compose up -d --build` there.
+# GitLab CI/CD variables (masked):
+#   SSH_PRIVATE_KEY_BASE64  base64 of the deploy private key
+#   VPS_USER, VPS_IP        e.g. harry / 169.58.99.141
+#   ENV_PRODUCTION_BASE64   base64 of fe/.env (see .env.docker.example)
 
 workflow:
   rules:
@@ -8,246 +14,46 @@ workflow:
     - when: never
 
 stages:
-  - lint
-  - build
   - deploy
 
 variables:
-  PNPM_VERSION: "11.7.0"
-  PNPM_STORE_DIR: "$CI_PROJECT_DIR/.pnpm-store"
-  NEXT_TELEMETRY_DISABLED: "1"
+  WORK_SPACE_PATH: "$VPS_PATH"
+  SSH_HOST: "$VPS_USER@$VPS_IP"
 
-default:
-  image: node:22-bookworm
-  interruptible: true
-
-.pnpm_job:
-  before_script:
-    - corepack enable
-    - corepack prepare "pnpm@${PNPM_VERSION}" --activate
-    - pnpm config set store-dir "$PNPM_STORE_DIR"
-    - pnpm install --frozen-lockfile
-  cache:
-    key:
-      files:
-        - pnpm-lock.yaml
-    paths:
-      - .pnpm-store
-    policy: pull-push
-
-.changes_packages: &changes_packages
-  - packages/**/*
-  - pnpm-lock.yaml
-  - package.json
-  - pnpm-workspace.yaml
-
-.changes_web: &changes_web
-  - apps/workspace/**/*
-  - apps/workspace/vercel.json
-  - packages/**/*
-  - pnpm-lock.yaml
-  - package.json
-  - pnpm-workspace.yaml
-
-.changes_landing: &changes_landing
-  - apps/marketing/**/*
-  - apps/marketing/vercel.json
-  - packages/**/*
-  - pnpm-lock.yaml
-  - package.json
-  - pnpm-workspace.yaml
-
-.rules_packages:
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      changes: *changes_packages
-
-.rules_web:
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      changes: *changes_web
-
-.rules_landing:
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      changes: *changes_landing
-
-# ── Packages ────────────────────────────────────────────────────────────────
-lint:packages:
-  extends:
-    - .pnpm_job
-    - .rules_packages
-  stage: lint
-  script:
-    - pnpm --filter "./packages/*" run type-check
-
-build:packages:
-  extends:
-    - .pnpm_job
-    - .rules_packages
-  stage: build
-  needs:
-    - job: lint:packages
-      optional: true
-  script:
-    - pnpm --filter "./packages/*" run build
-  artifacts:
-    paths:
-      - packages/*/dist/
-    expire_in: 1 day
-
-# ── App: web ────────────────────────────────────────────────────────────────
-lint:web:
-  extends:
-    - .pnpm_job
-    - .rules_web
-  stage: lint
-  script:
-    - pnpm --filter "./packages/*" run build
-    - pnpm --filter engli-tutor-fe lint
-
-build:web:
-  extends:
-    - .pnpm_job
-    - .rules_web
-  stage: build
-  needs:
-    - job: lint:web
-      optional: true
-  script:
-    - pnpm --filter "./packages/*" run build
-    - pnpm --filter engli-tutor-fe build
-  artifacts:
-    paths:
-      - apps/workspace/.next/
-    exclude:
-      - apps/workspace/.next/cache/**
-    expire_in: 1 day
-
-# ── App: landing ────────────────────────────────────────────────────────────
-lint:landing:
-  extends:
-    - .pnpm_job
-    - .rules_landing
-  stage: lint
-  script:
-    - pnpm --filter "./packages/*" run build
-    - pnpm --filter engli-tutor-web lint
-
-build:landing:
-  extends:
-    - .pnpm_job
-    - .rules_landing
-  stage: build
-  needs:
-    - job: lint:landing
-      optional: true
-  script:
-    - pnpm --filter "./packages/*" run build
-    - pnpm --filter engli-tutor-web build
-  artifacts:
-    paths:
-      - apps/marketing/.next/
-    exclude:
-      - apps/marketing/.next/cache/**
-    expire_in: 1 day
-
-# ── Deploy (Vercel) ─────────────────────────────────────────────────────────
-# GitLab CI/CD variables (masked / protected):
-#   VERCEL_TOKEN
-#   VERCEL_ORG_ID
-#   VERCEL_PROJECT_ID_LANDING
-#   VERCEL_PROJECT_ID_WEB
-# App public URLs (forwarded to Vercel build via --build-env on deploy):
-#   landing: NEXT_PUBLIC_API_URL=https://pkbc7gf23n.ap-southeast-1.awsapprunner.com
-#            NEXT_PUBLIC_APP_URL=https://app.pagecraft-ai.site
-#            NEXT_PUBLIC_SITE_URL=https://pagecraft-ai.site
-#   web:     NEXT_PUBLIC_API_URL=https://pkbc7gf23n.ap-southeast-1.awsapprunner.com
-#            NEXT_PUBLIC_MARKETING_URL=https://pagecraft-ai.site
-# Set these in GitLab CI/CD Variables (same names). Redeploy after changing.
-# Missing NEXT_PUBLIC_API_URL → fallback http://localhost:3001 (baked at build).
-
-.vercel_deploy:
-  image: node:22-bookworm
+# ── Deploy (VPS, Docker Compose) ────────────────────────────────────────────
+deploy:vps:
   stage: deploy
-  interruptible: true
+  image: alpine:3.20
+  interruptible: false
+  resource_group: production
+  environment:
+    name: production
   before_script:
-    - chmod +x ./scripts/vercel-deploy.sh
-
-deploy:landing:preview:
-  extends: .vercel_deploy
-  needs:
-    - job: build:landing
-      optional: true
+    - apk add --no-cache openssh-client rsync
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY_BASE64" | base64 -d > ~/.ssh/id_ed25520
+    - chmod 600 ~/.ssh/id_ed25520
+    - ssh-keyscan -H "$VPS_IP" >> ~/.ssh/known_hosts
+    - printf "Host %s\n  IdentityFile ~/.ssh/id_ed25520\n  IdentitiesOnly yes\n" "$VPS_IP" > ~/.ssh/config
+    - chmod 600 ~/.ssh/config
   script:
+    - test -n "$ENV_PRODUCTION_BASE64" || (echo 'Missing GitLab variable ENV_PRODUCTION_BASE64' && exit 1)
+    - ssh $SSH_HOST "mkdir -p .${WORK_SPACE_PATH}"
+    - rsync -az --delete --exclude='.git' --exclude='node_modules' --exclude='.next' --exclude='.pnpm-store' --exclude='.env' --exclude='.env.local' ./ $SSH_HOST:.${WORK_SPACE_PATH}/
+    - echo "$ENV_PRODUCTION_BASE64" | base64 -d | ssh $SSH_HOST "cat > .${WORK_SPACE_PATH}/apps/workspace/.env && chmod 600 .${WORK_SPACE_PATH}/apps/workspace/.env"
+    - echo "$ENV_PRODUCTION_BASE64" | base64 -d | ssh $SSH_HOST "cat > .${WORK_SPACE_PATH}/apps/marketing/.env && chmod 600 .${WORK_SPACE_PATH}/apps/marketing/.env"
     - |
-      if [ -z "${VERCEL_PROJECT_ID_LANDING:-}" ]; then
-        echo "Missing VERCEL_PROJECT_ID_LANDING (do not use VERCEL_PROJECT_ID for landing deploy)"
-        exit 1
-      fi
-    - bash ./scripts/vercel-deploy.sh landing
-  environment:
-    name: preview/landing
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes: *changes_landing
-
-deploy:landing:production:
-  extends: .vercel_deploy
-  needs:
-    - job: build:landing
-      optional: true
-  script:
-    - |
-      if [ -z "${VERCEL_PROJECT_ID_LANDING:-}" ]; then
-        echo "Missing VERCEL_PROJECT_ID_LANDING (do not use VERCEL_PROJECT_ID for landing deploy)"
-        exit 1
-      fi
-    - bash ./scripts/vercel-deploy.sh landing --prod
-  environment:
-    name: production/landing
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      changes: *changes_landing
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: manual
-      allow_failure: true
-
-deploy:web:preview:
-  extends: .vercel_deploy
-  needs:
-    - job: build:web
-      optional: true
-  script:
-    - |
-      if [ -z "${VERCEL_PROJECT_ID_WEB:-}" ]; then
-        echo "Missing VERCEL_PROJECT_ID_WEB (do not use VERCEL_PROJECT_ID for web deploy)"
-        exit 1
-      fi
-    - bash ./scripts/vercel-deploy.sh web
-  environment:
-    name: preview/web
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes: *changes_web
-
-deploy:web:production:
-  extends: .vercel_deploy
-  needs:
-    - job: build:web
-      optional: true
-  script:
-    - |
-      if [ -z "${VERCEL_PROJECT_ID_WEB:-}" ]; then
-        echo "Missing VERCEL_PROJECT_ID_WEB (do not use VERCEL_PROJECT_ID for web deploy)"
-        exit 1
-      fi
-    - bash ./scripts/vercel-deploy.sh web --prod
-  environment:
-    name: production/web
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      changes: *changes_web
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: manual
-      allow_failure: true
+      ssh $SSH_HOST "
+        set -e;
+        cd .${WORK_SPACE_PATH};
+        docker compose up -d --build --remove-orphans;
+        docker image prune -f;
+        for app in 3000 3002; do
+          ok=0;
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            code=\$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:\$app/en || true);
+            if [ \"\$code\" = 200 ]; then ok=1; echo \"port \$app OK\"; break; fi;
+            sleep 3;
+          done;
+          if [ \$ok != 1 ]; then docker compose logs --tail=100; exit 1; fi;
+        done"

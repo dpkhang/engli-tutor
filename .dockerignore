@@ -1,0 +1,14 @@
+**/node_modules
+**/.next
+**/dist
+**/.env
+**/.env.local
+**/*.tsbuildinfo
+**/.DS_Store
+**/*.log
+.git
+.pnpm-store
+.turbo
+Dockerfile
+docker-compose.yml
+.dockerignore
