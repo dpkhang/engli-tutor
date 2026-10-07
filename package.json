@@ -18,9 +18,9 @@
     "deploy:marketing:prod": "bash ./scripts/vercel-deploy.sh landing --prod",
     "deploy:workspace": "bash ./scripts/vercel-deploy.sh web",
     "deploy:workspace:prod": "bash ./scripts/vercel-deploy.sh web --prod",
-    "dev:workspace": "pnpm build:pkg && pnpm --filter engli-tutor-fe dev:https",
-    "dev:marketing": "pnpm build:pkg && pnpm --filter engli-tutor-web dev:https",
-    "dev:admin": "pnpm --dir ../admin dev:https",
+    "dev:workspace": "pnpm build:pkg && pnpm --filter engli-tutor-fe dev",
+    "dev:marketing": "pnpm build:pkg && pnpm --filter engli-tutor-web dev",
+    "dev:admin": "pnpm --dir ../admin dev",
     "build": "pnpm build:pkg && pnpm --filter engli-tutor-fe build && pnpm --filter engli-tutor-web build",
     "build:pkg": "pnpm --filter \"./packages/*\" run build",
     "lint": "pnpm -r --filter \"./apps/*\" --filter \"./packages/*\" lint"

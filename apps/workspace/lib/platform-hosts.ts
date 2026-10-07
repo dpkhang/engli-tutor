@@ -4,14 +4,10 @@ const DEFAULT_PLATFORM_HOSTS = [
   "localhost",
   "127.0.0.1",
   "app.pagecraft-ai.site",
-  "local.app.pagecraft-ai.site",
   "pagecraft-ai.site",
   "www.pagecraft-ai.site",
-  "local.pagecraft-ai.site",
   "admin.pagecraft-ai.site",
-  "local.admin.pagecraft-ai.site",
   "domains.pagecraft-ai.site",
-  "local.domains.pagecraft-ai.site",
 ] as const;
 
 function envPlatformHosts(): string[] {

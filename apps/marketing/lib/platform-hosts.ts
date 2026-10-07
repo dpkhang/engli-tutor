@@ -3,7 +3,6 @@ const PLATFORM_HOSTS = new Set([
   "127.0.0.1",
   "pagecraft-ai.site",
   "www.pagecraft-ai.site",
-  "local.pagecraft-ai.site",
 ]);
 
 export function normalizeHostname(value: string | null): string {

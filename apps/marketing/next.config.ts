@@ -42,7 +42,11 @@ if (isProdBuild && /localhost|127\.0\.0\.1/.test(appUrl)) {
   );
 }
 
+const monorepoRoot = path.join(__dirname, "../..");
+
 const nextConfig: NextConfig = {
+  output: "standalone",
+  outputFileTracingRoot: monorepoRoot,
   env: {
     NEXT_PUBLIC_API_URL: apiUrl,
     NEXT_PUBLIC_APP_URL: appUrl,
@@ -56,7 +60,7 @@ const nextConfig: NextConfig = {
     "@engli-tutor/legal",
   ],
   turbopack: {
-    root: path.join(__dirname, "../.."),
+    root: monorepoRoot,
   },
   experimental: {
     optimizePackageImports: ["@engli-tutor/ui"],

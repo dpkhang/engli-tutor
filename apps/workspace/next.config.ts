@@ -19,7 +19,11 @@ if (!process.env.NEXT_PUBLIC_API_URL?.trim()) {
 // be the production AWS App Runner API.
 const useSameOriginProxy = true;
 
+const monorepoRoot = path.join(__dirname, "../..");
+
 const nextConfig: NextConfig = {
+  output: "standalone",
+  outputFileTracingRoot: monorepoRoot,
   env: {
     NEXT_PUBLIC_API_URL: apiUrl,
     NEXT_PUBLIC_SITE_URL: (
@@ -37,7 +41,7 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ["@engli-tutor/ui"],
   },
   turbopack: {
-    root: path.join(__dirname, "../.."),
+    root: monorepoRoot,
   },
   // Proxy lives in app/api/[...path]/route.ts (rewrites would bypass it and
   // forward browser Origin → API INVALID_ORIGIN for local domains).

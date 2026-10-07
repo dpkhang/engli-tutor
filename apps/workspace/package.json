@@ -8,7 +8,6 @@
     "install:landing-page": "pnpm --dir ../.. install:landing-page",
     "module:add": "pnpm --dir ../.. module:add",
     "dev": "next dev -p 3000",
-    "dev:https": "next dev -p 3000 -H local.app.pagecraft-ai.site --experimental-https --experimental-https-key ../../../certs/local-pagecraft-key.pem --experimental-https-cert ../../../certs/local-pagecraft.pem",
     "build": "next build",
     "start": "next start -p 3000",
     "lint": "tsc --noEmit"

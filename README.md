@@ -37,8 +37,8 @@ pnpm module:add vitest @testing-library/react --dev
 ## Development
 
 ```bash
-pnpm dev:workspace   # http://localhost:3000  (HTTPS local: local.app.pagecraft-ai.site)
-pnpm dev:marketing   # http://localhost:3002  (HTTPS local: local.pagecraft-ai.site)
+pnpm dev:workspace   # http://localhost:3000
+pnpm dev:marketing   # http://localhost:3002
 ```
 
 Env:
