@@ -5,7 +5,8 @@
 # GitLab CI/CD variables (masked):
 #   SSH_PRIVATE_KEY_BASE64  base64 of the deploy private key
 #   VPS_USER, VPS_IP        e.g. harry / 169.58.99.141
-#   ENV_PRODUCTION_BASE64   base64 of fe/.env (see .env.docker.example)
+#   ENV_WORKSPACE_BASE64    base64 of apps/workspace/.env.production
+#   ENV_MARKETING_BASE64    base64 of apps/marketing/.env.production
 
 workflow:
   rules:
@@ -37,11 +38,12 @@ deploy:vps:
     - printf "Host %s\n  IdentityFile ~/.ssh/id_ed25520\n  IdentitiesOnly yes\n" "$VPS_IP" > ~/.ssh/config
     - chmod 600 ~/.ssh/config
   script:
-    - test -n "$ENV_PRODUCTION_BASE64" || (echo 'Missing GitLab variable ENV_PRODUCTION_BASE64' && exit 1)
+    - test -n "$ENV_WORKSPACE_BASE64" || (echo 'Missing GitLab variable ENV_WORKSPACE_BASE64' && exit 1)
+    - test -n "$ENV_MARKETING_BASE64" || (echo 'Missing GitLab variable ENV_MARKETING_BASE64' && exit 1)
     - ssh $SSH_HOST "mkdir -p .${WORK_SPACE_PATH}"
-    - rsync -az --delete --exclude='.git' --exclude='node_modules' --exclude='.next' --exclude='.pnpm-store' --exclude='.env' --exclude='.env.local' ./ $SSH_HOST:.${WORK_SPACE_PATH}/
-    - echo "$ENV_PRODUCTION_BASE64" | base64 -d | ssh $SSH_HOST "cat > .${WORK_SPACE_PATH}/apps/workspace/.env && chmod 600 .${WORK_SPACE_PATH}/apps/workspace/.env"
-    - echo "$ENV_PRODUCTION_BASE64" | base64 -d | ssh $SSH_HOST "cat > .${WORK_SPACE_PATH}/apps/marketing/.env && chmod 600 .${WORK_SPACE_PATH}/apps/marketing/.env"
+    - rsync -az --delete --exclude='.git' --exclude='node_modules' --exclude='.next' --exclude='.pnpm-store' --exclude='.env' --exclude='.env.local' --exclude='.env.production' ./ $SSH_HOST:.${WORK_SPACE_PATH}/
+    - echo "$ENV_WORKSPACE_BASE64" | base64 -d | ssh $SSH_HOST "cat > .${WORK_SPACE_PATH}/apps/workspace/.env.production && chmod 600 .${WORK_SPACE_PATH}/apps/workspace/.env.production"
+    - echo "$ENV_MARKETING_BASE64" | base64 -d | ssh $SSH_HOST "cat > .${WORK_SPACE_PATH}/apps/marketing/.env.production && chmod 600 .${WORK_SPACE_PATH}/apps/marketing/.env.production"
     - |
       ssh $SSH_HOST "
         set -e;

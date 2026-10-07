@@ -17,15 +17,9 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
 
 FROM deps AS build
 ARG APP=workspace
-ARG NEXT_PUBLIC_API_URL
-ARG NEXT_PUBLIC_APP_URL
-ARG NEXT_PUBLIC_SITE_URL
-ARG NEXT_PUBLIC_MARKETING_URL
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
-    NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL \
-    NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
-    NEXT_PUBLIC_MARKETING_URL=$NEXT_PUBLIC_MARKETING_URL
+# NEXT_PUBLIC_* come from apps/${APP}/.env.production, which `next build` loads itself.
 COPY . .
+RUN test -f apps/${APP}/.env.production || (echo "Missing apps/${APP}/.env.production" && exit 1)
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm config set store-dir /pnpm/store && pnpm install --offline --frozen-lockfile
 RUN pnpm --filter "./packages/*" run build \
