@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { isPrivateIpv4 } from "@/lib/platform-hosts";
 
 type RouteContext = {
   params: Promise<{ path: string[] }>;
@@ -22,8 +23,26 @@ function isLocalDevHost(hostname: string) {
   return (
     hostname === "localhost" ||
     hostname === "127.0.0.1" ||
-    /^local(\.|$)/.test(hostname)
+    /^local(\.|$)/.test(hostname) ||
+    isPrivateIpv4(hostname)
   );
+}
+
+/** The API only trusts localhost dev origins, so present LAN access (e.g. a phone) as localhost. */
+function adaptLanOrigin(headers: Headers) {
+  for (const name of ["origin", "referer"]) {
+    const value = headers.get(name);
+    if (!value) continue;
+    let url: URL;
+    try {
+      url = new URL(value);
+    } catch {
+      continue;
+    }
+    if (!isPrivateIpv4(url.hostname)) continue;
+    url.hostname = "localhost";
+    headers.set(name, name === "origin" ? url.origin : url.toString());
+  }
 }
 
 /** Drop browser CORS metadata; keep Origin so Better Auth can match trustedOrigins. */
@@ -88,6 +107,7 @@ async function proxy(request: NextRequest, context: RouteContext) {
   const local = isLocalDevHost(request.nextUrl.hostname);
   const https = request.nextUrl.protocol === "https:";
   if (local && !https) adaptLocalHttpRequestCookies(headers);
+  if (local) adaptLanOrigin(headers);
 
   const response = await fetch(upstream, {
     method: request.method,
@@ -109,6 +129,11 @@ async function proxy(request: NextRequest, context: RouteContext) {
     const lower = key.toLowerCase();
     if (lower === "set-cookie" || HOP_BY_HOP.has(lower)) continue;
     res.headers.append(key, value);
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    res.headers.set("x-upstream-url", upstream.toString());
+    console.info(`[api-proxy] ${request.method} ${upstream.toString()} → ${response.status}`);
   }
 
   const rawCookies = response.headers.getSetCookie();

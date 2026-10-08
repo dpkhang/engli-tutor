@@ -24,11 +24,20 @@ export function normalizeHostname(host: string | null | undefined): string {
   return host.split(":")[0]?.trim().toLowerCase().replace(/\.$/, "") ?? "";
 }
 
+/** 10/8, 172.16/12 and 192.168/16 — LAN access to a dev server, never a customer domain. */
+export function isPrivateIpv4(hostname: string): boolean {
+  const parts = hostname.split(".").map(Number);
+  if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) return false;
+  const [a, b] = parts;
+  return a === 10 || (a === 192 && b === 168) || (a === 172 && b >= 16 && b <= 31);
+}
+
 export function isPlatformHost(host: string | null | undefined): boolean {
   const hostname = normalizeHostname(host);
   if (!hostname) return true;
 
   if (hostname.endsWith(".vercel.app") || hostname.endsWith(".localhost")) return true;
+  if (isPrivateIpv4(hostname)) return true;
 
   const known = new Set<string>([...DEFAULT_PLATFORM_HOSTS, ...envPlatformHosts()]);
   return known.has(hostname);

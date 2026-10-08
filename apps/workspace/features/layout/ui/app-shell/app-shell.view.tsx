@@ -18,6 +18,7 @@ import {
 import { Button, BrandLogo, cn, ThemeToggle } from "@engli-tutor/ui";
 import { AnimatePresence, motion } from "motion/react";
 import { FloatingTranslate } from "@/features/translate";
+import { HeaderInstallButton } from "@/features/pwa";
 import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 import { WorkspaceLanguageSwitcher } from "@/features/i18n/workspace-language-switcher";
 import { withLocalePath, getPathLocale } from "@/lib/locale-path";
@@ -159,6 +160,7 @@ export const AppShellView = memo(function AppShellView({
 
           <div className="flex items-center gap-1.5">
             {search}
+            <HeaderInstallButton />
             {user ? null : <ThemeToggle />}
             {user ? (
               <div className="relative" ref={accountMenuRef}>

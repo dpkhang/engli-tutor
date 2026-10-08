@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { QueryProvider } from "@/providers/query-provider";
@@ -7,6 +7,7 @@ import { AppShell, GlobalNavigationLoading, SignOutLoadingProvider } from "@/fea
 import { AppearanceProvider } from "@/features/settings";
 import { LessonProgressSync } from "@/features/learn/ui/lesson-progress-sync";
 import { PushRegistrar } from "@/features/notifications/push-registrar";
+import { ServiceWorkerRegistrar } from "@/features/pwa";
 import { ActionDialogProvider, CookieConsentBanner, ToastProvider } from "@engli-tutor/ui";
 import { UpgradeModalProvider } from "@/features/payments/ui/upgrade-modal-provider";
 import { WorkspaceI18n } from "@/features/i18n/workspace-i18n";
@@ -28,6 +29,13 @@ export const metadata: Metadata = {
     title: "EngliTutor",
     statusBarStyle: "default",
   },
+  icons: {
+    apple: "/icons/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#4F46E5",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -52,6 +60,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                   <Suspense fallback={null}>
                     <GlobalNavigationLoading />
                   </Suspense>
+                  <ServiceWorkerRegistrar />
                   <AuthGate>
                     <PushRegistrar />
                     <AppShell>{children}</AppShell>
