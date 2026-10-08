@@ -1,9 +1,24 @@
 {
+  "id": "/",
   "name": "EngliTutor",
   "short_name": "EngliTutor",
+  "description": "Practice listening, speaking, reading and writing with AI chat, quick tips, and mini-games every day.",
+  "lang": "en",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#070a15",
-  "theme_color": "#4F46E5"
+  "theme_color": "#4F46E5",
+  "categories": ["education"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Lessons", "url": "/lessons", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Practice", "url": "/practice", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Speaking", "url": "/speaking", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
 }

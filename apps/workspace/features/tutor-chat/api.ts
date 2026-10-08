@@ -1,3 +1,4 @@
+import { ApiError } from "@engli-tutor/api-client";
 import { workspaceApiClient } from "@/lib/workspace-api-client";
 
 export type TutorScenario = "interview" | "standup" | "smalltalk" | "email" | "free";
@@ -56,7 +57,7 @@ export const tutorApi = {
         explanationLocale: input.explanationLocale,
       }),
     });
-    if (!response.ok) throw new Error(`Chat request failed (${response.status})`);
+    if (!response.ok) throw await ApiError.fromResponse(response);
 
     // Demo/fallback mode still returns the legacy JSON response.
     const contentType = response.headers.get("content-type") ?? "";

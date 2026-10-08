@@ -1,5 +1,12 @@
+import { networkInterfaces } from "node:os";
 import path from "node:path";
 import type { NextConfig } from "next";
+
+// Lets phones on the same Wi-Fi open the dev server by LAN IP without HMR being blocked.
+const lanDevOrigins = Object.values(networkInterfaces())
+  .flat()
+  .filter((net) => net && net.family === "IPv4" && !net.internal)
+  .map((net) => net!.address);
 
 const DEFAULT_API_URL =
   process.env.NODE_ENV === "production"
@@ -24,6 +31,7 @@ const monorepoRoot = path.join(__dirname, "../..");
 const nextConfig: NextConfig = {
   output: "standalone",
   outputFileTracingRoot: monorepoRoot,
+  allowedDevOrigins: lanDevOrigins,
   env: {
     NEXT_PUBLIC_API_URL: apiUrl,
     NEXT_PUBLIC_SITE_URL: (
@@ -42,6 +50,21 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     root: monorepoRoot,
+  },
+  async headers() {
+    return [
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Service-Worker-Allowed", value: "/" },
+        ],
+      },
+      {
+        source: "/manifest.webmanifest",
+        headers: [{ key: "Cache-Control", value: "no-cache" }],
+      },
+    ];
   },
   // Proxy lives in app/api/[...path]/route.ts (rewrites would bypass it and
   // forward browser Origin → API INVALID_ORIGIN for local domains).

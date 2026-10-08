@@ -178,11 +178,13 @@ export function SpeakingRoomPage() {
 
       try {
         const payload = nextTurns.map(({ role, content }) => ({ role, content }));
-        const result = await tutorApi.chat({
+        // The API streams SSE whenever ElevenLabs chat is configured; only the final reply is spoken.
+        const result = await tutorApi.chatStream({
           messages: payload,
           scenario: scene,
           mode: "speaking",
           level,
+          onChunk: () => {},
         });
         if (!aliveRef.current) return;
 
