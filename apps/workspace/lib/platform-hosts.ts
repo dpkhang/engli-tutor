@@ -19,6 +19,18 @@ function envPlatformHosts(): string[] {
     .filter(Boolean);
 }
 
+/** Parent domain of the API (api.harrybox.cloud → harrybox.cloud); its subdomains are ours, never customer domains. */
+function apiParentDomain(): string | null {
+  const raw = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (!raw) return null;
+  try {
+    const labels = new URL(raw).hostname.toLowerCase().split(".");
+    return labels.length >= 3 ? labels.slice(1).join(".") : labels.join(".");
+  } catch {
+    return null;
+  }
+}
+
 export function normalizeHostname(host: string | null | undefined): string {
   if (!host) return "";
   return host.split(":")[0]?.trim().toLowerCase().replace(/\.$/, "") ?? "";
@@ -38,6 +50,9 @@ export function isPlatformHost(host: string | null | undefined): boolean {
 
   if (hostname.endsWith(".vercel.app") || hostname.endsWith(".localhost")) return true;
   if (isPrivateIpv4(hostname)) return true;
+
+  const parent = apiParentDomain();
+  if (parent && (hostname === parent || hostname.endsWith(`.${parent}`))) return true;
 
   const known = new Set<string>([...DEFAULT_PLATFORM_HOSTS, ...envPlatformHosts()]);
   return known.has(hostname);
