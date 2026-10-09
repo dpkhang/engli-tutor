@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import type { Locale } from "@engli-tutor/i18n";
 import { withCurrentLocale } from "@/lib/locale-path";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { accountApi } from "@/features/accounts";
@@ -21,6 +22,8 @@ import {
   needsOnboarding,
   persistWelcomeSeen,
   safeOnboardingReturnTo,
+  localizedDestination,
+  rememberUiLocale,
   setWelcomePending,
   type LearningGoalId,
 } from "../../model/onboarding";
@@ -47,6 +50,7 @@ export function OnboardingPage() {
   const subscribe = useSubscribe();
 
   const [step, setStep] = useState<OnboardingStepId>("intro");
+  const [uiLocale, setUiLocale] = useState<Locale | null>(null);
   const [level, setLevel] = useState<SkillLevel | null>(null);
   const [goalId, setGoalId] = useState<LearningGoalId>("speak");
   const [customGoal, setCustomGoal] = useState("");
@@ -61,7 +65,8 @@ export function OnboardingPage() {
     if (!profile || showWelcome || finishingHere.current) return;
     if (needsOnboarding(profile)) return;
     if (hasSeenWelcome(profile)) {
-      window.location.replace(withCurrentLocale(returnTo));
+      rememberUiLocale(profile.uiLocale);
+      window.location.replace(localizedDestination(returnTo, profile.uiLocale));
       return;
     }
     router.replace(withCurrentLocale(`/welcome?returnTo=${encodeURIComponent(returnTo)}`));
@@ -70,6 +75,7 @@ export function OnboardingPage() {
   useEffect(() => {
     const profile = profileQuery.data;
     if (!profile) return;
+    if (profile.uiLocale) setUiLocale((current) => current ?? profile.uiLocale);
     if (profile.targetLevel) setLevel(profile.targetLevel);
     if (profile.learningGoal) {
       const match = LEARNING_GOALS.find(
@@ -93,8 +99,10 @@ export function OnboardingPage() {
 
   const saveProfile = useMutation({
     mutationFn: () => {
+      if (!uiLocale) throw new Error("Choose a language to continue");
       if (!level) throw new Error("Choose a level to continue");
       return accountApi.update({
+        uiLocale,
         nativeLanguage: NATIVE_LANGUAGE,
         targetLevel: level,
         learningGoal,
@@ -108,20 +116,21 @@ export function OnboardingPage() {
 
   const enterWorkspace = useCallback(async () => {
     await persistWelcomeSeen(queryClient);
-    router.replace(withCurrentLocale(returnTo));
-  }, [queryClient, returnTo, router]);
+    rememberUiLocale(uiLocale);
+    // Full load: the locale changes and the client router cache may hold redirects to the old one.
+    window.location.replace(localizedDestination(returnTo, uiLocale));
+  }, [queryClient, returnTo, uiLocale]);
 
   const finishOnboarding = useCallback(async () => {
     finishingHere.current = true;
     try {
       const profile = await saveProfile.mutateAsync();
       queryClient.setQueryData(queryKeys.account, profile);
-      router.prefetch(returnTo);
       setShowWelcome(true);
     } catch {
       finishingHere.current = false;
     }
-  }, [queryClient, returnTo, router, saveProfile]);
+  }, [queryClient, saveProfile]);
 
   const onChoosePaidPlan = useCallback(
     async (planId: string) => {
@@ -132,6 +141,7 @@ export function OnboardingPage() {
         await saveProfile.mutateAsync();
         const result = await subscribe.mutateAsync({ planId, period });
         if (!result.url) throw new Error("Stripe did not return a checkout URL");
+        rememberUiLocale(uiLocale);
         setWelcomePending(returnTo);
         window.location.assign(result.url);
       } catch (error) {
@@ -140,7 +150,7 @@ export function OnboardingPage() {
         setPendingPlan(null);
       }
     },
-    [period, returnTo, saveProfile, subscribe],
+    [period, returnTo, saveProfile, subscribe, uiLocale],
   );
 
   const saveError =
@@ -151,9 +161,9 @@ export function OnboardingPage() {
         : null;
 
   const goNext = useCallback(() => {
-    if (step === "intro") setStep("details");
+    if (step === "intro" && uiLocale) setStep("details");
     else if (step === "details" && detailsReady) setStep("plans");
-  }, [detailsReady, step]);
+  }, [detailsReady, step, uiLocale]);
 
   const goBack = useCallback(() => {
     if (step === "details") setStep("intro");
@@ -174,6 +184,7 @@ export function OnboardingPage() {
       firstName={firstName}
       showWelcome={showWelcome}
       step={step}
+      uiLocale={uiLocale}
       level={level}
       goalId={goalId}
       customGoal={customGoal}
@@ -188,6 +199,7 @@ export function OnboardingPage() {
       saveError={saveError}
       planError={planError}
       onFinishedWelcome={enterWorkspace}
+      onUiLocaleChange={setUiLocale}
       onLevelChange={setLevel}
       onGoalChange={setGoalId}
       onCustomGoalChange={setCustomGoal}

@@ -5,6 +5,7 @@ import { PageLoadingOverlay } from "./page-loading-overlay";
 import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
 
 type SignOutLoadingContextValue = {
+  signingOut: boolean;
   beginSignOut: () => void;
   endSignOut: () => void;
 };
@@ -16,7 +17,10 @@ export function SignOutLoadingProvider({ children }: { children: ReactNode }) {
   const [signingOut, setSigningOut] = useState(false);
   const beginSignOut = useCallback(() => setSigningOut(true), []);
   const endSignOut = useCallback(() => setSigningOut(false), []);
-  const value = useMemo(() => ({ beginSignOut, endSignOut }), [beginSignOut, endSignOut]);
+  const value = useMemo(
+    () => ({ signingOut, beginSignOut, endSignOut }),
+    [signingOut, beginSignOut, endSignOut],
+  );
 
   return (
     <SignOutLoadingContext.Provider value={value}>

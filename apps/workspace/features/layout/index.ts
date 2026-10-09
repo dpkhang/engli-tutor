@@ -9,3 +9,4 @@ export {
 } from "./ui/shared";
 export { NotFoundPage } from "./ui/not-found-page";
 export { GlobalNavigationLoading } from "./ui/global-navigation-loading";
+export { PreventZoom } from "./ui/prevent-zoom";

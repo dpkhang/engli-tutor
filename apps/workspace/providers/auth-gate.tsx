@@ -14,6 +14,7 @@ import {
   safeOnboardingReturnTo,
   WELCOME_PATH,
 } from "@/features/onboarding";
+import { useSignOutLoading } from "@/features/layout";
 import { CACHE_TIMES, queryKeys } from "@/lib/query";
 import { withCurrentLocale } from "@/lib/locale-path";
 
@@ -77,6 +78,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const isPublic = isPublicPath(routePath);
   const { data, isPending } = useSession();
   const user = data?.user;
+  const { signingOut } = useSignOutLoading();
   const redirected = useRef(false);
   const profileQuery = useQuery({
     queryKey: queryKeys.account,
@@ -140,6 +142,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     }
 
     if (isPublic || user) return;
+    // An explicit sign-out navigates to a plain login URL; don't race it with a returnTo redirect.
+    if (signingOut) return;
     redirected.current = true;
     const returnTo = encodeURIComponent(pathname || "/");
     window.location.replace(`${withLocale(LOGIN_PATH)}?returnTo=${returnTo}`);
@@ -157,6 +161,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     needsSetup,
     needsWelcome,
     router,
+    signingOut,
   ]);
 
   if (isLogin) {

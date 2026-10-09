@@ -157,6 +157,20 @@
     max-width: 100%;
   }
 
+  html {
+    touch-action: manipulation;
+  }
+
+  /* iOS zooms into any focused field whose font-size is below 16px. */
+  @media (hover: none) and (pointer: coarse) {
+    input,
+    textarea,
+    select,
+    [contenteditable="true"] {
+      font-size: max(16px, 1rem) !important;
+    }
+  }
+
   .dark body {
     background-image:
       radial-gradient(ellipse at 18% 0%, hsl(222 28% 14% / 0.85), transparent 45%),
