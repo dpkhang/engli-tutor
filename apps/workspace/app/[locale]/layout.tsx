@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { isLocale, SUPPORTED_LOCALES } from "@engli-tutor/i18n";
 import { CookieConsentBanner } from "@engli-tutor/ui";
+import { siteMetadata } from "@/lib/seo";
 
 export const dynamicParams = false;
 
@@ -13,10 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   return {
-    description:
-      locale === "vi"
-        ? "Luyện nghe · nói · đọc · viết với AI chat, mẹo nhanh và mini-game mỗi ngày."
-        : "Practice listening · speaking · reading · writing with AI chat, quick tips, and mini-games every day.",
+    ...siteMetadata(locale),
     alternates: { languages: Object.fromEntries(SUPPORTED_LOCALES.map((item) => [item, `/${item}`])) },
   };
 }

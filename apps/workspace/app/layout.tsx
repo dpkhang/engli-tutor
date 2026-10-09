@@ -11,6 +11,7 @@ import { ServiceWorkerRegistrar } from "@/features/pwa";
 import { ActionDialogProvider, ToastProvider } from "@engli-tutor/ui";
 import { UpgradeModalProvider } from "@/features/payments/ui/upgrade-modal-provider";
 import { WorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { SITE_URL, siteMetadata } from "@/lib/seo";
 import "./globals.css";
 
 const sans = Plus_Jakarta_Sans({
@@ -20,9 +21,8 @@ const sans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "EngliTutor — Learn English with AI",
-  description:
-    "Practice listening · speaking · reading · writing with AI chat, quick tips, and mini-games every day.",
+  metadataBase: new URL(SITE_URL),
+  ...siteMetadata("en"),
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,

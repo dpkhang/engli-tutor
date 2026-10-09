@@ -45,7 +45,64 @@ export type VoiceInputState = {
   speechSupported: boolean;
 };
 
-export function useVoiceInput(onTranscript?: (text: string) => void) {
+export type VoiceInputOptions = {
+  /** Auto-stop once the learner has spoken and then stayed quiet this long (ms). */
+  silenceMs?: number;
+};
+
+const SILENCE_POLL_MS = 100;
+const NOISE_CALIBRATION_MS = 400;
+const MIN_SPEECH_MS = 300;
+const MIN_SPEECH_LEVEL = 0.015;
+
+type SilenceWatch = { context: AudioContext; timer: number };
+
+function watchSilence(stream: MediaStream, silenceMs: number, onSilence: () => void, lastVoiceRef: { current: number }) {
+  const AudioCtx =
+    window.AudioContext ?? (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioCtx) return null;
+  const context = new AudioCtx();
+  // Safari may create the context suspended once the getUserMedia await has consumed the user gesture.
+  if (context.state === "suspended") void context.resume().catch(() => {});
+  const analyser = context.createAnalyser();
+  analyser.fftSize = 1024;
+  context.createMediaStreamSource(stream).connect(analyser);
+  const samples = new Float32Array(analyser.fftSize);
+
+  const startedAt = performance.now();
+  let noiseFloor = 0;
+  let calibrationFrames = 0;
+  let speechMs = 0;
+  lastVoiceRef.current = 0;
+
+  const timer = window.setInterval(() => {
+    analyser.getFloatTimeDomainData(samples);
+    let sum = 0;
+    for (const sample of samples) sum += sample * sample;
+    const level = Math.sqrt(sum / samples.length);
+    const now = performance.now();
+
+    if (now - startedAt < NOISE_CALIBRATION_MS) {
+      noiseFloor = (noiseFloor * calibrationFrames + level) / (calibrationFrames + 1);
+      calibrationFrames += 1;
+      return;
+    }
+
+    if (level > Math.max(MIN_SPEECH_LEVEL, noiseFloor * 2.5)) {
+      speechMs += SILENCE_POLL_MS;
+      lastVoiceRef.current = now;
+    }
+
+    if (speechMs >= MIN_SPEECH_MS && lastVoiceRef.current && now - lastVoiceRef.current >= silenceMs) {
+      onSilence();
+    }
+  }, SILENCE_POLL_MS);
+
+  return { context, timer } satisfies SilenceWatch;
+}
+
+export function useVoiceInput(onTranscript?: (text: string) => void, options?: VoiceInputOptions) {
+  const silenceMs = options?.silenceMs;
   const [recording, setRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [interim, setInterim] = useState("");
@@ -63,6 +120,16 @@ export function useVoiceInput(onTranscript?: (text: string) => void) {
   const baseTranscriptRef = useRef("");
   const onTranscriptRef = useRef(onTranscript);
   onTranscriptRef.current = onTranscript;
+  const silenceWatchRef = useRef<SilenceWatch | null>(null);
+  const lastVoiceRef = useRef(0);
+
+  const stopSilenceWatch = useCallback(() => {
+    const watch = silenceWatchRef.current;
+    if (!watch) return;
+    silenceWatchRef.current = null;
+    window.clearInterval(watch.timer);
+    void watch.context.close().catch(() => {});
+  }, []);
 
   useEffect(() => {
     setSpeechSupported(Boolean(getSpeechRecognitionCtor()));
@@ -75,6 +142,7 @@ export function useVoiceInput(onTranscript?: (text: string) => void) {
 
   useEffect(() => {
     return () => {
+      stopSilenceWatch();
       recognitionRef.current?.abort();
       mediaRecorderRef.current?.state === "recording" && mediaRecorderRef.current.stop();
       streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -84,6 +152,7 @@ export function useVoiceInput(onTranscript?: (text: string) => void) {
   }, []);
 
   const stop = useCallback(() => {
+    stopSilenceWatch();
     recognitionRef.current?.stop();
     recognitionRef.current = null;
 
@@ -95,7 +164,7 @@ export function useVoiceInput(onTranscript?: (text: string) => void) {
       setStream(null);
       setRecording(false);
     }
-  }, []);
+  }, [stopSilenceWatch]);
 
   const start = useCallback(async () => {
     setError(null);
@@ -137,6 +206,7 @@ export function useVoiceInput(onTranscript?: (text: string) => void) {
       };
 
       recorder.onstop = () => {
+        stopSilenceWatch();
         const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/webm" });
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
@@ -154,6 +224,11 @@ export function useVoiceInput(onTranscript?: (text: string) => void) {
       recorder.start();
       setRecording(true);
 
+      if (silenceMs) {
+        stopSilenceWatch();
+        silenceWatchRef.current = watchSilence(stream, silenceMs, () => stop(), lastVoiceRef);
+      }
+
       const Recognition = getSpeechRecognitionCtor();
       if (Recognition) {
         const recognition = new Recognition();
@@ -168,6 +243,7 @@ export function useVoiceInput(onTranscript?: (text: string) => void) {
             if (result.isFinal) finalChunk += result[0].transcript;
             else interimChunk += result[0].transcript;
           }
+          if (lastVoiceRef.current && (finalChunk || interimChunk)) lastVoiceRef.current = performance.now();
           if (finalChunk) {
             baseTranscriptRef.current = `${baseTranscriptRef.current} ${finalChunk}`.trim();
             setTranscript(baseTranscriptRef.current);
@@ -196,9 +272,10 @@ export function useVoiceInput(onTranscript?: (text: string) => void) {
       }
     } catch {
       setError("Couldn't open the microphone. Check browser permissions and try again.");
+      stopSilenceWatch();
       setRecording(false);
     }
-  }, [audioUrl]);
+  }, [audioUrl, silenceMs, stop, stopSilenceWatch]);
 
   const toggle = useCallback(async () => {
     if (recording) stop();

@@ -39,7 +39,7 @@ function adaptLocalHttpRequestCookies(headers: Headers) {
   if (!cookie) return;
   headers.set(
     "cookie",
-    cookie.replace(/(^|;\s*)((?:pagecraft|better-auth)\.)/g, "$1__Secure-$2"),
+    cookie.replace(/(^|;\s*)((?:englitutor|better-auth)\.)/g, "$1__Secure-$2"),
   );
 }
 

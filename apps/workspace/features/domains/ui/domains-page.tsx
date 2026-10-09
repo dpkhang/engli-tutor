@@ -175,7 +175,7 @@ export default function DomainsPage() {
                 name="hostname"
                 required
                 className="h-9"
-                placeholder="lp.brand.com or campaign.pagecraft-ai.site"
+                placeholder="lp.brand.com or campaign.harrybox.cloud"
                 autoComplete="off"
                 aria-invalid={Boolean(create.error)}
               />

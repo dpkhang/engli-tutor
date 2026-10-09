@@ -1,5 +1,5 @@
-const PROD_APP_URL = "https://app.pagecraft-ai.site";
-const PROD_SITE_URL = "https://pagecraft-ai.site";
+const PROD_APP_URL = "https://app.harrybox.cloud";
+const PROD_SITE_URL = "https://harrybox.cloud";
 
 function publicUrl(value: string | undefined, prodFallback: string, devFallback: string): string {
   const explicit = value?.trim();

@@ -4,6 +4,7 @@ import { isLocale, SUPPORTED_LOCALES } from "@engli-tutor/i18n";
 import { CookieConsentBanner } from "@engli-tutor/ui";
 import { SiteShell } from "@/features/layout";
 import { MarketingI18n } from "@/features/i18n";
+import { siteMetadata } from "@/lib/seo";
 
 export function generateStaticParams() {
   return SUPPORTED_LOCALES.map((locale) => ({ locale }));
@@ -13,8 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   return {
-    title: "EngliTutor — AI English Tutor",
-    description: locale === "vi" ? "Luyện tiếng Anh với AI mỗi ngày và nhận phản hồi bằng tiếng Việt." : "Practice speaking English with AI every day and get feedback in Vietnamese.",
+    ...siteMetadata(locale),
     alternates: { languages: Object.fromEntries(SUPPORTED_LOCALES.map((item) => [item, `/${item}`])) },
   };
 }

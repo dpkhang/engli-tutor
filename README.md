@@ -66,18 +66,18 @@ Browser gọi `/api/*` same-origin; Next proxy/route forward tới `NEXT_PUBLIC_
 | `NEXT_PUBLIC_APP_URL` | Workspace origin |
 | `NEXT_PUBLIC_SITE_URL` | Marketing origin |
 
-### Production (`pagecraft-ai.site`)
+### Production (`harrybox.cloud`)
 
 ```text
 # Workspace + Marketing (GitLab CI / Vercel)
 NEXT_PUBLIC_API_URL=https://api.harrybox.cloud
-NEXT_PUBLIC_MARKETING_URL=https://pagecraft-ai.site
-NEXT_PUBLIC_APP_URL=https://app.pagecraft-ai.site
-NEXT_PUBLIC_SITE_URL=https://pagecraft-ai.site
+NEXT_PUBLIC_MARKETING_URL=https://harrybox.cloud
+NEXT_PUBLIC_APP_URL=https://app.harrybox.cloud
+NEXT_PUBLIC_SITE_URL=https://harrybox.cloud
 ```
 
-Backend (Fly) cần khớp `WEB_ORIGIN`, `LANDING_ORIGIN`, `AUTH_COOKIE_DOMAIN=.pagecraft-ai.site`.  
-Ưu tiên `APP_URL=https://app.pagecraft-ai.site` khi auth đi qua first-party FE proxy.
+Backend (Fly) cần khớp `WEB_ORIGIN`, `LANDING_ORIGIN`, `AUTH_COOKIE_DOMAIN=.harrybox.cloud`.  
+Ưu tiên `APP_URL=https://app.harrybox.cloud` khi auth đi qua first-party FE proxy.
 
 ## AI landing + hero image
 

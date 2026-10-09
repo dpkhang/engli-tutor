@@ -35,7 +35,7 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: apiUrl,
     NEXT_PUBLIC_SITE_URL: (
-      process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://pagecraft-ai.site"
+      process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://app.harrybox.cloud"
     ).replace(/\/$/, ""),
     NEXT_PUBLIC_AUTH_SAME_ORIGIN: useSameOriginProxy ? "true" : "false",
   },
