@@ -50,6 +50,7 @@ export function useVoiceInput(onTranscript?: (text: string) => void) {
   const [transcript, setTranscript] = useState("");
   const [interim, setInterim] = useState("");
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [speechSupported, setSpeechSupported] = useState(false);
@@ -106,6 +107,7 @@ export function useVoiceInput(onTranscript?: (text: string) => void) {
       URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
     }
+    setAudioBlob(null);
 
     if (!navigator.mediaDevices?.getUserMedia) {
       setError("This browser does not support recording.");
@@ -138,6 +140,7 @@ export function useVoiceInput(onTranscript?: (text: string) => void) {
         const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/webm" });
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
+        setAudioBlob(blob);
         stream.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
         setStream(null);
@@ -207,6 +210,7 @@ export function useVoiceInput(onTranscript?: (text: string) => void) {
       const shouldRevoke = options?.revoke !== false;
       if (shouldRevoke && audioUrl) URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
+      setAudioBlob(null);
     },
     [audioUrl],
   );
@@ -218,6 +222,7 @@ export function useVoiceInput(onTranscript?: (text: string) => void) {
     transcript,
     interim,
     audioUrl,
+    audioBlob,
     stream,
     error,
     start,

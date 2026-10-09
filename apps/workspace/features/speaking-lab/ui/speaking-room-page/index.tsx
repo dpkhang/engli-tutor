@@ -10,6 +10,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import { useRouter } from "next/navigation";
+import { withCurrentLocale } from "@/lib/locale-path";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   UPGRADE_MESSAGE,
@@ -49,6 +50,7 @@ export function SpeakingRoomPage() {
   const [level, setLevel] = useState<TutorLevel>("B1");
   const [turns, setTurns] = useState<Turn[]>([{ role: "assistant", content: SCENES[0].opener }]);
   const [pending, setPending] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [upgradeReason, setUpgradeReason] = useState<UpgradeReason | null>(null);
   const queryClient = useQueryClient();
@@ -70,6 +72,7 @@ export function SpeakingRoomPage() {
   const turnsRef = useRef(turns);
   const pendingRef = useRef(false);
   const wasRecordingRef = useRef(false);
+  const transcribeGenRef = useRef(0);
   const autoSpeakRef = useRef(autoSpeak);
   const sfxOnRef = useRef(sfxOn);
   const aiSpeech = useAiSpeech();
@@ -114,7 +117,8 @@ export function SpeakingRoomPage() {
     [lastAssistant, sceneMeta.opener],
   );
   const userTurns = useMemo(() => turns.filter((t) => t.role === "user").length, [turns]);
-  const orbMode = voice.recording ? "recording" : pending ? "thinking" : aiSpeaking ? "ai" : "idle";
+  const busy = pending || transcribing;
+  const orbMode = voice.recording ? "recording" : busy ? "thinking" : aiSpeaking ? "ai" : "idle";
 
   const playSfx = useCallback((fn: () => Promise<void>) => {
     if (!sfxOnRef.current) return;
@@ -178,7 +182,7 @@ export function SpeakingRoomPage() {
 
       try {
         const payload = nextTurns.map(({ role, content }) => ({ role, content }));
-        // The API streams SSE whenever ElevenLabs chat is configured; only the final reply is spoken.
+        // Only the final reply is spoken, so streamed chunks are ignored.
         const result = await tutorApi.chatStream({
           messages: payload,
           scenario: scene,
@@ -224,14 +228,35 @@ export function SpeakingRoomPage() {
     wasRecordingRef.current = false;
     playSfx(() => speakingSfx.recStop());
 
-    const text = (voice.transcript || draft).trim();
-    if (!text) {
+    const browserText = (voice.transcript || draft).trim();
+    const audioUrl = voice.audioUrl ?? undefined;
+    const noSpeech = () => {
       playSfx(() => speakingSfx.error());
       setError("No speech detected. Try speaking more clearly or open the typing panel.");
+    };
+    if (!voice.audioBlob) {
+      if (browserText) void sendUtterance(browserText, audioUrl);
+      else noSpeech();
       return;
     }
-    void sendUtterance(text, voice.audioUrl ?? undefined);
-  }, [voice.recording, voice.transcript, voice.audioUrl, draft, sendUtterance, playSfx]);
+
+    // Server STT is the source of truth; the browser transcript is only a live preview and fallback.
+    const gen = ++transcribeGenRef.current;
+    setTranscribing(true);
+    setError(null);
+    void tutorApi
+      .transcribe({ audio: voice.audioBlob })
+      .then(({ text }) => text.trim())
+      .catch(() => "")
+      .then((serverText) => {
+        if (!aliveRef.current || gen !== transcribeGenRef.current) return;
+        setTranscribing(false);
+        const text = serverText || browserText;
+        if (!text) return noSpeech();
+        setDraft(text);
+        void sendUtterance(text, audioUrl);
+      });
+  }, [voice.recording, voice.transcript, voice.audioUrl, voice.audioBlob, draft, sendUtterance, playSfx]);
 
   const resetRoom = useCallback(
     (nextScene: TutorScenario = scene, nextLevel: TutorLevel = level) => {
@@ -240,6 +265,8 @@ export function SpeakingRoomPage() {
       if (voice.recording) voice.stop();
       voice.clearAudio({ revoke: true });
       wasRecordingRef.current = false;
+      transcribeGenRef.current += 1;
+      setTranscribing(false);
       const opener = SCENES.find((s) => s.id === nextScene)?.opener ?? SCENES[0].opener;
       setScene(nextScene);
       setLevel(nextLevel);
@@ -267,7 +294,7 @@ export function SpeakingRoomPage() {
 
   const onMicClick = useCallback(async () => {
     setError(null);
-    if (pending) return;
+    if (busy) return;
     if (voice.recording) {
       voice.stop();
       return;
@@ -277,7 +304,7 @@ export function SpeakingRoomPage() {
     setDraft("");
     playSfx(() => speakingSfx.recStart());
     await voice.start();
-  }, [aiSpeech, pending, playSfx, voice]);
+  }, [aiSpeech, busy, playSfx, voice]);
 
   const replayPrompt = useCallback(() => {
     if (!promptEn || !aliveRef.current) return;
@@ -323,10 +350,10 @@ export function SpeakingRoomPage() {
       if (e.key !== "Enter") return;
       if (e.shiftKey) return;
       e.preventDefault();
-      if (pending || voice.recording || !draft.trim()) return;
+      if (busy || voice.recording || !draft.trim()) return;
       void sendUtterance(draft);
     },
-    [draft, pending, sendUtterance, voice.recording],
+    [busy, draft, sendUtterance, voice.recording],
   );
   const onSend = useCallback(() => {
     void sendUtterance(draft);
@@ -339,7 +366,7 @@ export function SpeakingRoomPage() {
       router.back();
       return;
     }
-    router.replace("/");
+    router.replace(withCurrentLocale("/"));
   }, [router]);
 
   return (
@@ -347,7 +374,7 @@ export function SpeakingRoomPage() {
       scene={scene}
       level={level}
       draft={draft}
-      pending={pending}
+      pending={busy}
       error={error ?? (sceneLocked ? UPGRADE_MESSAGE.pro : null)}
       showUpgrade={upgradeReason !== null || sceneLocked}
       lockedScenes={lockedScenes}

@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, type KeyboardEvent, type RefObject } from "react";
-import Link from "next/link";
+import { LocalizedLink as Link } from "@/features/i18n/localized-link";
 import { useUpgradeModal } from "@/features/payments/ui/upgrade-modal-provider";
 import {
   ArrowLeft,

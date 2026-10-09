@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, type FormEvent, type RefObject } from "react";
-import Link from "next/link";
+import { LocalizedLink as Link } from "@/features/i18n/localized-link";
 import { BookOpen, Search, X } from "lucide-react";
 import type { LessonPack } from "@/features/learn/model/curriculum";
 import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";

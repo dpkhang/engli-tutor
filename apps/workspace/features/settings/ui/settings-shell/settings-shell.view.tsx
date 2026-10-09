@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, Suspense, type ReactNode } from "react";
-import Link from "next/link";
+import { LocalizedLink as Link } from "@/features/i18n/localized-link";
 import { Cookie, ShieldCheck } from "lucide-react";
 import { cn } from "@engli-tutor/ui";
 import { PageHeader } from "@/features/layout";

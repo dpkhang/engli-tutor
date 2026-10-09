@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { withCurrentLocale } from "@/lib/locale-path";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { authClient, authErrorMessage, getMarketingUrl, useSession } from "@/lib/auth-client";
@@ -49,7 +50,7 @@ export function LoginPage() {
 
   useEffect(() => {
     if (sessionPending || !data?.user) return;
-    window.location.replace(returnTo);
+    window.location.replace(withCurrentLocale(returnTo));
   }, [sessionPending, data?.user, returnTo]);
 
   const changeMode = useCallback((nextMode: AuthMode) => {
@@ -104,10 +105,10 @@ export function LoginPage() {
               returnTo.startsWith("/") && !returnTo.startsWith("//") && returnTo !== "/onboarding"
                 ? `/onboarding?returnTo=${encodeURIComponent(returnTo)}`
                 : "/onboarding";
-            window.location.assign(next);
+            window.location.assign(withCurrentLocale(next));
             return;
           }
-          window.location.assign(returnTo);
+          window.location.assign(withCurrentLocale(returnTo));
         } catch {
           setPending(false);
           setError("Couldn't reach the auth server. Please try again.");

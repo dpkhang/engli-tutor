@@ -52,7 +52,7 @@ cp apps/marketing/.env.local.example apps/marketing/.env.local
 
 | Variable | Purpose |
 | --- | --- |
-| `NEXT_PUBLIC_API_URL` | Backend origin (AWS App Runner URL) |
+| `NEXT_PUBLIC_API_URL` | Backend origin |
 | `NEXT_PUBLIC_MARKETING_URL` | Marketing site origin |
 | `GOOGLE_MAPS_API_KEY` | Server-only key for Google Places address autocomplete |
 
@@ -70,7 +70,7 @@ Browser gọi `/api/*` same-origin; Next proxy/route forward tới `NEXT_PUBLIC_
 
 ```text
 # Workspace + Marketing (GitLab CI / Vercel)
-NEXT_PUBLIC_API_URL=https://YOUR_SERVICE.ap-southeast-1.awsapprunner.com
+NEXT_PUBLIC_API_URL=https://api.harrybox.cloud
 NEXT_PUBLIC_MARKETING_URL=https://pagecraft-ai.site
 NEXT_PUBLIC_APP_URL=https://app.pagecraft-ai.site
 NEXT_PUBLIC_SITE_URL=https://pagecraft-ai.site

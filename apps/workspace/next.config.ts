@@ -10,20 +10,20 @@ const lanDevOrigins = Object.values(networkInterfaces())
 
 const DEFAULT_API_URL =
   process.env.NODE_ENV === "production"
-    ? "https://pkbc7gf23n.ap-southeast-1.awsapprunner.com"
+    ? "https://api.harrybox.cloud"
     : "http://localhost:3001";
 
 const apiUrl = (process.env.NEXT_PUBLIC_API_URL?.trim() || DEFAULT_API_URL).replace(/\/$/, "");
 
 if (!process.env.NEXT_PUBLIC_API_URL?.trim()) {
   console.warn(
-    `[web] NEXT_PUBLIC_API_URL unset — using ${DEFAULT_API_URL}. Set it in Vercel/GitLab to the AWS App Runner URL.`,
+    `[web] NEXT_PUBLIC_API_URL unset — using ${DEFAULT_API_URL}. Set it in GitLab for production.`,
   );
 }
 
 // Always proxy API calls through the frontend origin. This keeps auth cookies
 // first-party on both Vercel domains and localhost while the upstream can still
-// be the production AWS App Runner API.
+// be the production API.
 const useSameOriginProxy = true;
 
 const monorepoRoot = path.join(__dirname, "../..");

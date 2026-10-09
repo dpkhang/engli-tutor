@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
+import { LocalizedLink as Link } from "@/features/i18n/localized-link";
 import { ArrowRight } from "lucide-react";
 import { CardTitle } from "@engli-tutor/ui";
 import type { LegalCtaCard, PolicyCta, PolicySection } from "@engli-tutor/legal";
