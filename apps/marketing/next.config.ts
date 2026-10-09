@@ -6,8 +6,8 @@ const isProdBuild = process.env.NODE_ENV === "production";
 const DEFAULT_API_URL = isProdBuild
   ? "https://api.harrybox.cloud"
   : "http://localhost:3001";
-const DEFAULT_APP_URL = isProdBuild ? "https://app.pagecraft-ai.site" : "http://localhost:3000";
-const DEFAULT_SITE_URL = isProdBuild ? "https://pagecraft-ai.site" : "http://localhost:3002";
+const DEFAULT_APP_URL = isProdBuild ? "https://app.harrybox.cloud" : "http://localhost:3000";
+const DEFAULT_SITE_URL = isProdBuild ? "https://harrybox.cloud" : "http://localhost:3002";
 
 function publicUrl(value: string | undefined, fallback: string): string {
   return (value?.trim() || fallback).replace(/\/$/, "");

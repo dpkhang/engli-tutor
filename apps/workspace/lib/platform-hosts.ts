@@ -3,11 +3,11 @@
 const DEFAULT_PLATFORM_HOSTS = [
   "localhost",
   "127.0.0.1",
-  "app.pagecraft-ai.site",
-  "pagecraft-ai.site",
-  "www.pagecraft-ai.site",
-  "admin.pagecraft-ai.site",
-  "domains.pagecraft-ai.site",
+  "app.harrybox.cloud",
+  "harrybox.cloud",
+  "www.harrybox.cloud",
+  "admin.harrybox.cloud",
+  "domains.harrybox.cloud",
 ] as const;
 
 function envPlatformHosts(): string[] {

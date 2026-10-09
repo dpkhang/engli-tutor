@@ -34,6 +34,7 @@ import { SCENES, SpeakingRoomPageView } from "./speaking-room-page.view";
 type Turn = TutorChatMessage & { audioUrl?: string };
 
 const PRO_SCENES: TutorScenario[] = ["interview", "standup"];
+const AUTO_SEND_SILENCE_MS = 2500;
 
 function splitCoach(content: string): { english: string; tip: string | null } {
   const marker = content.indexOf("💬");
@@ -84,7 +85,7 @@ export function SpeakingRoomPage() {
   sfxOnRef.current = sfxOn;
 
   const onVoiceText = useCallback((text: string) => setDraft(text), []);
-  const voice = useVoiceInput(onVoiceText);
+  const voice = useVoiceInput(onVoiceText, { silenceMs: AUTO_SEND_SILENCE_MS });
 
   useEffect(() => {
     aliveRef.current = true;

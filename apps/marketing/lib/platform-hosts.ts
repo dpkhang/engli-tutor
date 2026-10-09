@@ -1,8 +1,8 @@
 const PLATFORM_HOSTS = new Set([
   "localhost",
   "127.0.0.1",
-  "pagecraft-ai.site",
-  "www.pagecraft-ai.site",
+  "harrybox.cloud",
+  "www.harrybox.cloud",
 ]);
 
 /** Parent domain of the API (api.harrybox.cloud → harrybox.cloud); its subdomains are ours, never customer domains. */

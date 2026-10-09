@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { SITE_URL, siteMetadata } from "@/lib/seo";
 import "./globals.css";
 
 const sans = Plus_Jakarta_Sans({
@@ -9,8 +10,8 @@ const sans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "EngliTutor — AI English Tutor",
-  description: "Practice speaking English with AI every day and get feedback in Vietnamese.",
+  metadataBase: new URL(SITE_URL),
+  ...siteMetadata("en"),
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
