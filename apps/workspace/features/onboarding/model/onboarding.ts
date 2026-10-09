@@ -2,6 +2,8 @@ import type { QueryClient } from "@tanstack/react-query";
 import type { SkillLevel } from "@/features/learn/model/skill-exercises";
 import { accountApi, type AccountProfile } from "@/features/accounts/api";
 import { notifyAccountChanged } from "@/features/accounts/model/account-sync";
+import { LOCALE_COOKIE, type Locale } from "@engli-tutor/i18n";
+import { getPathLocale, stripLocalePath, withLocalePath } from "@/lib/locale-path";
 import { queryKeys } from "@/lib/query";
 
 export const ONBOARDING_PATH = "/onboarding";
@@ -136,9 +138,11 @@ export async function persistWelcomeSeen(queryClient: QueryClient) {
   }
 }
 
-export function safeOnboardingReturnTo(raw: string | null | undefined) {
-  if (!raw) return "/";
-  if (!raw.startsWith("/") || raw.startsWith("//")) return "/";
+/** Returns a locale-free path so callers can re-prefix it with the learner's chosen locale. */
+export function safeOnboardingReturnTo(value: string | null | undefined) {
+  if (!value) return "/";
+  if (!value.startsWith("/") || value.startsWith("//")) return "/";
+  const raw = stripLocalePath(value);
   if (
     raw === ONBOARDING_PATH ||
     raw.startsWith(`${ONBOARDING_PATH}?`) ||
@@ -149,6 +153,17 @@ export function safeOnboardingReturnTo(raw: string | null | undefined) {
     return "/";
   }
   return raw;
+}
+
+/** Client-only: the post-onboarding URL in the learner's chosen UI locale (falls back to the current URL locale). */
+export function localizedDestination(dest: string, uiLocale: Locale | null | undefined) {
+  if (typeof window === "undefined") return dest;
+  return withLocalePath(stripLocalePath(dest), uiLocale ?? getPathLocale(window.location.pathname));
+}
+
+export function rememberUiLocale(uiLocale: Locale | null | undefined) {
+  if (typeof document === "undefined" || !uiLocale) return;
+  document.cookie = `${LOCALE_COOKIE}=${uiLocale}; Path=/; Max-Age=31536000; SameSite=Lax`;
 }
 
 export function formatVnd(value: number) {

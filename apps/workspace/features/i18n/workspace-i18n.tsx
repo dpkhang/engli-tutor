@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import en from "@engli-tutor/i18n/messages/en";
 import vi from "@engli-tutor/i18n/messages/vi";
 import { createTranslator, isLocale, LOCALE_COOKIE, type Locale } from "@engli-tutor/i18n";
+import { stripLocalePath } from "@/lib/locale-path";
 
 type WorkspaceMessages = typeof en & { workspace?: Record<string, unknown> };
 const messages: Record<Locale, WorkspaceMessages> = { en, vi };
@@ -16,9 +17,18 @@ function readLocale(): Locale {
   return isLocale(value) ? value : "en";
 }
 
+const ENGLISH_ONLY_PATHS = ["/login", "/onboarding", "/welcome"];
+
+function isEnglishOnlyPath(pathname: string) {
+  const path = stripLocalePath(pathname);
+  return ENGLISH_ONLY_PATHS.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+}
+
 export function WorkspaceI18n({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const routeLocale = isLocale(pathname?.split("/")[1]) ? (pathname.split("/")[1] as Locale) : null;
+  const routeLocale = pathname && isEnglishOnlyPath(pathname)
+    ? "en"
+    : isLocale(pathname?.split("/")[1]) ? (pathname.split("/")[1] as Locale) : null;
   const [locale, setLocale] = useState<Locale>(() => routeLocale ?? readLocale());
   useEffect(() => {
     const sync = () => setLocale(routeLocale ?? readLocale());

@@ -11,12 +11,14 @@ import {
   Crown,
   Gamepad2,
   Headphones,
+  Languages,
   LoaderCircle,
   Mic2,
   Sparkles,
   Target,
 } from "lucide-react";
 import { Alert, AlertDescription, Badge, BrandLogo, Button, cn } from "@engli-tutor/ui";
+import type { Locale } from "@engli-tutor/i18n";
 import { LEVELS, type SkillLevel } from "@/features/learn/model/skill-exercises";
 import type { BillingPeriod } from "@/features/payments/api/billing";
 import { PERIOD_SUFFIX, planPeriodPrice, type ComparePlan } from "@/features/payments/model/plans";
@@ -42,6 +44,11 @@ export type OnboardingStepId = (typeof STEPS)[number]["id"];
 type OnboardingPlan = ComparePlan;
 
 const INTRO_ICONS = [Mic2, Headphones, Gamepad2, Compass] as const;
+
+const UI_LANGUAGES: ReadonlyArray<{ id: Locale; title: string; hint: string }> = [
+  { id: "en", title: "English", hint: "Show EngliTutor in English" },
+  { id: "vi", title: "Vietnamese", hint: "Show EngliTutor in Vietnamese" },
+];
 
 function OptionCard({
   active,
@@ -77,6 +84,7 @@ export type OnboardingPageViewProps = {
   firstName: string;
   showWelcome: boolean;
   step: OnboardingStepId;
+  uiLocale: Locale | null;
   level: SkillLevel | null;
   goalId: LearningGoalId;
   customGoal: string;
@@ -91,6 +99,7 @@ export type OnboardingPageViewProps = {
   saveError: string | null;
   planError: string | null;
   onFinishedWelcome: () => void | Promise<void>;
+  onUiLocaleChange: (locale: Locale) => void;
   onLevelChange: (level: SkillLevel) => void;
   onGoalChange: (goalId: LearningGoalId) => void;
   onCustomGoalChange: (value: string) => void;
@@ -105,6 +114,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
   firstName,
   showWelcome,
   step,
+  uiLocale,
   level,
   goalId,
   customGoal,
@@ -119,6 +129,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
   saveError,
   planError,
   onFinishedWelcome,
+  onUiLocaleChange,
   onLevelChange,
   onGoalChange,
   onCustomGoalChange,
@@ -179,6 +190,28 @@ export const OnboardingPageView = memo(function OnboardingPageView({
                 <p className="text-sm leading-6 text-muted-foreground sm:text-base">
 {t("workspace.onboardingIntro")}
                 </p>
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex items-center gap-2 text-sm font-semibold">
+                      <Languages className="size-4 text-primary" />
+                      {t("workspace.onboardingChooseLanguage")}
+                    </div>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                      {t("workspace.onboardingChooseLanguageHint")}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {UI_LANGUAGES.map((item) => (
+                      <OptionCard
+                        key={item.id}
+                        active={uiLocale === item.id}
+                        title={item.title}
+                        hint={item.hint}
+                        onClick={() => onUiLocaleChange(item.id)}
+                      />
+                    ))}
+                  </div>
+                </div>
                 <ul className="grid gap-2.5">
                   {INTRO_HIGHLIGHTS.map((item, index) => {
                     const Icon = INTRO_ICONS[index] ?? Sparkles;
@@ -220,7 +253,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
                     🇻🇳
                   </span>
                   <span>
-                    <span className="block text-sm font-semibold">Vietnamese</span>
+                    <span className="block text-sm font-semibold">{t("workspace.nativeLanguageVietnamese")}</span>
                     <span className="text-xs text-muted-foreground">
                       {t("workspace.explanationsVietnamese")}
                     </span>
@@ -284,7 +317,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
             {step === "plans" ? (
               <section className="space-y-6">
                 <div>
-                  <p className="text-sm font-medium text-primary">Upgrade</p>
+                  <p className="text-sm font-medium text-primary">{t("workspace.upgradeStep")}</p>
                   <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
                     {t("workspace.upgradeFromFree")}
                   </h1>
@@ -383,7 +416,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
             <Button
               type="button"
               className="h-11 flex-1 rounded-full sm:flex-none sm:px-6"
-              disabled={step === "details" && !detailsReady}
+              disabled={(step === "intro" && !uiLocale) || (step === "details" && !detailsReady)}
               onClick={onNext}
             >
               {step === "intro" ? t("workspace.getStarted") : t("workspace.continue")}
@@ -394,7 +427,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
           <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
             <Button type="button" variant="outline" className="h-11 rounded-full px-4" onClick={onBack}>
               <ArrowLeft />
-              Back
+              {t("workspace.back")}
             </Button>
             <Button
               type="button"

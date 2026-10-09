@@ -3,12 +3,12 @@ import { Suspense } from "react";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { QueryProvider } from "@/providers/query-provider";
 import { AuthGate } from "@/providers/auth-gate";
-import { AppShell, GlobalNavigationLoading, SignOutLoadingProvider } from "@/features/layout";
+import { AppShell, GlobalNavigationLoading, PreventZoom, SignOutLoadingProvider } from "@/features/layout";
 import { AppearanceProvider } from "@/features/settings";
 import { LessonProgressSync } from "@/features/learn/ui/lesson-progress-sync";
 import { PushRegistrar } from "@/features/notifications/push-registrar";
 import { ServiceWorkerRegistrar } from "@/features/pwa";
-import { ActionDialogProvider, CookieConsentBanner, ToastProvider } from "@engli-tutor/ui";
+import { ActionDialogProvider, ToastProvider } from "@engli-tutor/ui";
 import { UpgradeModalProvider } from "@/features/payments/ui/upgrade-modal-provider";
 import { WorkspaceI18n } from "@/features/i18n/workspace-i18n";
 import "./globals.css";
@@ -30,12 +30,17 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
   },
   icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
     apple: "/icons/apple-touch-icon.png",
   },
 };
 
 export const viewport: Viewport = {
   themeColor: "#4F46E5",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -61,11 +66,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                     <GlobalNavigationLoading />
                   </Suspense>
                   <ServiceWorkerRegistrar />
+                  <PreventZoom />
                   <AuthGate>
                     <PushRegistrar />
                     <AppShell>{children}</AppShell>
                   </AuthGate>
-                  <CookieConsentBanner policyHref="/policy/cookies" />
                 </SignOutLoadingProvider>
                 </UpgradeModalProvider>
               </ToastProvider>

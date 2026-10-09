@@ -3,19 +3,23 @@
 import { memo, type ReactNode, type RefObject } from "react";
 import { LocalizedLink as Link } from "@/features/i18n/localized-link";
 import {
+  BookOpen,
   ChevronDown,
   Crown,
+  Gamepad2,
   Gauge,
+  House,
   LogOut,
-  Menu,
   MessageCircle,
   Mic2,
+  Route,
   Settings,
   Sparkles,
+  TrendingUp,
   UserRound,
   X,
 } from "lucide-react";
-import { Button, BrandLogo, cn, ThemeToggle } from "@engli-tutor/ui";
+import { BrandLogo, cn, ThemeToggle } from "@engli-tutor/ui";
 import { AnimatePresence, motion } from "motion/react";
 import { FloatingTranslate } from "@/features/translate";
 import { HeaderInstallButton } from "@/features/pwa";
@@ -24,11 +28,11 @@ import { WorkspaceLanguageSwitcher } from "@/features/i18n/workspace-language-sw
 import { withLocalePath, getPathLocale } from "@/lib/locale-path";
 
 const PRIMARY_NAV = [
-  { href: "/", key: "workspace.today" },
-  { href: "/skills", key: "workspace.skills" },
-  { href: "/games", key: "workspace.games" },
-  { href: "/lessons", key: "workspace.myPath" },
-  { href: "/progress", key: "workspace.myProgress", private: true },
+  { href: "/", key: "workspace.today", icon: House },
+  { href: "/skills", key: "workspace.skills", icon: BookOpen },
+  { href: "/games", key: "workspace.games", icon: Gamepad2 },
+  { href: "/lessons", key: "workspace.myPath", icon: Route },
+  { href: "/progress", key: "workspace.myProgress", icon: TrendingUp, private: true },
 ] as const;
 
 function isActivePath(pathname: string, href: string) {
@@ -53,7 +57,6 @@ export type AppShellViewProps = {
   routeReset: ReactNode;
   pathname: string;
   search: ReactNode;
-  mobileOpen: boolean;
   accountOpen: boolean;
   aiToolsOpen: boolean;
   aiLauncherExpanded: boolean;
@@ -69,8 +72,6 @@ export type AppShellViewProps = {
   translateOpen: boolean;
   accountMenuRef: RefObject<HTMLDivElement | null>;
   aiToolsInnerRef: RefObject<HTMLDivElement | null>;
-  onToggleMobile: () => void;
-  onCloseMobile: () => void;
   onToggleAccount: () => void;
   onSignOut: () => void;
   onToggleAiDock: () => void;
@@ -82,7 +83,6 @@ export const AppShellView = memo(function AppShellView({
   routeReset,
   pathname,
   search,
-  mobileOpen,
   accountOpen,
   aiToolsOpen,
   aiLauncherExpanded,
@@ -98,8 +98,6 @@ export const AppShellView = memo(function AppShellView({
   translateOpen,
   accountMenuRef,
   aiToolsInnerRef,
-  onToggleMobile,
-  onCloseMobile,
   onToggleAccount,
   onSignOut,
   onToggleAiDock,
@@ -112,25 +110,21 @@ export const AppShellView = memo(function AppShellView({
   const raiseFabForExerciseBar = isPracticeExercise;
   const navItems = PRIMARY_NAV.filter((item) => !("private" in item && item.private) || Boolean(user));
   const hideHeader = routePath.startsWith("/policy");
+  // Exercise pages have their own fixed action bar at the bottom.
+  const showBottomTabs = !hideHeader && !isPracticeExercise;
 
   return (
-    <div className="workspace-background group/shell relative min-h-svh">
+    <div
+      className={cn(
+        "workspace-background group/shell relative min-h-svh",
+        showBottomTabs && "[--tabbar-h:4rem] lg:[--tabbar-h:0px]",
+      )}
+    >
       {routeReset}
       {hideHeader ? null : (
       <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="lg:hidden"
-              aria-label={mobileOpen ? t("workspace.closeMenu") : t("workspace.openMenu")}
-              onClick={onToggleMobile}
-            >
-              {mobileOpen ? <X /> : <Menu />}
-            </Button>
-
             <Link
               href={localize("/")}
               className="group flex shrink-0 items-center text-foreground"
@@ -260,38 +254,43 @@ export const AppShellView = memo(function AppShellView({
           </div>
         </div>
 
-        <AnimatePresence>
-          {mobileOpen ? (
-            <motion.nav
-              className="border-t border-border bg-background px-4 py-3 lg:hidden"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              aria-label={t("workspace.mobileMenu")}
-            >
-              <div className="mx-auto flex max-w-6xl flex-col gap-1 pb-2">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={localize(item.href)}
-                    className={cn(
-                      "rounded-xl px-3 py-2.5 text-sm font-medium",
-                      isActivePath(routePath, item.href)
-                        ? "bg-primary text-primary-foreground"
-                        : "text-foreground hover:bg-muted",
-                    )}
-                    onClick={onCloseMobile}
-                  >
-                    {t(item.key)}
-                  </Link>
-                ))}
-              </div>
-            </motion.nav>
-          ) : null}
-        </AnimatePresence>
       </header>
       )}
+
+      {showBottomTabs ? (
+        <nav
+          className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden group-has-data-not-found/shell:hidden"
+          aria-label={t("workspace.primaryNavigation")}
+        >
+          <div className="mx-auto flex h-(--tabbar-h) max-w-xl items-stretch">
+            {navItems.map((item) => {
+              const active = isActivePath(routePath, item.href);
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={localize(item.href)}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "flex min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 text-[11px] font-medium transition-colors",
+                    active ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "grid h-7 w-12 place-items-center rounded-full transition-colors",
+                      active && "bg-primary/12",
+                    )}
+                  >
+                    <Icon className="size-5" strokeWidth={active ? 2.25 : 1.75} />
+                  </span>
+                  <span className="max-w-full truncate">{t(item.key)}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      ) : null}
 
       {showAiDock || showTranslate ? (
       <div
@@ -300,7 +299,7 @@ export const AppShellView = memo(function AppShellView({
           right: "max(1rem, env(safe-area-inset-right, 0px))",
           bottom: raiseFabForExerciseBar
             ? "max(6rem, calc(env(safe-area-inset-bottom, 0px) + 5.5rem))"
-            : "max(1.25rem, env(safe-area-inset-bottom, 0px))",
+            : "calc(var(--tabbar-h, 0px) + max(1.25rem, env(safe-area-inset-bottom, 0px)))",
         }}
       >
         {showTranslate ? (
@@ -442,8 +441,8 @@ export const AppShellView = memo(function AppShellView({
           className={cn(
             "mx-auto w-full min-w-0 max-w-6xl overflow-x-clip px-4 pt-8 sm:px-6 sm:pt-10",
             showAiDock
-              ? "pb-[calc(6rem+env(safe-area-inset-bottom))] sm:pb-24"
-              : "pb-10 sm:pb-16",
+              ? "pb-[calc(var(--tabbar-h,0px)+6rem+env(safe-area-inset-bottom))] sm:pb-[calc(var(--tabbar-h,0px)+6rem)]"
+              : "pb-[calc(var(--tabbar-h,0px)+2.5rem+env(safe-area-inset-bottom))] sm:pb-[calc(var(--tabbar-h,0px)+4rem)]",
             "group-has-data-not-found/shell:pb-10 group-has-data-not-found/shell:sm:pb-16",
           )}
         >

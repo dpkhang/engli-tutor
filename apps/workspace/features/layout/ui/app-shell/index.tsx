@@ -66,7 +66,6 @@ function AppShellFrame({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const { beginSignOut, endSignOut } = useSignOutLoading();
   const { open: translateOpen } = useTranslateSession();
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [aiToolsOpen, setAiToolsOpen] = useState(false);
   const [aiLauncherExpanded, setAiLauncherExpanded] = useState(true);
@@ -89,7 +88,6 @@ function AppShellFrame({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setAccountOpen(false);
-    setMobileOpen(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -149,14 +147,6 @@ function AppShellFrame({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(timer);
   }, [aiToolsOpen, aiLauncherExpanded]);
 
-  const onToggleMobile = useCallback(() => {
-    setMobileOpen((open) => !open);
-  }, []);
-
-  const onCloseMobile = useCallback(() => {
-    setMobileOpen(false);
-  }, []);
-
   const onToggleAccount = useCallback(() => {
     setAccountOpen((open) => !open);
   }, []);
@@ -212,7 +202,6 @@ function AppShellFrame({ children }: { children: ReactNode }) {
       pathname={pathname}
       search={search}
       routeReset={<TranslateRouteReset />}
-      mobileOpen={mobileOpen}
       accountOpen={accountOpen}
       aiToolsOpen={aiToolsOpen}
       aiLauncherExpanded={aiLauncherExpanded}
@@ -228,8 +217,6 @@ function AppShellFrame({ children }: { children: ReactNode }) {
       translateOpen={translateOpen}
       accountMenuRef={accountMenuRef}
       aiToolsInnerRef={aiToolsInnerRef}
-      onToggleMobile={onToggleMobile}
-      onCloseMobile={onCloseMobile}
       onToggleAccount={onToggleAccount}
       onSignOut={onSignOut}
       onToggleAiDock={onToggleAiDock}

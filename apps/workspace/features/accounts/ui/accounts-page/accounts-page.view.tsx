@@ -287,13 +287,13 @@ export const AccountsPageView = memo(function AccountsPageView({
 
         {dirty ? (
           <div className="fixed inset-x-0 bottom-0 z-70 border-t border-border/80 bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-12px_32px_-18px_rgba(15,23,42,0.28)] backdrop-blur-md sm:px-6">
-            <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 pr-16 lg:pl-62 lg:pr-4">
+            <div className="mx-auto flex max-w-6xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:pr-16 lg:pl-62 lg:pr-4">
               <p className="text-sm text-muted-foreground">{t("workspace.unsavedAccountChanges")}</p>
-              <div className="flex flex-wrap gap-2">
-                <Button type="button" variant="outline" className="rounded-full" onClick={onDiscard}>
-                  Discard
+              <div className="flex w-full gap-2 sm:w-auto sm:shrink-0">
+                <Button type="button" variant="outline" className="flex-1 rounded-full sm:flex-none" onClick={onDiscard}>
+                  {t("workspace.discard")}
                 </Button>
-                <Button type="submit" className="rounded-full" disabled={!canSave}>
+                <Button type="submit" className="flex-1 rounded-full sm:flex-none" disabled={!canSave}>
                   {savePending ? t("workspace.savingChanges") : t("workspace.saveChanges")}
                 </Button>
               </div>

@@ -60,17 +60,18 @@ function localePath(pathname: string, locale: Locale): string {
   return pathname === "/" ? `/${locale}` : `/${locale}${pathname}`;
 }
 
-function workspaceReturnTo(request: NextRequest): URL {
+function workspaceReturnTo(request: NextRequest, locale: Locale): URL {
   const dest = request.nextUrl.clone();
   const returnTo = request.nextUrl.searchParams.get("returnTo");
   if (returnTo?.startsWith("/") && !returnTo.startsWith("//")) {
     const queryAt = returnTo.indexOf("?");
-    dest.pathname = (queryAt >= 0 ? returnTo.slice(0, queryAt) : returnTo) || "/";
+    const path = (queryAt >= 0 ? returnTo.slice(0, queryAt) : returnTo) || "/";
+    dest.pathname = isLocale(path.split("/")[1]) ? path : localePath(path, locale);
     dest.search = queryAt >= 0 ? returnTo.slice(queryAt) : "";
     dest.hash = "";
     return dest;
   }
-  dest.pathname = "/";
+  dest.pathname = `/${locale}`;
   dest.search = "";
   dest.hash = "";
   return dest;
@@ -116,18 +117,14 @@ export async function proxy(request: NextRequest) {
   }
 
   if (!isCustomDomainHost(host) && hasLocalePrefix && !shouldBypass(pathname)) {
-    const target = request.nextUrl.clone();
-    target.pathname = pathname.slice(locale.length + 1) || "/";
-    const response = NextResponse.rewrite(target);
-    response.cookies.set(LOCALE_COOKIE, locale, { path: "/", maxAge: 31_536_000, sameSite: "lax" });
-    return response;
-  }
-
-  if (pathname === "/login" && !isCustomDomainHost(host)) {
-    if (await hasWorkspaceSession(request)) {
-      return NextResponse.redirect(workspaceReturnTo(request));
+    if (pathname === `/${locale}/login` && (await hasWorkspaceSession(request))) {
+      return NextResponse.redirect(workspaceReturnTo(request, locale));
     }
-    return NextResponse.next();
+    const response = NextResponse.next();
+    if (request.cookies.get(LOCALE_COOKIE)?.value !== locale) {
+      response.cookies.set(LOCALE_COOKIE, locale, { path: "/", maxAge: 31_536_000, sameSite: "lax" });
+    }
+    return response;
   }
 
   if (!isCustomDomainHost(host)) return NextResponse.next();
