@@ -1,7 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
-import Link from "next/link";
+import { LocalizedLink as Link } from "@/features/i18n/localized-link";
 import { ArrowLeft, Search } from "lucide-react";
 import {
   Badge,

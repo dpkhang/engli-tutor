@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import Link from "next/link";
+import { LocalizedLink as Link } from "@/features/i18n/localized-link";
 import { Check, CreditCard, Crown, Gauge, Sparkles } from "lucide-react";
 import { Badge, Button, CardTitle } from "@engli-tutor/ui";
 import { SettingsCard, SettingsCardContent, SettingsCardHeader, SettingsPanel } from "../shared";

@@ -1,8 +1,9 @@
 "use client";
 
 import { memo, type FormEvent } from "react";
-import Link from "next/link";
+import { LocalizedLink as Link } from "@/features/i18n/localized-link";
 import { useRouter } from "next/navigation";
+import { withCurrentLocale } from "@/lib/locale-path";
 import { ArrowRight, BookOpen, Heart, LoaderCircle, Search, Sparkles } from "lucide-react";
 import { Button, cn, Input } from "@engli-tutor/ui";
 import { DataLoadingState } from "@/features/layout";
@@ -31,7 +32,7 @@ export const SearchPageView = memo(function SearchPageView({
   const onSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const next = String(new FormData(event.currentTarget).get("q") ?? "").trim();
-    router.push(next ? `/search?q=${encodeURIComponent(next)}` : "/search");
+    router.push(withCurrentLocale(next ? `/search?q=${encodeURIComponent(next)}` : "/search"));
   };
 
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, type ReactNode } from "react";
-import Link from "next/link";
+import { LocalizedLink as Link } from "@/features/i18n/localized-link";
 import {
   BookOpenCheck,
   CheckCircle2,

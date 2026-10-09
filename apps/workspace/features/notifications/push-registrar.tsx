@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useSession } from "@/lib/auth-client";
+import { withCurrentLocale } from "@/lib/locale-path";
 import { syncGrantedSubscription } from "./push-client";
 
 export function PushRegistrar() {
@@ -14,7 +15,7 @@ export function PushRegistrar() {
 
     const onMessage = (event: MessageEvent) => {
       const url = event.data?.type === "navigate" ? event.data.url : null;
-      if (typeof url === "string" && url.startsWith("/")) window.location.assign(url);
+      if (typeof url === "string" && url.startsWith("/")) window.location.assign(withCurrentLocale(url));
     };
     navigator.serviceWorker.addEventListener("message", onMessage);
     return () => navigator.serviceWorker.removeEventListener("message", onMessage);

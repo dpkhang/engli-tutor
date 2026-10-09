@@ -13,7 +13,7 @@ import { usePendingReferral } from "@/features/referrals";
 import { useSignOutLoading } from "../shared";
 import { TranslateSessionProvider, useTranslateSession, isLessonTranslatePath } from "@/features/translate";
 import { LessonSearch } from "../lesson-search";
-import { getPathLocale } from "@/lib/locale-path";
+import { getPathLocale, withCurrentLocale } from "@/lib/locale-path";
 import { AppShellView } from "./app-shell.view";
 
 function isAiDockHiddenPath(pathname: string) {
@@ -176,7 +176,7 @@ function AppShellFrame({ children }: { children: ReactNode }) {
       if (result.error) throw new Error("Sign out failed");
       resetAccountAppearance();
       queryClient.clear();
-      window.location.assign("/login");
+      window.location.assign(withCurrentLocale("/login"));
     } catch {
       endSignOut();
     }

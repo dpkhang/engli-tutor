@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { withCurrentLocale } from "@/lib/locale-path";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { accountApi } from "@/features/accounts";
 import { type SkillLevel } from "@/features/learn/model/skill-exercises";
@@ -60,10 +61,10 @@ export function OnboardingPage() {
     if (!profile || showWelcome || finishingHere.current) return;
     if (needsOnboarding(profile)) return;
     if (hasSeenWelcome(profile)) {
-      window.location.replace(returnTo);
+      window.location.replace(withCurrentLocale(returnTo));
       return;
     }
-    router.replace(`/welcome?returnTo=${encodeURIComponent(returnTo)}`);
+    router.replace(withCurrentLocale(`/welcome?returnTo=${encodeURIComponent(returnTo)}`));
   }, [profileQuery.data, returnTo, router, showWelcome]);
 
   useEffect(() => {
@@ -107,7 +108,7 @@ export function OnboardingPage() {
 
   const enterWorkspace = useCallback(async () => {
     await persistWelcomeSeen(queryClient);
-    router.replace(returnTo);
+    router.replace(withCurrentLocale(returnTo));
   }, [queryClient, returnTo, router]);
 
   const finishOnboarding = useCallback(async () => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   cn,
   Select,
@@ -20,7 +20,6 @@ function readLocale(): Locale {
 }
 
 export function WorkspaceLanguageSwitcher({ className }: { className?: string }) {
-  const router = useRouter();
   const pathname = usePathname();
   const t = useWorkspaceI18n();
   const [locale, setLocale] = useState<Locale>(() => {
@@ -48,7 +47,9 @@ export function WorkspaceLanguageSwitcher({ className }: { className?: string })
     const currentPath = pathname ?? "/";
     const currentSegment = currentPath.split("/")[1];
     const withoutLocale = isLocale(currentSegment) ? currentPath.slice(currentSegment.length + 1) || "/" : currentPath;
-    router.push(withoutLocale === "/" ? `/${nextLocale}` : `/${nextLocale}${withoutLocale}`);
+    const target = withoutLocale === "/" ? `/${nextLocale}` : `/${nextLocale}${withoutLocale}`;
+    // Full load: the client router cache still holds prefetched redirects to the old locale.
+    window.location.assign(`${target}${window.location.search}`);
   };
 
   const languageName = activeLocale === "vi" ? "Tiếng Việt" : "English";

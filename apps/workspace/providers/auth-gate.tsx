@@ -15,6 +15,7 @@ import {
   WELCOME_PATH,
 } from "@/features/onboarding";
 import { CACHE_TIMES, queryKeys } from "@/lib/query";
+import { withCurrentLocale } from "@/lib/locale-path";
 
 const LOGIN_PATH = "/login";
 
@@ -54,14 +55,14 @@ export function AuthSplash({ message, busy = true, children }: { message: string
 
 function getSafeReturnTo(): string {
   const value = new URLSearchParams(window.location.search).get("returnTo");
-  if (value?.startsWith("/") && !value.startsWith("//")) return value;
+  if (value?.startsWith("/") && !value.startsWith("//")) return withCurrentLocale(value);
   try {
     const target = new URL(value ?? "");
     if (target.origin === new URL(getMarketingUrl()).origin) return target.toString();
   } catch {
     // Invalid and external return URLs fall back to the workspace root.
   }
-  return "/";
+  return withCurrentLocale("/");
 }
 
 export function AuthGate({ children }: { children: React.ReactNode }) {

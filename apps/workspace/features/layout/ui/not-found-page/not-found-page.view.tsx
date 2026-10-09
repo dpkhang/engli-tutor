@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import Link from "next/link";
+import { LocalizedLink as Link } from "@/features/i18n/localized-link";
 import { BookOpen, Gamepad2, House, Search } from "lucide-react";
 import { Button } from "@engli-tutor/ui";
 import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";

@@ -103,6 +103,22 @@ export const tutorApi = {
     return result;
   },
 
+  /** Server-side speech-to-text for a recorded turn (webm/opus or mp4). */
+  transcribe: async (input: { audio: Blob; signal?: AbortSignal }): Promise<{ text: string }> => {
+    const form = new FormData();
+    const extension = input.audio.type.includes("mp4") ? "m4a" : "webm";
+    form.append("audio", input.audio, `speech.${extension}`);
+    const response = await fetch(`${getApiBase()}/api/tutor/transcribe`, {
+      method: "POST",
+      credentials: "include",
+      signal: input.signal,
+      headers: { "X-Client": "pagecraft-workspace" },
+      body: form,
+    });
+    if (!response.ok) throw await ApiError.fromResponse(response);
+    return response.json() as Promise<{ text: string }>;
+  },
+
   /** Returns MPEG audio when TTS is configured; throws on non-OK responses. */
   speak: async (input: { text: string; voice?: string; signal?: AbortSignal }): Promise<Blob> => {
     const response = await fetch(`${getApiBase()}/api/tutor/speak`, {

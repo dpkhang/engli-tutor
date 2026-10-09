@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, type ReactNode, type RefObject } from "react";
-import Link from "next/link";
+import { LocalizedLink as Link } from "@/features/i18n/localized-link";
 import {
   ChevronDown,
   Crown,
@@ -108,9 +108,10 @@ export const AppShellView = memo(function AppShellView({
   const t = useWorkspaceI18n();
   const locale = getPathLocale(pathname);
   const localize = (href: string) => withLocalePath(href, locale);
+  const routePath = locale ? pathname.slice(locale.length + 1) || "/" : pathname;
   const raiseFabForExerciseBar = isPracticeExercise;
   const navItems = PRIMARY_NAV.filter((item) => !("private" in item && item.private) || Boolean(user));
-  const hideHeader = pathname.startsWith("/policy");
+  const hideHeader = routePath.startsWith("/policy");
 
   return (
     <div className="workspace-background group/shell relative min-h-svh">
@@ -139,11 +140,11 @@ export const AppShellView = memo(function AppShellView({
 
             <nav className="ml-4 hidden items-center gap-1 lg:flex" aria-label={t("workspace.primaryNavigation")}>
               {navItems.map((item) => {
-                const active = isActivePath(pathname, item.href);
+                const active = isActivePath(routePath, item.href);
                 return (
                   <Link
                     key={item.href}
-                    href={item.href}
+                    href={localize(item.href)}
                     className={cn(
                       "rounded-full px-3.5 py-2 text-sm font-medium transition-colors",
                       active
@@ -273,10 +274,10 @@ export const AppShellView = memo(function AppShellView({
                 {navItems.map((item) => (
                   <Link
                     key={item.href}
-                    href={item.href}
+                    href={localize(item.href)}
                     className={cn(
                       "rounded-xl px-3 py-2.5 text-sm font-medium",
-                      isActivePath(pathname, item.href)
+                      isActivePath(routePath, item.href)
                         ? "bg-primary text-primary-foreground"
                         : "text-foreground hover:bg-muted",
                     )}

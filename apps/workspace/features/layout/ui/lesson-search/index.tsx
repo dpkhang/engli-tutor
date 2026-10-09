@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { withCurrentLocale } from "@/lib/locale-path";
 import { useLessonPacks } from "@/features/learn/hooks/use-learning-catalog";
 import { LessonSearchView } from "./lesson-search.view";
 
@@ -72,7 +73,7 @@ export function LessonSearch() {
 
   const onViewAll = useCallback(() => {
     const term = query.trim();
-    router.push(term ? `/search?q=${encodeURIComponent(term)}` : "/search");
+    router.push(withCurrentLocale(term ? `/search?q=${encodeURIComponent(term)}` : "/search"));
     setOpen(false);
   }, [query, router]);
 

@@ -1,8 +1,9 @@
 "use client";
 
 import { memo, type FormEvent } from "react";
-import Link from "next/link";
+import { LocalizedLink as Link } from "@/features/i18n/localized-link";
 import { useRouter } from "next/navigation";
+import { withCurrentLocale } from "@/lib/locale-path";
 import {
   BookOpenCheck,
   Gamepad2,
@@ -53,7 +54,7 @@ export const LessonsPageView = memo(function LessonsPageView({
     const params = new URLSearchParams();
     if (activeSkill !== "All") params.set("skill", activeSkill);
     if (next) params.set("q", next);
-    router.push(params.size ? `/lessons?${params.toString()}` : "/lessons");
+    router.push(withCurrentLocale(params.size ? `/lessons?${params.toString()}` : "/lessons"));
   };
 
   return (

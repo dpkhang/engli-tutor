@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import Link from "next/link";
+import { LocalizedLink as Link } from "@/features/i18n/localized-link";
 import { ArrowLeft, BookOpen, Check, Heart, House, Lightbulb, RotateCcw, Volume2 } from "lucide-react";
 import { Button, cn } from "@engli-tutor/ui";
 import { DataLoadingState, NotFoundPage } from "@/features/layout";

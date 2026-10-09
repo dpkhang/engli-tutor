@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { withCurrentLocale } from "@/lib/locale-path";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { accountApi } from "@/features/accounts";
 import { useSession } from "@/lib/auth-client";
@@ -33,19 +34,19 @@ export function WelcomePage() {
   const dest = safeOnboardingReturnTo(peekWelcomePending() ?? searchParams.get("returnTo"));
 
   useEffect(() => {
-    router.prefetch(dest);
+    router.prefetch(withCurrentLocale(dest));
   }, [dest, router]);
 
   useEffect(() => {
     if (!hasSeenWelcome(profileQuery.data)) return;
     takeWelcomePending();
-    router.replace(dest);
+    router.replace(withCurrentLocale(dest));
   }, [dest, profileQuery.data, router]);
 
   const enterWorkspace = useCallback(async () => {
     await persistWelcomeSeen(queryClient);
     takeWelcomePending();
-    router.replace(dest);
+    router.replace(withCurrentLocale(dest));
   }, [dest, queryClient, router]);
 
   return <WelcomePageView firstName={firstName} onFinished={enterWorkspace} />;
