@@ -31,12 +31,13 @@ import {
   formatBillingDateTime,
   formatVnd,
   planPeriodPrice,
-  PERIOD_LABEL,
-  PERIOD_SUFFIX,
-  STATUS_LABEL,
+  PERIOD_LABEL_KEY,
+  PERIOD_SUFFIX_KEY,
+  STATUS_LABEL_KEY,
   type ComparePlan,
   type usageRows,
 } from "../../model/plans";
+import { useWorkspaceI18n } from "@/features/i18n";
 import { PlanPeriodSwitch } from "../plan-period-switch";
 import { UpgradePlansModal } from "../upgrade-plans-modal";
 
@@ -93,6 +94,7 @@ export const PaymentsPageView = memo(function PaymentsPageView({
   onOpenUpgrade,
   onCloseUpgrade,
 }: PaymentsPageViewProps) {
+  const t = useWorkspaceI18n();
   // Kept for the unreachable legacy modal markup below until its next cleanup pass.
   const sheetDragControls = useDragControls();
   const [mounted, setMounted] = useState(false);
@@ -113,16 +115,16 @@ export const PaymentsPageView = memo(function PaymentsPageView({
         <div className="relative max-w-2xl">
           <p className="hidden items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-primary-foreground/80 sm:inline-flex">
             <Sparkles className="size-3.5 text-amber-300" />
-            Plans that grow with your confidence
+            {t("billing.page.eyebrow")}
           </p>
           <h1 className="text-xl leading-tight font-semibold tracking-[-0.035em] sm:mt-5 sm:text-4xl">
-            More practice. More progress.
-            <br className="hidden sm:block" /> Always at your pace.
+            {t("billing.page.titleLine1")}
+            <br className="hidden sm:block" /> {t("billing.page.titleLine2")}
           </h1>
           <p className="mt-3 hidden max-w-xl text-sm leading-6 text-primary-foreground/75 sm:mt-4 sm:block sm:text-base">
             {hasPaidPlan
-              ? "Your learning plan, practice time and payment activity—all in one simple place."
-              : "Start free and upgrade whenever you want more time to speak, practise and grow."}
+              ? t("billing.page.subtitlePaid")
+              : t("billing.page.subtitleFree")}
           </p>
         </div>
       </header>
@@ -131,14 +133,14 @@ export const PaymentsPageView = memo(function PaymentsPageView({
         <Alert>
           <AlertDescription>
             {checkoutType === "upgrade"
-              ? "Your plan is upgraded. New benefits apply right away."
-              : "Your learning plan is active. Enjoy your new benefits."}
+              ? t("billing.page.upgradeSuccess")
+              : t("billing.page.subscribeSuccess")}
           </AlertDescription>
         </Alert>
       ) : null}
       {checkoutState === "cancel" ? (
         <Alert variant="destructive">
-          <AlertDescription>Checkout canceled.</AlertDescription>
+          <AlertDescription>{t("billing.page.checkoutCanceled")}</AlertDescription>
         </Alert>
       ) : null}
       {error ? (
@@ -155,11 +157,11 @@ export const PaymentsPageView = memo(function PaymentsPageView({
               className="gap-1 rounded-full px-3 py-1"
             >
               {hasPaidPlan ? <Crown className="size-3" /> : null}
-              Current plan
+              {t("workspace.currentPlan")}
             </Badge>
             {hasPaidPlan && subscriptionStatus ? (
               <Badge variant="outline">
-                {STATUS_LABEL[subscriptionStatus] ?? subscriptionStatus}
+                {STATUS_LABEL_KEY[subscriptionStatus] ? t(STATUS_LABEL_KEY[subscriptionStatus]) : subscriptionStatus}
               </Badge>
             ) : null}
             {accessNote ? <Badge variant="outline">{accessNote}</Badge> : null}
@@ -171,13 +173,13 @@ export const PaymentsPageView = memo(function PaymentsPageView({
         </CardHeader>
         <CardContent className="p-4 sm:p-8">
           {billingLoading ? (
-            <p className="text-sm text-muted-foreground">Loading plan details…</p>
+            <p className="text-sm text-muted-foreground">{t("workspace.loadingPlanDetails")}</p>
           ) : (
             <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1fr_1.2fr]">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <p className="flex items-center gap-2 text-sm font-semibold">
-                    <Gauge className="size-4 text-primary" /> Today&apos;s usage
+                    <Gauge className="size-4 text-primary" /> {t("workspace.todaysUsage")}
                   </p>
                   <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     {usage.map((row) => (
@@ -185,16 +187,16 @@ export const PaymentsPageView = memo(function PaymentsPageView({
                         key={row.metric}
                         className="min-w-0 rounded-2xl border border-primary/15 bg-primary/5 px-3 py-3 text-sm sm:px-4"
                       >
-                        <p className="text-xs text-muted-foreground">{row.label}</p>
+                        <p className="text-xs text-muted-foreground">{t(row.labelKey)}</p>
                         <p className="font-semibold">
-                          {row.limit === null ? "Unlimited" : `${row.used} / ${row.limit}`}
+                          {row.limit === null ? t("checkout.unlimited") : `${row.used} / ${row.limit}`}
                         </p>
                         <p className="mt-1 text-xs text-muted-foreground">
                           {row.limit === null
-                            ? `${row.used} used today`
+                            ? t("billing.page.usedToday", { count: row.used })
                             : row.used >= row.limit
-                              ? "Daily allowance used — resets at midnight"
-                              : `${Math.max(0, row.limit - row.used)} left today`}
+                              ? t("billing.page.allowanceUsed")
+                              : t("billing.page.leftToday", { count: Math.max(0, row.limit - row.used) })}
                         </p>
                         {row.limit !== null ? (
                           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-primary/10">
@@ -207,20 +209,20 @@ export const PaymentsPageView = memo(function PaymentsPageView({
                       </div>
                     ))}
                   </div>
-                  <p className="text-xs text-muted-foreground">Daily allowances reset at midnight (Vietnam time). Unlimited AI usage is subject to fair use and may slow down during heavy use.</p>
-                  <p className="text-xs text-muted-foreground">Only AI-generated translations count; dictionary and cached results do not. Game usage counts completed plays.</p>
+                  <p className="text-xs text-muted-foreground">{t("billing.page.resetNote")}</p>
+                  <p className="text-xs text-muted-foreground">{t("billing.page.countNote")}</p>
                 </div>
 
                 <dl className="grid gap-3 text-sm sm:grid-cols-2">
                   {hasPaidPlan && billingPeriod ? (
                     <div>
-                      <dt className="text-muted-foreground">Billing period</dt>
-                      <dd className="font-medium">{PERIOD_LABEL[billingPeriod] ?? billingPeriod}</dd>
+                      <dt className="text-muted-foreground">{t("checkout.billingPeriod")}</dt>
+                      <dd className="font-medium">{PERIOD_LABEL_KEY[billingPeriod] ? t(PERIOD_LABEL_KEY[billingPeriod]) : billingPeriod}</dd>
                     </div>
                   ) : null}
                   {hasPaidPlan && currentPeriodEnd ? (
                     <div>
-                      <dt className="text-muted-foreground">Next renewal</dt>
+                      <dt className="text-muted-foreground">{t("workspace.nextRenewal")}</dt>
                       <dd className="font-medium">{formatBillingDateTime(currentPeriodEnd)}</dd>
                     </div>
                   ) : null}
@@ -234,7 +236,7 @@ export const PaymentsPageView = memo(function PaymentsPageView({
                       disabled={!stripeReady || Boolean(pending)}
                       onClick={onOpenUpgrade}
                     >
-                      <ArrowUpCircle /> {hasPaidPlan ? "Upgrade plan" : "Explore plans"}
+                      <ArrowUpCircle /> {hasPaidPlan ? t("checkout.upgradePlan") : t("billing.page.explorePlans")}
                     </Button>
                   ) : null}
                   {canStartTrial ? (
@@ -249,7 +251,7 @@ export const PaymentsPageView = memo(function PaymentsPageView({
                         <LoaderCircle className="animate-spin" />
                       ) : (
                         <>
-                          <Sparkles /> Try Premium free for {trialDays} days
+                          <Sparkles /> {t("billing.page.tryPremium", { days: trialDays })}
                         </>
                       )}
                     </Button>
@@ -258,7 +260,7 @@ export const PaymentsPageView = memo(function PaymentsPageView({
               </div>
 
               <div className="space-y-3">
-                <p className="text-sm font-semibold">Current benefits</p>
+                <p className="text-sm font-semibold">{t("billing.page.currentBenefits")}</p>
                 <ul className="space-y-3 rounded-2xl border border-border/70 bg-muted/25 p-4 text-sm sm:p-5">
                   {activePlan.features.map((feature) => (
                     <li key={feature} className="flex gap-2.5 text-muted-foreground">
@@ -410,7 +412,7 @@ export const PaymentsPageView = memo(function PaymentsPageView({
                               <p className="mt-4 wrap-break-word font-display text-xl tracking-tight sm:text-2xl">
                                 {formatVnd(price)}
                                 <span className="ml-1 text-sm font-sans font-normal text-muted-foreground">
-                                  {PERIOD_SUFFIX[shownPeriod]}
+                                  {t(PERIOD_SUFFIX_KEY[shownPeriod])}
                                 </span>
                               </p>
                               {discount > 0 ? (

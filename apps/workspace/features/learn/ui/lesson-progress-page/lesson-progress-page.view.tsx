@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, type ReactNode } from "react";
-import { LocalizedLink as Link } from "@/features/i18n/localized-link";
+import { LocalizedLink as Link } from "@/features/i18n";
 import {
   BookOpenCheck,
   CheckCircle2,
@@ -23,8 +23,8 @@ import type {
   LessonProgressEntry,
 } from "../../model/lesson-progress";
 import type { SkillExercise, SkillId, SkillMeta } from "../../model/skill-exercises";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
-import { LocalizedLink } from "@/features/i18n/localized-link";
+import { useWorkspaceI18n } from "@/features/i18n";
+import { LocalizedLink } from "@/features/i18n";
 
 export type ManagedLesson = {
   entry: LessonProgressEntry | LessonFavoriteEntry;
@@ -122,12 +122,12 @@ function LessonCard({
       <div className="flex flex-wrap items-center gap-2 pr-10">
         {tone === "started" ? (
           <span className="rounded-full bg-amber-500/12 px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300">
-            In progress
+            {t("workspace.inProgress")}
           </span>
         ) : null}
         {tone === "completed" ? (
           <span className="rounded-full bg-emerald-500/12 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
-            Completed
+            {t("workspace.completed")}
           </span>
         ) : null}
         {lesson ? (
@@ -234,7 +234,7 @@ export const LessonProgressPageView = memo(function LessonProgressPageView({
         <section className="space-y-3 rounded-3xl border border-border/70 bg-card/70 p-4 sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-base font-semibold">{t("workspace.addInProgress")}</h2>
-            <p className="text-xs text-muted-foreground">{available.length} available</p>
+            <p className="text-xs text-muted-foreground">{available.length} {t("workspace.available")}</p>
           </div>
           {available.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
@@ -264,7 +264,7 @@ export const LessonProgressPageView = memo(function LessonProgressPageView({
                           "border-rose-500/30 bg-rose-500/10 text-rose-600",
                       )}
                       aria-label={
-                        favoriteIds.has(lesson.id) ? "Remove from favorites" : "Add to favorites"
+                        favoriteIds.has(lesson.id) ? t("workspace.removeFavorite") : t("workspace.addFavorite")
                       }
                       onClick={() => onToggleFavorite(lesson.id)}
                     >
@@ -279,7 +279,7 @@ export const LessonProgressPageView = memo(function LessonProgressPageView({
                       onClick={() => onStartLesson(lesson.id)}
                     >
                       <CirclePlay className="size-3.5" />
-                      Start
+                      {t("workspace.start")}
                     </Button>
                   </div>
                 </li>
@@ -337,7 +337,7 @@ export const LessonProgressPageView = memo(function LessonProgressPageView({
             <div className="grid gap-4 sm:grid-cols-2">
               {exerciseFavorites.map((item) => {
                 const title = item.exercise?.title ?? item.entry.exerciseId;
-                const skillLabel = item.skill?.labelEn ?? item.entry.skillId;
+                const skillLabel = item.skill ? t(`workspace.${item.skill.id}`) : item.entry.skillId;
                 return (
                   <article
                     key={`${item.entry.skillId}-${item.entry.exerciseId}`}
@@ -346,7 +346,7 @@ export const LessonProgressPageView = memo(function LessonProgressPageView({
                     <button
                       type="button"
                       className="absolute top-4 right-4 grid size-9 place-items-center rounded-full border border-rose-500/30 bg-rose-500/10 text-rose-600 transition-colors hover:bg-rose-500/15 dark:text-rose-400"
-                      aria-label="Remove saved exercise"
+                      aria-label={t("learn.removeSavedExercise")}
                       onClick={() =>
                         onRemoveExerciseFavorite(item.entry.skillId, item.entry.exerciseId)
                       }
@@ -378,14 +378,14 @@ export const LessonProgressPageView = memo(function LessonProgressPageView({
                       </p>
                     ) : null}
                     <p className="mt-3 text-xs text-muted-foreground">
-                      Updated {formatUpdatedAt(item.entry.updatedAt)}
+                      {t("workspace.updated")} {formatUpdatedAt(item.entry.updatedAt)}
                     </p>
                     <Button
                       asChild
                       className="mt-auto h-10 w-full rounded-full sm:mt-5 sm:w-auto"
                     >
                       <Link href={`/skills/${item.entry.skillId}/${item.entry.exerciseId}`}>
-                        Practice
+                        {t("workspace.practice")}
                       </Link>
                     </Button>
                   </article>
@@ -449,7 +449,7 @@ export const LessonProgressPageView = memo(function LessonProgressPageView({
                         onClick={() => onStartLesson(item.entry.lessonId)}
                       >
                         <CirclePlay className="size-4" />
-                        Start
+                        {t("workspace.start")}
                       </Button>
                       <Button
                         type="button"
@@ -473,7 +473,7 @@ export const LessonProgressPageView = memo(function LessonProgressPageView({
             <div>
               <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight">
                 <CirclePlay className="size-5 text-amber-600 dark:text-amber-400" />
-                In progress
+                {t("workspace.inProgress")}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 {t("workspace.inProgressDescription")}
@@ -501,7 +501,7 @@ export const LessonProgressPageView = memo(function LessonProgressPageView({
               </p>
               <Button type="button" className="mt-4 rounded-full" onClick={onToggleAdd}>
                 <Plus className="size-4" />
-                Start a lesson
+                {t("workspace.startLessonCta")}
               </Button>
             </div>
           ) : (
@@ -547,7 +547,7 @@ export const LessonProgressPageView = memo(function LessonProgressPageView({
             <div>
               <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight">
                 <CheckCircle2 className="size-5 text-emerald-600 dark:text-emerald-400" />
-                Completed
+                {t("workspace.completed")}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 {t("workspace.completedDescription")}

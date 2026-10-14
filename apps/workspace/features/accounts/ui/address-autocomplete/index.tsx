@@ -5,6 +5,7 @@ import {
   AddressAutocompleteView,
   type AddressSuggestion,
 } from "./address-autocomplete.view";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 export function AddressAutocomplete({
   id,
@@ -19,6 +20,7 @@ export function AddressAutocomplete({
   onChange: (value: string) => void;
   onValidityChange: (valid: boolean) => void;
 }) {
+  const t = useWorkspaceI18n();
   const listId = useId();
   const requestRef = useRef<AbortController | null>(null);
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
@@ -50,12 +52,12 @@ export function AddressAutocomplete({
           suggestions?: AddressSuggestion[];
           message?: string;
         };
-        if (!response.ok) throw new Error(payload.message || "Address lookup failed");
+        if (!response.ok) throw new Error(payload.message || t("accounts.addressLookupFailed"));
         setSuggestions(payload.suggestions ?? []);
       } catch (cause) {
         if (controller.signal.aborted) return;
         setSuggestions([]);
-        setError(cause instanceof Error ? cause.message : "Address lookup failed");
+        setError(cause instanceof Error ? cause.message : t("accounts.addressLookupFailed"));
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
@@ -65,7 +67,7 @@ export function AddressAutocomplete({
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [open, value]);
+  }, [open, t, value]);
 
   const onFocus = useCallback(() => setOpen(true), []);
   const onInputChange = useCallback(

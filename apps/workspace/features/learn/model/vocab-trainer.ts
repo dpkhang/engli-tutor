@@ -4,10 +4,10 @@ import { shuffleInPlace } from "./games";
 
 export type VocabMode = "flip" | "picture" | "listen";
 
-export const VOCAB_MODES: Array<{ id: VocabMode; label: string }> = [
-  { id: "flip", label: "Flip" },
-  { id: "picture", label: "Picture quiz" },
-  { id: "listen", label: "Listen & pick" },
+export const VOCAB_MODES: Array<{ id: VocabMode; labelKey: string }> = [
+  { id: "flip", labelKey: "learn.vocabMode.flip" },
+  { id: "picture", labelKey: "learn.vocabMode.picture" },
+  { id: "listen", labelKey: "learn.vocabMode.listen" },
 ];
 
 export const MASTERED_BOX = 5;

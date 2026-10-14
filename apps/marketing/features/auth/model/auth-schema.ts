@@ -4,14 +4,14 @@ const credentials = {
   email: z
     .string()
     .trim()
-    .min(1, "Enter your email address")
-    .email("Enter a valid email address")
-    .max(254, "Email address is too long")
+    .min(1, "auth.validation.emailRequired")
+    .email("auth.validation.emailInvalid")
+    .max(254, "auth.validation.emailTooLong")
     .transform((value) => value.toLowerCase()),
   password: z
     .string()
-    .min(8, "Use at least 8 characters")
-    .max(128, "Password must be 128 characters or fewer"),
+    .min(8, "auth.validation.passwordTooShort")
+    .max(128, "auth.validation.passwordTooLong"),
 };
 
 export const authFormSchema = z.discriminatedUnion("mode", [
@@ -25,8 +25,8 @@ export const authFormSchema = z.discriminatedUnion("mode", [
     name: z
       .string()
       .trim()
-      .min(2, "Enter at least 2 characters")
-      .max(80, "Name must be 80 characters or fewer")
+      .min(2, "auth.validation.nameTooShort")
+      .max(80, "auth.validation.nameTooLong")
       .transform((value) => value.replace(/\s+/g, " ")),
     ...credentials,
   }),

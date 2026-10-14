@@ -8,6 +8,7 @@ import { billingApi } from "../../api/billing";
 import { billingMeQueryKey } from "../../hooks/use-billing";
 import { PaymentResultPageView, type PaymentResultState } from "./payment-result-page.view";
 import { getPathLocale, withLocalePath } from "@/lib/locale-path";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 const PLAN_NAMES: Record<string, string> = {
   growth: "Standard",
@@ -15,6 +16,7 @@ const PLAN_NAMES: Record<string, string> = {
 };
 
 export function PaymentResultPage() {
+  const t = useWorkspaceI18n();
   const router = useRouter();
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
@@ -28,11 +30,11 @@ export function PaymentResultPage() {
   const [state, setState] = useState<PaymentResultState>(checkout === "success" ? "processing" : "failed");
   const [message, setMessage] = useState(
     checkout === "success"
-      ? "We're confirming your payment with Stripe. Please keep this page open."
+      ? t("billing.result.confirming")
       : failureMessage ??
           (checkout === "cancel"
-            ? "You canceled checkout. Your account was not charged and your current plan is unchanged."
-            : "Payment did not complete. Please check your payment details and try again."),
+            ? t("billing.result.canceledMessage")
+            : t("billing.result.failedMessage")),
   );
   const [confirmedPlanId, setConfirmedPlanId] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(5);
@@ -45,7 +47,7 @@ export function PaymentResultPage() {
     if (!sessionId && !(checkoutType === "upgrade" && itemId)) {
       clearWelcomePending();
       setState("failed");
-      setMessage("Payment session id not found. Please try again from the payments page.");
+      setMessage(t("billing.result.noSession"));
       return;
     }
 
@@ -60,8 +62,8 @@ export function PaymentResultPage() {
         setState("success");
         setMessage(
           checkoutType === "upgrade"
-            ? "Your plan is upgraded. New benefits apply right away."
-            : "Your plan is active and benefits have been updated.",
+            ? t("billing.page.upgradeSuccess")
+            : t("billing.result.activeMessage"),
         );
       };
 
@@ -95,13 +97,14 @@ export function PaymentResultPage() {
           /* Fall through to the confirm error. */
         }
         setState("failed");
-        setMessage(error instanceof Error ? error.message : "Couldn't confirm payment. Please try again.");
+        setMessage(error instanceof Error ? error.message : t("billing.result.confirmError"));
       }
     })();
 
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- confirm once per checkout redirect, not on locale change
   }, [checkout, checkoutType, itemId, queryClient, router, sessionId]);
 
   useEffect(() => {
@@ -119,8 +122,8 @@ export function PaymentResultPage() {
   }, [countdown, router, state]);
 
   const packageName = useMemo(
-    () => PLAN_NAMES[confirmedPlanId ?? itemId ?? ""] ?? "selected plan",
-    [confirmedPlanId, itemId],
+    () => PLAN_NAMES[confirmedPlanId ?? itemId ?? ""] ?? t("billing.result.selectedPlan"),
+    [confirmedPlanId, itemId, t],
   );
 
   return (

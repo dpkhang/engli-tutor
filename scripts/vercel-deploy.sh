@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Deploy an app to Vercel (preview or production).
-# Usage: bash ./scripts/vercel-deploy.sh <landing|web> [--prod]
+# Usage: bash ./scripts/vercel-deploy.sh <marketing|workspace> [--prod]   (legacy aliases: landing|web)
 #
 # Run from the fe workspace root. Do NOT pass the app subdirectory to
 # `vercel deploy` — Vercel Project Settings → Root Directory must already be:
-#   landing → apps/marketing
-#   web     → apps/workspace
+#   marketing → apps/marketing
+#   workspace → apps/workspace
 #
 # GitLab CI/CD variables required:
 #   VERCEL_TOKEN
@@ -13,8 +13,8 @@
 #   VERCEL_PROJECT_ID_LANDING     # Project Settings → General → Project ID (prj_...)
 #   VERCEL_PROJECT_ID_WEB
 # Also forward to Vercel build (NEXT_PUBLIC_* are baked at build time):
-#   landing → NEXT_PUBLIC_API_URL, NEXT_PUBLIC_APP_URL, NEXT_PUBLIC_SITE_URL
-#   web     → NEXT_PUBLIC_API_URL, NEXT_PUBLIC_MARKETING_URL
+#   marketing → NEXT_PUBLIC_API_URL, NEXT_PUBLIC_APP_URL, NEXT_PUBLIC_SITE_URL
+#   workspace → NEXT_PUBLIC_API_URL, NEXT_PUBLIC_MARKETING_URL
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -24,19 +24,24 @@ APP="${1:-}"
 MODE="${2:-}"
 
 usage() {
-  echo "Usage: bash ./scripts/vercel-deploy.sh <landing|web> [--prod]" >&2
+  echo "Usage: bash ./scripts/vercel-deploy.sh <marketing|workspace> [--prod]" >&2
   exit 1
 }
 
 [[ -n "$APP" ]] || usage
 
 case "$APP" in
-  landing)
+  landing) APP="marketing" ;;
+  web) APP="workspace" ;;
+esac
+
+case "$APP" in
+  marketing)
     APP_DIR="apps/marketing"
     PROJECT_ID_VAR="VERCEL_PROJECT_ID_LANDING"
     EXPECTED_ROOT="apps/marketing"
     ;;
-  web)
+  workspace)
     APP_DIR="apps/workspace"
     PROJECT_ID_VAR="VERCEL_PROJECT_ID_WEB"
     EXPECTED_ROOT="apps/workspace"
@@ -163,7 +168,7 @@ if ! RESOLVED_ORG="$(find_project_team "$PROJECT_ID")"; then
   echo "     Team Settings → General → copy Team ID (team_…) into VERCEL_ORG_ID" >&2
   echo "     (Do NOT use Account user id if the project belongs to a team.)" >&2
   echo "  3) VERCEL_TOKEN must be created by an account that can access that team/project" >&2
-  echo "  4) Landing and web are 2 different Vercel projects → 2 different prj_ ids" >&2
+  echo "  4) Marketing and workspace are 2 different Vercel projects → 2 different prj_ ids" >&2
 
   echo >&2
   echo "  Projects visible to this token (name → id):" >&2
@@ -222,12 +227,12 @@ forward_public_env() {
 }
 
 case "$APP" in
-  landing)
+  marketing)
     forward_public_env NEXT_PUBLIC_API_URL
     forward_public_env NEXT_PUBLIC_APP_URL
     forward_public_env NEXT_PUBLIC_SITE_URL
     ;;
-  web)
+  workspace)
     forward_public_env NEXT_PUBLIC_API_URL
     forward_public_env NEXT_PUBLIC_MARKETING_URL
     ;;
@@ -237,16 +242,16 @@ if [[ -z "${NEXT_PUBLIC_API_URL:-}" ]]; then
   echo "✖ NEXT_PUBLIC_API_URL is required for $APP deploy (backend API origin)" >&2
   exit 1
 fi
-if [[ "$APP" == "web" && -z "${NEXT_PUBLIC_MARKETING_URL:-}" ]]; then
-  echo "✖ NEXT_PUBLIC_MARKETING_URL is required for web deploy (landing site origin)" >&2
+if [[ "$APP" == "workspace" && -z "${NEXT_PUBLIC_MARKETING_URL:-}" ]]; then
+  echo "✖ NEXT_PUBLIC_MARKETING_URL is required for workspace deploy (marketing site origin)" >&2
   exit 1
 fi
-if [[ "$APP" == "landing" && -z "${NEXT_PUBLIC_APP_URL:-}" ]]; then
-  echo "✖ NEXT_PUBLIC_APP_URL is required for landing deploy (workspace web origin)" >&2
+if [[ "$APP" == "marketing" && -z "${NEXT_PUBLIC_APP_URL:-}" ]]; then
+  echo "✖ NEXT_PUBLIC_APP_URL is required for marketing deploy (workspace origin)" >&2
   exit 1
 fi
-if [[ "$APP" == "landing" && -z "${NEXT_PUBLIC_SITE_URL:-}" ]]; then
-  echo "✖ NEXT_PUBLIC_SITE_URL is required for landing deploy (marketing public URL)" >&2
+if [[ "$APP" == "marketing" && -z "${NEXT_PUBLIC_SITE_URL:-}" ]]; then
+  echo "✖ NEXT_PUBLIC_SITE_URL is required for marketing deploy (marketing public URL)" >&2
   exit 1
 fi
 

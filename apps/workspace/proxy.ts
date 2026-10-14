@@ -1,15 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE, type Locale } from "@engli-tutor/i18n";
-import { isCustomDomainHost, normalizeHostname } from "./lib/platform-hosts";
-
-type ResolvePayload = {
-  landingPage?: { slug?: string; status?: string };
-};
-
-function requestHost(request: NextRequest): string {
-  const forwarded = request.headers.get("x-forwarded-host");
-  return normalizeHostname(forwarded ?? request.headers.get("host"));
-}
 
 function apiBase(request: NextRequest): string {
   if (process.env.NEXT_PUBLIC_AUTH_SAME_ORIGIN === "true") {
@@ -29,24 +19,6 @@ function shouldBypass(pathname: string): boolean {
     pathname === "/sitemap.xml" ||
     /\.[a-zA-Z0-9]+$/.test(pathname)
   );
-}
-
-async function resolveSlug(request: NextRequest, host: string): Promise<string | null> {
-  const url = `${apiBase(request)}/api/public/domains/resolve?host=${encodeURIComponent(host)}`;
-  try {
-    const response = await fetch(url, {
-      headers: { Accept: "application/json", "X-Client": "pagecraft-edge" },
-      // Edge should always see current domain↔page mapping.
-      cache: "no-store",
-    });
-    if (!response.ok) return null;
-    const data = (await response.json()) as ResolvePayload;
-    const slug = data.landingPage?.slug?.trim().toLowerCase();
-    if (!slug || data.landingPage?.status !== "PUBLISHED") return null;
-    return slug;
-  } catch {
-    return null;
-  }
 }
 
 function detectLocale(request: NextRequest): Locale {
@@ -98,17 +70,17 @@ async function hasWorkspaceSession(request: NextRequest): Promise<boolean> {
 }
 
 /**
- * Custom domains (Host ≠ platform) → published landing at /p/{slug}.
- * Workspace hosts are unchanged, except signed-in users cannot open /login.
+ * Locale prefixing for every page route; signed-in users cannot open /login.
  */
 export async function proxy(request: NextRequest) {
-  const host = requestHost(request);
   const { pathname } = request.nextUrl;
   const localeSegment = pathname.split("/")[1];
   const locale = isLocale(localeSegment) ? localeSegment : detectLocale(request);
   const hasLocalePrefix = isLocale(localeSegment);
 
-  if (!isCustomDomainHost(host) && !shouldBypass(pathname) && !hasLocalePrefix) {
+  if (shouldBypass(pathname)) return NextResponse.next();
+
+  if (!hasLocalePrefix) {
     const redirect = request.nextUrl.clone();
     redirect.pathname = localePath(pathname, locale);
     const response = NextResponse.redirect(redirect);
@@ -116,38 +88,17 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  if (!isCustomDomainHost(host) && hasLocalePrefix && !shouldBypass(pathname)) {
-    if (pathname === `/${locale}/login` && (await hasWorkspaceSession(request))) {
-      return NextResponse.redirect(workspaceReturnTo(request, locale));
-    }
-    const response = NextResponse.next();
-    if (request.cookies.get(LOCALE_COOKIE)?.value !== locale) {
-      response.cookies.set(LOCALE_COOKIE, locale, { path: "/", maxAge: 31_536_000, sameSite: "lax" });
-    }
-    return response;
+  // Absolute returnTo (marketing) is left to the login page, which first
+  // hands the session to that host.
+  const returnTo = request.nextUrl.searchParams.get("returnTo");
+  const relativeReturnTo = !returnTo || (returnTo.startsWith("/") && !returnTo.startsWith("//"));
+  if (pathname === `/${locale}/login` && relativeReturnTo && (await hasWorkspaceSession(request))) {
+    return NextResponse.redirect(workspaceReturnTo(request, locale));
   }
-
-  if (!isCustomDomainHost(host)) return NextResponse.next();
-
-  if (shouldBypass(pathname)) return NextResponse.next();
-
-  // Already on public renderer — keep as-is (useful for debugging).
-  if (pathname.startsWith("/p/")) return NextResponse.next();
-
-  const slug = await resolveSlug(request, host);
-  if (!slug) {
-    const unavailable = request.nextUrl.clone();
-    unavailable.pathname = "/domain-unavailable";
-    unavailable.search = "";
-    return NextResponse.rewrite(unavailable);
+  const response = NextResponse.next();
+  if (request.cookies.get(LOCALE_COOKIE)?.value !== locale) {
+    response.cookies.set(LOCALE_COOKIE, locale, { path: "/", maxAge: 31_536_000, sameSite: "lax" });
   }
-
-  const target = request.nextUrl.clone();
-  target.pathname = `/p/${slug}`;
-  target.search = "";
-  const response = NextResponse.rewrite(target);
-  response.headers.set("x-pagecraft-domain-host", host);
-  response.headers.set("x-pagecraft-domain-slug", slug);
   return response;
 }
 

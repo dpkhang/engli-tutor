@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { RouteFallback } from "@/features/layout";
 import { notFound } from "next/navigation";
 import { GamePlayPage, GAMES_CATALOG, isGameId } from "@/features/learn";
 
@@ -16,7 +17,7 @@ export default async function GamePlayRoutePage({
   const { slug } = await params;
   if (!isGameId(slug)) notFound();
   return (
-    <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Loading game…</div>}>
+    <Suspense fallback={<RouteFallback messageKey="shell.loadingGame" />}>
       <GamePlayPage slug={slug} />
     </Suspense>
   );

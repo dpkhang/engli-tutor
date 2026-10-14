@@ -1,10 +1,10 @@
 "use client";
 
 import { memo } from "react";
-import { LocalizedLink as Link } from "@/features/i18n/localized-link";
+import { LocalizedLink as Link } from "@/features/i18n";
 import { BookOpen, Gamepad2, House, Search } from "lucide-react";
 import { Button } from "@engli-tutor/ui";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 export type NotFoundAction = {
   href: string;
@@ -12,12 +12,6 @@ export type NotFoundAction = {
   icon?: React.ReactNode;
   primary?: boolean;
 };
-
-const DEFAULT_ACTIONS: NotFoundAction[] = [
-  { href: "/", label: "Back to Today", icon: <House />, primary: true },
-  { href: "/skills", label: "Practice", icon: <BookOpen /> },
-  { href: "/games", label: "Games", icon: <Gamepad2 /> },
-];
 
 function LetterTile({
   letter,
@@ -51,7 +45,7 @@ export const NotFoundPageView = memo(function NotFoundPageView({
   code = "404",
   title,
   description,
-  actions = DEFAULT_ACTIONS,
+  actions,
 }: NotFoundPageViewProps) {
   const t = useWorkspaceI18n();
   const resolvedTitle = title ?? t("workspace.notFoundTitle");

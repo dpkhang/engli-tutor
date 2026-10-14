@@ -4,9 +4,11 @@ import { useCallback, useState, type FormEvent } from "react";
 import { useActionDialog } from "@engli-tutor/ui";
 import { ApiError } from "@engli-tutor/api-client";
 import { authClient, authErrorMessage } from "@/lib/auth-client";
+import { useWorkspaceI18n } from "@/features/i18n";
 import { SecuritySettingsView } from "./security-settings.view";
 
 export function SecuritySettings() {
+  const t = useWorkspaceI18n();
   const dialog = useActionDialog();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -20,11 +22,11 @@ export function SecuritySettings() {
       event.preventDefault();
       setPasswordError(null);
       if (newPassword.length < 8) {
-        setPasswordError("New password must be at least 8 characters.");
+        setPasswordError(t("settings.security.tooShort"));
         return;
       }
       if (newPassword !== confirmPassword) {
-        setPasswordError("New password and confirmation do not match.");
+        setPasswordError(t("settings.security.mismatch"));
         return;
       }
       setPasswordPending(true);
@@ -43,22 +45,22 @@ export function SecuritySettings() {
         setConfirmPassword("");
         setRevokeOthers(false);
         await dialog.inform({
-          title: "Password updated",
+          title: t("settings.security.updatedTitle"),
           description: revokeOthers
-            ? "Your password was changed. Other devices have been signed out."
-            : "Your password was changed successfully.",
-          confirmLabel: "OK",
+            ? t("settings.security.updatedOthers")
+            : t("settings.security.updated"),
+          confirmLabel: t("settings.security.ok"),
           tone: "success",
         });
       } catch (error) {
         setPasswordError(
-          error instanceof ApiError ? error.message : "Couldn't update the password. Try again.",
+          error instanceof ApiError ? error.message : t("settings.security.updateFailed"),
         );
       } finally {
         setPasswordPending(false);
       }
     },
-    [confirmPassword, currentPassword, dialog, newPassword, revokeOthers],
+    [confirmPassword, currentPassword, dialog, newPassword, revokeOthers, t],
   );
 
   return (

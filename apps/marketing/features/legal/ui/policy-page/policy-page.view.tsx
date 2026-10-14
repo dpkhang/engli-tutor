@@ -9,10 +9,10 @@ export function PolicyPageView() {
   const t = useMarketingI18n();
   return (
     <LegalDocumentView
-      eyebrow="Legal"
-      title="Privacy Policy"
-      intro={`Last updated ${POLICY_UPDATED_AT}. How EngliTutor collects, uses, and protects your personal data.`}
-      hubLabel={t("legal.privacyPolicy")}
+      eyebrow={t("legal.eyebrow")}
+      title={t("legal.privacyPolicy")}
+      intro={t("legal.privacyIntro", { date: POLICY_UPDATED_AT })}
+      hubLabel={t("legal.jumpToTopic")}
       hubCtas={PRIVACY_HUB_CTAS}
       sections={POLICY_SECTIONS}
     />

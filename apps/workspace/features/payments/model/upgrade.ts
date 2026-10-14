@@ -1,4 +1,5 @@
 import { ApiError } from "@engli-tutor/api-client";
+import type { Translator } from "@engli-tutor/i18n";
 import type { UsageMetric } from "../api/billing";
 
 export type UpgradeReason = "quota" | "pro";
@@ -17,23 +18,23 @@ export function upgradeReasonFromError(error: unknown): UpgradeReason | null {
   return null;
 }
 
-export const UPGRADE_MESSAGE: Record<UpgradeReason, string> = {
-  quota: "You've used today's AI tutor messages. Your limit resets at midnight, or upgrade for more.",
-  pro: "This scenario is part of Premium. Start a free trial or upgrade to unlock it.",
+export const UPGRADE_MESSAGE_KEY: Record<UpgradeReason, string> = {
+  quota: "billing.upgrade.quotaChat",
+  pro: "billing.upgrade.pro",
 };
 
-const QUOTA_MESSAGE: Record<UsageMetric, string> = {
-  tutor_chat: UPGRADE_MESSAGE.quota,
-  tts: "You've used today's AI voice. Your limit resets at midnight, or upgrade for more.",
-  ai_translate: "You've used today's AI translations. Your limit resets at midnight, or upgrade for more.",
-  game_session: "You've used today's free game plays. They reset at midnight, or upgrade for unlimited play.",
+const QUOTA_MESSAGE_KEY: Record<UsageMetric, string> = {
+  tutor_chat: UPGRADE_MESSAGE_KEY.quota,
+  tts: "billing.upgrade.quotaVoice",
+  ai_translate: "billing.upgrade.quotaTranslate",
+  game_session: "billing.upgrade.quotaGames",
 };
 
 /** Plan-aware message for a 402 response, or null for any other error. */
-export function upgradeMessageFromError(error: unknown): string | null {
+export function upgradeMessageFromError(error: unknown, t: Translator): string | null {
   const reason = upgradeReasonFromError(error);
   if (!reason) return null;
-  if (reason === "pro") return UPGRADE_MESSAGE.pro;
+  if (reason === "pro") return t(UPGRADE_MESSAGE_KEY.pro);
   const metric = paymentRequiredBody(error)?.metric as UsageMetric | undefined;
-  return (metric && QUOTA_MESSAGE[metric]) || UPGRADE_MESSAGE.quota;
+  return t((metric && QUOTA_MESSAGE_KEY[metric]) || UPGRADE_MESSAGE_KEY.quota);
 }

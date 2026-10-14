@@ -10,7 +10,7 @@ export class MarketingApiClient extends ApiClient {
           ? ""
           : process.env.NEXT_PUBLIC_API_URL,
       credentials: "include",
-      defaultHeaders: { Accept: "application/json", "X-Client": "pagecraft-marketing" },
+      defaultHeaders: { Accept: "application/json", "X-Client": "englitutor-marketing" },
     });
   }
 }

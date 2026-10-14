@@ -1,15 +1,15 @@
 "use client";
 
 import { memo, type FormEvent } from "react";
-import { LocalizedLink as Link } from "@/features/i18n/localized-link";
+import { LocalizedLink as Link } from "@/features/i18n";
 import { useRouter } from "next/navigation";
 import { withCurrentLocale } from "@/lib/locale-path";
 import { ArrowRight, BookOpen, Heart, LoaderCircle, Search, Sparkles } from "lucide-react";
 import { Button, cn, Input } from "@engli-tutor/ui";
 import { DataLoadingState } from "@/features/layout";
 import type { LessonPack } from "../../model/curriculum";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
-import { LocalizedLink } from "@/features/i18n/localized-link";
+import { useWorkspaceI18n } from "@/features/i18n";
+import { LocalizedLink } from "@/features/i18n";
 
 export type SearchPageViewProps = {
   query: string;
@@ -117,7 +117,7 @@ export const SearchPageView = memo(function SearchPageView({
                       ? "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400"
                       : "border-border bg-background text-muted-foreground hover:text-rose-500",
                   )}
-                  aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+                  aria-label={favorited ? t("workspace.removeFavorite") : t("workspace.addFavorite")}
                   aria-pressed={favorited}
                   onClick={() => onToggleFavorite(lesson.id)}
                 >
@@ -139,7 +139,7 @@ export const SearchPageView = memo(function SearchPageView({
                   </div>
                 </div>
                 <p className="mt-4 text-xs font-medium text-muted-foreground">
-                  {lesson.skills.join(" · ")}
+                  {lesson.skills.map((skill) => t(`workspace.${skill.toLowerCase()}`)).join(" · ")}
                 </p>
                 <div className="mt-auto flex flex-wrap gap-2 pt-5">
                   <Button asChild className="rounded-full">

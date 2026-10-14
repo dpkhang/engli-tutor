@@ -84,28 +84,44 @@ export function SegmentedSwitch<T extends string>({
   );
 }
 
+export type BillingPeriodSwitchLabels = {
+  ariaLabel: string;
+  monthly: string;
+  quarterly: string;
+  yearly: string;
+};
+
+const DEFAULT_BILLING_PERIOD_LABELS: BillingPeriodSwitchLabels = {
+  ariaLabel: "Billing period",
+  monthly: "Monthly",
+  quarterly: "3 months",
+  yearly: "Yearly",
+};
+
 export function BillingPeriodSwitch({
   value,
   onChange,
   className,
   disabled,
+  labels = DEFAULT_BILLING_PERIOD_LABELS,
 }: {
   value: "monthly" | "quarterly" | "yearly";
   onChange: (value: "monthly" | "quarterly" | "yearly") => void;
   className?: string;
   disabled?: boolean;
+  labels?: BillingPeriodSwitchLabels;
 }) {
   return (
     <SegmentedSwitch
       value={value}
       onChange={onChange}
-      ariaLabel="Billing period"
+      ariaLabel={labels.ariaLabel}
       disabled={disabled}
       className={className}
       options={[
-        { id: "monthly", label: "Monthly" },
-        { id: "quarterly", label: "3 months", badge: "−15%" },
-        { id: "yearly", label: "Yearly", badge: "−40%" },
+        { id: "monthly", label: labels.monthly },
+        { id: "quarterly", label: labels.quarterly, badge: "−15%" },
+        { id: "yearly", label: labels.yearly, badge: "−40%" },
       ]}
     />
   );

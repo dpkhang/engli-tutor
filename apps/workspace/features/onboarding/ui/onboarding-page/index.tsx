@@ -6,10 +6,11 @@ import type { Locale } from "@engli-tutor/i18n";
 import { withCurrentLocale } from "@/lib/locale-path";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { accountApi } from "@/features/accounts";
-import { type SkillLevel } from "@/features/learn/model/skill-exercises";
-import type { BillingPeriod } from "@/features/payments/api/billing";
-import { useBillingMe, useSubscribe } from "@/features/payments/hooks/use-billing";
-import { allPlansForCompare } from "@/features/payments/model/plans";
+import { type SkillLevel } from "@/features/learn";
+import type { BillingPeriod } from "@/features/payments";
+import { useBillingMe, useSubscribe } from "@/features/payments";
+import { allPlansForCompare } from "@/features/payments";
+import { useWorkspaceI18n } from "@/features/i18n";
 import { setPreferredLevel } from "@/features/settings";
 import { useSession } from "@/lib/auth-client";
 import { ApiError } from "@engli-tutor/api-client";
@@ -30,6 +31,7 @@ import {
 import { OnboardingPageView, type OnboardingStepId } from "./onboarding-page.view";
 
 export function OnboardingPage() {
+  const t = useWorkspaceI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
@@ -92,8 +94,8 @@ export function OnboardingPage() {
   const learningGoal = goalText(goalId, customGoal);
   const detailsReady = Boolean(level) && learningGoal.length > 0;
   const plans = useMemo(
-    () => allPlansForCompare(billing.data?.subscriptionPlans ?? []).filter((plan) => !plan.isFree),
-    [billing.data?.subscriptionPlans],
+    () => allPlansForCompare(billing.data?.subscriptionPlans ?? [], t).filter((plan) => !plan.isFree),
+    [billing.data?.subscriptionPlans, t],
   );
   const stripeReady = billing.data?.stripeConfigured ?? false;
 

@@ -1,3 +1,3 @@
-export { referralsApi } from "./api";
-export type { ReferralMe, ReferralRedemptionSummary, RedeemReferralResult } from "./api";
-export { usePendingReferral } from "./use-pending-referral";
+export { referralsApi } from "./api/referrals-api";
+export type { ReferralMe, ReferralRedemptionSummary, RedeemReferralResult } from "./api/referrals-api";
+export { persistPendingReferral, usePendingReferral } from "./hooks/use-pending-referral";

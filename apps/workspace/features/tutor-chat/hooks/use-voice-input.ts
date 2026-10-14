@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 type SpeechRecognitionResultLike = {
   readonly isFinal: boolean;
@@ -102,6 +103,7 @@ function watchSilence(stream: MediaStream, silenceMs: number, onSilence: () => v
 }
 
 export function useVoiceInput(onTranscript?: (text: string) => void, options?: VoiceInputOptions) {
+  const t = useWorkspaceI18n();
   const silenceMs = options?.silenceMs;
   const [recording, setRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
@@ -179,7 +181,7 @@ export function useVoiceInput(onTranscript?: (text: string) => void, options?: V
     setAudioBlob(null);
 
     if (!navigator.mediaDevices?.getUserMedia) {
-      setError("This browser does not support recording.");
+      setError(t("tutorChat.recordingUnsupported"));
       return;
     }
 
@@ -254,7 +256,7 @@ export function useVoiceInput(onTranscript?: (text: string) => void, options?: V
         recognition.onerror = (event) => {
           if (event.error === "aborted" || event.error === "no-speech") return;
           if (event.error === "not-allowed") {
-            setError("Microphone permission denied. Allow access in your browser.");
+            setError(t("tutorChat.micDenied"));
           }
         };
         recognition.onend = () => {
@@ -271,11 +273,11 @@ export function useVoiceInput(onTranscript?: (text: string) => void, options?: V
         recognition.start();
       }
     } catch {
-      setError("Couldn't open the microphone. Check browser permissions and try again.");
+      setError(t("tutorChat.micOpenFailed"));
       stopSilenceWatch();
       setRecording(false);
     }
-  }, [audioUrl, silenceMs, stop, stopSilenceWatch]);
+  }, [audioUrl, silenceMs, stop, stopSilenceWatch, t]);
 
   const toggle = useCallback(async () => {
     if (recording) stop();

@@ -1,4 +1,5 @@
-import type { BillingCatalog, PeriodPrice } from "@/features/payment/api/billing";
+import type { Translator } from "@engli-tutor/i18n";
+import type { BillingCatalog, PeriodPrice } from "@/features/payments";
 
 export type PlanId = string;
 
@@ -17,76 +18,78 @@ export type Plan = {
   imageUrl: string;
   features: string[];
   cta: string;
+  isEntry: boolean;
   featured: boolean;
 };
 
-export const PLANS: Plan[] = [
-  {
-    id: "starter",
-    name: "Starter",
-    price: "0đ",
-    priceValue: 0,
-    period: "forever",
-    description: "A daily AI tutor allowance — a good way to explore EngliTutor.",
-    imageUrl: "/images/plan-starter.png",
-    features: [
-      "10 AI tutor chats and 20 AI voice replies per day",
-      "4-skill placement test (listening–speaking–reading–writing)",
-      "Full CEFR A2–B1 path across all four skills",
-      "Error feedback in Vietnamese",
-    ],
-    cta: "Start lesson",
-    featured: false,
-  },
+const STARTER_FEATURE_KEYS = [
+  "plans.starter.featureChat",
+  "plans.starter.featurePlacement",
+  "plans.starter.featurePath",
+  "plans.starter.featureFeedback",
 ];
 
-const STARTER_PLAN = PLANS[0]!;
+function starterPlan(t: Translator): Plan {
+  return {
+    id: "starter",
+    name: t("plans.starter.name"),
+    price: "0đ",
+    priceValue: 0,
+    period: t("plans.forever"),
+    description: t("plans.starter.description"),
+    imageUrl: "/images/plan-starter.png",
+    features: STARTER_FEATURE_KEYS.map((key) => t(key)),
+    cta: t("header.startLesson"),
+    isEntry: true,
+    featured: false,
+  };
+}
 
 /** Convert the backend billing catalog into the presentation model used by marketing/payment UI. */
-export function plansFromCatalog(catalog: BillingCatalog | null | undefined): Plan[] {
-  if (!catalog?.subscriptionPlans.length) return [STARTER_PLAN];
+export function plansFromCatalog(catalog: BillingCatalog | null | undefined, t: Translator): Plan[] {
+  if (!catalog?.subscriptionPlans.length) return [starterPlan(t)];
 
   const mapped = catalog.subscriptionPlans.map((plan) => {
     const isFree = Boolean(plan.isFree) || plan.priceVndMonthly <= 0 || plan.id === "starter";
     const benefits = plan.benefits?.length ? plan.benefits : plan.features;
+    const isEntry = isFree || /^start speaking\b/i.test(plan.cta || "");
     return {
       id: plan.id,
       name: plan.name,
       price: formatVnd(plan.priceVndMonthly),
       priceValue: plan.priceVndMonthly,
-      period: isFree ? "forever" : "/ month",
+      period: isFree ? t("plans.forever") : t("billing.periodSuffix.monthly"),
       description: plan.description,
       imageUrl: plan.imageUrl || (plan.id === "scale" ? "/images/plan-scale.png" : `/images/plan-${plan.id}.png`),
       features: benefits,
       periodPrices: plan.periodPrices,
-      cta: isFree || /^start speaking\b/i.test(plan.cta || "")
-        ? "Start lesson"
-        : plan.cta || `Choose ${plan.name}`,
+      cta: isEntry ? t("header.startLesson") : plan.cta || t("plans.choose", { name: plan.name }),
+      isEntry,
       featured: Boolean(plan.featured),
     } satisfies Plan;
   });
 
   if (mapped.some((plan) => plan.priceValue <= 0)) return mapped;
-  return [STARTER_PLAN, ...mapped];
+  return [starterPlan(t), ...mapped];
 }
 
 export const BILLING_PERIODS: {
   id: BillingPeriod;
-  label: string;
-  hint: string;
+  labelKey: string;
+  hintKey: string;
 }[] = [
-  { id: "monthly", label: "Monthly", hint: "Billed every month" },
-  { id: "quarterly", label: "3 months", hint: "Billed every 3 months · save 15%" },
-  { id: "yearly", label: "Yearly", hint: "Billed once a year · save 40%" },
+  { id: "monthly", labelKey: "billing.period.monthly", hintKey: "plans.period.monthlyHint" },
+  { id: "quarterly", labelKey: "billing.period.quarterly", hintKey: "plans.period.quarterlyHint" },
+  { id: "yearly", labelKey: "billing.period.yearly", hintKey: "plans.period.yearlyHint" },
 ];
 
-const PERIOD_TERMS: Record<BillingPeriod, { months: number; discount: number; label: string }> = {
-  monthly: { months: 1, discount: 0, label: "/ month" },
-  quarterly: { months: 3, discount: 0.15, label: "/ 3 months" },
-  yearly: { months: 12, discount: 0.4, label: "/ year" },
+const PERIOD_TERMS: Record<BillingPeriod, { months: number; discount: number; labelKey: string }> = {
+  monthly: { months: 1, discount: 0, labelKey: "billing.periodSuffix.monthly" },
+  quarterly: { months: 3, discount: 0.15, labelKey: "billing.periodSuffix.quarterly" },
+  yearly: { months: 12, discount: 0.4, labelKey: "billing.periodSuffix.yearly" },
 };
 
-export function getPlanById(id: string | null | undefined, plans: Plan[] = PLANS): Plan {
+export function getPlanById(id: string | null | undefined, plans: Plan[]): Plan {
   return plans.find((plan) => plan.id === id) ?? plans.find((plan) => plan.featured) ?? plans[0]!;
 }
 
@@ -105,22 +108,22 @@ export function formatVnd(value: number): string {
 }
 
 /** Mirrors the backend period pricing when the catalog has no `periodPrices`. */
-export function getBillingTotal(plan: Plan, period: BillingPeriod): {
+export function getBillingTotal(plan: Plan, period: BillingPeriod, t: Translator): {
   total: number;
   label: string;
   periodLabel: string;
 } {
   if (plan.priceValue === 0) {
-    return { total: 0, label: "0đ", periodLabel: "forever" };
+    return { total: 0, label: "0đ", periodLabel: t("plans.forever") };
   }
 
   const terms = PERIOD_TERMS[period];
   const total =
     plan.periodPrices?.[period]?.totalVnd ??
     Math.round((plan.priceValue * terms.months * (1 - terms.discount)) / 1000) * 1000;
-  return { total, label: formatVnd(total), periodLabel: terms.label };
+  return { total, label: formatVnd(total), periodLabel: t(terms.labelKey) };
 }
 
-export function billingPeriodLabel(period: BillingPeriod | null | undefined): string {
-  return BILLING_PERIODS.find((item) => item.id === period)?.label ?? "Monthly";
+export function billingPeriodLabel(period: BillingPeriod | null | undefined, t: Translator): string {
+  return t(BILLING_PERIODS.find((item) => item.id === period)?.labelKey ?? "billing.period.monthly");
 }

@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Skip Vercel build when commit does not touch this app (or shared packages).
-# Usage from app dir (set as Ignored Build Step): bash ../../scripts/vercel-ignore.sh landing|web
+# Usage from app dir (set as Ignored Build Step): bash ../../scripts/vercel-ignore.sh marketing|workspace  (legacy aliases: landing|web)
 set -euo pipefail
 
 APP="${1:-}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 case "$APP" in
-  landing) PATHS=("apps/marketing" "packages" "pnpm-lock.yaml" "pnpm-workspace.yaml" "package.json") ;;
-  web) PATHS=("apps/workspace" "packages" "pnpm-lock.yaml" "pnpm-workspace.yaml" "package.json") ;;
+  marketing|landing) PATHS=("apps/marketing" "packages" "pnpm-lock.yaml" "pnpm-workspace.yaml" "package.json") ;;
+  workspace|web) PATHS=("apps/workspace" "packages" "pnpm-lock.yaml" "pnpm-workspace.yaml" "package.json") ;;
   *)
-    echo "Usage: vercel-ignore.sh <landing|web>" >&2
+    echo "Usage: vercel-ignore.sh <marketing|workspace>" >&2
     exit 1
     ;;
 esac

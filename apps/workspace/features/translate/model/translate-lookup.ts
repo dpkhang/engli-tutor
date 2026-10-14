@@ -1,4 +1,4 @@
-import { translateApi, type TranslateDirection, type TranslateResult } from "../api";
+import { translateApi, type TranslateDirection, type TranslateResult } from "../api/translate-api";
 import {
   cacheKey,
   getCachedLookup,

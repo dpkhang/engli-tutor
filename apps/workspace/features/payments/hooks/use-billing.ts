@@ -9,7 +9,7 @@ export const billingMeQueryKey = queryKeys.billing.me;
 export function useBillingMe(enabled = true) {
   return useQuery({
     queryKey: billingMeQueryKey,
-    queryFn: billingApi.me,
+    queryFn: ({ signal }) => billingApi.me({ signal }),
     enabled,
     staleTime: 0,
     refetchOnMount: "always",

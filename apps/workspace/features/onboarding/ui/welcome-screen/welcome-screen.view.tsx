@@ -3,7 +3,7 @@
 import { memo, useEffect, useRef } from "react";
 import { BrandLogo, Button } from "@engli-tutor/ui";
 import { WELCOME_DURATION_MS } from "../../model/onboarding";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 export type WelcomeScreenViewProps = {
   firstName: string;

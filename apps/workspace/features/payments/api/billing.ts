@@ -69,7 +69,8 @@ export type CheckoutResponse = {
 };
 
 export const billingApi = {
-  me: () => workspaceApiClient.get<BillingMe>("/api/billing/me", { cache: "no-store" }),
+  me: (init?: { signal?: AbortSignal }) =>
+    workspaceApiClient.get<BillingMe>("/api/billing/me", { cache: "no-store", signal: init?.signal }),
   subscribe: (planId: SubscriptionPlan["id"], period: BillingPeriod = "monthly") =>
     workspaceApiClient.post<CheckoutResponse>("/api/billing/subscribe", {
       planId,

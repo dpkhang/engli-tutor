@@ -54,7 +54,7 @@ function stripBrowserFetchMetadata(headers: Headers) {
 }
 
 /**
- * Production Better Auth names cookies `__Secure-englitutor.*` because APP_URL is https.
+ * Production Better Auth names cookies `__Secure-englitutor-v2.*` because APP_URL is https.
  * HTTP localhost cannot store `__Secure-` cookies — strip the prefix when forwarding
  * upstream, and the reverse when returning Set-Cookie to the browser.
  */
@@ -63,8 +63,26 @@ function adaptLocalHttpRequestCookies(headers: Headers) {
   if (!cookie) return;
   headers.set(
     "cookie",
-    cookie.replace(/(^|;\s*)((?:englitutor|better-auth)\.)/g, "$1__Secure-$2"),
+    cookie.replace(/(^|;\s*)((?:englitutor(?:-v2)?|better-auth)\.)/g, "$1__Secure-$2"),
   );
+}
+
+/**
+ * Expire the old session cookies that were scoped to the parent domain, so
+ * they stop reaching every *.harrybox.cloud host. Safe to drop once they have
+ * aged out of browsers.
+ */
+function expireLegacySharedCookies(request: NextRequest, res: NextResponse) {
+  const labels = request.nextUrl.hostname.split(".");
+  if (labels.length < 2) return;
+  const parentDomain = labels.slice(-2).join(".");
+  for (const { name } of request.cookies.getAll()) {
+    if (!name.startsWith("__Secure-englitutor.")) continue;
+    res.headers.append(
+      "set-cookie",
+      `${name}=; Domain=.${parentDomain}; Path=/; Max-Age=0; Secure; SameSite=Lax`,
+    );
+  }
 }
 
 function adaptSetCookieForBrowser(raw: string, hostname: string, https: boolean): string {
@@ -145,6 +163,7 @@ async function proxy(request: NextRequest, context: RouteContext) {
     const value = adaptSetCookieForBrowser(raw, request.nextUrl.hostname, https);
     res.headers.append("set-cookie", value);
   }
+  if (!local) expireLegacySharedCookies(request, res);
 
   return res;
 }

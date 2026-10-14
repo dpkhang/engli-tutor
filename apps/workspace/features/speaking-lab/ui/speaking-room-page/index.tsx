@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { withCurrentLocale } from "@/lib/locale-path";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  UPGRADE_MESSAGE,
+  UPGRADE_MESSAGE_KEY,
   billingMeQueryKey,
   planAllows,
   upgradeReasonFromError,
@@ -25,8 +25,9 @@ import {
   type TutorChatMessage,
   type TutorLevel,
   type TutorScenario,
-} from "@/features/tutor-chat/api";
-import { useVoiceInput } from "@/features/tutor-chat/hooks/use-voice-input";
+} from "@/features/tutor-chat";
+import { useVoiceInput } from "@/features/tutor-chat";
+import { useWorkspaceI18n } from "@/features/i18n";
 import { speakingSfx } from "../../lib/speaking-sfx";
 import { useAiSpeech } from "../../hooks/use-ai-speech";
 import { SCENES, SpeakingRoomPageView } from "./speaking-room-page.view";
@@ -46,6 +47,7 @@ function splitCoach(content: string): { english: string; tip: string | null } {
 }
 
 export function SpeakingRoomPage() {
+  const t = useWorkspaceI18n();
   const router = useRouter();
   const [scene, setScene] = useState<TutorScenario>("interview");
   const [level, setLevel] = useState<TutorLevel>("B1");
@@ -206,7 +208,11 @@ export function SpeakingRoomPage() {
         const reason = upgradeReasonFromError(err);
         setUpgradeReason(reason);
         setError(
-          reason ? UPGRADE_MESSAGE[reason] : err instanceof Error ? err.message : "Couldn't send your turn",
+          reason
+            ? t(UPGRADE_MESSAGE_KEY[reason])
+            : err instanceof Error
+              ? err.message
+              : t("speaking.sendError"),
         );
         setTurns(turnsRef.current.slice(0, -1));
         turnsRef.current = turnsRef.current.slice(0, -1);
@@ -221,7 +227,7 @@ export function SpeakingRoomPage() {
         voice.clearAudio({ revoke: false });
       }
     },
-    [aiSpeech, level, playSfx, queryClient, scene, sceneLocked, speakLastAssistant, voice],
+    [aiSpeech, level, playSfx, queryClient, scene, sceneLocked, speakLastAssistant, t, voice],
   );
 
   useEffect(() => {
@@ -233,7 +239,7 @@ export function SpeakingRoomPage() {
     const audioUrl = voice.audioUrl ?? undefined;
     const noSpeech = () => {
       playSfx(() => speakingSfx.error());
-      setError("No speech detected. Try speaking more clearly or open the typing panel.");
+      setError(t("speaking.noSpeech"));
     };
     if (!voice.audioBlob) {
       if (browserText) void sendUtterance(browserText, audioUrl);
@@ -376,7 +382,7 @@ export function SpeakingRoomPage() {
       level={level}
       draft={draft}
       pending={busy}
-      error={error ?? (sceneLocked ? UPGRADE_MESSAGE.pro : null)}
+      error={error ?? (sceneLocked ? t(UPGRADE_MESSAGE_KEY.pro) : null)}
       showUpgrade={upgradeReason !== null || sceneLocked}
       lockedScenes={lockedScenes}
       demoMode={demoMode}
@@ -385,7 +391,7 @@ export function SpeakingRoomPage() {
       voiceSource={voiceSource}
       panelOpen={panelOpen}
       sfxOn={sfxOn}
-      sceneLabel={sceneMeta.label}
+      sceneLabel={t(sceneMeta.labelKey)}
       promptEn={promptEn}
       promptTip={promptTip}
       userTurns={userTurns}

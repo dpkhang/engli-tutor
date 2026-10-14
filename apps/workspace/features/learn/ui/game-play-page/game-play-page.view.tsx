@@ -1,14 +1,14 @@
 "use client";
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LocalizedLink as Link } from "@/features/i18n/localized-link";
-import { useUpgradeModal } from "@/features/payments/ui/upgrade-modal-provider";
+import { LocalizedLink as Link } from "@/features/i18n";
+import { useUpgradeModal } from "@/features/payments";
 import { ArrowLeft, Bookmark, Check, ChevronLeft, Gamepad2, House, Lightbulb, Mic2, RotateCcw, Volume2, X } from "lucide-react";
 import { Button, SegmentedSwitch, cn } from "@engli-tutor/ui";
 import { DataLoadingState, NotFoundPage } from "@/features/layout";
 import { ClickableTranslateText } from "@/features/translate";
-import { useAiSpeech } from "@/features/speaking-lab/hooks/use-ai-speech";
-import { useVoiceInput } from "@/features/tutor-chat/hooks/use-voice-input";
+import { useAiSpeech } from "@/features/speaking-lab";
+import { useVoiceInput } from "@/features/tutor-chat";
 import { sampleAnswerFor, scoreGameRound, shuffleInPlace } from "../../model/games";
 import type {
   LearningGame,
@@ -19,8 +19,8 @@ import type {
 } from "../../api/types";
 import type { LessonPack } from "../../model/curriculum";
 import { VOCAB_MODES, type VocabMode } from "../../model/vocab-trainer";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
-import { LocalizedLink } from "@/features/i18n/localized-link";
+import { useWorkspaceI18n } from "@/features/i18n";
+import { LocalizedLink } from "@/features/i18n";
 
 export type GamePlayPhase = "intro" | "playing" | "results";
 
@@ -54,8 +54,8 @@ function DeckPicker({
   onPickDeck: (deckId: string) => void;
   onPickMode: (mode: VocabMode) => void;
   onReviewDeck: (deckId: string) => void;
-  t?: (key: string) => string;
 }) {
+  const t = useWorkspaceI18n();
   const activeDeck = decks.find((deck) => deck.id === deckId);
   return (
     <div className="space-y-4">
@@ -63,7 +63,7 @@ function DeckPicker({
         <SegmentedSwitch
           value={level}
           onChange={onPickLevel}
-          ariaLabel="Flashcard level"
+          ariaLabel={t("learn.game.flashcardLevel")}
           className="max-w-md"
           options={levels.map((item) => ({ id: item, label: item }))}
         />
@@ -89,8 +89,8 @@ function DeckPicker({
               >
                 <span className="block text-sm font-semibold text-foreground">{deck.title}</span>
                 <span className="mt-1 block text-xs text-muted-foreground">
-                  {deck.cardCount} words
-                  {deck.masteredCount > 0 ? ` · ${deck.masteredCount} mastered` : ""}
+                  {t("learn.game.wordCount", { count: deck.cardCount })}
+                  {deck.masteredCount > 0 ? ` · ${t("learn.game.mastered", { count: deck.masteredCount })}` : ""}
                 </span>
                 <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-muted">
                   <span
@@ -106,7 +106,7 @@ function DeckPicker({
                   className="mx-4 mb-3 inline-flex w-fit items-center gap-1.5 rounded-full border border-rose-200 px-3 py-1 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:border-rose-400/30 dark:text-rose-300 dark:hover:bg-rose-400/10"
                 >
                   <RotateCcw className="size-3.5" />
-                  Review now ({deck.reviewCount})
+                  {t("learn.game.reviewNow", { count: deck.reviewCount })}
                 </button>
               ) : null}
             </div>
@@ -114,26 +114,28 @@ function DeckPicker({
         })}
       </div>
       <div className="space-y-2">
-        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Mode</p>
+        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{t("learn.game.mode")}</p>
         <SegmentedSwitch
           value={mode}
           onChange={onPickMode}
-          ariaLabel="Practice mode"
+          ariaLabel={t("learn.game.practiceMode")}
           className="max-w-md"
           options={VOCAB_MODES.map((item) => ({
             id: item.id,
-            label: lockedModes.includes(item.id) ? `${item.label} · Standard` : item.label,
+            label: lockedModes.includes(item.id)
+              ? t("learn.game.modeStandard", { mode: t(item.labelKey) })
+              : t(item.labelKey),
           }))}
         />
         {lockedModes.includes(mode) ? (
           <p className="text-xs text-muted-foreground">
-            Picture quiz and Listen &amp; pick are part of Standard. Flip stays free.
+            {t("learn.game.lockedModesNote")}
           </p>
         ) : mode === "picture" && activeDeck && activeDeck.pictureCount < activeDeck.cardCount ? (
           <p className="text-xs text-muted-foreground">
             {activeDeck.pictureCount
-              ? `${activeDeck.pictureCount} of ${activeDeck.cardCount} words have pictures yet.`
-              : "No pictures in this deck yet — it will play as flip cards."}
+              ? t("learn.game.picturesPartial", { count: activeDeck.pictureCount, total: activeDeck.cardCount })
+              : t("learn.game.noPictures")}
           </p>
         ) : null}
       </div>
@@ -218,6 +220,7 @@ function OpenRound({
   allowMic: boolean;
   onChange: (value: string) => void;
 }) {
+  const t = useWorkspaceI18n();
   const voice = useVoiceInput((text) => onChange(text));
   return (
     <div className="space-y-3">
@@ -239,7 +242,7 @@ function OpenRound({
             onClick={() => void voice.toggle()}
           >
             <Mic2 className="size-4" />
-            {voice.recording ? "Stop" : "Speak instead"}
+            {voice.recording ? t("learn.game.stop") : t("learn.game.speakInstead")}
           </Button>
           {voice.interim ? (
             <span className="text-xs text-muted-foreground">{voice.interim}</span>
@@ -262,10 +265,11 @@ function OrderRound({
   locked: boolean;
   onChange: (value: number[]) => void;
 }) {
+  const t = useWorkspaceI18n();
   return (
     <div className="space-y-3">
       <p className="text-xs text-muted-foreground">
-        Tap in the order you heard. Tap again to undo.
+        {t("learn.game.orderHint")}
       </p>
       <div className="space-y-2">
         {items.map((item) => {
@@ -414,6 +418,7 @@ function SpellRound({
     () => shuffleInPlace(letters.map((letter, originalIndex) => ({ originalIndex, letter }))),
     [letters],
   );
+  const t = useWorkspaceI18n();
   const [picked, setPicked] = useState<number[]>([]);
   const used = new Set(picked);
 
@@ -453,7 +458,7 @@ function SpellRound({
         })}
       </div>
       <p className="text-center text-xs text-muted-foreground">
-        Tap letters to spell. Tap a letter above to undo.
+        {t("learn.game.spellHint")}
       </p>
       <div className="flex flex-wrap justify-center gap-2">
         {shuffled.map((item) => {
@@ -501,10 +506,11 @@ function HuntRound({
   targetCount: number;
   onChange: (value: string[]) => void;
 }) {
+  const t = useWorkspaceI18n();
   return (
     <div className="space-y-3">
       <p className="text-xs text-muted-foreground">
-        Pick {targetCount} words · {selected.length}/{targetCount}
+        {t("learn.game.huntHint", { count: targetCount })} · {selected.length}/{targetCount}
       </p>
       <div className="flex flex-wrap gap-2">
         {options.map((word) => {
@@ -568,6 +574,7 @@ function FlashRound({
   onBack: () => void;
   onRate: (value: "xmart" | "check") => void;
 }) {
+  const t = useWorkspaceI18n();
   const [flipped, setFlipped] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const outline = "h-14 rounded-2xl border bg-transparent shadow-none";
@@ -600,7 +607,7 @@ function FlashRound({
       <div className="[perspective:1400px]">
         <button
           type="button"
-          aria-label={flipped ? question.word : `Flip ${question.word}`}
+          aria-label={flipped ? question.word : t("learn.game.flipWord", { word: question.word })}
           className={cn(
             "relative grid min-h-[28rem] w-full [transform-style:preserve-3d] transition-transform duration-500",
             !locked && !flipped && "hover:-translate-y-1",
@@ -638,7 +645,7 @@ function FlashRound({
             </span>
             <span className={cn("flex flex-1 flex-col items-center justify-center px-6 py-5 text-center", enter === "back" ? "flashcard-enter-back" : "flashcard-enter-next")}>
               <span className="text-4xl font-semibold tracking-[-0.04em] capitalize sm:text-5xl">{question.word}</span>
-              <span className="mt-2 text-xs text-muted-foreground">Tap the card to reveal</span>
+              <span className="mt-2 text-xs text-muted-foreground">{t("learn.game.tapToReveal")}</span>
             </span>
           </span>
 
@@ -670,7 +677,7 @@ function FlashRound({
         <Button
           type="button"
           variant="outline"
-          aria-label="Previous word"
+          aria-label={t("learn.game.previousWord")}
           disabled={!canGoBack}
           className={cn(outline, "border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800")}
           onClick={onBack}
@@ -680,7 +687,7 @@ function FlashRound({
         <Button
           type="button"
           variant="outline"
-          aria-label="Save word"
+          aria-label={t("learn.game.saveWord")}
           aria-pressed={saved}
           className={cn(
             outline,
@@ -695,7 +702,7 @@ function FlashRound({
         <Button
           type="button"
           variant="outline"
-          aria-label="Hear"
+          aria-label={t("learn.game.hear")}
           className={cn(outline, "border-primary/40 text-primary hover:bg-primary/10")}
           onClick={onSpeak}
         >
@@ -705,7 +712,7 @@ function FlashRound({
           <Button
             type="button"
             variant="outline"
-            aria-label="Save to study again"
+            aria-label={t("learn.game.studyAgain")}
             aria-keyshortcuts="x"
             disabled={locked}
             className={cn(mark, "border-rose-200 text-rose-600 hover:border-rose-300 hover:bg-rose-50 dark:border-rose-400/30 dark:text-rose-300 dark:hover:bg-rose-400/10")}
@@ -719,7 +726,7 @@ function FlashRound({
           <Button
             type="button"
             variant="outline"
-            aria-label="Next word"
+            aria-label={t("learn.game.nextWord")}
             aria-keyshortcuts="Enter"
             disabled={locked}
             className={cn(mark, "border-emerald-200 text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50 dark:border-emerald-400/30 dark:text-emerald-300 dark:hover:bg-emerald-400/10")}
@@ -753,6 +760,7 @@ function RoundPlay({
   onBack: () => void;
   onSubmit: (value: string, correct: boolean) => void;
 }) {
+  const t = useWorkspaceI18n();
   const { speak, stop } = useAiSpeech();
   const [value, setValue] = useState("");
   const [seconds, setSeconds] = useState(round.seconds);
@@ -878,7 +886,7 @@ function RoundPlay({
           </p>
           {timed ? (
             waitsForAudio && !audioStarted ? (
-              <span className="text-xs text-muted-foreground">Timer starts with the audio…</span>
+              <span className="text-xs text-muted-foreground">{t("learn.game.timerWaits")}</span>
             ) : (
               <TimerRing seconds={seconds} total={round.seconds} />
             )
@@ -908,7 +916,9 @@ function RoundPlay({
                 }}
               >
                 <Volume2 className="size-4" />
-                {hears === 0 ? "Listen" : `Hear again (${Math.max(0, hearMax - hears)} left)`}
+                {hears === 0
+                  ? t("workspace.listen")
+                  : t("learn.game.hearAgain", { count: Math.max(0, hearMax - hears) })}
               </Button>
             </div>
           ) : (
@@ -927,7 +937,7 @@ function RoundPlay({
           value={value}
           locked={locked}
           allowMic={gameId === "speed-reply"}
-          placeholder="Type your answer in English…"
+          placeholder={t("workspace.typeAnswerEnglish")}
           onChange={setValue}
         />
       ) : null}
@@ -985,11 +995,11 @@ function RoundPlay({
         <div className="space-y-2 rounded-xl border border-accent/25 bg-accent/8 px-4 py-3">
           <p className="flex items-center gap-2 text-sm font-semibold">
             <Check className="size-4 text-accent" />
-            {correct ? "On track" : "Check the hint"}
+            {correct ? t("learn.game.onTrack") : t("learn.game.checkHint")}
           </p>
           <p className="text-sm leading-relaxed text-muted-foreground">{explanationOf(question)}</p>
           <p className="text-sm text-foreground">
-            <span className="font-medium">Sample: </span>
+            <span className="font-medium">{t("learn.game.sample")} </span>
             {sampleAnswerFor(question)}
           </p>
         </div>
@@ -1000,7 +1010,7 @@ function RoundPlay({
           disabled={!ready}
           onClick={() => finish(value)}
         >
-          Submit
+          {t("learn.game.submit")}
         </Button>
       )}
     </article>
@@ -1135,7 +1145,7 @@ export const GamePlayPageView = memo(function GamePlayPageView({
 
       <header className="workspace-hero-accent relative overflow-hidden rounded-3xl bg-linear-to-br from-rose-500 to-orange-400 px-5 py-6 text-white sm:rounded-[1.75rem] sm:px-9 sm:py-10">
         <p className="hidden text-[11px] font-semibold tracking-[0.18em] text-white/70 uppercase sm:block">
-          {game.skill} · {game.durationMinutes} min
+          {game.skill} · {t("learn.game.minutes", { count: game.durationMinutes })}
         </p>
         <h1 className="text-xl font-semibold tracking-tight sm:mt-2 sm:text-4xl">{game.title}</h1>
         <p className="mt-3 hidden max-w-2xl text-sm text-white/80 sm:block">{game.howToPlay}</p>
@@ -1174,7 +1184,7 @@ export const GamePlayPageView = memo(function GamePlayPageView({
             </p>
           ) : playsLeft !== null ? (
             <p className="text-xs text-muted-foreground">
-              {playsLeft} free {playsLeft === 1 ? "play" : "plays"} left today
+              {t(playsLeft === 1 ? "learn.game.playsLeftOne" : "learn.game.playsLeftOther", { count: playsLeft })}
             </p>
           ) : null}
           <div className="flex flex-wrap gap-3">
@@ -1185,7 +1195,10 @@ export const GamePlayPageView = memo(function GamePlayPageView({
             ) : (
               <Button className="h-11 rounded-full px-6" onClick={onStart}>
                 {activeDeck
-                  ? `Start ${activeDeck.title} · ${mode === "picture" && activeDeck.pictureCount > 0 ? activeDeck.pictureCount : activeDeck.cardCount} words`
+                  ? t("learn.game.startDeck", {
+                      deck: activeDeck.title,
+                      count: mode === "picture" && activeDeck.pictureCount > 0 ? activeDeck.pictureCount : activeDeck.cardCount,
+                    })
                   : t("workspace.startPlaying")}
               </Button>
             )}
@@ -1201,10 +1214,10 @@ export const GamePlayPageView = memo(function GamePlayPageView({
           <p className="text-sm text-muted-foreground">
             {reviewRound > 0 ? (
               <span className="mr-2 rounded-full bg-rose-500/10 px-2 py-0.5 text-xs font-medium text-rose-600 dark:text-rose-300">
-                Review round {reviewRound}
+                {t("learn.game.reviewRound", { count: reviewRound })}
               </span>
             ) : null}
-            Round {index + 1} of {session.length}
+            {t("workspace.roundOf", { current: index + 1, total: session.length })}
           </p>
           <div className="h-2 overflow-hidden rounded-full bg-muted">
             <div
@@ -1237,17 +1250,17 @@ export const GamePlayPageView = memo(function GamePlayPageView({
         <div className="space-y-5 overflow-hidden rounded-[1.75rem] border border-primary/20 bg-linear-to-br from-primary to-primary/80 px-6 py-8 text-primary-foreground">
           <div>
             <p className="text-[11px] font-semibold tracking-[0.18em] text-primary-foreground/70 uppercase">
-              {missedRounds.length ? "Keep going" : "All learned"}
+              {missedRounds.length ? t("workspace.keepGoing") : t("workspace.allLearned")}
             </p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight">
               {missedRounds.length
-                ? `You know ${correctCount}/${session.length} words`
-                : "You know every word in this set!"}
+                ? t("workspace.youKnowWords", { correct: correctCount, total: session.length })
+                : t("workspace.allWordsSet")}
             </h2>
             <p className="mt-2 max-w-xl text-sm text-primary-foreground/75">
               {missedRounds.length
-                ? `Practice the ${missedRounds.length} word${missedRounds.length > 1 ? "s" : ""} you marked ✗ until none are left.`
-                : "Pick another deck or play this one again."}
+                ? t("learn.game.practiceMissedHint", { count: missedRounds.length })
+                : t("learn.game.pickAnother")}
             </p>
           </div>
           {missedRounds.length ? (
@@ -1270,7 +1283,10 @@ export const GamePlayPageView = memo(function GamePlayPageView({
                 onClick={onPracticeMissed}
               >
                 <RotateCcw className="size-4" />
-                Practice {missedRounds.length} word{missedRounds.length > 1 ? "s" : ""} again
+                {t("workspace.practiceWordsAgain", {
+                  count: missedRounds.length,
+                  plural: missedRounds.length > 1 ? "s" : "",
+                })}
               </Button>
             ) : decks.length ? (
               <Button
@@ -1279,12 +1295,12 @@ export const GamePlayPageView = memo(function GamePlayPageView({
                 onClick={onBackToDecks}
               >
                 <ArrowLeft className="size-4" />
-                All levels
+                {t("workspace.allLevelsGame")}
               </Button>
             ) : null}
             {playsBlocked ? (
               <Button type="button" className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25" onClick={openUpgradeModal}>
-                See plans
+                {t("workspace.seePlans")}
               </Button>
             ) : (
               <Button
@@ -1302,7 +1318,7 @@ export const GamePlayPageView = memo(function GamePlayPageView({
                 onClick={onBackToDecks}
               >
                 <ArrowLeft className="size-4" />
-                All levels
+                {t("workspace.allLevelsGame")}
               </Button>
             ) : null}
             <Button
@@ -1322,15 +1338,15 @@ export const GamePlayPageView = memo(function GamePlayPageView({
             {t("workspace.niceWork")}
           </p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight">
-            You got {correctCount}/{session.length} correct
+            {t("workspace.youGotScore", { correct: correctCount, total: session.length })}
           </h2>
           <p className="mt-2 max-w-xl text-sm text-primary-foreground/75">
-            {t("workspace.playAgain")}, or open a related skill drill to see the same language in a longer exercise.
+            {t("workspace.gameScoreDescription")}
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             {playsBlocked ? (
               <Button type="button" className="rounded-full border-0 bg-white text-[#0b1524] hover:bg-white/90" onClick={openUpgradeModal}>
-                See plans
+                {t("workspace.seePlans")}
               </Button>
             ) : (
               <Button
@@ -1346,7 +1362,7 @@ export const GamePlayPageView = memo(function GamePlayPageView({
               asChild
               className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25"
             >
-              <Link href={`/skills/${game.relatedSkill}`}>Related skill</Link>
+              <Link href={`/skills/${game.relatedSkill}`}>{t("workspace.relatedSkill")}</Link>
             </Button>
             <Button
               asChild

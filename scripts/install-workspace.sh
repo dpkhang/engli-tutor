@@ -11,14 +11,13 @@ usage() {
 Usage: bash ./scripts/install-workspace.sh <workspace>
 
 Workspaces:
-  all       Install root + apps/* + packages/*, then build packages
-  web       Install apps/workspace (+ deps), then build packages
-  landing   Install apps/marketing (+ deps), then build packages
-  ui        Install all packages/*, then build them
-  packages  Alias of ui
+  all        Install root + apps/* + packages/*, then build packages
+  workspace  Install apps/workspace (+ deps), then build packages   (alias: web)
+  marketing  Install apps/marketing (+ deps), then build packages   (alias: landing)
+  packages   Install all packages/*, then build them                (alias: ui)
 
 Package scripts:
-  pnpm install:landing-page       Install all LandingCraft workspaces
+  pnpm install:all                Install all EngliTutor workspaces
   pnpm module:add <package...>    Add dependencies to both applications
 EOF
 }
@@ -35,25 +34,19 @@ case "$TARGET" in
     echo "→ Building packages..."
     pnpm --filter "./packages/*" run build
     ;;
-  web)
-    echo "→ Installing workspace: engli-tutor-fe (web)..."
+  workspace|web)
+    echo "→ Installing workspace: engli-tutor-fe..."
     pnpm install --filter "engli-tutor-fe..."
     echo "→ Building packages..."
     pnpm --filter "./packages/*" run build
     ;;
-  landing)
+  marketing|landing)
     echo "→ Installing workspace: engli-tutor-web..."
     pnpm install --filter "engli-tutor-web..."
     echo "→ Building packages..."
     pnpm --filter "./packages/*" run build
     ;;
-  ui)
-    echo "→ Installing all packages/* workspaces..."
-    pnpm install --filter "./packages/*"
-    echo "→ Building packages..."
-    pnpm --filter "./packages/*" run build
-    ;;
-  packages)
+  packages|ui)
     echo "→ Installing all packages/* workspaces..."
     pnpm install --filter "./packages/*"
     echo "→ Building packages..."

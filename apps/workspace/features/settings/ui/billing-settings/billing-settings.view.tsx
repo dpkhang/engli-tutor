@@ -1,11 +1,11 @@
 "use client";
 
 import { memo } from "react";
-import { LocalizedLink as Link } from "@/features/i18n/localized-link";
+import { LocalizedLink as Link } from "@/features/i18n";
 import { Check, CreditCard, Crown, Gauge, Sparkles } from "lucide-react";
 import { Badge, Button, CardTitle } from "@engli-tutor/ui";
 import { SettingsCard, SettingsCardContent, SettingsCardHeader, SettingsPanel } from "../shared";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 export type BillingFact = {
   label: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 type PageLoadingOverlayProps = {
   open: boolean;

@@ -4,10 +4,6 @@ export const queryKeys = {
     me: ["billing", "me"] as const,
     credits: ["credits", "me"] as const,
   },
-  domains: {
-    all: ["domains"] as const,
-    verification: (id: string) => ["domains", "verification", id] as const,
-  },
   learning: {
     all: ["learning"] as const,
     meta: ["learning", "meta"] as const,

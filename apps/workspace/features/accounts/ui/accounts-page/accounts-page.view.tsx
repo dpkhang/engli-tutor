@@ -27,8 +27,8 @@ import {
   cn,
 } from "@engli-tutor/ui";
 import { PageHeader, DataLoadingState } from "@/features/layout";
-import { LEVELS, type SkillLevel } from "@/features/learn/model/skill-exercises";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { LEVELS, type SkillLevel } from "@/features/learn";
+import { useWorkspaceI18n } from "@/features/i18n";
 import {
   SettingsCard,
   SettingsCardContent,

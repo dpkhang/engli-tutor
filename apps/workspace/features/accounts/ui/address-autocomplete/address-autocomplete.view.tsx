@@ -3,6 +3,7 @@
 import { memo } from "react";
 import { Check, LoaderCircle, MapPin, Search } from "lucide-react";
 import { cn, Input } from "@engli-tutor/ui";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 export type AddressSuggestion = {
   id: string;
@@ -40,6 +41,7 @@ export const AddressAutocompleteView = memo(function AddressAutocompleteView({
   onBlur,
   onSelect,
 }: AddressAutocompleteViewProps) {
+  const t = useWorkspaceI18n();
   return (
     <div className="relative">
       <MapPin className="pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -49,7 +51,7 @@ export const AddressAutocompleteView = memo(function AddressAutocompleteView({
         value={value}
         disabled={disabled}
         autoComplete="street-address"
-        placeholder="Start typing your address…"
+        placeholder={t("accounts.addressPlaceholder")}
         role="combobox"
         aria-autocomplete="list"
         aria-expanded={open && suggestions.length > 0}

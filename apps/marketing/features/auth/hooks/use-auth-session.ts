@@ -1,9 +1,11 @@
 "use client";
 
 import { useSession } from "@/lib/auth-client";
+import { useMarketingI18n } from "@/features/i18n";
 import { getEntryHref } from "../model/session";
 
 export function useAuthSession() {
+  const t = useMarketingI18n();
   const { data, isPending, error } = useSession();
   const user = data?.user ?? null;
   const isLoggedIn = Boolean(user);
@@ -16,7 +18,7 @@ export function useAuthSession() {
     error,
     isLoggedIn,
     entryHref: getEntryHref(isLoggedIn),
-    entryLabel: isLoggedIn ? "Open Workspace" : "Start lesson",
+    entryLabel: isLoggedIn ? t("header.openWorkspace") : t("header.startLesson"),
     getEntryHref: () => getEntryHref(isLoggedIn),
   };
 }

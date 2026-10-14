@@ -1,10 +1,10 @@
 "use client";
 
 import { memo, type FormEvent, type RefObject } from "react";
-import { LocalizedLink as Link } from "@/features/i18n/localized-link";
+import { LocalizedLink as Link } from "@/features/i18n";
 import { BookOpen, Search, X } from "lucide-react";
-import type { LessonPack } from "@/features/learn/model/curriculum";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import type { LessonPack } from "@/features/learn";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 export type LessonSearchViewProps = {
   open: boolean;
@@ -107,7 +107,7 @@ export const LessonSearchView = memo(function LessonSearchView({
                       {lesson.title}
                     </span>
                     <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                      {lesson.level} · {lesson.duration} · {lesson.skills.join(" · ")}
+                      {lesson.level} · {lesson.duration} · {lesson.skills.map((skill) => t(`workspace.${skill.toLowerCase()}`)).join(" · ")}
                     </span>
                   </span>
                 </Link>

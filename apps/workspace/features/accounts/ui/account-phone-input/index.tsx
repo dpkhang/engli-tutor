@@ -9,9 +9,12 @@ import PhoneInput, {
   type Value,
 } from "react-phone-number-input";
 import flags from "react-phone-number-input/flags";
+import enLabels from "react-phone-number-input/locale/en.json";
+import viLabels from "react-phone-number-input/locale/vi.json";
 import { cn } from "@engli-tutor/ui";
 import { X } from "lucide-react";
 import { PhoneCountrySelect } from "../phone-country-select";
+import { useWorkspaceI18n, useWorkspaceLocale } from "@/features/i18n";
 
 const PRIORITY_COUNTRIES: Array<Country | "|" | "..."> = [
   "VN",
@@ -56,6 +59,8 @@ export const AccountPhoneInput = memo(function AccountPhoneInput({
   className,
   onChange,
 }: AccountPhoneInputProps) {
+  const t = useWorkspaceI18n();
+  const locale = useWorkspaceLocale();
   const valid = useMemo(() => getPhoneValidity(value), [value]);
   const showError = Boolean(value) && !valid;
   const nationalRef = useRef(nationalDigits(value));
@@ -101,18 +106,19 @@ export const AccountPhoneInput = memo(function AccountPhoneInput({
         value={value || undefined}
         defaultCountry="VN"
         flags={flags}
+        labels={locale === "vi" ? viLabels : enLabels}
         international
         countryCallingCodeEditable={false}
         countryOptionsOrder={PRIORITY_COUNTRIES}
         countrySelectComponent={PhoneCountrySelect}
         disabled={disabled}
         autoComplete="tel"
-        placeholder="Phone number"
+        placeholder={t("accounts.phoneNumber")}
         onChange={handleChange}
         onCountryChange={handleCountryChange}
       />
       {value && !disabled ? (
-        <button type="button" aria-label="Clear phone number"
+        <button type="button" aria-label={t("accounts.clearPhone")}
           className="absolute right-2 top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-primary"
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => { handleChange(undefined); document.getElementById(id)?.focus(); }}>
@@ -121,7 +127,7 @@ export const AccountPhoneInput = memo(function AccountPhoneInput({
       ) : null}
       </div>
       {showError ? (
-        <p className="text-xs text-destructive">Enter a valid phone number</p>
+        <p className="text-xs text-destructive">{t("accounts.invalidPhone")}</p>
       ) : null}
     </div>
   );

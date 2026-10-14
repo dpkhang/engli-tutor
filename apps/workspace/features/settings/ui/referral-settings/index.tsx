@@ -3,23 +3,26 @@
 import { useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "@engli-tutor/api-client";
+import type { Translator } from "@engli-tutor/i18n";
 import { referralsApi } from "@/features/referrals";
-import { billingMeQueryKey } from "@/features/payments/hooks/use-billing";
-import { formatBillingDateTime } from "@/features/payments/model/plans";
+import { billingMeQueryKey } from "@/features/payments";
+import { formatBillingDateTime } from "@/features/payments";
 import { queryKeys } from "@/lib/query";
+import { useWorkspaceI18n } from "@/features/i18n";
 import { ReferralSettingsView, type ReferralRedemptionRow } from "./referral-settings.view";
 
 function normalizeReferralCode(code: string) {
   return code.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
 
-function referralErrorMessage(error: unknown) {
+function referralErrorMessage(error: unknown, t: Translator) {
   if (error instanceof ApiError) return error.message;
   if (error instanceof Error) return error.message;
-  return "Could not redeem the referral code. Try again.";
+  return t("settings.referral.redeemFailed");
 }
 
 export function ReferralSettings() {
+  const t = useWorkspaceI18n();
   const queryClient = useQueryClient();
   const [manualCode, setManualCode] = useState("");
   const [copied, setCopied] = useState<"code" | "link" | null>(null);
@@ -36,7 +39,7 @@ export function ReferralSettings() {
       setManualCode("");
       setNotice({
         tone: "success",
-        message: `Referral redeemed. You received ${result.referredDays} days of Premium.`,
+        message: t("settings.referral.redeemedNotice", { days: result.referredDays }),
       });
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.referrals.me }),
@@ -44,7 +47,7 @@ export function ReferralSettings() {
       ]);
     },
     onError: (error) => {
-      setNotice({ tone: "error", message: referralErrorMessage(error) });
+      setNotice({ tone: "error", message: referralErrorMessage(error, t) });
     },
   });
 

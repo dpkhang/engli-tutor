@@ -1,14 +1,16 @@
-import { isSkillLevel, type SkillLevel } from "@/features/learn/model/skill-exercises";
+import { isSkillLevel, type SkillLevel } from "@/features/learn";
 
 export const LEVEL_STORAGE_KEY = "englitutor-preferred-level";
 export const SPEECH_RATE_KEY = "englitutor-speech-rate";
 export const AUTOPLAY_LISTENING_KEY = "englitutor-autoplay-listening";
-export const THEME_STORAGE_KEY = "pagecraft-theme";
+export const THEME_STORAGE_KEY = "englitutor-theme";
+/** Key used before the rebrand; still read (and migrated) so saved themes survive. */
+export const LEGACY_THEME_STORAGE_KEY = "pagecraft-theme";
 export const ACCENT_STORAGE_KEY = "englitutor-accent";
 export const TEXT_SIZE_STORAGE_KEY = "englitutor-text-size";
 export const REDUCE_MOTION_STORAGE_KEY = "englitutor-reduce-motion";
 export const PREFERENCES_EVENT = "englitutor-preferences";
-export const THEME_EVENT = "pagecraft-theme";
+export const THEME_EVENT = "englitutor-theme";
 
 export type SpeechRateId = "slow" | "normal" | "fast";
 export type ThemePreference =
@@ -76,29 +78,29 @@ export const ACCENTS: Array<{ id: AccentId; label: string; swatch: string }> = [
   { id: "slate", label: "Slate", swatch: "215 22% 42%" },
 ];
 
-export const TEXT_SIZES: Array<{ id: TextSizeId; label: string; hint: string }> = [
-  { id: "default", label: "Default", hint: "16px" },
-  { id: "comfortable", label: "Comfortable", hint: "A bit larger" },
-  { id: "large", label: "Large", hint: "Easier to read" },
+export const TEXT_SIZES: Array<{ id: TextSizeId; labelKey: string; hintKey: string }> = [
+  { id: "default", labelKey: "settings.textSize.default", hintKey: "settings.textSize.defaultHint" },
+  { id: "comfortable", labelKey: "settings.textSize.comfortable", hintKey: "settings.textSize.comfortableHint" },
+  { id: "large", labelKey: "settings.textSize.large", hintKey: "settings.textSize.largeHint" },
 ];
 
 export const REDUCE_MOTION_OPTIONS: Array<{
   id: ReduceMotionPreference;
-  label: string;
-  hint: string;
+  labelKey: string;
+  hintKey: string;
 }> = [
-  { id: "system", label: "System", hint: "Match your device" },
-  { id: "on", label: "Reduce", hint: "Fewer animations" },
-  { id: "off", label: "Keep motion", hint: "Always animate" },
+  { id: "system", labelKey: "workspace.system", hintKey: "settings.motion.systemHint" },
+  { id: "on", labelKey: "settings.motion.reduce", hintKey: "settings.motion.reduceHint" },
+  { id: "off", labelKey: "settings.motion.keep", hintKey: "settings.motion.keepHint" },
 ];
 
 export const SPEECH_RATES: Record<
   SpeechRateId,
-  { label: string; hint: string; tts: number; audio: number }
+  { labelKey: string; hintKey: string; tts: number; audio: number }
 > = {
-  slow: { label: "Slow", hint: "Easier for dictation", tts: 0.82, audio: 0.85 },
-  normal: { label: "Normal", hint: "Natural pace", tts: 0.94, audio: 1 },
-  fast: { label: "Faster", hint: "Closer to native speed", tts: 1.08, audio: 1.15 },
+  slow: { labelKey: "settings.speechRate.slow", hintKey: "settings.speechRate.slowHint", tts: 0.82, audio: 0.85 },
+  normal: { labelKey: "settings.speechRate.normal", hintKey: "settings.speechRate.normalHint", tts: 0.94, audio: 1 },
+  fast: { labelKey: "settings.speechRate.fast", hintKey: "settings.speechRate.fastHint", tts: 1.08, audio: 1.15 },
 };
 
 function notifyPreferences() {
@@ -122,7 +124,7 @@ function queueAppearanceSync() {
       appearanceAccent: getAccentPreference(),
       appearanceTextSize: getTextSizePreference(),
     };
-    void import("@/features/accounts/api").then(({ accountApi }) => {
+    void import("@/features/accounts/api/accounts-api").then(({ accountApi }) => {
       if (!appearanceSyncArmed || generation !== appearanceGeneration) return;
       return accountApi.update(appearance);
     }).catch(() => undefined);
@@ -151,7 +153,7 @@ export function resetAccountAppearance() {
 export async function hydrateAppearancePreferences(expectedUserId?: string) {
   disarmAppearanceSync();
   const generation = appearanceGeneration;
-  const { accountApi } = await import("@/features/accounts/api");
+  const { accountApi } = await import("@/features/accounts/api/accounts-api");
   const profile = await accountApi.get();
   if (generation !== appearanceGeneration || (expectedUserId && profile.id !== expectedUserId)) return false;
   applyingRemoteAppearance = true;
@@ -237,7 +239,14 @@ export function applyLearningPreferences(prefs: {
 export function getThemePreference(): ThemePreference {
   if (typeof window === "undefined") return "system";
   const stored = localStorage.getItem(THEME_STORAGE_KEY);
-  return isThemePreference(stored) ? stored : "system";
+  if (isThemePreference(stored)) return stored;
+  const legacy = localStorage.getItem(LEGACY_THEME_STORAGE_KEY);
+  if (isThemePreference(legacy)) {
+    localStorage.setItem(THEME_STORAGE_KEY, legacy);
+    localStorage.removeItem(LEGACY_THEME_STORAGE_KEY);
+    return legacy;
+  }
+  return "system";
 }
 
 function paintTheme(theme: ThemePreference) {

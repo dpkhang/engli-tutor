@@ -2,9 +2,10 @@
 
 import { useCallback, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { notificationsApi, type NotificationPreferences } from "@/features/notifications/api";
-import { dropSubscription, enableDevicePush, preferencePayload } from "@/features/notifications/push-client";
+import { notificationsApi, type NotificationPreferences } from "@/features/notifications";
+import { dropSubscription, enableDevicePush, preferencePayload } from "@/features/notifications";
 import { queryKeys } from "@/lib/query";
+import { useWorkspaceI18n } from "@/features/i18n";
 import { NotificationSettingsView } from "./notification-settings.view";
 
 type Draft = Omit<NotificationPreferences, "configured" | "reminderTimeZone">;
@@ -20,6 +21,7 @@ function anyEnabled(prefs: Draft) {
 }
 
 export function NotificationSettings() {
+  const t = useWorkspaceI18n();
   const queryClient = useQueryClient();
   const notificationsQuery = useQuery({
     queryKey: queryKeys.notifications,
@@ -38,7 +40,7 @@ export function NotificationSettings() {
       setNotice(null);
       try {
         if (anyEnabled(next)) {
-          const device = await enableDevicePush();
+          const device = await enableDevicePush(t);
           if (!device.ok) {
             setNotice(device.message);
             return;
@@ -48,15 +50,15 @@ export function NotificationSettings() {
         queryClient.setQueryData(queryKeys.notifications, saved);
         if (!anyEnabled(saved)) await dropSubscription();
         if (anyEnabled(saved) && !saved.configured) {
-          setNotice("Notifications are not available on this server yet.");
+          setNotice(t("settings.notifications.notConfigured"));
         }
       } catch (error) {
-        setNotice(error instanceof Error ? error.message : "Could not save notifications.");
+        setNotice(error instanceof Error ? error.message : t("settings.notifications.saveFailed"));
       } finally {
         setPending(false);
       }
     },
-    [queryClient],
+    [queryClient, t],
   );
 
   const save = useCallback(

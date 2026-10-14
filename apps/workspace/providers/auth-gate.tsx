@@ -4,7 +4,8 @@ import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { BrandLogo } from "@engli-tutor/ui";
-import { getMarketingUrl, useSession } from "@/lib/auth-client";
+import { SESSION_SYNC_PATH } from "@engli-tutor/auth";
+import { getMarketingUrl, redirectAfterSignIn, useSession } from "@/lib/auth-client";
 import { isLocale, type Locale } from "@engli-tutor/i18n";
 import { accountApi } from "@/features/accounts";
 import {
@@ -17,6 +18,7 @@ import {
 import { useSignOutLoading } from "@/features/layout";
 import { CACHE_TIMES, queryKeys } from "@/lib/query";
 import { withCurrentLocale } from "@/lib/locale-path";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 const LOGIN_PATH = "/login";
 
@@ -30,7 +32,7 @@ function stripLocale(pathname: string): { locale: Locale | null; path: string } 
 function isPublicPath(pathname: string) {
   return (
     pathname === LOGIN_PATH ||
-    pathname === "/domain-unavailable" ||
+    pathname === SESSION_SYNC_PATH ||
     pathname.startsWith("/policy")
   );
 }
@@ -67,6 +69,7 @@ function getSafeReturnTo(): string {
 }
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
+  const t = useWorkspaceI18n();
   const pathname = usePathname();
   const router = useRouter();
   const { locale, path: routePath } = stripLocale(pathname);
@@ -108,7 +111,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
     if (isLogin && user) {
       redirected.current = true;
-      window.location.replace(getSafeReturnTo());
+      void redirectAfterSignIn(getSafeReturnTo());
       return;
     }
 
@@ -166,30 +169,30 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   if (isLogin) {
     if (isPending || user) {
-      return <AuthSplash message={user ? "Opening workspace..." : "Checking session..."} />;
+      return <AuthSplash message={user ? t("shell.opening") : t("shell.checkingSession")} />;
     }
     return <>{children}</>;
   }
 
   if (isPending && !isPublic) {
-    return <AuthSplash message="Preparing workspace..." />;
+    return <AuthSplash message={t("shell.preparing")} />;
   }
 
   if (isPublic) return <>{children}</>;
 
-  if (isPending) return <AuthSplash message="Preparing workspace..." />;
-  if (!user) return <AuthSplash message="Redirecting to sign in..." />;
+  if (isPending) return <AuthSplash message={t("shell.preparing")} />;
+  if (!user) return <AuthSplash message={t("shell.redirectingSignIn")} />;
 
   if (!isOnboarding && !isWelcome && !isPaymentResult && !profileReady) {
-    return <AuthSplash message="Preparing workspace..." />;
+    return <AuthSplash message={t("shell.preparing")} />;
   }
 
   if (!isOnboarding && !isWelcome && !isPaymentResult && needsSetup) {
-    return <AuthSplash message="Setting up your path..." />;
+    return <AuthSplash message={t("shell.settingUpPath")} />;
   }
 
   if (!isOnboarding && !isWelcome && !isPaymentResult && needsWelcome) {
-    return <AuthSplash message="Welcome in..." />;
+    return <AuthSplash message={t("shell.welcomeIn")} />;
   }
 
   return <>{children}</>;

@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, type FormEvent } from "react";
-import { LocalizedLink as Link } from "@/features/i18n/localized-link";
+import { LocalizedLink as Link } from "@/features/i18n";
 import { useRouter } from "next/navigation";
 import { withCurrentLocale } from "@/lib/locale-path";
 import {
@@ -18,8 +18,8 @@ import { Button, cn, Input } from "@engli-tutor/ui";
 import { DataLoadingState } from "@/features/layout";
 import type { LessonPack } from "../../model/curriculum";
 import type { LessonProgressStatus } from "../../model/lesson-progress";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
-import { LocalizedLink } from "@/features/i18n/localized-link";
+import { useWorkspaceI18n } from "@/features/i18n";
+import { LocalizedLink } from "@/features/i18n";
 
 export const SKILL_FILTERS = ["All", "Listening", "Speaking", "Reading", "Writing"] as const;
 export type LessonSkillFilter = (typeof SKILL_FILTERS)[number];
@@ -144,7 +144,7 @@ export const LessonsPageView = memo(function LessonsPageView({
                     : "border-border bg-card text-muted-foreground hover:text-foreground",
                 )}
               >
-                {skill}
+                {skill === "All" ? t("learn.all") : t(`workspace.${skill.toLowerCase()}`)}
               </Link>
             );
           })}
@@ -176,7 +176,7 @@ export const LessonsPageView = memo(function LessonsPageView({
                   ? "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400"
                   : "border-border bg-background text-muted-foreground hover:text-rose-500",
               )}
-              aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+              aria-label={favorited ? t("workspace.removeFavorite") : t("workspace.addFavorite")}
               aria-pressed={favorited}
               onClick={() => onToggleFavorite(lesson.id)}
             >
@@ -201,7 +201,7 @@ export const LessonsPageView = memo(function LessonsPageView({
                 <Timer className="size-3.5" />
                 {lesson.duration}
               </span>
-              <span className="text-xs font-medium text-accent">{lesson.skills.join(" · ")}</span>
+              <span className="text-xs font-medium text-accent">{lesson.skills.map((skill) => t(`workspace.${skill.toLowerCase()}`)).join(" · ")}</span>
             </div>
 
             <h2 className="mt-4 text-xl font-semibold tracking-tight transition-colors group-hover:text-primary">
