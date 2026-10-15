@@ -20,4 +20,5 @@ export {
   setPreferredLevel,
   getSpeechRateId,
   resolveSpeechRates,
+  resetAccountAppearance,
 } from "./model/preferences";

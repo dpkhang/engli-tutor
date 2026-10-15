@@ -1,5 +1,8 @@
+"use client";
+
 import { ArrowRight, DatabaseZap } from "lucide-react";
 import { Badge, Button, Card, CardContent } from "@engli-tutor/ui";
+import { useWorkspaceI18n } from "@/features/i18n";
 import { PageHeader } from "./page-header";
 
 export type ModuleCapability = {
@@ -19,13 +22,14 @@ export function ModulePlaceholder({
   description: string;
   capabilities: ModuleCapability[];
 }) {
+  const t = useWorkspaceI18n();
   return (
     <div className="space-y-8">
       <PageHeader
         eyebrow={eyebrow}
         title={title}
         description={description}
-        action={<Badge variant="secondary">UI ready · awaiting API</Badge>}
+        action={<Badge variant="secondary">{t("shell.awaitingApi")}</Badge>}
       />
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {capabilities.map((item) => (
@@ -48,7 +52,7 @@ export function ModulePlaceholder({
       <div className="flex items-start gap-3 rounded-xl border border-dashed bg-card p-5 text-sm text-muted-foreground">
         <DatabaseZap className="mt-0.5 size-5 shrink-0 text-primary" />
         <p>
-          This module already has a route and navigation. Add the matching database model and API before enabling data writes.
+          {t("shell.modulePlaceholderNote")}
         </p>
       </div>
     </div>

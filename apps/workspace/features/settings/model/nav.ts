@@ -12,7 +12,7 @@ import {
 export type SettingsSection = {
   href: string;
   label: string;
-  description: string;
+  descriptionKey: string;
   icon: LucideIcon;
   match: "exact" | "prefix";
 };
@@ -21,49 +21,49 @@ export const SETTINGS_NAV: SettingsSection[] = [
   {
     href: "/settings/account",
     label: "Account",
-    description: "Name, work details, and learning profile",
+    descriptionKey: "workspace.accountDescription",
     icon: UserRound,
     match: "prefix",
   },
   {
     href: "/settings",
     label: "Appearance",
-    description: "Theme, color, text size, and motion",
+    descriptionKey: "workspace.appearanceDescription",
     icon: Monitor,
     match: "exact",
   },
   {
     href: "/settings/learning",
     label: "Learning",
-    description: "Level, playback speed, and listening",
+    descriptionKey: "workspace.learningDescription",
     icon: Target,
     match: "prefix",
   },
   {
     href: "/settings/notifications",
     label: "Notifications",
-    description: "Reminders, lessons, and billing",
+    descriptionKey: "workspace.notificationsDescription",
     icon: Bell,
     match: "prefix",
   },
   {
     href: "/settings/security",
     label: "Security",
-    description: "Password and signed-in devices",
+    descriptionKey: "workspace.securityDescription",
     icon: KeyRound,
     match: "prefix",
   },
   {
     href: "/settings/referrals",
     label: "Referrals",
-    description: "Invite friends and redeem codes",
+    descriptionKey: "workspace.referralsDescription",
     icon: Gift,
     match: "prefix",
   },
   {
     href: "/settings/billing",
     label: "Billing",
-    description: "Plan, usage, and payments",
+    descriptionKey: "workspace.billingDescription",
     icon: CreditCard,
     match: "prefix",
   },

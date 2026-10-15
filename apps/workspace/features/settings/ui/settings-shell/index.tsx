@@ -3,9 +3,9 @@
 import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { accountApi } from "@/features/accounts/api";
-import { billingApi } from "@/features/payments/api/billing";
-import { billingMeQueryKey } from "@/features/payments/hooks/use-billing";
+import { accountApi } from "@/features/accounts";
+import { billingApi } from "@/features/payments";
+import { billingMeQueryKey } from "@/features/payments";
 import { queryKeys } from "@/lib/query";
 import { SETTINGS_NAV, getSettingsSection } from "../../model/nav";
 import { SettingsShellView } from "./settings-shell.view";

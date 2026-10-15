@@ -1,4 +1,4 @@
-import type { AccountProfile } from "../api";
+import type { AccountProfile } from "../api/accounts-api";
 
 const CHANNEL_NAME = "englitutor-account";
 const STORAGE_KEY = "englitutor-account-sync";

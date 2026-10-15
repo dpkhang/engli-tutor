@@ -2,8 +2,9 @@
 
 import { useMemo } from "react";
 import { useSession } from "@/lib/auth-client";
-import { useBillingMe } from "@/features/payments/hooks/use-billing";
-import { planBadgeLabel } from "@/features/payments/model/plans";
+import { useBillingMe } from "@/features/payments";
+import { planBadgeLabel } from "@/features/payments";
+import { useWorkspaceI18n } from "@/features/i18n";
 import { useLessonPacks } from "../../hooks/use-learning-catalog";
 import { useLessonProgress } from "../../hooks/use-lesson-progress";
 import type { LessonPack } from "../../model/curriculum";
@@ -37,6 +38,7 @@ function dayOfYear(date = new Date()) {
 }
 
 export function LearnHome() {
+  const t = useWorkspaceI18n();
   const { data: session } = useSession();
   const { packs } = useLessonPacks();
   const { progress, hydrated } = useLessonProgress();
@@ -44,7 +46,9 @@ export function LearnHome() {
 
   const firstName = useMemo(
     () =>
-      session?.user?.name?.trim()?.split(/\s+/)[0] || session?.user?.email?.split("@")[0] || "there",
+      session?.user?.name?.trim()?.split(/\s+/)[0] ||
+      session?.user?.email?.split("@")[0] ||
+      "there",
     [session?.user?.name, session?.user?.email],
   );
 
@@ -71,7 +75,7 @@ export function LearnHome() {
             level: lesson.level,
             duration: lesson.duration,
             focus: lesson.focus,
-            href: `/practice?scenario=${lesson.scenario}&lesson=${lesson.id}`,
+            href: `/practice`,
             updatedAt: entry.updatedAt,
           },
         ];
@@ -90,7 +94,7 @@ export function LearnHome() {
             kind: "lesson" as const,
             title: lesson.title,
             meta: `${lesson.level} · ${lesson.duration}`,
-            href: `/practice?scenario=${lesson.scenario}&lesson=${lesson.id}`,
+            href: `/practice`,
             updatedAt: entry.updatedAt,
           },
         ];
@@ -107,7 +111,7 @@ export function LearnHome() {
             id: `exercise-${entry.skillId}-${entry.exerciseId}`,
             kind: "exercise" as const,
             title: exercise.title,
-            meta: `${skill.labelEn} · ${exercise.level}`,
+            meta: `${t(`workspace.${skill.id}`)} · ${exercise.level}`,
             href: skillExerciseHref(entry.skillId, entry.exerciseId, exercise.level),
             updatedAt: entry.updatedAt,
           },
@@ -115,7 +119,7 @@ export function LearnHome() {
       });
 
     return [...lessons, ...exercises].sort(byUpdatedAtDesc).slice(0, 6);
-  }, [packById, progress.exerciseFavorites, progress.favorites]);
+  }, [packById, progress.exerciseFavorites, progress.favorites, t]);
 
   const finishedItems = useMemo((): HomeFinishedItem[] => {
     return [...progress.completed]
@@ -129,7 +133,7 @@ export function LearnHome() {
             id: lesson.id,
             title: lesson.title,
             level: lesson.level,
-            href: `/practice?scenario=${lesson.scenario}&lesson=${lesson.id}`,
+            href: `/practice`,
             updatedAt: entry.updatedAt,
           },
         ];
@@ -149,7 +153,7 @@ export function LearnHome() {
       return [
         {
           id: `${skillId}-${exercise.id}`,
-          skillLabel: skill.labelEn,
+          skillLabel: t(`workspace.${skill.id}`),
           title: exercise.title,
           level: exercise.level,
           duration: exercise.duration,
@@ -157,11 +161,11 @@ export function LearnHome() {
         },
       ];
     });
-  }, []);
+  }, [t]);
 
   const snapshot = useMemo((): HomeSnapshot => {
     return {
-      plan: planBadgeLabel(billing.data),
+      plan: planBadgeLabel(billing.data, t),
       planLoading: billing.isLoading,
       started: progress.started.length,
       completed: progress.completed.length,
@@ -174,6 +178,7 @@ export function LearnHome() {
     progress.exerciseFavorites.length,
     progress.favorites.length,
     progress.started.length,
+    t,
   ]);
 
   const dailyChallenge = useMemo((): HomeDailyChallenge => {

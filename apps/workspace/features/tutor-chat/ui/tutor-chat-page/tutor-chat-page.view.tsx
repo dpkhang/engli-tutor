@@ -1,10 +1,9 @@
 "use client";
 
 import { memo, type FormEvent, type KeyboardEvent, type RefObject } from "react";
-import { useUpgradeModal } from "@/features/payments/ui/upgrade-modal-provider";
+import { useUpgradeModal } from "@/features/payments";
 import {
   BrainCircuit,
-  Crown,
   LoaderCircle,
   MessageCircle,
   Mic,
@@ -15,102 +14,62 @@ import {
   Square,
 } from "lucide-react";
 import { Button, cn } from "@engli-tutor/ui";
-import { type TutorChatMessage, type TutorScenario } from "../../api";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { type TutorChatMessage } from "../../api/tutor-api";
+import { useWorkspaceI18n } from "@/features/i18n";
 
-export const SCENARIOS: { id: TutorScenario; label: string; hint: string }[] = [
-  { id: "interview", label: "Interview", hint: "Behavioral & project questions" },
-  { id: "standup", label: "Stand-up", hint: "Short daily update" },
-  { id: "smalltalk", label: "Small talk", hint: "Office conversation" },
-  { id: "email", label: "Email", hint: "Draft / edit a short email" },
-  { id: "free", label: "Free", hint: "You pick the topic" },
-];
-
-export const STARTERS: Record<TutorScenario, string> = {
-  interview:
-    "Hi! I'm EngliTutor. Let's practice a job interview. Tell me briefly about yourself and your current role.",
-  standup:
-    "Good morning! Let's do a quick standup. What did you finish yesterday, and what's on your plate today?",
-  smalltalk: "Hey! How's your week going so far? Feel free to answer in a few short sentences.",
-  email:
-    "Let's practice work writing. Describe the email you need — who it's for and what you want them to do.",
-  free: "Hi! I'm ready to practice English with you. What topic would you like to talk about today?",
-};
+export const CHAT_STARTER =
+  "Hi! I'm ready to practice English with you. What would you like to talk about today?";
 
 type ChatMessage = TutorChatMessage & { audioUrl?: string; streaming?: boolean };
 
-function splitCoach(content: string): { english: string; tip: string | null } {
+/** Drops a trailing "💬 Tips:" block if the model still adds one. */
+function stripTips(content: string): string {
   const marker = content.indexOf("💬");
-  if (marker === -1) return { english: content.trim(), tip: null };
-  return {
-    english: content.slice(0, marker).trim(),
-    tip: content.slice(marker).trim(),
-  };
+  return (marker === -1 ? content : content.slice(0, marker)).trim();
 }
 
-export type TutorChatLesson = {
-  title: string;
-  skills: string[];
-  duration: string;
-  focus: string;
-};
-
 export type TutorChatPageViewProps = {
-  lesson: TutorChatLesson | undefined;
-  scenario: TutorScenario;
   messages: ChatMessage[];
   draft: string;
   pending: boolean;
   error: string | null;
   showUpgrade: boolean;
-  lockedScenarios: TutorScenario[];
   demoMode: boolean;
-  pendingAudioUrl: string | null;
   voiceRecording: boolean;
   voiceSupported: boolean;
   voiceSpeechSupported: boolean;
   voiceError: string | null;
   micDisabled: boolean;
-  scenarioLabel: string | undefined;
   messageListRef: RefObject<HTMLDivElement | null>;
   composerRef: RefObject<HTMLDivElement | null>;
   inputRef: RefObject<HTMLTextAreaElement | null>;
   onResetCurrent: () => void;
-  onSelectScenario: (id: TutorScenario) => void;
   onDraftChange: (value: string) => void;
   onDraftKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
   onSubmit: (event: FormEvent) => void;
   onToggleMic: () => void;
-  onDeleteAudio: () => void;
 };
 
 export const TutorChatPageView = memo(function TutorChatPageView({
-  lesson,
-  scenario,
   messages,
   draft,
   pending,
   error,
   showUpgrade,
-  lockedScenarios,
   demoMode,
-  pendingAudioUrl,
   voiceRecording,
   voiceSupported,
   voiceSpeechSupported,
   voiceError,
   micDisabled,
-  scenarioLabel,
   messageListRef,
   composerRef,
   inputRef,
   onResetCurrent,
-  onSelectScenario,
   onDraftChange,
   onDraftKeyDown,
   onSubmit,
   onToggleMic,
-  onDeleteAudio,
 }: TutorChatPageViewProps) {
   const t = useWorkspaceI18n();
   const { openUpgradeModal } = useUpgradeModal();
@@ -128,61 +87,12 @@ export const TutorChatPageView = memo(function TutorChatPageView({
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="relative max-w-2xl space-y-2">
             <h1 className="text-xl font-semibold tracking-tight text-white sm:text-4xl">
-              {lesson ? lesson.title : t("workspace.chatTutor")}
+              {t("workspace.chatTutor")}
             </h1>
             <p className="hidden text-sm leading-relaxed text-white/70 sm:block sm:text-base">
-              {lesson
-                ? `${lesson.skills.join(" · ")} · ${lesson.duration} · ${lesson.focus}`
-                : t("workspace.chatDescription")}
+              {t("workspace.chatDescription")}
             </p>
           </div>
-          <Button
-            type="button"
-            className="relative h-9 rounded-full border-0 bg-white text-primary hover:bg-white/90 sm:h-10"
-            onClick={onResetCurrent}
-          >
-            <RefreshCw className="size-4" />
-            {t("workspace.newConversation")}
-          </Button>
-        </div>
-
-        <div className="flex flex-wrap gap-2 pt-1">
-          {SCENARIOS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => onSelectScenario(item.id)}
-              className={cn(
-                "shrink-0 rounded-full border px-3 py-1.5 text-left text-sm transition-colors sm:px-3.5 sm:py-2",
-                scenario === item.id
-                  ? "border-white bg-white text-primary"
-                  : "border-white/15 bg-white/6 text-white/65 hover:bg-white/10 hover:text-white",
-              )}
-            >
-              <span className="font-medium">{item.label}</span>
-              {lockedScenarios.includes(item.id) ? (
-                <span
-                  className={cn(
-                    "ml-1.5 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase",
-                    scenario === item.id
-                      ? "bg-primary/10 text-primary"
-                      : "bg-amber-300/20 text-amber-200",
-                  )}
-                >
-                  <Crown className="size-2.5" />
-                  {t("workspace.premium")}
-                </span>
-              ) : null}
-              <span
-                className={cn(
-                  "ml-2 hidden text-xs sm:inline",
-                  scenario === item.id ? "text-primary/70" : "text-white/40",
-                )}
-              >
-                {item.hint}
-              </span>
-            </button>
-          ))}
         </div>
 
         {demoMode ? (
@@ -198,20 +108,29 @@ export const TutorChatPageView = memo(function TutorChatPageView({
           <span className="grid size-9 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm">
             <MessageCircle className="size-4" />
           </span>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-foreground">EngliTutor AI</p>
             <p className="truncate text-xs text-muted-foreground">
-              {scenarioLabel} · A2–B1 · {t("workspace.voiceInputSupported")}
+              A2–B1 · {t("workspace.voiceInputSupported")}
             </p>
           </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="shrink-0 rounded-full text-muted-foreground hover:text-foreground"
+            onClick={onResetCurrent}
+            aria-label={t("workspace.newConversation")}
+            title={t("workspace.newConversation")}
+          >
+            <RefreshCw className="size-4" />
+          </Button>
         </div>
 
         <div ref={messageListRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-5">
           {messages.map((message, index) => {
             const isUser = message.role === "user";
-            const { english, tip } = isUser
-              ? { english: message.content, tip: null }
-              : splitCoach(message.content);
+            const english = isUser ? message.content : stripTips(message.content);
 
             return (
               <div
@@ -261,11 +180,6 @@ export const TutorChatPageView = memo(function TutorChatPageView({
                       src={message.audioUrl}
                       className={cn("h-9 max-w-full", isUser ? "accent-white" : undefined)}
                     />
-                  ) : null}
-                  {tip ? (
-                    <div className="rounded-2xl border border-accent/25 bg-accent/8 px-3.5 py-2.5 text-sm leading-relaxed text-foreground whitespace-pre-wrap">
-                      {tip}
-                    </div>
                   ) : null}
                 </div>
               </div>
@@ -321,28 +235,6 @@ export const TutorChatPageView = memo(function TutorChatPageView({
             </div>
           ) : null}
 
-          {pendingAudioUrl && !voiceRecording ? (
-            <div className="mb-3 grid grid-cols-[1fr_auto] items-center gap-2 rounded-2xl border border-border bg-muted/50 p-3 sm:flex sm:gap-3 sm:px-3.5 sm:py-2.5">
-              <p className="text-xs font-medium text-muted-foreground sm:shrink-0">
-                {t("workspace.lastRecording")}
-              </p>
-              <audio
-                controls
-                src={pendingAudioUrl}
-                className="col-span-2 h-9 w-full min-w-0 sm:order-0 sm:col-auto sm:h-8 sm:flex-1"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="row-start-1 rounded-full text-muted-foreground sm:row-auto"
-                onClick={onDeleteAudio}
-              >
-                {t("workspace.deleteAudio")}
-              </Button>
-            </div>
-          ) : null}
-
           <form
             className="grid grid-cols-[auto_1fr_auto] items-center gap-2 rounded-[1.25rem] border border-border bg-muted/40 p-2 shadow-sm sm:flex sm:items-end sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none"
             onSubmit={onSubmit}
@@ -359,10 +251,10 @@ export const TutorChatPageView = memo(function TutorChatPageView({
               aria-label={voiceRecording ? t("workspace.stopRecording") : t("workspace.record")}
               title={
                 !voiceSupported
-                  ? "Browser does not support recording"
+                  ? t("tutorChat.noRecording")
                   : voiceRecording
-                    ? "Stop recording"
-                    : "Record spoken English"
+                    ? t("workspace.stopRecording")
+                    : t("tutorChat.recordSpoken")
               }
               onClick={onToggleMic}
             >
@@ -398,7 +290,7 @@ export const TutorChatPageView = memo(function TutorChatPageView({
               ) : (
                 <Send className="size-4" />
               )}
-              Send
+              {t("workspace.send")}
             </Button>
           </form>
           <p className="mt-2 hidden flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground sm:flex">

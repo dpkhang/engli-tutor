@@ -13,8 +13,10 @@ import {
   PREFERENCES_EVENT,
   THEME_EVENT,
 } from "../../model/preferences";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 export function AppearanceProvider({ children }: { children: ReactNode }) {
+  const t = useWorkspaceI18n();
   const { data: session, isPending } = useSession();
   const userId = session?.user?.id ?? null;
   const [readyUserId, setReadyUserId] = useState<string | null>(null);
@@ -85,8 +87,8 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
       <AuthSplash
         busy={!hasError}
         message={hasError
-          ? isPending ? "We could not finish checking your session. Please try again." : "Could not load your appearance settings. Please try again."
-          : "Preparing workspace..."}
+          ? isPending ? t("shell.sessionCheckFailed") : t("settings.appearanceLoadFailed")
+          : t("shell.preparing")}
       >
         {hasError ? (
           <button
@@ -97,7 +99,7 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
               else setAttempt((value) => value + 1);
             }}
           >
-            Try again
+            {t("workspace.tryAgain")}
           </button>
         ) : null}
       </AuthSplash>

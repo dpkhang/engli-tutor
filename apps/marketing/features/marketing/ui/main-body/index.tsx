@@ -3,13 +3,15 @@
 import { useCallback, useMemo } from "react";
 import { goToEntry, useAuthSession } from "@/features/auth";
 import { planCheckoutHref, plansFromCatalog, type PlanId } from "../../model/plans";
-import { useBillingCatalog } from "@/features/payment/hooks/use-billing-catalog";
+import { useBillingCatalog } from "@/features/payments";
 import { MainBodyView } from "./main-body.view";
+import { useMarketingI18n } from "@/features/i18n";
 
 export function MainBody() {
+  const t = useMarketingI18n();
   const { entryLabel, isLoggedIn } = useAuthSession();
   const catalog = useBillingCatalog();
-  const plans = useMemo(() => (catalog.data ? plansFromCatalog(catalog.data) : []), [catalog.data]);
+  const plans = useMemo(() => (catalog.data ? plansFromCatalog(catalog.data, t) : []), [catalog.data, t]);
   const visiblePlans = useMemo(
     () => (isLoggedIn ? plans.filter((plan) => plan.id !== "starter") : plans),
     [isLoggedIn, plans],
@@ -19,7 +21,7 @@ export function MainBody() {
   const onEntryClick = useCallback(() => goToEntry(isLoggedIn), [isLoggedIn]);
   const onPlanClick = useCallback(
     (planId: PlanId) => {
-      if (plans.find((plan) => plan.id === planId)?.cta === "Start lesson") {
+      if (plans.find((plan) => plan.id === planId)?.isEntry) {
         goToEntry(isLoggedIn);
         return;
       }

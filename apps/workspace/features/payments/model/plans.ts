@@ -1,3 +1,4 @@
+import type { Translator } from "@engli-tutor/i18n";
 import type { BillingMe, BillingPeriod, PlanLimits, SubscriptionPlan, UsageMetric } from "../api/billing";
 
 export type WorkspacePlanId = string;
@@ -28,10 +29,10 @@ const FALLBACK_STARTER: SubscriptionPlan = {
     yearly: { totalVnd: 0, months: 12, discountPercent: 0 },
   },
   features: [
-    "10 AI tutor messages a day",
-    "20 AI voice replays a day",
-    "Listening, speaking, reading and writing exercises",
-    "English corrections explained in Vietnamese",
+    "billing.starter.featureChat",
+    "billing.starter.featureVoice",
+    "billing.starter.featureSkills",
+    "billing.starter.featureCorrections",
   ],
   cta: "Start speaking practice",
   imageUrl: "/images/plan-starter.png",
@@ -39,38 +40,45 @@ const FALLBACK_STARTER: SubscriptionPlan = {
   isFree: true,
 };
 
-export const STARTER_PLAN = FALLBACK_STARTER;
+function starterPlan(t: Translator): SubscriptionPlan {
+  return {
+    ...FALLBACK_STARTER,
+    name: t("workspace.free"),
+    description: t("billing.starter.description"),
+    features: FALLBACK_STARTER.features.map((key) => t(key)),
+  };
+}
 
 export const BILLING_PERIODS: BillingPeriod[] = ["monthly", "quarterly", "yearly"];
 
-export const STATUS_LABEL: Record<string, string> = {
-  active: "Active",
-  ACTIVE: "Active",
-  past_due: "Past due",
-  PAST_DUE: "Past due",
-  canceled: "Canceled",
-  CANCELED: "Canceled",
-  incomplete: "Incomplete",
-  INCOMPLETE: "Incomplete",
+export const STATUS_LABEL_KEY: Record<string, string> = {
+  active: "checkout.active",
+  ACTIVE: "checkout.active",
+  past_due: "billing.status.pastDue",
+  PAST_DUE: "billing.status.pastDue",
+  canceled: "billing.status.canceled",
+  CANCELED: "billing.status.canceled",
+  incomplete: "billing.status.incomplete",
+  INCOMPLETE: "billing.status.incomplete",
 };
 
-export const PERIOD_LABEL: Record<BillingPeriod, string> = {
-  monthly: "Monthly",
-  quarterly: "3 months",
-  yearly: "Yearly",
+export const PERIOD_LABEL_KEY: Record<BillingPeriod, string> = {
+  monthly: "billing.period.monthly",
+  quarterly: "billing.period.quarterly",
+  yearly: "billing.period.yearly",
 };
 
-export const PERIOD_SUFFIX: Record<BillingPeriod, string> = {
-  monthly: "/ month",
-  quarterly: "/ 3 months",
-  yearly: "/ year",
+export const PERIOD_SUFFIX_KEY: Record<BillingPeriod, string> = {
+  monthly: "billing.periodSuffix.monthly",
+  quarterly: "billing.periodSuffix.quarterly",
+  yearly: "billing.periodSuffix.yearly",
 };
 
-export const USAGE_LABEL: Record<UsageMetric, string> = {
-  tutor_chat: "AI tutor messages",
-  tts: "AI voice",
-  ai_translate: "AI translations",
-  game_session: "Game plays",
+export const USAGE_LABEL_KEY: Record<UsageMetric, string> = {
+  tutor_chat: "billing.usage.tutorChat",
+  tts: "workspace.aiVoice",
+  ai_translate: "billing.usage.aiTranslate",
+  game_session: "billing.usage.gameSession",
 };
 
 export function formatVnd(value: number) {
@@ -142,33 +150,40 @@ export function dailyRemaining(data: BillingMe | undefined, metric: UsageMetric)
 export function usageRows(data: BillingMe | undefined) {
   const limits = data?.entitlements?.limits;
   if (!data || !limits) return [];
-  return (Object.keys(USAGE_LABEL) as UsageMetric[]).map((metric) => {
+  return (Object.keys(USAGE_LABEL_KEY) as UsageMetric[]).map((metric) => {
     const limit = metricLimit(limits, metric);
     const hardCap = limits.enforcement === "block" && limit !== null;
     return {
       metric,
-      label: USAGE_LABEL[metric],
+      labelKey: USAGE_LABEL_KEY[metric],
       used: data.usage?.[metric] ?? 0,
       limit: hardCap ? limit : null,
     };
   });
 }
 
-function planBullets(plan: Pick<SubscriptionPlan, "id" | "benefits" | "features" | "limits">): string[] {
+function planBullets(
+  plan: Pick<SubscriptionPlan, "id" | "benefits" | "features" | "limits">,
+  t: Translator,
+): string[] {
   const benefits = plan.benefits?.length ? plan.benefits : plan.features ?? [];
   const limits = normalizedLimits(plan.id, plan.limits);
-  const allowance = (metric: UsageMetric, label: string) => {
+  const allowance = (metric: UsageMetric, labelKey: string) => {
     const limit = metricLimit(limits, metric);
-    return limits.enforcement === "block" && limit !== null
-      ? `${limit} ${label} a day`
-      : `Unlimited ${label}${limits.enforcement === "throttle" && metric !== "game_session" ? " (fair use)" : ""}`;
+    const label = t(labelKey);
+    if (limits.enforcement === "block" && limit !== null) {
+      return t("billing.bullet.dailyAllowance", { count: limit, label });
+    }
+    return limits.enforcement === "throttle" && metric !== "game_session"
+      ? t("billing.bullet.unlimitedFairUse", { label })
+      : t("billing.bullet.unlimited", { label });
   };
   return [...new Set([
     ...benefits,
-    allowance("ai_translate", "AI translations"),
-    allowance("game_session", "game plays"),
-    limits.fullVocabModes ? "Vocabulary: Flip, Picture quiz and Listen & pick" : "Vocabulary: Flip mode",
-    limits.proScenarios ? "Interview and Standup scenarios included" : "Everyday tutor scenarios (Interview and Standup require Premium)",
+    allowance("ai_translate", "billing.bullet.aiTranslations"),
+    allowance("game_session", "billing.bullet.gamePlays"),
+    t(limits.fullVocabModes ? "billing.bullet.vocabAllModes" : "billing.bullet.vocabFlipOnly"),
+    t(limits.proScenarios ? "billing.bullet.proScenarios" : "billing.bullet.everydayScenarios"),
   ])];
 }
 
@@ -186,7 +201,10 @@ export function currentPlanId(data: BillingMe | undefined): WorkspacePlanId {
   return data.subscription.planId === "free" ? "starter" : data.subscription.planId;
 }
 
-export function currentPlanDetails(data: BillingMe | undefined): {
+export function currentPlanDetails(
+  data: BillingMe | undefined,
+  t: Translator,
+): {
   id: WorkspacePlanId;
   name: string;
   description: string;
@@ -199,10 +217,13 @@ export function currentPlanDetails(data: BillingMe | undefined): {
       id,
       name: fromApi.name,
       description: fromApi.description,
-      features: planBullets(fromApi),
+      features: planBullets(fromApi, t),
     };
   }
-  if (id === "starter") return { ...STARTER_PLAN, features: planBullets(STARTER_PLAN) };
+  if (id === "starter") {
+    const starter = starterPlan(t);
+    return { ...starter, features: planBullets(starter, t) };
+  }
   return { id, name: id, description: "", features: [] };
 }
 
@@ -213,21 +234,21 @@ export function hasPremiumAccess(data: BillingMe | undefined) {
 }
 
 /** Compact header label: remaining free chats, or the active plan name. */
-export function planBadgeLabel(data: BillingMe | undefined): string | undefined {
+export function planBadgeLabel(data: BillingMe | undefined, t: Translator): string | undefined {
   if (!data) return undefined;
   const chat = usageRows(data).find((row) => row.metric === "tutor_chat");
   if (chat && chat.limit !== null) {
-    return `${Math.max(0, chat.limit - chat.used)} chats left`;
+    return t("billing.chatsLeft", { count: Math.max(0, chat.limit - chat.used) });
   }
-  return currentPlanDetails(data).name;
+  return currentPlanDetails(data, t).name;
 }
 
 /** Label for trial / bonus access, e.g. "Trial until Oct 6, 2026". */
-export function accessNote(data: BillingMe | undefined): string | null {
+export function accessNote(data: BillingMe | undefined, t: Translator): string | null {
   const entitlements = data?.entitlements;
   if (!entitlements?.proUntil) return null;
-  const until = formatBillingDate(entitlements.proUntil);
-  return entitlements.source === "trial" ? `Trial until ${until}` : `Bonus access until ${until}`;
+  const date = formatBillingDate(entitlements.proUntil);
+  return t(entitlements.source === "trial" ? "billing.trialUntil" : "billing.bonusUntil", { date });
 }
 
 export type ComparePlan = {
@@ -241,27 +262,31 @@ export type ComparePlan = {
   isFree: boolean;
 };
 
-export function allPlansForCompare(subscriptionPlans: SubscriptionPlan[]): ComparePlan[] {
+export function allPlansForCompare(
+  subscriptionPlans: SubscriptionPlan[],
+  t: Translator,
+): ComparePlan[] {
   const mapped = subscriptionPlans.map((plan) => ({
     id: plan.id,
     name: plan.name,
     description: plan.description,
     priceVndMonthly: plan.priceVndMonthly,
     periodPrices: plan.periodPrices,
-    features: planBullets(plan),
+    features: planBullets(plan, t),
     featured: plan.featured,
     isFree: isFreePlan(plan),
   }));
 
   if (!mapped.some((plan) => plan.isFree)) {
+    const starter = starterPlan(t);
     return [
       {
-        id: STARTER_PLAN.id,
-        name: STARTER_PLAN.name,
-        description: STARTER_PLAN.description,
+        id: starter.id,
+        name: starter.name,
+        description: starter.description,
         priceVndMonthly: 0,
-        periodPrices: STARTER_PLAN.periodPrices,
-        features: planBullets(STARTER_PLAN),
+        periodPrices: starter.periodPrices,
+        features: planBullets(starter, t),
         isFree: true,
       },
       ...mapped,

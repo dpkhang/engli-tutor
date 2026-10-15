@@ -4,7 +4,7 @@ import { memo } from "react";
 import { Check, Copy, Gift, LoaderCircle, Share2, TicketPercent, UsersRound } from "lucide-react";
 import { Alert, AlertDescription, Button, CardTitle, Input } from "@engli-tutor/ui";
 import { SettingsCard, SettingsCardContent, SettingsCardHeader, SettingsPanel } from "../shared";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 export type ReferralRedemptionRow = {
   id: string;
@@ -80,7 +80,7 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
 
             <div className="grid gap-3 rounded-3xl border border-border/70 bg-muted/20 p-3.5 sm:grid-cols-[minmax(0,1fr)_auto]">
               <div className="min-w-0 space-y-2">
-                <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Your code</p>
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">{t("workspace.yourCode")}</p>
                 <p className="break-all font-mono text-2xl font-semibold tracking-wider text-foreground">{code}</p>
                 <p className="truncate text-xs text-muted-foreground">{shareUrl}</p>
               </div>

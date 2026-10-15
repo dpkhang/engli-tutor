@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import { tutorApi } from "@/features/tutor-chat/api";
+import { tutorApi } from "@/features/tutor-chat";
 import { resolveSpeechRates } from "@/features/settings";
 
 function pickEnglishVoice(): SpeechSynthesisVoice | null {

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { withCurrentLocale } from "@/lib/locale-path";
-import { useLessonPacks } from "@/features/learn/hooks/use-learning-catalog";
+import { useLessonPacks } from "@/features/learn";
 import { LessonSearchView } from "./lesson-search.view";
 
 function normalize(value: string) {

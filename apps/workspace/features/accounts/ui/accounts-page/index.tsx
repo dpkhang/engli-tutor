@@ -1,6 +1,6 @@
 "use client";
 
-import { resetAccountAppearance } from "@/features/settings/model/preferences";
+import { resetAccountAppearance } from "@/features/settings";
 
 import { useCallback, useLayoutEffect, useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -12,9 +12,10 @@ import { getPathLocale, withLocalePath } from "@/lib/locale-path";
 import { authClient, useSession } from "@/lib/auth-client";
 import { queryKeys } from "@/lib/query";
 import { setPreferredLevel } from "@/features/settings";
-import { accountApi, type AccountProfile } from "../../api";
+import { accountApi, type AccountProfile } from "../../api/accounts-api";
 import { getPhoneValidity } from "../account-phone-input";
 import { AccountsPageView, type ProfileForm } from "./accounts-page.view";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 const EMPTY_FORM: ProfileForm = {
   name: "",
@@ -45,6 +46,7 @@ function profileToForm(profile: AccountProfile, fallbackName = ""): ProfileForm 
 }
 
 export function AccountsPage({ embedded = false }: { embedded?: boolean }) {
+  const t = useWorkspaceI18n();
   const dialog = useActionDialog();
   const toast = useToast();
   const { beginSignOut, endSignOut } = useSignOutLoading();
@@ -79,9 +81,9 @@ export function AccountsPage({ embedded = false }: { embedded?: boolean }) {
 
   const save = useMutation({
     mutationFn: () => {
-      if (!form) throw new Error("Profile is still loading");
-      if (!getPhoneValidity(form.phone)) throw new Error("Enter a valid phone number");
-      if (form.city && !addressValid) throw new Error("Choose an address from the suggestions");
+      if (!form) throw new Error(t("accounts.profileLoading"));
+      if (!getPhoneValidity(form.phone)) throw new Error(t("accounts.invalidPhone"));
+      if (form.city && !addressValid) throw new Error(t("workspace.chooseAddress"));
       return accountApi.update({
         name: form.name.trim(),
         phone: form.phone,
@@ -104,29 +106,29 @@ export function AccountsPage({ embedded = false }: { embedded?: boolean }) {
       } catch {
         await refetchSession();
       }
-      toast.success("Profile saved", "Your account details are up to date.");
+      toast.success(t("accounts.profileSaved"), t("accounts.profileSavedDescription"));
     },
   });
 
   const onSignOut = useCallback(async () => {
     const accepted = await dialog.confirm({
-      title: "Sign out?",
-      description: "You'll need to sign in again to continue managing the workspace.",
-      confirmLabel: "Sign out",
+      title: t("shell.signOutTitle"),
+      description: t("accounts.signOutDescription"),
+      confirmLabel: t("workspace.signOut"),
       tone: "danger",
     });
     if (!accepted) return;
     beginSignOut();
     try {
       const result = await authClient.signOut();
-      if (result.error) throw new Error("Sign out failed");
+      if (result.error) throw new Error(t("shell.signOutFailed"));
       resetAccountAppearance();
       queryClient.clear();
       window.location.assign(withLocalePath("/login", getPathLocale(window.location.pathname)));
     } catch {
       endSignOut();
     }
-  }, [beginSignOut, dialog, endSignOut, queryClient]);
+  }, [beginSignOut, dialog, endSignOut, queryClient, t]);
 
   const onFieldChange = useCallback(<K extends keyof ProfileForm>(key: K, value: ProfileForm[K]) => {
     setForm((current) => (current ? { ...current, [key]: value } : current));
@@ -151,7 +153,7 @@ export function AccountsPage({ embedded = false }: { embedded?: boolean }) {
     save.error instanceof ApiError
       ? save.error.message
       : save.error
-        ? "Couldn't save your profile. Try again."
+        ? t("accounts.saveFailed")
         : null;
   const ready = form !== null;
 

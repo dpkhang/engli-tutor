@@ -1,4 +1,11 @@
 import { ApiError } from "./api-error";
+import { ApiTimeoutError, createRequestSignal } from "./request-signal";
+
+/** Applied to every request unless overridden via `timeoutMs`. */
+export const DEFAULT_TIMEOUT_MS = 30_000;
+
+/** `RequestInit` plus a per-request timeout override (`0` disables the timeout). */
+export type ApiRequestInit = RequestInit & { timeoutMs?: number };
 
 export type RequestContext = { url: string; init: RequestInit };
 export type RequestInterceptor = (
@@ -17,6 +24,8 @@ export type ApiClientOptions = {
   baseURL?: string;
   defaultHeaders?: HeadersInit;
   credentials?: RequestCredentials;
+  /** Default timeout in ms for every request (`0` disables). Defaults to 30s. */
+  timeoutMs?: number;
 };
 
 export class ApiClient {
@@ -39,21 +48,26 @@ export class ApiClient {
     return this.register(this.errorInterceptors, interceptor);
   }
 
-  async request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  async request<T>(path: string, init: ApiRequestInit = {}): Promise<T> {
+    const { timeoutMs = this.options.timeoutMs ?? DEFAULT_TIMEOUT_MS, ...fetchInit } = init;
     const headers = new Headers(this.options.defaultHeaders);
-    new Headers(init.headers).forEach((value, key) => headers.set(key, value));
-    if (init.body && !headers.has("Content-Type") && !(init.body instanceof FormData)) {
+    new Headers(fetchInit.headers).forEach((value, key) => headers.set(key, value));
+    if (fetchInit.body && !headers.has("Content-Type") && !(fetchInit.body instanceof FormData)) {
       headers.set("Content-Type", "application/json");
     }
 
     let context: RequestContext = {
       url: this.resolveUrl(path),
-      init: { credentials: this.options.credentials ?? "include", ...init, headers },
+      init: { credentials: this.options.credentials ?? "include", ...fetchInit, headers },
     };
 
     for (const interceptor of this.requestInterceptors.values()) {
       context = await interceptor(context);
     }
+
+    // The timer stays armed until the body is read, so a stalled response is cut too.
+    const requestSignal = createRequestSignal(timeoutMs, context.init.signal);
+    context = { ...context, init: { ...context.init, signal: requestSignal.signal } };
 
     try {
       let response = await fetch(context.url, context.init);
@@ -62,33 +76,35 @@ export class ApiClient {
       }
       if (!response.ok) throw await ApiError.fromResponse(response);
       if (response.status === 204) return undefined as T;
-      return response.json() as Promise<T>;
+      return (await response.json()) as T;
     } catch (caught) {
-      let error: unknown = caught;
+      let error: unknown = requestSignal.timedOut() ? new ApiTimeoutError(timeoutMs) : caught;
       for (const interceptor of this.errorInterceptors.values()) {
         error = await interceptor(error, context);
       }
       throw error;
+    } finally {
+      requestSignal.dispose();
     }
   }
 
-  get<T>(path: string, init?: RequestInit) {
+  get<T>(path: string, init?: ApiRequestInit) {
     return this.request<T>(path, { ...init, method: "GET" });
   }
 
-  post<T>(path: string, body?: unknown, init?: RequestInit) {
+  post<T>(path: string, body?: unknown, init?: ApiRequestInit) {
     return this.request<T>(path, { ...init, method: "POST", body: this.serialize(body) });
   }
 
-  put<T>(path: string, body?: unknown, init?: RequestInit) {
+  put<T>(path: string, body?: unknown, init?: ApiRequestInit) {
     return this.request<T>(path, { ...init, method: "PUT", body: this.serialize(body) });
   }
 
-  patch<T>(path: string, body?: unknown, init?: RequestInit) {
+  patch<T>(path: string, body?: unknown, init?: ApiRequestInit) {
     return this.request<T>(path, { ...init, method: "PATCH", body: this.serialize(body) });
   }
 
-  delete<T = void>(path: string, init?: RequestInit) {
+  delete<T = void>(path: string, init?: ApiRequestInit) {
     return this.request<T>(path, { ...init, method: "DELETE" });
   }
 

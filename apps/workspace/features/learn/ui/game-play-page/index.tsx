@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { accountApi } from "@/features/accounts/api";
+import { accountApi } from "@/features/accounts";
 import { billingMeQueryKey, dailyRemaining, planAllows, useBillingMe } from "@/features/payments";
 import { queryKeys } from "@/lib/query";
 import { LESSON_PACKS } from "../../model/curriculum";

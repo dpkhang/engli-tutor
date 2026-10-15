@@ -41,12 +41,20 @@ export function localePath(locale: Locale, path = "/"): string {
 
 export type MessageTree = { [key: string]: string | { [key: string]: unknown } };
 
-export function createTranslator<T extends MessageTree>(messages: T) {
-  return (key: string): string => {
+export type TranslationValues = Record<string, string | number>;
+
+export type Translator = (key: string, values?: TranslationValues) => string;
+
+export function createTranslator<T extends MessageTree>(messages: T): Translator {
+  return (key, values) => {
     const value = key.split(".").reduce<unknown>((current, part) => {
       if (!current || typeof current !== "object") return undefined;
       return (current as Record<string, unknown>)[part];
     }, messages);
-    return typeof value === "string" ? value : key;
+    const text = typeof value === "string" ? value : key;
+    if (!values) return text;
+    return text.replace(/\{(\w+)\}/g, (match, name: string) =>
+      name in values ? String(values[name]) : match,
+    );
   };
 }

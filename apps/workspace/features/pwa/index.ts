@@ -1,3 +1,3 @@
-export { HeaderInstallButton } from "./header-install-button";
-export { InstallAppCard } from "./install-app-card";
-export { ServiceWorkerRegistrar } from "./service-worker-registrar";
+export { HeaderInstallButton } from "./ui/header-install-button";
+export { InstallAppCard } from "./ui/install-app-card";
+export { ServiceWorkerRegistrar } from "./ui/service-worker-registrar";

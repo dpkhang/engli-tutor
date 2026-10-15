@@ -25,7 +25,9 @@
     "managePlan": "Manage plan",
     "signOut": "Sign out",
     "openWorkspace": "Open Workspace",
-    "workspaceDescription": "Learning path & practice sessions"
+    "workspaceDescription": "Learning path & practice sessions",
+    "homeLabel": "EngliTutor home",
+    "mobileNavigation": "Mobile navigation"
   },
   "hero": {
     "eyebrow": "Your English. Your next opportunity.",
@@ -69,14 +71,50 @@
     "comingSoon": "Coming soon",
     "hidePassword": "Hide password",
     "showPassword": "Show password",
-    "requestProcessing": "Your request is being processed"
+    "requestProcessing": "Your request is being processed",
+    "validation": {
+      "emailRequired": "Enter your email address",
+      "emailInvalid": "Enter a valid email address",
+      "emailTooLong": "Email address is too long",
+      "passwordTooShort": "Use at least 8 characters",
+      "passwordTooLong": "Password must be 128 characters or fewer",
+      "nameTooShort": "Enter at least 2 characters",
+      "nameTooLong": "Name must be 80 characters or fewer"
+    },
+    "heroTitle": "Make every conversation feel",
+    "heroHighlight": "effortless.",
+    "heroDescription": "Build real speaking confidence with practice that adapts to you, instant Vietnamese feedback, and progress you can feel.",
+    "modeLabel": "Authentication mode",
+    "genericError": "Something went wrong. Try again.",
+    "serverUnreachable": "Could not reach the auth server. Please try again."
   },
   "legal": {
     "onThisPage": "On this page",
     "privacyPolicy": "Privacy Policy",
     "cookiePolicy": "Cookie Policy",
     "yourCookieChoice": "Your cookie choice",
-    "manageCookieSettings": "Manage cookie settings"
+    "manageCookieSettings": "Manage cookie settings",
+    "eyebrow": "Legal",
+    "cookieIntro": "Last updated {date}. Which cookies and browser storage EngliTutor uses, and how you can control them.",
+    "privacyIntro": "Last updated {date}. How EngliTutor collects, uses, and protects your personal data.",
+    "relatedPrivacyPages": "Related privacy pages",
+    "jumpToTopic": "Jump to a privacy topic",
+    "link": {
+      "privacy": "Privacy Policy",
+      "privacyDescription": "What we collect across account, learning, voice, and billing.",
+      "cookies": "Cookie Policy",
+      "cookiesDescription": "Session cookies, preferences, and how to control them.",
+      "voiceAi": "Voice & AI data",
+      "voiceAiDescription": "How speaking audio and transcripts are processed.",
+      "rights": "Your privacy rights",
+      "rightsDescription": "Access, correct, export, or delete your data.",
+      "request": "Request your data",
+      "requestDescription": "Email support to export or delete your account.",
+      "voiceAiShort": "Voice & AI",
+      "rightsShort": "Your rights"
+    },
+    "privacyMetaDescription": "How EngliTutor collects, uses, and protects account, learning, voice, and billing data.",
+    "cookieMetaDescription": "Which cookies and browser storage EngliTutor uses, why they are needed, and how to control them."
   },
   "checkout": {
     "redirectingFree": "Redirecting to free signup…",
@@ -249,6 +287,7 @@
     "continueTitle": "Continue",
     "speakWithAi": "Speak with AI",
     "speakWithAiNow": "Speak with AI now",
+    "chatWithAi": "Chat with AI",
     "jumpIn": "Jump in",
     "atAGlance": "At a glance",
     "studySnapshot": "Study snapshot",
@@ -474,7 +513,7 @@
     "home": "Home",
     "chatPracticeSpace": "Your judgment-free practice space",
     "chatTutor": "Chat EngliTutor",
-    "chatDescription": "Type or record English — AI replies in English and suggests corrections in Vietnamese.",
+    "chatDescription": "Chat freely in English about anything — type or record, and the AI replies in English.",
     "voiceInputSupported": "voice input supported",
     "aiReplying": "EngliTutor is replying…",
     "aiThinking": "EngliTutor AI is thinking…",
@@ -630,7 +669,19 @@
     "markCompleteHint": "Mark a lesson complete when you are done practising it.",
     "markComplete": "Mark complete",
     "moveToProgress": "Move to in progress",
-    "remove": "Remove"
+    "remove": "Remove",
+    "demoMode": "Demo mode",
+    "recordEnglishInstruction": "Recording — speak in English",
+    "noSttBrowser": "speech-to-text isn't supported in this browser",
+    "record": "Record",
+    "listeningStop": "Listening… tap stop when done",
+    "writeMessage": "Write a message…",
+    "tapStop": "Tap stop to finish",
+    "voiceInput": "Voice input",
+    "email": "Email",
+    "jobTitlePlaceholder": "e.g. Software engineer",
+    "moreWaysToLearnDescription": "Games, lessons and extra practice to keep going",
+    "upgradeTo": "Upgrade to"
   },
   "home": {
     "builtForPractical": "Built for practical English",
@@ -701,7 +752,14 @@
     "privacy": "Privacy Policy",
     "cookies": "Cookie Policy",
     "openPayment": "Open payment page",
-    "retryPricing": "Retry pricing"
+    "retryPricing": "Retry pricing",
+    "faqVoiceLink": "Read voice & AI privacy →",
+    "faqCookieLink": "Read the Cookie Policy →",
+    "loopSteps": "Listen → Read → Speak → Write",
+    "aiTutor": "AI tutor",
+    "promptLabel": "Prompt:",
+    "checkingCatalog": "We are checking the latest catalog before showing paid options. You can still start a free lesson now.",
+    "pricingUnavailable": "The pricing catalog is temporarily unavailable. We will not show fallback plans as current pricing."
   },
   "footer": {
     "learn": "Learn with EngliTutor",
@@ -722,5 +780,376 @@
     "cookieSettings": "Cookie settings",
     "tagline": "Curriculum for professionals who speak every day",
     "description": "AI English tutor — listen, speak, read, write every day, with feedback in Vietnamese. Built for A2–B1 professionals."
+  },
+  "accounts": {
+    "profileLoading": "Profile is still loading",
+    "invalidPhone": "Enter a valid phone number",
+    "profileSaved": "Profile saved",
+    "profileSavedDescription": "Your account details are up to date.",
+    "signOutDescription": "You'll need to sign in again to continue managing the workspace.",
+    "saveFailed": "Couldn't save your profile. Try again.",
+    "phoneNumber": "Phone number",
+    "clearPhone": "Clear phone number",
+    "selectCountry": "Select country",
+    "searchCountryPlaceholder": "Search country or code",
+    "searchCountries": "Search countries",
+    "noCountries": "No countries found",
+    "countryCallingCode": "Country calling code",
+    "international": "International",
+    "addressLookupFailed": "Address lookup failed",
+    "addressPlaceholder": "Start typing your address…"
+  },
+  "shell": {
+    "signingIn": "Signing you in...",
+    "sessionCheckFailed": "We could not finish checking your session. Please try again.",
+    "preparing": "Preparing workspace...",
+    "opening": "Opening workspace...",
+    "checkingSession": "Checking session...",
+    "redirectingSignIn": "Redirecting to sign in...",
+    "settingUpPath": "Setting up your path...",
+    "welcomeIn": "Welcome in...",
+    "startSpeaking": "Start speaking with AI",
+    "openTutorChat": "Open AI tutor chat",
+    "signOutTitle": "Sign out?",
+    "signOutDescription": "You’ll need to sign in again to keep learning with EngliTutor.",
+    "signOutFailed": "Sign out failed",
+    "awaitingApi": "UI ready · awaiting API",
+    "modulePlaceholderNote": "This module already has a route and navigation. Add the matching database model and API before enabling data writes.",
+    "loadingTitle": "Opening your workspace",
+    "loadingDescription": "Fetching the latest content and getting your page ready.",
+    "loadingPaymentResult": "Loading payment result…",
+    "loadingPayments": "Loading payments…",
+    "loadingDomains": "Loading domains…",
+    "loadingYourLessons": "Loading your lessons…",
+    "loadingPath": "Loading path…",
+    "loadingExercises": "Loading exercises…",
+    "openingChat": "Opening chat room…",
+    "loadingGame": "Loading game…"
+  },
+  "billing": {
+    "error": {
+      "checkout": "Could not start checkout",
+      "syncPayment": "Couldn't sync payment. Try refreshing the page.",
+      "noCheckoutUrl": "Stripe did not return a checkout URL",
+      "subscribe": "Couldn't create subscription session",
+      "upgrade": "Couldn't upgrade plan",
+      "trial": "Couldn't start the trial"
+    },
+    "modal": {
+      "close": "Close",
+      "eyebrow": "Choose what fits you",
+      "subtitlePaid": "Choose the next step beyond {plan}.",
+      "subtitleFree": "Choose how much speaking practice and guidance you need.",
+      "empty": "No upgrade plans are available right now.",
+      "saveVsMonthly": "Save {discount}% vs monthly ({price} / month)",
+      "choose": "Choose"
+    },
+    "page": {
+      "eyebrow": "Plans that grow with your confidence",
+      "titleLine1": "More practice. More progress.",
+      "titleLine2": "Always at your pace.",
+      "subtitlePaid": "Your learning plan, practice time and payment activity—all in one simple place.",
+      "subtitleFree": "Start free and upgrade whenever you want more time to speak, practise and grow.",
+      "upgradeSuccess": "Your plan is upgraded. New benefits apply right away.",
+      "subscribeSuccess": "Your learning plan is active. Enjoy your new benefits.",
+      "checkoutCanceled": "Checkout canceled.",
+      "usedToday": "{count} used today",
+      "allowanceUsed": "Daily allowance used — resets at midnight",
+      "leftToday": "{count} left today",
+      "resetNote": "Daily allowances reset at midnight (Vietnam time). Unlimited AI usage is subject to fair use and may slow down during heavy use.",
+      "countNote": "Only AI-generated translations count; dictionary and cached results do not. Game usage counts completed plays.",
+      "explorePlans": "Explore plans",
+      "tryPremium": "Try Premium free for {days} days",
+      "currentBenefits": "Current benefits"
+    },
+    "result": {
+      "processing": "Processing payment",
+      "success": "Payment successful",
+      "failed": "Payment failed",
+      "planUpgraded": "Plan upgraded",
+      "planActivated": "Plan activated",
+      "notCompleted": "Checkout not completed",
+      "benefitsApplied": "Plan benefits have been applied to your workspace.",
+      "redirecting": "Redirecting in",
+      "backToExercises": "Back to exercises",
+      "tryAgain": "Try payment again",
+      "confirming": "We're confirming your payment with Stripe. Please keep this page open.",
+      "canceledMessage": "You canceled checkout. Your account was not charged and your current plan is unchanged.",
+      "failedMessage": "Payment did not complete. Please check your payment details and try again.",
+      "noSession": "Payment session id not found. Please try again from the payments page.",
+      "activeMessage": "Your plan is active and benefits have been updated.",
+      "confirmError": "Couldn't confirm payment. Please try again.",
+      "selectedPlan": "selected plan"
+    },
+    "settings": {
+      "status": "Status",
+      "price": "Price"
+    },
+    "starter": {
+      "description": "Build a simple daily English habit and discover how AI practice works for you.",
+      "featureChat": "10 AI tutor messages a day",
+      "featureVoice": "20 AI voice replays a day",
+      "featureSkills": "Listening, speaking, reading and writing exercises",
+      "featureCorrections": "English corrections explained in Vietnamese"
+    },
+    "status": {
+      "pastDue": "Past due",
+      "canceled": "Canceled",
+      "incomplete": "Incomplete"
+    },
+    "period": {
+      "monthly": "Monthly",
+      "quarterly": "3 months",
+      "yearly": "Yearly"
+    },
+    "periodSuffix": {
+      "monthly": "/ month",
+      "quarterly": "/ 3 months",
+      "yearly": "/ year"
+    },
+    "usage": {
+      "tutorChat": "AI tutor messages",
+      "aiTranslate": "AI translations",
+      "gameSession": "Game plays"
+    },
+    "bullet": {
+      "dailyAllowance": "{count} {label} a day",
+      "unlimited": "Unlimited {label}",
+      "unlimitedFairUse": "Unlimited {label} (fair use)",
+      "aiTranslations": "AI translations",
+      "gamePlays": "game plays",
+      "vocabAllModes": "Vocabulary: Flip, Picture quiz and Listen & pick",
+      "vocabFlipOnly": "Vocabulary: Flip mode",
+      "proScenarios": "Interview and Standup scenarios included",
+      "everydayScenarios": "Everyday tutor scenarios (Interview and Standup require Premium)"
+    },
+    "chatsLeft": "{count} chats left",
+    "trialUntil": "Trial until {date}",
+    "bonusUntil": "Bonus access until {date}",
+    "upgrade": {
+      "quotaChat": "You've used today's AI tutor messages. Your limit resets at midnight, or upgrade for more.",
+      "pro": "This scenario is part of Premium. Start a free trial or upgrade to unlock it.",
+      "quotaVoice": "You've used today's AI voice. Your limit resets at midnight, or upgrade for more.",
+      "quotaTranslate": "You've used today's AI translations. Your limit resets at midnight, or upgrade for more.",
+      "quotaGames": "You've used today's free game plays. They reset at midnight, or upgrade for unlimited play."
+    }
+  },
+  "learn": {
+    "vocabMode": {
+      "flip": "Flip",
+      "picture": "Picture quiz",
+      "listen": "Listen & pick"
+    },
+    "game": {
+      "flashcardLevel": "Flashcard level",
+      "wordCount": "{count} words",
+      "mastered": "{count} mastered",
+      "reviewNow": "Review now ({count})",
+      "mode": "Mode",
+      "practiceMode": "Practice mode",
+      "modeStandard": "{mode} · Standard",
+      "lockedModesNote": "Picture quiz and Listen & pick are part of Standard. Flip stays free.",
+      "picturesPartial": "{count} of {total} words have pictures yet.",
+      "noPictures": "No pictures in this deck yet — it will play as flip cards.",
+      "stop": "Stop",
+      "speakInstead": "Speak instead",
+      "orderHint": "Tap in the order you heard. Tap again to undo.",
+      "spellHint": "Tap letters to spell. Tap a letter above to undo.",
+      "huntHint": "Pick {count} words",
+      "flipWord": "Flip {word}",
+      "tapToReveal": "Tap the card to reveal",
+      "previousWord": "Previous word",
+      "saveWord": "Save word",
+      "hear": "Hear",
+      "studyAgain": "Save to study again",
+      "nextWord": "Next word",
+      "timerWaits": "Timer starts with the audio…",
+      "hearAgain": "Hear again ({count} left)",
+      "onTrack": "On track",
+      "checkHint": "Check the hint",
+      "sample": "Sample:",
+      "submit": "Submit",
+      "minutes": "{count} min",
+      "playsLeftOne": "{count} free play left today",
+      "playsLeftOther": "{count} free plays left today",
+      "startDeck": "Start {deck} · {count} words",
+      "reviewRound": "Review round {count}",
+      "practiceMissedHint": "Practice the {count} word(s) you marked ✗ until none are left.",
+      "pickAnother": "Pick another deck or play this one again."
+    },
+    "removeSavedExercise": "Remove saved exercise",
+    "scenario": {
+      "standup": "Team stand-up",
+      "free": "Choose your topic",
+      "interviewBody": "Share your story with confidence",
+      "standupBody": "Talk about plans and progress",
+      "smalltalkBody": "Enjoy an easy office conversation",
+      "emailBody": "Write clear, natural messages",
+      "freeBody": "Talk about anything on your mind"
+    },
+    "skillBlurb": {
+      "reading": "Read office notes / JDs / emails, then answer comprehension questions.",
+      "listening": "Listen (or have AI read) a dialogue, then complete the question set.",
+      "speaking": "Answer aloud or in short writing for a situation, then compare with a sample.",
+      "writing": "Write short sentences / emails from a brief, with sample guidance."
+    },
+    "levelLabel": {
+      "A2": "Basic",
+      "B1": "Intermediate",
+      "TOEIC": "TOEIC",
+      "IELTS": "IELTS"
+    },
+    "levelBlurb": {
+      "A2": "Short sentences, familiar vocabulary, clear tasks.",
+      "B1": "Longer reading/listening, structured answers.",
+      "TOEIC": "Workplace English: emails, meetings, and practical listening.",
+      "IELTS": "Exam tasks: headings, talks, cue cards, and short essays."
+    },
+    "reviewExplanations": "Review the explanations above, then try again or practice another skill.",
+    "moreInSkill": "More in this skill",
+    "aiChat": "AI Chat",
+    "all": "All"
+  },
+  "plans": {
+    "starter": {
+      "name": "Starter",
+      "description": "A daily AI tutor allowance — a good way to explore EngliTutor.",
+      "featureChat": "10 AI tutor chats and 20 AI voice replies per day",
+      "featurePlacement": "4-skill placement test (listening–speaking–reading–writing)",
+      "featurePath": "Full CEFR A2–B1 path across all four skills",
+      "featureFeedback": "Error feedback in Vietnamese"
+    },
+    "forever": "forever",
+    "choose": "Choose {name}",
+    "period": {
+      "monthlyHint": "Billed every month",
+      "quarterlyHint": "Billed every 3 months · save 15%",
+      "yearlyHint": "Billed once a year · save 40%",
+      "monthlyNote": "Billed every month. Pay for 3 months to save 15%, or a year to save 40%."
+    },
+    "planImageAlt": "{name} plan",
+    "access": {
+      "trial": "Premium trial",
+      "bonus": "Premium bonus days"
+    },
+    "until": "Until {date}",
+    "openingDetails": "Opening your plan details…",
+    "subscriptionSuccess": "Subscription successful. Your plan will be active in a few seconds.",
+    "paymentSuccess": "Payment successful. Your plan will update shortly.",
+    "trialHint": "Try Premium free for {days} days from the workspace — no card needed.",
+    "loadDetailsFailed": "Could not load plan details. Try refreshing the page or signing in again.",
+    "current": "Current",
+    "noCheckoutUrl": "Stripe did not return a checkout URL",
+    "checkoutFailed": "Could not create a checkout session",
+    "noUpgradeUrl": "Stripe did not return an upgrade URL",
+    "upgradeFailed": "Could not create an upgrade session"
+  },
+  "settings": {
+    "textSize": {
+      "default": "Default",
+      "defaultHint": "16px",
+      "comfortable": "Comfortable",
+      "comfortableHint": "A bit larger",
+      "large": "Large",
+      "largeHint": "Easier to read",
+      "preview": "Preview:"
+    },
+    "motion": {
+      "systemHint": "Match your device",
+      "reduce": "Reduce",
+      "reduceHint": "Fewer animations",
+      "keep": "Keep motion",
+      "keepHint": "Always animate",
+      "ariaLabel": "Animation"
+    },
+    "speechRate": {
+      "slow": "Slow",
+      "slowHint": "Easier for dictation",
+      "normal": "Normal",
+      "normalHint": "Natural pace",
+      "fast": "Faster",
+      "fastHint": "Closer to native speed"
+    },
+    "theme": {
+      "lightHint": "Bright workspace",
+      "warmHint": "Soft paper tone",
+      "darkHint": "Dim for night study",
+      "midnightHint": "Deep OLED black",
+      "forestHint": "Calm green night",
+      "oceanHint": "Cool blue depth",
+      "duskHint": "Warm sunset glow",
+      "systemHint": "Follow your device"
+    },
+    "appearanceLoadFailed": "Could not load your appearance settings. Please try again.",
+    "security": {
+      "tooShort": "New password must be at least 8 characters.",
+      "mismatch": "New password and confirmation do not match.",
+      "updatedTitle": "Password updated",
+      "updatedOthers": "Your password was changed. Other devices have been signed out.",
+      "updated": "Your password was changed successfully.",
+      "ok": "OK",
+      "updateFailed": "Couldn't update the password. Try again."
+    },
+    "notifications": {
+      "iosHomeScreen": "On iPhone, add EngliTutor to your Home Screen before this device can receive notifications.",
+      "unsupported": "This browser cannot receive notifications.",
+      "blocked": "Notifications are blocked in this browser. Allow them in site settings, then turn this on again.",
+      "enableFailed": "Could not turn on notifications.",
+      "notConfigured": "Notifications are not available on this server yet.",
+      "saveFailed": "Could not save notifications.",
+      "noSubscription": "This browser did not return a push subscription."
+    },
+    "loadingTitle": "Loading settings",
+    "loadingDescription": "Updating this section…",
+    "accent": {
+      "indigo": "Indigo",
+      "violet": "Violet",
+      "fuchsia": "Fuchsia",
+      "sky": "Sky",
+      "blue": "Blue",
+      "teal": "Teal",
+      "emerald": "Emerald",
+      "lime": "Lime",
+      "amber": "Amber",
+      "orange": "Orange",
+      "rose": "Rose",
+      "slate": "Slate"
+    },
+    "referral": {
+      "redeemFailed": "Could not redeem the referral code. Try again.",
+      "redeemedNotice": "Referral redeemed. You received {days} days of Premium.",
+      "redeemedTitle": "Referral redeemed",
+      "redeemedDescription": "You received {days} days of Premium.",
+      "notRedeemedTitle": "Referral not redeemed",
+      "notRedeemedDescription": "Try again in Settings → Referrals. Your account is unaffected."
+    }
+  },
+  "translate": {
+    "unavailable": "Translation is unavailable right now. Please try again.",
+    "moreNatural": "More natural phrasing",
+    "tone": "Tone:",
+    "keywordInContext": "Keyword in context",
+    "remember": "Remember",
+    "sourceDictionary": "From dictionary · no AI used",
+    "sourceDemo": "Demo mode · configure OpenAI for live translations",
+    "sourceAi": "Saved or AI result · verify important content",
+    "again": "Translate something else",
+    "open": "Open translate",
+    "shortcutTitle": "Translate (⌘E)"
+  },
+  "tutorChat": {
+    "noRecording": "Browser does not support recording",
+    "recordSpoken": "Record spoken English",
+    "sendError": "Couldn't send message",
+    "noAudio": "Couldn't hear anything. Tap the mic and try again.",
+    "recordingUnsupported": "This browser does not support recording.",
+    "micDenied": "Microphone permission denied. Allow access in your browser.",
+    "micOpenFailed": "Couldn't open the microphone. Check browser permissions and try again."
+  },
+  "speaking": {
+    "demo": "demo",
+    "you": "You",
+    "sendError": "Couldn't send your turn",
+    "noSpeech": "No speech detected. Try speaking more clearly or open the typing panel."
   }
 }

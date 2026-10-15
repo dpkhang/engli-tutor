@@ -25,7 +25,9 @@
     "managePlan": "Quản lý gói học",
     "signOut": "Đăng xuất",
     "openWorkspace": "Mở Workspace",
-    "workspaceDescription": "Lộ trình và buổi luyện tập"
+    "workspaceDescription": "Lộ trình và buổi luyện tập",
+    "homeLabel": "Trang chủ EngliTutor",
+    "mobileNavigation": "Điều hướng trên di động"
   },
   "hero": {
     "eyebrow": "Tiếng Anh của bạn. Cơ hội tiếp theo của bạn.",
@@ -69,14 +71,50 @@
     "comingSoon": "Sắp ra mắt",
     "hidePassword": "Ẩn mật khẩu",
     "showPassword": "Hiện mật khẩu",
-    "requestProcessing": "Đang xử lý yêu cầu"
+    "requestProcessing": "Đang xử lý yêu cầu",
+    "validation": {
+      "emailRequired": "Nhập địa chỉ email của bạn",
+      "emailInvalid": "Nhập địa chỉ email hợp lệ",
+      "emailTooLong": "Địa chỉ email quá dài",
+      "passwordTooShort": "Dùng ít nhất 8 ký tự",
+      "passwordTooLong": "Mật khẩu tối đa 128 ký tự",
+      "nameTooShort": "Nhập ít nhất 2 ký tự",
+      "nameTooLong": "Tên tối đa 80 ký tự"
+    },
+    "heroTitle": "Biến mọi cuộc trò chuyện trở nên",
+    "heroHighlight": "thật nhẹ nhàng.",
+    "heroDescription": "Tự tin nói tiếng Anh thật sự với bài luyện thích ứng theo bạn, phản hồi tiếng Việt tức thì và tiến bộ bạn cảm nhận được.",
+    "modeLabel": "Chế độ xác thực",
+    "genericError": "Đã xảy ra lỗi. Thử lại.",
+    "serverUnreachable": "Không kết nối được máy chủ xác thực. Vui lòng thử lại."
   },
   "legal": {
     "onThisPage": "Trong trang này",
     "privacyPolicy": "Chính sách quyền riêng tư",
     "cookiePolicy": "Chính sách cookie",
     "yourCookieChoice": "Lựa chọn cookie của bạn",
-    "manageCookieSettings": "Quản lý cài đặt cookie"
+    "manageCookieSettings": "Quản lý cài đặt cookie",
+    "eyebrow": "Pháp lý",
+    "cookieIntro": "Cập nhật lần cuối {date}. Những cookie và bộ nhớ trình duyệt mà EngliTutor sử dụng, và cách bạn kiểm soát chúng.",
+    "privacyIntro": "Cập nhật lần cuối {date}. Cách EngliTutor thu thập, sử dụng và bảo vệ dữ liệu cá nhân của bạn.",
+    "relatedPrivacyPages": "Các trang quyền riêng tư liên quan",
+    "jumpToTopic": "Đi tới chủ đề quyền riêng tư",
+    "link": {
+      "privacy": "Chính sách quyền riêng tư",
+      "privacyDescription": "Những gì chúng tôi thu thập từ tài khoản, việc học, giọng nói và thanh toán.",
+      "cookies": "Chính sách cookie",
+      "cookiesDescription": "Cookie phiên, tuỳ chọn và cách kiểm soát chúng.",
+      "voiceAi": "Dữ liệu giọng nói & AI",
+      "voiceAiDescription": "Cách xử lý âm thanh luyện nói và bản ghi lời.",
+      "rights": "Quyền riêng tư của bạn",
+      "rightsDescription": "Truy cập, chỉnh sửa, xuất hoặc xoá dữ liệu của bạn.",
+      "request": "Yêu cầu dữ liệu của bạn",
+      "requestDescription": "Gửi email cho bộ phận hỗ trợ để xuất hoặc xoá tài khoản.",
+      "voiceAiShort": "Giọng nói & AI",
+      "rightsShort": "Quyền của bạn"
+    },
+    "privacyMetaDescription": "Cách EngliTutor thu thập, sử dụng và bảo vệ dữ liệu tài khoản, học tập, giọng nói và thanh toán.",
+    "cookieMetaDescription": "Những cookie và bộ nhớ trình duyệt EngliTutor sử dụng, lý do cần thiết và cách kiểm soát chúng."
   },
   "checkout": {
     "redirectingFree": "Đang chuyển đến đăng ký gói miễn phí…",
@@ -249,6 +287,7 @@
     "continueTitle": "Học tiếp",
     "speakWithAi": "Nói chuyện với AI",
     "speakWithAiNow": "Nói chuyện với AI ngay",
+    "chatWithAi": "Chat với AI",
     "jumpIn": "Bắt đầu ngay",
     "atAGlance": "Tổng quan",
     "studySnapshot": "Tình hình học tập",
@@ -474,7 +513,7 @@
     "home": "Trang chủ",
     "chatPracticeSpace": "Không gian luyện tập không phán xét",
     "chatTutor": "Chat EngliTutor",
-    "chatDescription": "Nhập hoặc ghi âm tiếng Anh — AI trả lời bằng tiếng Anh và gợi ý sửa lỗi bằng tiếng Việt.",
+    "chatDescription": "Trò chuyện tự do bằng tiếng Anh về bất kỳ chủ đề nào — nhập hoặc ghi âm, AI trả lời bằng tiếng Anh.",
     "voiceInputSupported": "hỗ trợ nhập bằng giọng nói",
     "aiReplying": "EngliTutor đang trả lời…",
     "aiThinking": "EngliTutor AI đang suy nghĩ…",
@@ -630,7 +669,19 @@
     "markCompleteHint": "Đánh dấu hoàn thành khi bạn đã luyện xong bài học.",
     "markComplete": "Đánh dấu hoàn thành",
     "moveToProgress": "Chuyển về đang học",
-    "remove": "Xóa"
+    "remove": "Xóa",
+    "demoMode": "Chế độ demo",
+    "recordEnglishInstruction": "Đang ghi âm — hãy nói tiếng Anh",
+    "noSttBrowser": "trình duyệt này không hỗ trợ chuyển giọng nói thành chữ",
+    "record": "Ghi âm",
+    "listeningStop": "Đang nghe… nhấn dừng khi xong",
+    "writeMessage": "Nhập tin nhắn…",
+    "tapStop": "Nhấn dừng để kết thúc",
+    "voiceInput": "Nhập bằng giọng nói",
+    "email": "Email",
+    "jobTitlePlaceholder": "VD: Kỹ sư phần mềm",
+    "moreWaysToLearnDescription": "Trò chơi, bài học và bài luyện thêm để học tiếp",
+    "upgradeTo": "Nâng cấp lên"
   },
   "home": {
     "builtForPractical": "Tiếng Anh thực tế cho công việc",
@@ -701,7 +752,14 @@
     "privacy": "Chính sách quyền riêng tư",
     "cookies": "Chính sách cookie",
     "openPayment": "Mở trang thanh toán",
-    "retryPricing": "Tải lại bảng giá"
+    "retryPricing": "Tải lại bảng giá",
+    "faqVoiceLink": "Đọc chính sách giọng nói & AI →",
+    "faqCookieLink": "Đọc Chính sách cookie →",
+    "loopSteps": "Nghe → Đọc → Nói → Viết",
+    "aiTutor": "Gia sư AI",
+    "promptLabel": "Đề bài:",
+    "checkingCatalog": "Chúng tôi đang kiểm tra bảng giá mới nhất trước khi hiển thị các gói trả phí. Bạn vẫn có thể bắt đầu bài học miễn phí ngay.",
+    "pricingUnavailable": "Bảng giá tạm thời không khả dụng. Chúng tôi sẽ không hiển thị gói dự phòng như giá hiện hành."
   },
   "footer": {
     "learn": "Học cùng EngliTutor",
@@ -722,5 +780,376 @@
     "cookieSettings": "Cài đặt cookie",
     "tagline": "Chương trình dành cho người đi làm sử dụng tiếng Anh mỗi ngày",
     "description": "Gia sư tiếng Anh AI — luyện nghe, nói, đọc, viết mỗi ngày với phản hồi bằng tiếng Việt. Dành cho người đi làm trình độ A2–B1."
+  },
+  "accounts": {
+    "profileLoading": "Hồ sơ vẫn đang tải",
+    "invalidPhone": "Nhập số điện thoại hợp lệ",
+    "profileSaved": "Đã lưu hồ sơ",
+    "profileSavedDescription": "Thông tin tài khoản của bạn đã được cập nhật.",
+    "signOutDescription": "Bạn sẽ cần đăng nhập lại để tiếp tục quản lý không gian học.",
+    "saveFailed": "Không lưu được hồ sơ. Hãy thử lại.",
+    "phoneNumber": "Số điện thoại",
+    "clearPhone": "Xoá số điện thoại",
+    "selectCountry": "Chọn quốc gia",
+    "searchCountryPlaceholder": "Tìm quốc gia hoặc mã vùng",
+    "searchCountries": "Tìm quốc gia",
+    "noCountries": "Không tìm thấy quốc gia",
+    "countryCallingCode": "Mã vùng quốc gia",
+    "international": "Quốc tế",
+    "addressLookupFailed": "Không tra cứu được địa chỉ",
+    "addressPlaceholder": "Bắt đầu nhập địa chỉ của bạn…"
+  },
+  "shell": {
+    "signingIn": "Đang đăng nhập...",
+    "sessionCheckFailed": "Chưa kiểm tra xong phiên đăng nhập. Vui lòng thử lại.",
+    "preparing": "Đang chuẩn bị không gian học...",
+    "opening": "Đang mở không gian học...",
+    "checkingSession": "Đang kiểm tra phiên đăng nhập...",
+    "redirectingSignIn": "Đang chuyển đến trang đăng nhập...",
+    "settingUpPath": "Đang thiết lập lộ trình của bạn...",
+    "welcomeIn": "Chào mừng bạn...",
+    "startSpeaking": "Bắt đầu nói chuyện với AI",
+    "openTutorChat": "Mở chat với gia sư AI",
+    "signOutTitle": "Đăng xuất?",
+    "signOutDescription": "Bạn sẽ cần đăng nhập lại để tiếp tục học với EngliTutor.",
+    "signOutFailed": "Đăng xuất thất bại",
+    "awaitingApi": "Giao diện sẵn sàng · đang chờ API",
+    "modulePlaceholderNote": "Mô-đun này đã có đường dẫn và điều hướng. Cần thêm model cơ sở dữ liệu và API tương ứng trước khi bật ghi dữ liệu.",
+    "loadingTitle": "Đang mở không gian học",
+    "loadingDescription": "Đang tải nội dung mới nhất và chuẩn bị trang cho bạn.",
+    "loadingPaymentResult": "Đang tải kết quả thanh toán…",
+    "loadingPayments": "Đang tải thanh toán…",
+    "loadingDomains": "Đang tải tên miền…",
+    "loadingYourLessons": "Đang tải bài học của bạn…",
+    "loadingPath": "Đang tải lộ trình…",
+    "loadingExercises": "Đang tải bài tập…",
+    "openingChat": "Đang mở phòng chat…",
+    "loadingGame": "Đang tải trò chơi…"
+  },
+  "billing": {
+    "error": {
+      "checkout": "Không thể bắt đầu thanh toán",
+      "syncPayment": "Không thể đồng bộ thanh toán. Hãy thử tải lại trang.",
+      "noCheckoutUrl": "Stripe không trả về đường dẫn thanh toán",
+      "subscribe": "Không thể tạo phiên đăng ký",
+      "upgrade": "Không thể nâng cấp gói",
+      "trial": "Không thể bắt đầu dùng thử"
+    },
+    "modal": {
+      "close": "Đóng",
+      "eyebrow": "Chọn gói phù hợp với bạn",
+      "subtitlePaid": "Chọn bước tiếp theo sau gói {plan}.",
+      "subtitleFree": "Chọn mức luyện nói và hướng dẫn bạn cần.",
+      "empty": "Hiện chưa có gói nâng cấp nào.",
+      "saveVsMonthly": "Tiết kiệm {discount}% so với gói tháng ({price} / tháng)",
+      "choose": "Chọn"
+    },
+    "page": {
+      "eyebrow": "Gói học đồng hành cùng sự tự tin của bạn",
+      "titleLine1": "Luyện nhiều hơn. Tiến bộ nhanh hơn.",
+      "titleLine2": "Luôn theo nhịp của bạn.",
+      "subtitlePaid": "Gói học, thời gian luyện tập và lịch sử thanh toán — tất cả ở cùng một nơi.",
+      "subtitleFree": "Bắt đầu miễn phí và nâng cấp bất cứ khi nào bạn muốn luyện nói và tiến bộ nhiều hơn.",
+      "upgradeSuccess": "Gói của bạn đã được nâng cấp. Quyền lợi mới áp dụng ngay.",
+      "subscribeSuccess": "Gói học của bạn đã được kích hoạt. Hãy tận hưởng quyền lợi mới.",
+      "checkoutCanceled": "Đã huỷ thanh toán.",
+      "usedToday": "Đã dùng {count} hôm nay",
+      "allowanceUsed": "Đã dùng hết lượt hôm nay — làm mới lúc nửa đêm",
+      "leftToday": "Còn {count} lượt hôm nay",
+      "resetNote": "Lượt dùng hằng ngày được làm mới lúc nửa đêm (giờ Việt Nam). Dùng AI không giới hạn áp dụng chính sách sử dụng hợp lý và có thể chậm lại khi dùng nhiều.",
+      "countNote": "Chỉ tính lượt dịch do AI tạo; tra từ điển và kết quả đã lưu không bị tính. Lượt chơi game tính theo số lượt hoàn thành.",
+      "explorePlans": "Xem các gói",
+      "tryPremium": "Dùng thử Premium miễn phí {days} ngày",
+      "currentBenefits": "Quyền lợi hiện tại"
+    },
+    "result": {
+      "processing": "Đang xử lý thanh toán",
+      "success": "Thanh toán thành công",
+      "failed": "Thanh toán thất bại",
+      "planUpgraded": "Đã nâng cấp gói",
+      "planActivated": "Đã kích hoạt gói",
+      "notCompleted": "Thanh toán chưa hoàn tất",
+      "benefitsApplied": "Quyền lợi của gói đã được áp dụng cho tài khoản của bạn.",
+      "redirecting": "Tự động chuyển trang sau",
+      "backToExercises": "Quay lại bài tập",
+      "tryAgain": "Thử thanh toán lại",
+      "confirming": "Chúng tôi đang xác nhận thanh toán với Stripe. Vui lòng giữ trang này mở.",
+      "canceledMessage": "Bạn đã huỷ thanh toán. Tài khoản không bị trừ tiền và gói hiện tại giữ nguyên.",
+      "failedMessage": "Thanh toán chưa hoàn tất. Vui lòng kiểm tra thông tin thanh toán và thử lại.",
+      "noSession": "Không tìm thấy mã phiên thanh toán. Vui lòng thử lại từ trang thanh toán.",
+      "activeMessage": "Gói của bạn đã được kích hoạt và quyền lợi đã được cập nhật.",
+      "confirmError": "Không thể xác nhận thanh toán. Vui lòng thử lại.",
+      "selectedPlan": "gói đã chọn"
+    },
+    "settings": {
+      "status": "Trạng thái",
+      "price": "Giá"
+    },
+    "starter": {
+      "description": "Xây dựng thói quen học tiếng Anh mỗi ngày và khám phá cách luyện tập cùng AI.",
+      "featureChat": "10 tin nhắn với gia sư AI mỗi ngày",
+      "featureVoice": "20 lượt nghe giọng đọc AI mỗi ngày",
+      "featureSkills": "Bài tập nghe, nói, đọc và viết",
+      "featureCorrections": "Sửa lỗi tiếng Anh, giải thích bằng tiếng Việt"
+    },
+    "status": {
+      "pastDue": "Quá hạn thanh toán",
+      "canceled": "Đã huỷ",
+      "incomplete": "Chưa hoàn tất"
+    },
+    "period": {
+      "monthly": "Hàng tháng",
+      "quarterly": "3 tháng",
+      "yearly": "Hàng năm"
+    },
+    "periodSuffix": {
+      "monthly": "/ tháng",
+      "quarterly": "/ 3 tháng",
+      "yearly": "/ năm"
+    },
+    "usage": {
+      "tutorChat": "Tin nhắn gia sư AI",
+      "aiTranslate": "Lượt dịch AI",
+      "gameSession": "Lượt chơi game"
+    },
+    "bullet": {
+      "dailyAllowance": "{count} {label} mỗi ngày",
+      "unlimited": "Không giới hạn {label}",
+      "unlimitedFairUse": "Không giới hạn {label} (sử dụng hợp lý)",
+      "aiTranslations": "lượt dịch AI",
+      "gamePlays": "lượt chơi game",
+      "vocabAllModes": "Từ vựng: Lật thẻ, Đố hình và Nghe & chọn",
+      "vocabFlipOnly": "Từ vựng: chế độ Lật thẻ",
+      "proScenarios": "Có tình huống Phỏng vấn và Standup",
+      "everydayScenarios": "Tình huống giao tiếp hằng ngày (Phỏng vấn và Standup cần gói Premium)"
+    },
+    "chatsLeft": "Còn {count} lượt chat",
+    "trialUntil": "Dùng thử đến {date}",
+    "bonusUntil": "Quyền lợi thưởng đến {date}",
+    "upgrade": {
+      "quotaChat": "Bạn đã dùng hết tin nhắn gia sư AI hôm nay. Lượt dùng làm mới lúc nửa đêm, hoặc nâng cấp để có thêm.",
+      "pro": "Tình huống này thuộc gói Premium. Hãy dùng thử miễn phí hoặc nâng cấp để mở khoá.",
+      "quotaVoice": "Bạn đã dùng hết lượt giọng đọc AI hôm nay. Lượt dùng làm mới lúc nửa đêm, hoặc nâng cấp để có thêm.",
+      "quotaTranslate": "Bạn đã dùng hết lượt dịch AI hôm nay. Lượt dùng làm mới lúc nửa đêm, hoặc nâng cấp để có thêm.",
+      "quotaGames": "Bạn đã dùng hết lượt chơi game miễn phí hôm nay. Lượt chơi làm mới lúc nửa đêm, hoặc nâng cấp để chơi không giới hạn."
+    }
+  },
+  "learn": {
+    "vocabMode": {
+      "flip": "Lật thẻ",
+      "picture": "Đố hình",
+      "listen": "Nghe & chọn"
+    },
+    "game": {
+      "flashcardLevel": "Cấp độ thẻ từ",
+      "wordCount": "{count} từ",
+      "mastered": "đã thuộc {count}",
+      "reviewNow": "Ôn ngay ({count})",
+      "mode": "Chế độ",
+      "practiceMode": "Chế độ luyện tập",
+      "modeStandard": "{mode} · Standard",
+      "lockedModesNote": "Đố hình và Nghe & chọn thuộc gói Standard. Lật thẻ vẫn miễn phí.",
+      "picturesPartial": "Mới có {count}/{total} từ có hình.",
+      "noPictures": "Bộ thẻ này chưa có hình — sẽ chơi ở chế độ lật thẻ.",
+      "stop": "Dừng",
+      "speakInstead": "Nói thay vì gõ",
+      "orderHint": "Chạm theo thứ tự bạn nghe được. Chạm lại để bỏ chọn.",
+      "spellHint": "Chạm vào chữ cái để đánh vần. Chạm chữ ở trên để bỏ.",
+      "huntHint": "Chọn {count} từ",
+      "flipWord": "Lật thẻ {word}",
+      "tapToReveal": "Chạm vào thẻ để xem nghĩa",
+      "previousWord": "Từ trước",
+      "saveWord": "Lưu từ",
+      "hear": "Nghe",
+      "studyAgain": "Đánh dấu để học lại",
+      "nextWord": "Từ tiếp theo",
+      "timerWaits": "Đồng hồ bắt đầu khi phát âm thanh…",
+      "hearAgain": "Nghe lại (còn {count} lượt)",
+      "onTrack": "Đúng hướng",
+      "checkHint": "Xem gợi ý",
+      "sample": "Câu mẫu:",
+      "submit": "Gửi",
+      "minutes": "{count} phút",
+      "playsLeftOne": "Còn {count} lượt chơi miễn phí hôm nay",
+      "playsLeftOther": "Còn {count} lượt chơi miễn phí hôm nay",
+      "startDeck": "Bắt đầu {deck} · {count} từ",
+      "reviewRound": "Vòng ôn tập {count}",
+      "practiceMissedHint": "Luyện lại {count} từ bạn đánh dấu ✗ cho đến khi thuộc hết.",
+      "pickAnother": "Chọn bộ thẻ khác hoặc chơi lại bộ này."
+    },
+    "removeSavedExercise": "Bỏ lưu bài tập",
+    "scenario": {
+      "standup": "Họp nhanh với nhóm",
+      "free": "Tự chọn chủ đề",
+      "interviewBody": "Tự tin kể câu chuyện của bạn",
+      "standupBody": "Trao đổi kế hoạch và tiến độ",
+      "smalltalkBody": "Trò chuyện thoải mái nơi công sở",
+      "emailBody": "Viết tin nhắn rõ ràng, tự nhiên",
+      "freeBody": "Nói về bất cứ điều gì bạn muốn"
+    },
+    "skillBlurb": {
+      "reading": "Đọc ghi chú công việc / JD / email, rồi trả lời câu hỏi đọc hiểu.",
+      "listening": "Nghe (hoặc để AI đọc) một đoạn hội thoại, rồi hoàn thành bộ câu hỏi.",
+      "speaking": "Trả lời bằng lời nói hoặc viết ngắn cho một tình huống, rồi so sánh với bài mẫu.",
+      "writing": "Viết câu ngắn / email theo yêu cầu, có bài mẫu hướng dẫn."
+    },
+    "levelLabel": {
+      "A2": "Cơ bản",
+      "B1": "Trung cấp",
+      "TOEIC": "TOEIC",
+      "IELTS": "IELTS"
+    },
+    "levelBlurb": {
+      "A2": "Câu ngắn, từ vựng quen thuộc, yêu cầu rõ ràng.",
+      "B1": "Bài đọc/nghe dài hơn, câu trả lời có cấu trúc.",
+      "TOEIC": "Tiếng Anh công sở: email, cuộc họp và nghe thực tế.",
+      "IELTS": "Dạng bài thi: chọn tiêu đề, bài nói, cue card và bài luận ngắn."
+    },
+    "reviewExplanations": "Xem lại phần giải thích ở trên, rồi làm lại hoặc luyện kỹ năng khác.",
+    "moreInSkill": "Thêm bài trong kỹ năng này",
+    "aiChat": "Chat với AI",
+    "all": "Tất cả"
+  },
+  "plans": {
+    "starter": {
+      "name": "Khởi đầu",
+      "description": "Hạn mức gia sư AI mỗi ngày — cách tốt để khám phá EngliTutor.",
+      "featureChat": "10 lượt chat với gia sư AI và 20 lượt phản hồi giọng nói AI mỗi ngày",
+      "featurePlacement": "Bài kiểm tra xếp lớp 4 kỹ năng (nghe–nói–đọc–viết)",
+      "featurePath": "Lộ trình CEFR A2–B1 đầy đủ cho cả bốn kỹ năng",
+      "featureFeedback": "Phản hồi lỗi bằng tiếng Việt"
+    },
+    "forever": "mãi mãi",
+    "choose": "Chọn {name}",
+    "period": {
+      "monthlyHint": "Thanh toán hàng tháng",
+      "quarterlyHint": "Thanh toán mỗi 3 tháng · tiết kiệm 15%",
+      "yearlyHint": "Thanh toán mỗi năm một lần · tiết kiệm 40%",
+      "monthlyNote": "Thanh toán hàng tháng. Trả 3 tháng để tiết kiệm 15%, hoặc trả cả năm để tiết kiệm 40%."
+    },
+    "planImageAlt": "Gói {name}",
+    "access": {
+      "trial": "Dùng thử Premium",
+      "bonus": "Ngày Premium thưởng"
+    },
+    "until": "Đến {date}",
+    "openingDetails": "Đang mở thông tin gói của bạn…",
+    "subscriptionSuccess": "Đăng ký thành công. Gói của bạn sẽ kích hoạt sau vài giây.",
+    "paymentSuccess": "Thanh toán thành công. Gói của bạn sẽ sớm được cập nhật.",
+    "trialHint": "Dùng thử Premium miễn phí {days} ngày trong không gian học — không cần thẻ.",
+    "loadDetailsFailed": "Không tải được thông tin gói. Hãy tải lại trang hoặc đăng nhập lại.",
+    "current": "Hiện tại",
+    "noCheckoutUrl": "Stripe không trả về đường dẫn thanh toán",
+    "checkoutFailed": "Không tạo được phiên thanh toán",
+    "noUpgradeUrl": "Stripe không trả về đường dẫn nâng cấp",
+    "upgradeFailed": "Không tạo được phiên nâng cấp"
+  },
+  "settings": {
+    "textSize": {
+      "default": "Mặc định",
+      "defaultHint": "16px",
+      "comfortable": "Thoải mái",
+      "comfortableHint": "Lớn hơn một chút",
+      "large": "Lớn",
+      "largeHint": "Dễ đọc hơn",
+      "preview": "Xem trước:"
+    },
+    "motion": {
+      "systemHint": "Theo thiết bị của bạn",
+      "reduce": "Giảm",
+      "reduceHint": "Ít hiệu ứng chuyển động hơn",
+      "keep": "Giữ chuyển động",
+      "keepHint": "Luôn hiển thị hiệu ứng",
+      "ariaLabel": "Hiệu ứng chuyển động"
+    },
+    "speechRate": {
+      "slow": "Chậm",
+      "slowHint": "Dễ nghe chép hơn",
+      "normal": "Bình thường",
+      "normalHint": "Tốc độ tự nhiên",
+      "fast": "Nhanh hơn",
+      "fastHint": "Gần tốc độ người bản xứ"
+    },
+    "theme": {
+      "lightHint": "Không gian sáng sủa",
+      "warmHint": "Tông giấy dịu mắt",
+      "darkHint": "Tối để học ban đêm",
+      "midnightHint": "Đen sâu cho màn OLED",
+      "forestHint": "Xanh lá dịu buổi đêm",
+      "oceanHint": "Xanh dương sâu mát mắt",
+      "duskHint": "Ánh hoàng hôn ấm áp",
+      "systemHint": "Theo thiết bị của bạn"
+    },
+    "appearanceLoadFailed": "Không tải được cài đặt giao diện. Vui lòng thử lại.",
+    "security": {
+      "tooShort": "Mật khẩu mới phải có ít nhất 8 ký tự.",
+      "mismatch": "Mật khẩu mới và mật khẩu xác nhận không khớp.",
+      "updatedTitle": "Đã cập nhật mật khẩu",
+      "updatedOthers": "Mật khẩu đã được đổi. Các thiết bị khác đã bị đăng xuất.",
+      "updated": "Đổi mật khẩu thành công.",
+      "ok": "OK",
+      "updateFailed": "Không cập nhật được mật khẩu. Hãy thử lại."
+    },
+    "notifications": {
+      "iosHomeScreen": "Trên iPhone, hãy thêm EngliTutor vào Màn hình chính để thiết bị này nhận được thông báo.",
+      "unsupported": "Trình duyệt này không nhận được thông báo.",
+      "blocked": "Thông báo đang bị chặn trên trình duyệt này. Hãy cho phép trong cài đặt trang web rồi bật lại.",
+      "enableFailed": "Không bật được thông báo.",
+      "notConfigured": "Máy chủ này chưa hỗ trợ thông báo.",
+      "saveFailed": "Không lưu được cài đặt thông báo.",
+      "noSubscription": "Trình duyệt này không trả về đăng ký nhận thông báo."
+    },
+    "loadingTitle": "Đang tải cài đặt",
+    "loadingDescription": "Đang cập nhật mục này…",
+    "accent": {
+      "indigo": "Chàm",
+      "violet": "Tím",
+      "fuchsia": "Hồng tím",
+      "sky": "Xanh trời",
+      "blue": "Xanh dương",
+      "teal": "Xanh mòng két",
+      "emerald": "Xanh ngọc",
+      "lime": "Xanh chanh",
+      "amber": "Hổ phách",
+      "orange": "Cam",
+      "rose": "Hồng",
+      "slate": "Xám đá"
+    },
+    "referral": {
+      "redeemFailed": "Không dùng được mã giới thiệu. Hãy thử lại.",
+      "redeemedNotice": "Đã dùng mã giới thiệu. Bạn nhận được {days} ngày Premium.",
+      "redeemedTitle": "Đã dùng mã giới thiệu",
+      "redeemedDescription": "Bạn nhận được {days} ngày Premium.",
+      "notRedeemedTitle": "Chưa dùng được mã giới thiệu",
+      "notRedeemedDescription": "Hãy thử lại trong Cài đặt → Giới thiệu. Tài khoản của bạn không bị ảnh hưởng."
+    }
+  },
+  "translate": {
+    "unavailable": "Hiện chưa thể dịch. Vui lòng thử lại.",
+    "moreNatural": "Cách diễn đạt tự nhiên hơn",
+    "tone": "Sắc thái:",
+    "keywordInContext": "Từ khoá trong ngữ cảnh",
+    "remember": "Ghi nhớ",
+    "sourceDictionary": "Từ từ điển · không dùng AI",
+    "sourceDemo": "Chế độ demo · cấu hình OpenAI để dịch thật",
+    "sourceAi": "Kết quả đã lưu hoặc từ AI · hãy kiểm tra lại nội dung quan trọng",
+    "again": "Dịch nội dung khác",
+    "open": "Mở khung dịch",
+    "shortcutTitle": "Dịch (⌘E)"
+  },
+  "tutorChat": {
+    "noRecording": "Trình duyệt không hỗ trợ ghi âm",
+    "recordSpoken": "Ghi âm câu nói tiếng Anh",
+    "sendError": "Không thể gửi tin nhắn",
+    "noAudio": "Không nghe thấy gì. Hãy nhấn mic và thử lại.",
+    "recordingUnsupported": "Trình duyệt này không hỗ trợ ghi âm.",
+    "micDenied": "Quyền micro bị từ chối. Hãy cho phép truy cập trong trình duyệt.",
+    "micOpenFailed": "Không mở được micro. Kiểm tra quyền của trình duyệt rồi thử lại."
+  },
+  "speaking": {
+    "demo": "demo",
+    "you": "Bạn",
+    "sendError": "Không thể gửi lượt nói của bạn",
+    "noSpeech": "Không nhận được giọng nói. Hãy nói rõ hơn hoặc mở khung nhập chữ."
   }
 }

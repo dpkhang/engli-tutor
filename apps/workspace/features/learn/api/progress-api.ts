@@ -11,7 +11,7 @@ async function request(path: string, init?: RequestInit): Promise<LessonProgress
       credentials: "include",
       headers: {
         Accept: "application/json",
-        "X-Client": "pagecraft-workspace",
+        "X-Client": "englitutor-workspace",
         ...(init?.body ? { "Content-Type": "application/json" } : {}),
       },
       ...init,

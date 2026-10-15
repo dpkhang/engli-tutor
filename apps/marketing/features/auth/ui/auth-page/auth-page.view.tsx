@@ -107,14 +107,13 @@ export const AuthPageView = memo(function AuthPageView({
             <WandSparkles className="size-3.5" /> {t("auth.coach")}
           </div>
           <h1 className="max-w-2xl text-5xl font-semibold leading-[1.07] tracking-[-0.045em] text-white xl:text-6xl">
-            Make every conversation feel{" "}
+            {t("auth.heroTitle")}{" "}
             <span className="bg-linear-to-r from-indigo-300 via-violet-300 to-sky-300 bg-clip-text text-transparent">
-              effortless.
+              {t("auth.heroHighlight")}
             </span>
           </h1>
           <p className="mt-6 max-w-xl text-base leading-7 text-slate-300/75">
-            Build real speaking confidence with practice that adapts to you, instant Vietnamese
-            feedback, and progress you can feel.
+            {t("auth.heroDescription")}
           </p>
 
           <div className="relative mt-10 max-w-xl rounded-[1.6rem] border border-white/10 bg-white/6 p-3 shadow-2xl shadow-black/30 backdrop-blur-2xl">
@@ -159,7 +158,7 @@ export const AuthPageView = memo(function AuthPageView({
                     />
                   ))}
                 </div>
-                <span className="text-xs text-white/35">Tap to speak</span>
+                <span className="text-xs text-white/35">{t("workspace.tapToSpeak")}</span>
               </div>
             </div>
             <motion.div
@@ -201,7 +200,7 @@ export const AuthPageView = memo(function AuthPageView({
             value={mode}
             onChange={onModeChange}
             disabled={pending}
-            ariaLabel="Authentication mode"
+            ariaLabel={t("auth.modeLabel")}
             className="mb-5"
             options={[
               { id: "login", label: t("auth.signIn") },
@@ -240,7 +239,7 @@ export const AuthPageView = memo(function AuthPageView({
                       {...register("name")}
                     />
                   </div>
-                  <FieldMessage id="name-error" message={errors.name?.message} />
+                  <FieldMessage id="name-error" message={errors.name?.message ? t(errors.name.message) : undefined} />
                 </motion.label>
               )}
             </AnimatePresence>
@@ -262,7 +261,7 @@ export const AuthPageView = memo(function AuthPageView({
                   {...register("email")}
                 />
               </div>
-              <FieldMessage id="email-error" message={errors.email?.message} />
+              <FieldMessage id="email-error" message={errors.email?.message ? t(errors.email.message) : undefined} />
             </label>
             <label className="block text-sm">
               <span className="mb-1.5 block font-medium text-slate-700 dark:text-slate-200">
@@ -291,7 +290,7 @@ export const AuthPageView = memo(function AuthPageView({
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </div>
-              <FieldMessage id="password-error" message={errors.password?.message} />
+              <FieldMessage id="password-error" message={errors.password?.message ? t(errors.password.message) : undefined} />
             </label>
 
             <p

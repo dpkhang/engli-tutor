@@ -4,10 +4,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { authClient, authErrorMessage, useSession } from "@/lib/auth-client";
+import { authClient, authErrorMessage, redirectAfterSignIn, useSession } from "@/lib/auth-client";
 import { getAppUrl, getSiteUrl } from "../../model/session";
 import { authFormSchema, type AuthFormValues, type AuthPayload } from "../../model/auth-schema";
 import { AuthPageView, type AuthMode } from "./auth-page.view";
+import { useMarketingI18n } from "@/features/i18n";
 
 function resolveReturnTo(raw: string | null): string {
   const fallback = getAppUrl();
@@ -23,6 +24,7 @@ function resolveReturnTo(raw: string | null): string {
 }
 
 export function AuthPage() {
+  const t = useMarketingI18n();
   const searchParams = useSearchParams();
   const returnTo = resolveReturnTo(searchParams.get("returnTo"));
   const { data, isPending: sessionPending } = useSession();
@@ -41,7 +43,7 @@ export function AuthPage() {
 
   useEffect(() => {
     if (sessionPending || !data?.user) return;
-    window.location.replace(returnTo);
+    void redirectAfterSignIn(returnTo);
   }, [sessionPending, data?.user, returnTo]);
 
   const changeMode = useCallback(
@@ -73,7 +75,7 @@ export function AuthPage() {
               name: values.name,
             });
             if (result.error) {
-              setError(authErrorMessage(result.error));
+              setError(authErrorMessage(result.error, t("auth.genericError")));
               setPending(false);
               return;
             }
@@ -83,19 +85,19 @@ export function AuthPage() {
               password: values.password,
             });
             if (result.error) {
-              setError(authErrorMessage(result.error));
+              setError(authErrorMessage(result.error, t("auth.genericError")));
               setPending(false);
               return;
             }
           }
 
-          window.location.assign(returnTo);
+          await redirectAfterSignIn(returnTo);
         } catch {
           setPending(false);
-          setError("Could not reach the auth server. Please try again.");
+          setError(t("auth.serverUnreachable"));
         }
       }),
-    [form, returnTo],
+    [form, returnTo, t],
   );
 
   return (

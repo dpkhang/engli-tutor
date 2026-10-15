@@ -1,4 +1,5 @@
 export { AuthPage } from "./ui/auth-page";
+export { SessionSyncPage } from "./ui/session-sync-page";
 export {
   getAppUrl,
   getAuthHref,

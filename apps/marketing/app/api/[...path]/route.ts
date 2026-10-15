@@ -39,8 +39,26 @@ function adaptLocalHttpRequestCookies(headers: Headers) {
   if (!cookie) return;
   headers.set(
     "cookie",
-    cookie.replace(/(^|;\s*)((?:englitutor|better-auth)\.)/g, "$1__Secure-$2"),
+    cookie.replace(/(^|;\s*)((?:englitutor(?:-v2)?|better-auth)\.)/g, "$1__Secure-$2"),
   );
+}
+
+/**
+ * Expire the old session cookies that were scoped to the parent domain, so
+ * they stop reaching every *.harrybox.cloud host. Safe to drop once they have
+ * aged out of browsers.
+ */
+function expireLegacySharedCookies(request: NextRequest, res: NextResponse) {
+  const labels = request.nextUrl.hostname.split(".");
+  if (labels.length < 2) return;
+  const parentDomain = labels.slice(-2).join(".");
+  for (const { name } of request.cookies.getAll()) {
+    if (!name.startsWith("__Secure-englitutor.")) continue;
+    res.headers.append(
+      "set-cookie",
+      `${name}=; Domain=.${parentDomain}; Path=/; Max-Age=0; Secure; SameSite=Lax`,
+    );
+  }
 }
 
 function adaptSetCookieForLocal(raw: string, https: boolean): string {
@@ -103,6 +121,7 @@ async function proxy(request: NextRequest, context: RouteContext) {
     const value = local ? adaptSetCookieForLocal(raw, https) : raw;
     res.headers.append("set-cookie", value);
   }
+  if (!local) expireLegacySharedCookies(request, res);
 
   return res;
 }

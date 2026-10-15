@@ -1,12 +1,12 @@
 "use client";
 
 import { memo } from "react";
-import { LocalizedLink as Link } from "@/features/i18n/localized-link";
+import { LocalizedLink as Link } from "@/features/i18n";
 import { ArrowLeft, Heart, Timer } from "lucide-react";
 import { Button, cn } from "@engli-tutor/ui";
 import { DataLoadingState } from "@/features/layout";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
-import { LocalizedLink } from "@/features/i18n/localized-link";
+import { useWorkspaceI18n } from "@/features/i18n";
+import { LocalizedLink } from "@/features/i18n";
 import {
   LEVELS,
   skillExerciseHref,
@@ -61,10 +61,10 @@ export const SkillListPageView = memo(function SkillListPageView({
               {meta.labelEn}
             </p>
             <h1 className="text-xl font-semibold tracking-tight sm:mt-2 sm:text-4xl">
-              {meta.labelVi}
+              {t(`workspace.${meta.id}`)}
             </h1>
             <p className="mt-3 hidden max-w-2xl text-sm leading-6 text-white/70 sm:block sm:text-base">
-              {meta.blurb}
+              {t(`learn.skillBlurb.${meta.id}`)}
             </p>
             {skill === "speaking" ? (
               <div className="mt-4">
@@ -122,7 +122,7 @@ export const SkillListPageView = memo(function SkillListPageView({
         {loading ? (
           <DataLoadingState
             title={t("workspace.loadingExercises")}
-            description={t("workspace.preparingSkillPractice").replace("{skill}", meta.labelEn.toLowerCase())}
+            description={t("workspace.preparingSkillPractice", { skill: t(`workspace.${meta.id}`).toLowerCase() })}
             cards={3}
           />
         ) : (
@@ -132,10 +132,10 @@ export const SkillListPageView = memo(function SkillListPageView({
               <h2 className="text-xl font-semibold tracking-tight">
                 {level.id}
                 <span className="ml-2 text-sm font-medium text-muted-foreground">
-                  {level.labelVi}
+                  {t(`learn.levelLabel.${level.id}`)}
                 </span>
               </h2>
-              <p className="text-sm text-muted-foreground">{level.blurb}</p>
+              <p className="text-sm text-muted-foreground">{t(`learn.levelBlurb.${level.id}`)}</p>
             </div>
 
             <div className="grid gap-4">

@@ -9,7 +9,7 @@ export class WorkspaceApiClient extends ApiClient {
     super({
       baseURL: sameOrigin ? "" : process.env.NEXT_PUBLIC_API_URL,
       credentials: "include",
-      defaultHeaders: { Accept: "application/json", "X-Client": "pagecraft-workspace" },
+      defaultHeaders: { Accept: "application/json", "X-Client": "englitutor-workspace" },
     });
 
     this.addErrorInterceptor((error) => {

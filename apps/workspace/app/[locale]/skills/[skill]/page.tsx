@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { RouteFallback } from "@/features/layout";
 import { notFound } from "next/navigation";
 import { SkillListPage, SKILLS, isSkillId } from "@/features/learn";
 
@@ -16,7 +17,7 @@ export default async function SkillListRoutePage({
   const { skill } = await params;
   if (!isSkillId(skill)) notFound();
   return (
-    <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Loading exercises…</div>}>
+    <Suspense fallback={<RouteFallback messageKey="shell.loadingExercises" />}>
       <SkillListPage skill={skill} />
     </Suspense>
   );

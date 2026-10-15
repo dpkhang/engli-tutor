@@ -16,9 +16,11 @@ import {
   currentPlanDetails,
   usageRows,
 } from "../../model/plans";
+import { useWorkspaceI18n } from "@/features/i18n";
 import { PaymentsPageView } from "./payments-page.view";
 
 export function PaymentsPage() {
+  const t = useWorkspaceI18n();
   const searchParams = useSearchParams();
   const checkoutState = searchParams.get("checkout");
   const checkoutType = searchParams.get("type");
@@ -47,7 +49,7 @@ export function PaymentsPage() {
         const latest = await billing.refetch();
         if (latest.data?.hasPaidPlan) return;
         setError(
-          err instanceof Error ? err.message : "Couldn't sync payment. Try refreshing the page.",
+          err instanceof Error ? err.message : t("billing.error.syncPayment"),
         );
       } finally {
         if (!cancelled) await billing.refetch();
@@ -63,10 +65,10 @@ export function PaymentsPage() {
   const data = billing.data;
   const hasPaidPlan = data?.hasPaidPlan ?? false;
   const stripeReady = data?.stripeConfigured ?? false;
-  const activePlan = currentPlanDetails(data);
+  const activePlan = currentPlanDetails(data, t);
   const comparePlans = useMemo(
-    () => allPlansForCompare(data?.subscriptionPlans ?? []),
-    [data?.subscriptionPlans],
+    () => allPlansForCompare(data?.subscriptionPlans ?? [], t),
+    [data?.subscriptionPlans, t],
   );
   const higherPlans = useMemo(() => {
     const paid = comparePlans.filter((plan) => !plan.isFree);
@@ -79,11 +81,11 @@ export function PaymentsPage() {
 
   const redirectCheckout = useCallback(async (url: string | null) => {
     if (!url) {
-      setError("Stripe did not return a checkout URL");
+      setError(t("billing.error.noCheckoutUrl"));
       return;
     }
     window.location.assign(url);
-  }, []);
+  }, [t]);
 
   const onSubscribe = useCallback(
     async (planId: SubscriptionPlan["id"]) => {
@@ -93,12 +95,12 @@ export function PaymentsPage() {
         const result = await subscribe.mutateAsync({ planId, period });
         await redirectCheckout(result.url);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Couldn't create subscription session");
+        setError(err instanceof Error ? err.message : t("billing.error.subscribe"));
       } finally {
         setPending(null);
       }
     },
-    [period, redirectCheckout, subscribe],
+    [period, redirectCheckout, subscribe, t],
   );
 
   const onUpgrade = useCallback(
@@ -109,12 +111,12 @@ export function PaymentsPage() {
         const result = await upgrade.mutateAsync(planId);
         await redirectCheckout(result.url);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Couldn't upgrade plan");
+        setError(err instanceof Error ? err.message : t("billing.error.upgrade"));
       } finally {
         setPending(null);
       }
     },
-    [redirectCheckout, upgrade],
+    [redirectCheckout, t, upgrade],
   );
 
   const onStartTrial = useCallback(async () => {
@@ -123,11 +125,11 @@ export function PaymentsPage() {
     try {
       await startTrial.mutateAsync();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't start the trial");
+      setError(err instanceof Error ? err.message : t("billing.error.trial"));
     } finally {
       setPending(null);
     }
-  }, [startTrial]);
+  }, [startTrial, t]);
 
   const onOpenUpgrade = useCallback(() => setShowUpgradeOptions(true), []);
   const onCloseUpgrade = useCallback(() => setShowUpgradeOptions(false), []);
@@ -140,7 +142,7 @@ export function PaymentsPage() {
       hasPaidPlan={hasPaidPlan}
       stripeReady={stripeReady}
       activePlan={activePlan}
-      accessNote={accessNote(data)}
+      accessNote={accessNote(data, t)}
       usage={usage}
       trialDays={data?.trialDays ?? 7}
       canStartTrial={canStartTrial}

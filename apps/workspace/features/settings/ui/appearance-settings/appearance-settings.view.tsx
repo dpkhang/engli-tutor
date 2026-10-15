@@ -25,17 +25,17 @@ import {
   type ThemePreference,
 } from "../../model/preferences";
 import { SettingsCard, SettingsCardContent, SettingsCardHeader, SettingsPanel } from "../shared";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { useWorkspaceI18n } from "@/features/i18n";
 
-const THEME_OPTIONS: Array<{ id: ThemePreference; label: string; hint: string }> = [
-  { id: "light", label: "light", hint: "Bright workspace" },
-  { id: "warm", label: "warm", hint: "Soft paper tone" },
-  { id: "dark", label: "dark", hint: "Dim for night study" },
-  { id: "midnight", label: "midnight", hint: "Deep OLED black" },
-  { id: "forest", label: "forest", hint: "Calm green night" },
-  { id: "ocean", label: "ocean", hint: "Cool blue depth" },
-  { id: "dusk", label: "dusk", hint: "Warm sunset glow" },
-  { id: "system", label: "system", hint: "Follow your device" },
+const THEME_OPTIONS: Array<{ id: ThemePreference; labelKey: string; hintKey: string }> = [
+  { id: "light", labelKey: "workspace.light", hintKey: "settings.theme.lightHint" },
+  { id: "warm", labelKey: "workspace.warm", hintKey: "settings.theme.warmHint" },
+  { id: "dark", labelKey: "workspace.dark", hintKey: "settings.theme.darkHint" },
+  { id: "midnight", labelKey: "workspace.midnight", hintKey: "settings.theme.midnightHint" },
+  { id: "forest", labelKey: "workspace.forest", hintKey: "settings.theme.forestHint" },
+  { id: "ocean", labelKey: "workspace.ocean", hintKey: "settings.theme.oceanHint" },
+  { id: "dusk", labelKey: "workspace.dusk", hintKey: "settings.theme.duskHint" },
+  { id: "system", labelKey: "workspace.system", hintKey: "settings.theme.systemHint" },
 ];
 
 const THEME_ICONS: Record<ThemePreference, ReactNode> = {
@@ -150,8 +150,8 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
                     )}
                   >
                     <ThemePreview mode={option.id} />
-                    <span className="mt-2 block text-sm font-semibold">{t(`workspace.${option.label}`)}</span>
-                    <span className="mt-0.5 block text-xs text-muted-foreground">{option.hint}</span>
+                    <span className="mt-2 block text-sm font-semibold">{t(option.labelKey)}</span>
+                    <span className="mt-0.5 block text-xs text-muted-foreground">{t(option.hintKey)}</span>
                   </button>
                 ))}
               </div>
@@ -190,7 +190,7 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
                         )}
                         style={{ backgroundColor: `hsl(${option.swatch})` }}
                       />
-                      {option.label}
+                      {t(`settings.accent.${option.id}`)}
                     </button>
                   );
                 })}
@@ -211,8 +211,8 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
               <SegmentedSwitch
                 value={view.textSize}
                 onChange={onTextSizeChange}
-                ariaLabel="Text size"
-                options={TEXT_SIZES.map((option) => ({ id: option.id, label: option.label }))}
+                ariaLabel={t("workspace.textSize")}
+                options={TEXT_SIZES.map((option) => ({ id: option.id, label: t(option.labelKey) }))}
               />
               <p
                 className={cn(
@@ -224,7 +224,7 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
                       : "text-sm",
                 )}
               >
-                Preview: “She booked a meeting for Tuesday afternoon.”
+                {t("settings.textSize.preview")} “She booked a meeting for Tuesday afternoon.”
               </p>
             </SettingsCardContent>
           </SettingsCard>
@@ -242,14 +242,14 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
               <SegmentedSwitch
                 value={view.reduceMotion}
                 onChange={onReduceMotionChange}
-                ariaLabel="Animation"
+                ariaLabel={t("settings.motion.ariaLabel")}
                 options={REDUCE_MOTION_OPTIONS.map((option) => ({
                   id: option.id,
-                  label: option.label,
+                  label: t(option.labelKey),
                 }))}
               />
               <p className="text-xs text-muted-foreground">
-                {REDUCE_MOTION_OPTIONS.find((item) => item.id === view.reduceMotion)?.hint}
+                {t(REDUCE_MOTION_OPTIONS.find((item) => item.id === view.reduceMotion)?.hintKey ?? "")}
               </p>
             </SettingsCardContent>
           </SettingsCard>

@@ -6,7 +6,7 @@ cd "$ROOT"
 
 usage() {
   cat <<'EOF'
-Add one or more dependencies to both LandingCraft applications.
+Add one or more dependencies to both EngliTutor applications.
 
 Usage:
   pnpm module:add <package...> [--dev] [--exact]
@@ -17,8 +17,8 @@ Examples:
   pnpm module:add vitest @testing-library/react --dev
 
 Targets:
-  engli-tutor-fe  (apps/workspace)
-  engli-tutor-web           (apps/marketing)
+  engli-tutor-fe   (apps/workspace)
+  engli-tutor-web  (apps/marketing)
 EOF
 }
 

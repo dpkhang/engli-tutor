@@ -5,10 +5,16 @@ import { useSearchParams } from "next/navigation";
 import { withCurrentLocale } from "@/lib/locale-path";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { authClient, authErrorMessage, getMarketingUrl, useSession } from "@/lib/auth-client";
+import {
+  authClient,
+  authErrorMessage,
+  getMarketingUrl,
+  redirectAfterSignIn,
+  useSession,
+} from "@/lib/auth-client";
 import { loginFormSchema, type LoginFormValues } from "../../model/login-schema";
 import { LoginPageView, type AuthMode } from "./login-page.view";
-import { persistPendingReferral } from "@/features/referrals/use-pending-referral";
+import { persistPendingReferral } from "@/features/referrals";
 
 function resolveReturnTo(raw: string | null, marketingUrl: string): string {
   if (!raw) return "/";
@@ -50,7 +56,7 @@ export function LoginPage() {
 
   useEffect(() => {
     if (sessionPending || !data?.user) return;
-    window.location.replace(withCurrentLocale(returnTo));
+    void redirectAfterSignIn(withCurrentLocale(returnTo));
   }, [sessionPending, data?.user, returnTo]);
 
   const changeMode = useCallback((nextMode: AuthMode) => {
@@ -105,10 +111,10 @@ export function LoginPage() {
               returnTo.startsWith("/") && !returnTo.startsWith("//") && returnTo !== "/onboarding"
                 ? `/onboarding?returnTo=${encodeURIComponent(returnTo)}`
                 : "/onboarding";
-            window.location.assign(withCurrentLocale(next));
+            await redirectAfterSignIn(withCurrentLocale(next));
             return;
           }
-          window.location.assign(withCurrentLocale(returnTo));
+          await redirectAfterSignIn(withCurrentLocale(returnTo));
         } catch {
           setPending(false);
           setError("Couldn't reach the auth server. Please try again.");

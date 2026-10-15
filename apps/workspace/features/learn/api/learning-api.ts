@@ -18,14 +18,15 @@ function getApiBase() {
  * Soft JSON GET that does not force login redirect on 401.
  * Skills pages keep a local catalog fallback when the API is unavailable.
  */
-async function softGet<T>(path: string): Promise<T | null> {
+async function softGet<T>(path: string, signal?: AbortSignal): Promise<T | null> {
   try {
     const response = await fetch(`${getApiBase()}${path}`, {
       method: "GET",
       credentials: "include",
+      signal,
       headers: {
         Accept: "application/json",
-        "X-Client": "pagecraft-workspace",
+        "X-Client": "englitutor-workspace",
       },
     });
     if (!response.ok) return null;
@@ -45,32 +46,35 @@ function toQuery(params: Record<string, string | undefined>) {
 }
 
 export const learningApi = {
-  meta: () => softGet<LearningMeta>("/api/learning/meta"),
+  meta: (signal?: AbortSignal) => softGet<LearningMeta>("/api/learning/meta", signal),
 
-  listExercises: (filters?: { skill?: LearningSkill; level?: LearningLevel }) =>
+  listExercises: (filters?: { skill?: LearningSkill; level?: LearningLevel }, signal?: AbortSignal) =>
     softGet<{ data: LearningExercise[]; total: number }>(
       `/api/learning/exercises${toQuery({
         skill: filters?.skill,
         level: filters?.level,
       })}`,
+      signal,
     ),
 
-  getExercise: (id: string) => softGet<LearningExercise>(`/api/learning/exercises/${id}`),
+  getExercise: (id: string, signal?: AbortSignal) =>
+    softGet<LearningExercise>(`/api/learning/exercises/${id}`, signal),
 
-  listIntegratedLessons: () =>
+  listIntegratedLessons: (signal?: AbortSignal) =>
     softGet<{ data: LearningIntegratedLesson[]; total: number }>(
       "/api/learning/integrated-lessons",
+      signal,
     ),
 
-  getIntegratedLesson: (id: string) =>
-    softGet<LearningIntegratedLesson>(`/api/learning/integrated-lessons/${id}`),
+  getIntegratedLesson: (id: string, signal?: AbortSignal) =>
+    softGet<LearningIntegratedLesson>(`/api/learning/integrated-lessons/${id}`, signal),
 
-  listLessons: () =>
-    softGet<{ data: LessonPack[]; total: number }>("/api/learning/lessons"),
+  listLessons: (signal?: AbortSignal) =>
+    softGet<{ data: LessonPack[]; total: number }>("/api/learning/lessons", signal),
 
-  listGames: () =>
-    softGet<{ data: LearningGameSummary[]; total: number }>("/api/learning/games"),
+  listGames: (signal?: AbortSignal) =>
+    softGet<{ data: LearningGameSummary[]; total: number }>("/api/learning/games", signal),
 
-  getGame: (id: string, lesson?: string) =>
-    softGet<LearningGame>(`/api/learning/games/${id}${toQuery({ lesson })}`),
+  getGame: (id: string, lesson?: string, signal?: AbortSignal) =>
+    softGet<LearningGame>(`/api/learning/games/${id}${toQuery({ lesson })}`, signal),
 };

@@ -1,0 +1,61 @@
+"use client";
+
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import en from "@engli-tutor/i18n/messages/en";
+import vi from "@engli-tutor/i18n/messages/vi";
+import {
+  createTranslator,
+  isLocale,
+  LOCALE_COOKIE,
+  type Locale,
+  type Translator,
+} from "@engli-tutor/i18n";
+import { stripLocalePath } from "@/lib/locale-path";
+
+type WorkspaceMessages = typeof en & { workspace?: Record<string, unknown> };
+const messages: Record<Locale, WorkspaceMessages> = { en, vi };
+const Context = createContext<Translator>(() => "");
+const LocaleContext = createContext<Locale>("en");
+
+function readLocale(): Locale {
+  if (typeof document === "undefined") return "en";
+  const value = document.cookie.match(new RegExp(`(?:^|; )${LOCALE_COOKIE}=([^;]+)`))?.[1];
+  return isLocale(value) ? value : "en";
+}
+
+const ENGLISH_ONLY_PATHS = ["/login", "/onboarding", "/welcome"];
+
+function isEnglishOnlyPath(pathname: string) {
+  const path = stripLocalePath(pathname);
+  return ENGLISH_ONLY_PATHS.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+}
+
+export function WorkspaceI18n({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const routeLocale = pathname && isEnglishOnlyPath(pathname)
+    ? "en"
+    : isLocale(pathname?.split("/")[1]) ? (pathname.split("/")[1] as Locale) : null;
+  const [locale, setLocale] = useState<Locale>(() => routeLocale ?? readLocale());
+  useEffect(() => {
+    const sync = () => setLocale(routeLocale ?? readLocale());
+    sync();
+    if (typeof document !== "undefined") document.documentElement.lang = routeLocale ?? readLocale();
+    window.addEventListener("englitutor-locale-change", sync);
+    return () => window.removeEventListener("englitutor-locale-change", sync);
+  }, [routeLocale]);
+  const t = useMemo(() => createTranslator(messages[locale]), [locale]);
+  return (
+    <LocaleContext.Provider value={locale}>
+      <Context.Provider value={t}>{children}</Context.Provider>
+    </LocaleContext.Provider>
+  );
+}
+
+export function useWorkspaceI18n() {
+  return useContext(Context);
+}
+
+export function useWorkspaceLocale() {
+  return useContext(LocaleContext);
+}

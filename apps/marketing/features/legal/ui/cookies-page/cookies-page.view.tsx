@@ -12,10 +12,10 @@ export function CookiesPageView() {
     <LegalDocumentView
       backHref="/policy"
       backLabel={t("legal.privacyPolicy")}
-      eyebrow="Legal"
-      title="Cookie Policy"
-      intro={`Last updated ${COOKIE_POLICY_UPDATED_AT}. Which cookies and browser storage EngliTutor uses, and how you can control them.`}
-      hubLabel="Related privacy pages"
+      eyebrow={t("legal.eyebrow")}
+      title={t("legal.cookiePolicy")}
+      intro={t("legal.cookieIntro", { date: COOKIE_POLICY_UPDATED_AT })}
+      hubLabel={t("legal.relatedPrivacyPages")}
       hubCtas={COOKIE_HUB_CTAS}
       extra={
         <div className="rounded-2xl border border-border/80 bg-background/90 p-5 shadow-sm backdrop-blur">

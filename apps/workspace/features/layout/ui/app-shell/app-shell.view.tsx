@@ -1,7 +1,7 @@
 "use client";
 
-import { memo, type ReactNode, type RefObject } from "react";
-import { LocalizedLink as Link } from "@/features/i18n/localized-link";
+import { memo, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import { LocalizedLink as Link } from "@/features/i18n";
 import {
   BookOpen,
   ChevronDown,
@@ -23,8 +23,8 @@ import { BrandLogo, cn, ThemeToggle } from "@engli-tutor/ui";
 import { AnimatePresence, motion } from "motion/react";
 import { FloatingTranslate } from "@/features/translate";
 import { HeaderInstallButton } from "@/features/pwa";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
-import { WorkspaceLanguageSwitcher } from "@/features/i18n/workspace-language-switcher";
+import { useWorkspaceI18n } from "@/features/i18n";
+import { WorkspaceLanguageSwitcher } from "@/features/i18n";
 import { withLocalePath, getPathLocale } from "@/lib/locale-path";
 
 const PRIMARY_NAV = [
@@ -104,6 +104,19 @@ export const AppShellView = memo(function AppShellView({
   onAiToolsAnimationComplete,
 }: AppShellViewProps) {
   const t = useWorkspaceI18n();
+  const launcherLabelRef = useRef<HTMLSpanElement>(null);
+  const [launcherWidth, setLauncherWidth] = useState(160);
+
+  useLayoutEffect(() => {
+    const label = launcherLabelRef.current;
+    if (!label) return;
+    // px-4 on both sides + gap-3 + Sparkles icon + 1px border on both sides
+    const measure = () => setLauncherWidth(Math.ceil(label.scrollWidth) + 32 + 12 + 20 + 2);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(label);
+    return () => observer.disconnect();
+  }, [showAiDock]);
   const locale = getPathLocale(pathname);
   const localize = (href: string) => withLocalePath(href, locale);
   const routePath = locale ? pathname.slice(locale.length + 1) || "/" : pathname;
@@ -320,7 +333,7 @@ export const AppShellView = memo(function AppShellView({
               : "justify-center border border-border bg-card text-muted-foreground hover:text-foreground",
           )}
           initial={false}
-          animate={{ width: aiLauncherExpanded ? 160 : 48 }}
+          animate={{ width: aiLauncherExpanded ? launcherWidth : 48 }}
           transition={{ width: { duration: 0.3, ease: [0.22, 1, 0.36, 1] } }}
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.94 }}
@@ -342,6 +355,7 @@ export const AppShellView = memo(function AppShellView({
 
           <span className="absolute inset-0 flex items-center justify-between gap-3 px-4 whitespace-nowrap">
             <motion.span
+              ref={launcherLabelRef}
               className="speak-infinity-text text-sm font-semibold"
               animate={{ opacity: aiLauncherExpanded ? 1 : 0 }}
               transition={{
@@ -349,7 +363,7 @@ export const AppShellView = memo(function AppShellView({
                 duration: aiLauncherExpanded ? 0.16 : 0.1,
               }}
             >
-              Speak with AI
+              {t("workspace.speakWithAi")}
             </motion.span>
             <motion.span
               animate={{
@@ -388,12 +402,12 @@ export const AppShellView = memo(function AppShellView({
               href={localize("/speaking")}
               tabIndex={aiToolsOpen ? 0 : -1}
               className="pointer-events-auto group flex h-13 max-w-[calc(100vw-2rem)] items-center justify-end rounded-full bg-primary px-2.5 text-primary-foreground shadow-[0_12px_32px_-10px_hsl(var(--primary)/0.7)] transition-colors hover:bg-primary/90"
-              aria-label="Start speaking with AI"
+              aria-label={t("shell.startSpeaking")}
             >
               <span className="grid grid-cols-[0fr] transition-[grid-template-columns] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:grid-cols-[1fr] group-focus-visible:grid-cols-[1fr]">
                 <span className="min-w-0 overflow-hidden">
                   <span className="block whitespace-nowrap pr-2.5 text-sm font-semibold opacity-0 transition-opacity duration-200 delay-0 group-hover:opacity-100 group-hover:delay-200 group-focus-visible:opacity-100 group-focus-visible:delay-200">
-                    Speak with AI
+                    {t("workspace.speakWithAi")}
                   </span>
                 </span>
               </span>
@@ -406,12 +420,12 @@ export const AppShellView = memo(function AppShellView({
               href={localize("/practice")}
               tabIndex={aiToolsOpen ? 0 : -1}
               className="pointer-events-auto group relative flex h-13 max-w-[calc(100vw-2rem)] items-center justify-end rounded-full border border-border bg-card px-2.5 text-foreground shadow-lg transition-colors hover:border-primary/30"
-              aria-label="Open AI tutor chat"
+              aria-label={t("shell.openTutorChat")}
             >
               <span className="grid grid-cols-[0fr] transition-[grid-template-columns] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:grid-cols-[1fr] group-focus-visible:grid-cols-[1fr]">
                 <span className="min-w-0 overflow-hidden">
                   <span className="block whitespace-nowrap pr-2.5 text-sm font-semibold opacity-0 transition-opacity duration-200 delay-0 group-hover:opacity-100 group-hover:delay-200 group-focus-visible:opacity-100 group-focus-visible:delay-200">
-                    Chat with AI
+                    {t("workspace.chatWithAi")}
                   </span>
                 </span>
               </span>

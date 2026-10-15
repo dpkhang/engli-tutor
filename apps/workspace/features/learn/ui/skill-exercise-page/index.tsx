@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getAutoPlayListening } from "@/features/settings";
-import { useAiSpeech } from "@/features/speaking-lab/hooks/use-ai-speech";
+import { useAiSpeech } from "@/features/speaking-lab";
 import { useSkillExercise } from "../../hooks/use-learning-catalog";
 import { useLessonProgress } from "../../hooks/use-lesson-progress";
 import { getSkillMeta, skillListHref, type OpenQuestion, type SkillId } from "../../model/skill-exercises";

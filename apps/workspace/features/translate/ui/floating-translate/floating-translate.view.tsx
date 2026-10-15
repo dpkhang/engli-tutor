@@ -14,8 +14,8 @@ import {
   X,
 } from "lucide-react";
 import { Button, cn } from "@engli-tutor/ui";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
-import { type TranslateResult } from "../../api";
+import { useWorkspaceI18n } from "@/features/i18n";
+import { type TranslateResult } from "../../api/translate-api";
 
 function highlightWordInSentence(sentence: string, word: string) {
   const index = sentence.toLowerCase().indexOf(word.toLowerCase());
@@ -324,14 +324,14 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
                 result.sentence.moreNatural !== result.translation ? (
                   <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/8 px-3 py-2.5">
                     <p className="text-[10px] font-bold tracking-wider text-emerald-700 uppercase dark:text-emerald-300">
-                      More natural phrasing
+                      {t("translate.moreNatural")}
                     </p>
                     <p className="mt-1 text-xs leading-5">{result.sentence.moreNatural}</p>
                   </div>
                 ) : null}
                 {result.sentence.tone ? (
                   <p className="text-[11px] text-muted-foreground">
-                    Tone:{" "}
+                    {t("translate.tone")}{" "}
                     <span className="font-medium text-foreground">{result.sentence.tone}</span>
                   </p>
                 ) : null}
@@ -342,7 +342,7 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
               <section>
                 <div className="flex items-center justify-between">
                   <p className="text-[10px] font-bold tracking-[0.14em] text-muted-foreground uppercase">
-                    Keyword in context
+                    {t("translate.keywordInContext")}
                   </p>
                   {result.word.level ? (
                     <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
@@ -395,7 +395,7 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
               <section className="rounded-xl bg-amber-500/8 p-3">
                 <p className="flex items-center gap-1.5 text-[10px] font-bold tracking-wider text-amber-700 uppercase dark:text-amber-300">
                   <Lightbulb className="size-3.5" />
-                  Remember
+                  {t("translate.remember")}
                 </p>
                 <ul className="mt-2 space-y-1.5">
                   {result.tips.map((tip) => (
@@ -411,10 +411,10 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
             <div className="flex items-center justify-between border-t border-border pt-3">
               <p className="text-[10px] text-muted-foreground">
                 {result.source === "dictionary"
-                  ? "From dictionary · no AI used"
+                  ? t("translate.sourceDictionary")
                   : result.demo
-                    ? "Demo mode · configure OpenAI for live translations"
-                    : "Saved or AI result · verify important content"}
+                    ? t("translate.sourceDemo")
+                    : t("translate.sourceAi")}
               </p>
               <button
                 type="button"
@@ -422,7 +422,7 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
                 className="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline"
               >
                 <RotateCcw className="size-3" />
-                Translate something else
+                {t("translate.again")}
               </button>
             </div>
           </div>
@@ -441,8 +441,8 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
         whileHover={{ y: -2 }}
         whileTap={{ scale: 0.94 }}
         aria-expanded={open}
-        aria-label={open ? "Close translate" : "Open translate"}
-        title="Translate (⌘E)"
+        aria-label={open ? t("workspace.closeTranslate") : t("translate.open")}
+        title={t("translate.shortcutTitle")}
       >
         {open ? <X className="size-4" /> : <Languages className="size-4" />}
       </motion.button>

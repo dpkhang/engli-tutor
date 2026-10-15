@@ -3,10 +3,10 @@
 import { memo } from "react";
 import { Target, Volume2 } from "lucide-react";
 import { Button, CardTitle, Label, SegmentedSwitch, cn } from "@engli-tutor/ui";
-import { LEVELS, type SkillLevel } from "@/features/learn/model/skill-exercises";
+import { LEVELS, type SkillLevel } from "@/features/learn";
 import { SPEECH_RATES, type SpeechRateId } from "../../model/preferences";
 import { ChoiceChip, SettingsCard, SettingsCardContent, SettingsCardHeader, SettingsPanel } from "../shared";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 export type LearningViewState = {
   level: SkillLevel | null;
@@ -83,10 +83,10 @@ export const LearningSettingsView = memo(function LearningSettingsView({
                   ariaLabel={t("workspace.playbackSpeed")}
                   options={(Object.keys(SPEECH_RATES) as SpeechRateId[]).map((id) => ({
                     id,
-                    label: SPEECH_RATES[id].label,
+                    label: t(SPEECH_RATES[id].labelKey),
                   }))}
                 />
-                <p className="text-xs text-muted-foreground">{SPEECH_RATES[view.speechRate].hint}</p>
+                <p className="text-xs text-muted-foreground">{t(SPEECH_RATES[view.speechRate].hintKey)}</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="autoplay-listening">{t("workspace.autoplayListening")}</Label>

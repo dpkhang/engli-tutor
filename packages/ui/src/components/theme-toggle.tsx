@@ -14,9 +14,9 @@ export function ThemeToggle({ className }: { className?: string }) {
       setTheme(document.documentElement.classList.contains("dark") ? "dark" : "light");
     };
     sync();
-    window.addEventListener("pagecraft-theme", sync);
+    window.addEventListener("englitutor-theme", sync);
     return () => {
-      window.removeEventListener("pagecraft-theme", sync);
+      window.removeEventListener("englitutor-theme", sync);
     };
   }, []);
 
@@ -24,7 +24,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     const nextTheme: Theme = theme === "dark" ? "light" : "dark";
     document.documentElement.classList.toggle("dark", nextTheme === "dark");
     document.documentElement.style.colorScheme = nextTheme;
-    window.dispatchEvent(new Event("pagecraft-theme"));
+    window.dispatchEvent(new Event("englitutor-theme"));
     setTheme(nextTheme);
   };
 

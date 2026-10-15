@@ -1,13 +1,13 @@
 "use client";
 
 import { memo, Suspense, type ReactNode } from "react";
-import { LocalizedLink as Link } from "@/features/i18n/localized-link";
+import { LocalizedLink as Link } from "@/features/i18n";
 import { Cookie, ShieldCheck } from "lucide-react";
 import { cn } from "@engli-tutor/ui";
 import { PageHeader } from "@/features/layout";
 import { SETTINGS_NAV, isSettingsNavActive, type SettingsSection } from "../../model/nav";
 import { SettingsContentLoading } from "../shared";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 const SIDEBAR_PRIVACY = [
   { href: "/policy", key: "workspace.privacyPolicy", icon: ShieldCheck },
@@ -31,7 +31,7 @@ export const SettingsShellView = memo(function SettingsShellView({
       <PageHeader
         eyebrow={t("workspace.personal")}
         title={t("workspace.settings")}
-        description={section?.description ?? t("workspace.manageWorkspace")}
+        description={section ? t(section.descriptionKey) : t("workspace.manageWorkspace")}
       />
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">

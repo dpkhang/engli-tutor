@@ -1,16 +1,20 @@
+"use client";
+
 import {
   POLICY_SECTIONS,
   POLICY_UPDATED_AT,
   PRIVACY_HUB_CTAS,
 } from "@engli-tutor/legal";
 import { WorkspaceLegalDocument } from "../legal-document";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 export function PolicyPage() {
+  const t = useWorkspaceI18n();
   return (
     <WorkspaceLegalDocument
-      title="Privacy Policy"
-      description={`Last updated ${POLICY_UPDATED_AT}. How EngliTutor collects, uses, and protects your personal data.`}
-      hubLabel="Jump to a privacy topic"
+      title={t("legal.privacyPolicy")}
+      description={t("legal.privacyIntro", { date: POLICY_UPDATED_AT })}
+      hubLabel={t("legal.jumpToTopic")}
       hubCtas={PRIVACY_HUB_CTAS}
       sections={POLICY_SECTIONS}
     />

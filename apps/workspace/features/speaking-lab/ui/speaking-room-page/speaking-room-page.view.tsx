@@ -1,8 +1,8 @@
 "use client";
 
 import { memo, type KeyboardEvent, type RefObject } from "react";
-import { LocalizedLink as Link } from "@/features/i18n/localized-link";
-import { useUpgradeModal } from "@/features/payments/ui/upgrade-modal-provider";
+import { LocalizedLink as Link } from "@/features/i18n";
+import { useUpgradeModal } from "@/features/payments";
 import {
   ArrowLeft,
   ChevronDown,
@@ -18,39 +18,39 @@ import {
   X,
 } from "lucide-react";
 import { Button, cn } from "@engli-tutor/ui";
-import { type TutorLevel, type TutorScenario } from "@/features/tutor-chat/api";
+import { type TutorLevel, type TutorScenario } from "@/features/tutor-chat";
 import { VoiceOrb } from "../shared";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 export const SCENES: {
   id: TutorScenario;
-  label: string;
-  blurb: string;
+  labelKey: string;
+  blurbKey: string;
   opener: string;
 }[] = [
   {
     id: "interview",
-    label: "Interview",
-    blurb: "Self-intro & behavioral",
+    labelKey: "workspace.interview",
+    blurbKey: "workspace.selfIntroBehavioral",
     opener:
       "Hi! Let's practice a spoken interview. Please introduce yourself in about 30 seconds — name, role, and one strength.",
   },
   {
     id: "standup",
-    label: "Stand-up",
-    blurb: "Yesterday / today / blockers",
+    labelKey: "workspace.standUp",
+    blurbKey: "workspace.yesterdayTodayBlockers",
     opener: "Good morning! It's your turn in stand-up. Tell me what you finished yesterday in two short sentences.",
   },
   {
     id: "smalltalk",
-    label: "Small talk",
-    blurb: "Chat with a colleague",
+    labelKey: "workspace.smallTalk",
+    blurbKey: "workspace.chatWithColleague",
     opener: "Hey! How's your week going? Answer in two or three spoken sentences.",
   },
   {
     id: "free",
-    label: "Free",
-    blurb: "You pick the topic",
+    labelKey: "workspace.freeTalk",
+    blurbKey: "workspace.youPickTopic",
     opener: "I'm ready to speak with you. What topic would you like to practice for one minute?",
   },
 ];
@@ -240,7 +240,7 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
                     : "bg-primary/6 text-muted-foreground hover:bg-primary/10 hover:text-foreground",
                 )}
               >
-                {item.label}
+                {t(item.labelKey)}
                 {lockedScenes.includes(item.id) ? (
                   <span className="ml-1.5 inline-flex items-center gap-0.5 text-[10px] font-semibold uppercase opacity-80">
                     <Crown className="size-2.5" />
@@ -268,7 +268,7 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
             ))}
             <span className="ml-auto text-[11px] text-muted-foreground">
               {userTurns} {t("workspace.turns")}
-              {demoMode ? " · demo" : ""}
+              {demoMode ? ` · ${t("speaking.demo")}` : ""}
             </span>
           </div>
         </div>
@@ -350,7 +350,7 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
               <div className="flex min-h-0 flex-1 items-start justify-center overflow-hidden">
                 {voiceRecording || (draft && !pending) ? (
                   <p className="line-clamp-3 text-[16px] leading-normal text-foreground sm:text-[17px]">
-                    <span className="font-semibold text-primary">You — </span>
+                    <span className="font-semibold text-primary">{t("speaking.you")} — </span>
                     {draft || "…"}
                   </p>
                 ) : (
@@ -396,7 +396,7 @@ export const SpeakingRoomPageView = memo(function SpeakingRoomPageView({
                 disabled={pending || voiceRecording || !draft.trim()}
                 onClick={onSend}
               >
-                Send
+                {t("workspace.send")}
               </Button>
               <Link
                 href="/"

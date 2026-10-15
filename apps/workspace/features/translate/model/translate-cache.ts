@@ -1,4 +1,4 @@
-import type { TranslateDirection, TranslateResult } from "../api";
+import type { TranslateDirection, TranslateResult } from "../api/translate-api";
 
 type CacheEntry = {
   storedAt: number;

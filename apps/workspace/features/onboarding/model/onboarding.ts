@@ -1,7 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
-import type { SkillLevel } from "@/features/learn/model/skill-exercises";
-import { accountApi, type AccountProfile } from "@/features/accounts/api";
-import { notifyAccountChanged } from "@/features/accounts/model/account-sync";
+import type { SkillLevel } from "@/features/learn";
+import { accountApi, type AccountProfile } from "@/features/accounts";
+import { notifyAccountChanged } from "@/features/accounts";
 import { LOCALE_COOKIE, type Locale } from "@engli-tutor/i18n";
 import { getPathLocale, stripLocalePath, withLocalePath } from "@/lib/locale-path";
 import { queryKeys } from "@/lib/query";

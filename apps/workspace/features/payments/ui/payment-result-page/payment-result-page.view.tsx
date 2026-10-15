@@ -3,7 +3,8 @@
 import { memo } from "react";
 import { Check, CircleX, LoaderCircle } from "lucide-react";
 import { Button, Card, CardContent } from "@engli-tutor/ui";
-import { LocalizedLink } from "@/features/i18n/localized-link";
+import { LocalizedLink } from "@/features/i18n";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 export type PaymentResultState = "processing" | "success" | "failed";
 
@@ -22,6 +23,7 @@ export const PaymentResultPageView = memo(function PaymentResultPageView({
   packageName,
   countdown,
 }: PaymentResultPageViewProps) {
+  const t = useWorkspaceI18n();
   const Icon = state === "processing" ? LoaderCircle : state === "success" ? Check : CircleX;
 
   return (
@@ -43,10 +45,10 @@ export const PaymentResultPageView = memo(function PaymentResultPageView({
 
           <h1 className="font-display text-3xl tracking-tight">
             {state === "processing"
-              ? "Processing payment"
+              ? t("billing.result.processing")
               : state === "success"
-                ? "Payment successful"
-                : "Payment failed"}
+                ? t("billing.result.success")
+                : t("billing.result.failed")}
           </h1>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">{message}</p>
 
@@ -76,16 +78,16 @@ export const PaymentResultPageView = memo(function PaymentResultPageView({
                   >
                     {state === "success"
                       ? checkoutType === "upgrade"
-                        ? "Plan upgraded"
-                        : "Plan activated"
-                      : "Checkout not completed"}
+                        ? t("billing.result.planUpgraded")
+                        : t("billing.result.planActivated")
+                      : t("billing.result.notCompleted")}
                   </p>
                   <p className="mt-1 truncate text-2xl font-bold text-foreground">{packageName}</p>
                 </div>
               </div>
               {state === "success" ? (
                 <p className="mt-4 border-t border-emerald-500/20 pt-3 text-sm text-emerald-800 dark:text-emerald-300">
-                  Plan benefits have been applied to your workspace.
+                  {t("billing.result.benefitsApplied")}
                 </p>
               ) : null}
             </div>
@@ -93,17 +95,17 @@ export const PaymentResultPageView = memo(function PaymentResultPageView({
 
           {state === "success" ? (
             <p className="mt-5 text-sm text-muted-foreground">
-              Redirecting in <strong className="text-foreground">{countdown}s</strong>
+              {t("billing.result.redirecting")} <strong className="text-foreground">{countdown}s</strong>
             </p>
           ) : null}
 
           <div className="mt-6 flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
             <Button asChild>
-              <LocalizedLink href="/skills">Back to exercises</LocalizedLink>
+              <LocalizedLink href="/skills">{t("billing.result.backToExercises")}</LocalizedLink>
             </Button>
             {state === "failed" ? (
               <Button asChild variant="outline">
-                <LocalizedLink href="/payments">Try payment again</LocalizedLink>
+                <LocalizedLink href="/payments">{t("billing.result.tryAgain")}</LocalizedLink>
               </Button>
             ) : null}
           </div>

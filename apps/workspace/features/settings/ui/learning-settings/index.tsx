@@ -2,8 +2,8 @@
 
 import { useCallback, useLayoutEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { type SkillLevel } from "@/features/learn/model/skill-exercises";
-import { accountApi } from "@/features/accounts/api";
+import { type SkillLevel } from "@/features/learn";
+import { accountApi } from "@/features/accounts";
 import { queryKeys } from "@/lib/query";
 import {
   applyLearningPreferences,

@@ -11,7 +11,7 @@ import {
   Label,
 } from "@engli-tutor/ui";
 import { SettingsCard, SettingsCardContent, SettingsCardHeader } from "../shared";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 export type SecuritySettingsViewProps = {
   currentPassword: string;

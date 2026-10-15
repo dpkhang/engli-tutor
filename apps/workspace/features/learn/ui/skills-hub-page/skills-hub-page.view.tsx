@@ -3,36 +3,36 @@
 import { memo } from "react";
 import { ArrowRight, BookOpen, Headphones, Mic, PenLine, Sparkles } from "lucide-react";
 import { LEVELS, SKILLS, type SkillId } from "../../model/skill-exercises";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
-import { LocalizedLink } from "@/features/i18n/localized-link";
+import { useWorkspaceI18n } from "@/features/i18n";
+import { LocalizedLink } from "@/features/i18n";
 
 const THEMES: Record<
   SkillId,
-  { icon: typeof BookOpen; color: string; gradient: string; prompt: string }
+  { icon: typeof BookOpen; color: string; gradient: string; promptKey: string }
 > = {
   listening: {
     icon: Headphones,
     color: "bg-sky-100 text-sky-700 dark:bg-sky-400/15 dark:text-sky-300",
     gradient: "from-sky-500/15",
-    prompt: "Hear the details",
+    promptKey: "workspace.hearDetails",
   },
   speaking: {
     icon: Mic,
     color: "bg-violet-100 text-violet-700 dark:bg-violet-400/15 dark:text-violet-300",
     gradient: "from-violet-500/15",
-    prompt: "Find your voice",
+    promptKey: "workspace.findVoice",
   },
   reading: {
     icon: BookOpen,
     color: "bg-amber-100 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300",
     gradient: "from-amber-500/15",
-    prompt: "Read with ease",
+    promptKey: "workspace.readWithEase",
   },
   writing: {
     icon: PenLine,
     color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-300",
     gradient: "from-emerald-500/15",
-    prompt: "Shape your ideas",
+    promptKey: "workspace.shapeIdeas",
   },
 };
 
@@ -87,10 +87,10 @@ export const SkillsHubPageView = memo(function SkillsHubPageView({
                 <ArrowRight className="size-5 text-muted-foreground/50 transition-transform group-hover:translate-x-1 group-hover:text-foreground" />
               </div>
               <p className="mt-6 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                {theme.prompt}
+                {t(theme.promptKey)}
               </p>
-              <h2 className="mt-1 text-2xl font-semibold tracking-tight">{skill.labelEn}</h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{skill.blurb}</p>
+              <h2 className="mt-1 text-2xl font-semibold tracking-tight">{t(`workspace.${skill.id}`)}</h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{t(`learn.skillBlurb.${skill.id}`)}</p>
               <div className="mt-auto flex flex-wrap gap-2 pt-5">
                 {LEVELS.map((level) => (
                   <span

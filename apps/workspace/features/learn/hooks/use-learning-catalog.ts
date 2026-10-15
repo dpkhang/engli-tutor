@@ -29,8 +29,11 @@ const catalogQuery = {
   refetchOnMount: true as const,
 };
 
-async function fetchSkillExercises(skill: SkillId): Promise<Cached<SkillExercise[]>> {
-  const result = await learningApi.listExercises({ skill });
+async function fetchSkillExercises(
+  skill: SkillId,
+  signal?: AbortSignal,
+): Promise<Cached<SkillExercise[]>> {
+  const result = await learningApi.listExercises({ skill }, signal);
   if (result?.data?.length) {
     return { source: "api", data: result.data.map(mapLearningExercise) };
   }
@@ -40,18 +43,21 @@ async function fetchSkillExercises(skill: SkillId): Promise<Cached<SkillExercise
 async function fetchSkillExercise(
   skill: SkillId,
   exerciseId: string,
+  signal?: AbortSignal,
 ): Promise<Cached<SkillExercise | null>> {
-  const remote = await learningApi.getExercise(exerciseId);
+  const remote = await learningApi.getExercise(exerciseId, signal);
   if (remote && remote.skill === skill) {
     return { source: "api", data: mapLearningExercise(remote) };
   }
   return { source: "local", data: getLocalExercise(skill, exerciseId) ?? null };
 }
 
-async function fetchSkillsCoverage(): Promise<
+async function fetchSkillsCoverage(
+  signal?: AbortSignal,
+): Promise<
   Cached<Record<SkillId, { total: number; byLevel: Record<SkillLevel, number> }>>
 > {
-  const meta = await learningApi.meta();
+  const meta = await learningApi.meta(signal);
   if (meta?.coverage?.length) {
     const data = Object.fromEntries(
       meta.coverage.map((row) => [
@@ -87,10 +93,10 @@ async function fetchSkillsCoverage(): Promise<
   return { source: "local", data };
 }
 
-async function fetchLessonPacks(): Promise<Cached<LessonPack[]>> {
+async function fetchLessonPacks(signal?: AbortSignal): Promise<Cached<LessonPack[]>> {
   const [packsResult, integrated] = await Promise.all([
-    learningApi.listLessons(),
-    learningApi.listIntegratedLessons(),
+    learningApi.listLessons(signal),
+    learningApi.listIntegratedLessons(signal),
   ]);
   const fromApi = [
     ...(packsResult?.data ?? []),
@@ -107,9 +113,9 @@ function localGameSummaries(): LearningGameSummary[] {
   }));
 }
 
-async function fetchGames(): Promise<Cached<LearningGameSummary[]>> {
+async function fetchGames(signal?: AbortSignal): Promise<Cached<LearningGameSummary[]>> {
   const local = localGameSummaries();
-  const result = await learningApi.listGames();
+  const result = await learningApi.listGames(signal);
   if (result?.data?.length) {
     const ids = new Set(result.data.map((game) => game.id));
     return { source: "api", data: [...result.data, ...local.filter((game) => !ids.has(game.id))] };
@@ -120,8 +126,9 @@ async function fetchGames(): Promise<Cached<LearningGameSummary[]>> {
 async function fetchGame(
   slug: string,
   lesson?: string | null,
+  signal?: AbortSignal,
 ): Promise<Cached<LearningGame | null>> {
-  const remote = await learningApi.getGame(slug, lesson ?? undefined);
+  const remote = await learningApi.getGame(slug, lesson ?? undefined, signal);
   if (remote?.rounds?.length) {
     return { source: "api", data: mapLearningGame(remote) };
   }
@@ -131,7 +138,7 @@ async function fetchGame(
 export function useSkillExercises(skill: SkillId, level?: SkillLevel | "all") {
   const query = useQuery({
     queryKey: queryKeys.learning.exercises(skill),
-    queryFn: () => fetchSkillExercises(skill),
+    queryFn: ({ signal }) => fetchSkillExercises(skill, signal),
     ...catalogQuery,
   });
 
@@ -180,9 +187,9 @@ export function useSkillExercises(skill: SkillId, level?: SkillLevel | "all") {
 
 export function useSkillExercise(skill: SkillId, exerciseId: string) {
   const queryClient = useQueryClient();
-  const query = useQuery({
+  const query = useQuery<Cached<SkillExercise | null>>({
     queryKey: queryKeys.learning.exercise(skill, exerciseId),
-    queryFn: () => fetchSkillExercise(skill, exerciseId),
+    queryFn: ({ signal }) => fetchSkillExercise(skill, exerciseId, signal),
     ...catalogQuery,
     placeholderData: () => {
       const cached = queryClient.getQueryData<Cached<SkillExercise[]>>(
@@ -205,7 +212,7 @@ export function useSkillExercise(skill: SkillId, exerciseId: string) {
 export function useSkillsCoverage() {
   const query = useQuery({
     queryKey: queryKeys.learning.meta,
-    queryFn: fetchSkillsCoverage,
+    queryFn: ({ signal }) => fetchSkillsCoverage(signal),
     ...catalogQuery,
   });
 
@@ -220,7 +227,7 @@ export function useSkillsCoverage() {
 export function useLessonPacks() {
   const query = useQuery({
     queryKey: queryKeys.learning.lessons,
-    queryFn: fetchLessonPacks,
+    queryFn: ({ signal }) => fetchLessonPacks(signal),
     ...catalogQuery,
   });
 
@@ -235,7 +242,7 @@ export function useLessonPacks() {
 export function useGames() {
   const query = useQuery({
     queryKey: queryKeys.learning.games,
-    queryFn: fetchGames,
+    queryFn: ({ signal }) => fetchGames(signal),
     ...catalogQuery,
   });
 
@@ -250,7 +257,7 @@ export function useGames() {
 export function useGame(slug: string, lesson?: string | null) {
   const query = useQuery({
     queryKey: queryKeys.learning.game(slug, lesson),
-    queryFn: () => fetchGame(slug, lesson),
+    queryFn: ({ signal }) => fetchGame(slug, lesson, signal),
     ...catalogQuery,
   });
 

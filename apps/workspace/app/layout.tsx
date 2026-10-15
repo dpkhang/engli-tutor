@@ -5,12 +5,12 @@ import { QueryProvider } from "@/providers/query-provider";
 import { AuthGate } from "@/providers/auth-gate";
 import { AppShell, GlobalNavigationLoading, PreventZoom, SignOutLoadingProvider } from "@/features/layout";
 import { AppearanceProvider } from "@/features/settings";
-import { LessonProgressSync } from "@/features/learn/ui/lesson-progress-sync";
-import { PushRegistrar } from "@/features/notifications/push-registrar";
+import { LessonProgressSync } from "@/features/learn";
+import { PushRegistrar } from "@/features/notifications";
 import { ServiceWorkerRegistrar } from "@/features/pwa";
 import { ActionDialogProvider, ToastProvider } from "@engli-tutor/ui";
-import { UpgradeModalProvider } from "@/features/payments/ui/upgrade-modal-provider";
-import { WorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { UpgradeModalProvider } from "@/features/payments";
+import { WorkspaceI18n } from "@/features/i18n";
 import { SITE_URL, siteMetadata } from "@/lib/seo";
 import "./globals.css";
 
@@ -49,14 +49,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var r=document.documentElement;var t=localStorage.getItem('pagecraft-theme');var darkIds={dark:1,midnight:1,forest:1,ocean:1,dusk:1};var resolved=t==='system'||!t?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):t;if(resolved==='warm'||resolved==='light'||resolved==='dark'||resolved==='midnight'||resolved==='forest'||resolved==='ocean'||resolved==='dusk'){}else{resolved=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}var d=!!darkIds[resolved];r.classList.toggle('dark',d);r.classList.remove('midnight');r.setAttribute('data-theme',resolved);r.style.colorScheme=d?'dark':'light';var a=localStorage.getItem('englitutor-accent');if(a)r.setAttribute('data-accent',a);var s=localStorage.getItem('englitutor-text-size');if(s)r.setAttribute('data-text-size',s);var m=localStorage.getItem('englitutor-reduce-motion');if(m)r.setAttribute('data-reduce-motion',m);r.classList.toggle('reduce-motion',m==='on')}catch(e){}})()`,
+            __html: `(function(){try{var r=document.documentElement;var t=localStorage.getItem('englitutor-theme')||localStorage.getItem('pagecraft-theme');var darkIds={dark:1,midnight:1,forest:1,ocean:1,dusk:1};var resolved=t==='system'||!t?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):t;if(resolved==='warm'||resolved==='light'||resolved==='dark'||resolved==='midnight'||resolved==='forest'||resolved==='ocean'||resolved==='dusk'){}else{resolved=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}var d=!!darkIds[resolved];r.classList.toggle('dark',d);r.classList.remove('midnight');r.setAttribute('data-theme',resolved);r.style.colorScheme=d?'dark':'light';var a=localStorage.getItem('englitutor-accent');if(a)r.setAttribute('data-accent',a);var s=localStorage.getItem('englitutor-text-size');if(s)r.setAttribute('data-text-size',s);var m=localStorage.getItem('englitutor-reduce-motion');if(m)r.setAttribute('data-reduce-motion',m);r.classList.toggle('reduce-motion',m==='on')}catch(e){}})()`,
           }}
         />
       </head>
       <body suppressHydrationWarning>
         <QueryProvider>
-          <AppearanceProvider>
-            <WorkspaceI18n>
+          <WorkspaceI18n>
+            <AppearanceProvider>
             <LessonProgressSync>
             <ActionDialogProvider>
               <ToastProvider>
@@ -76,8 +76,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               </ToastProvider>
             </ActionDialogProvider>
             </LessonProgressSync>
-            </WorkspaceI18n>
-          </AppearanceProvider>
+            </AppearanceProvider>
+          </WorkspaceI18n>
         </QueryProvider>
       </body>
     </html>

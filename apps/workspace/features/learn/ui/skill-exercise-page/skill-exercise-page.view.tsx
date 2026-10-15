@@ -1,13 +1,13 @@
 "use client";
 
 import { memo } from "react";
-import { LocalizedLink as Link } from "@/features/i18n/localized-link";
+import { LocalizedLink as Link } from "@/features/i18n";
 import { ArrowLeft, BookOpen, Check, Heart, House, Lightbulb, RotateCcw, Volume2 } from "lucide-react";
 import { Button, cn } from "@engli-tutor/ui";
 import { DataLoadingState, NotFoundPage } from "@/features/layout";
 import { ClickableTranslateText } from "@/features/translate";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
-import { LocalizedLink } from "@/features/i18n/localized-link";
+import { useWorkspaceI18n } from "@/features/i18n";
+import { LocalizedLink } from "@/features/i18n";
 import type {
   ChoiceQuestion,
   OpenQuestion,
@@ -333,10 +333,10 @@ export const SkillExercisePageView = memo(function SkillExercisePageView({
             {t("workspace.niceWorkExclamation")}
           </p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight">
-            {t("workspace.youGotScore").replace("{correct}", String(correctCount)).replace("{total}", String(exercise.questions.length))}
+            {t("workspace.youGotScore", { correct: correctCount, total: exercise.questions.length })}
           </h2>
           <p className="mt-2 max-w-xl text-sm text-primary-foreground/75">
-            Review the explanations above, then try again or practice another skill.
+            {t("learn.reviewExplanations")}
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Button
@@ -351,14 +351,14 @@ export const SkillExercisePageView = memo(function SkillExercisePageView({
               asChild
               className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25"
             >
-              <LocalizedLink href={backHref}>More in this skill</LocalizedLink>
+              <LocalizedLink href={backHref}>{t("learn.moreInSkill")}</LocalizedLink>
             </Button>
             <Button
               asChild
               variant="outline"
               className="rounded-full border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
             >
-              <LocalizedLink href="/practice">AI Chat</LocalizedLink>
+              <LocalizedLink href="/practice">{t("learn.aiChat")}</LocalizedLink>
             </Button>
           </div>
         </div>

@@ -10,8 +10,10 @@ import {
 } from "react";
 import { useReducedMotion } from "motion/react";
 import { ApiError } from "@engli-tutor/api-client";
+import type { Translator } from "@engli-tutor/i18n";
+import { useWorkspaceI18n } from "@/features/i18n";
 import { upgradeMessageFromError } from "@/features/payments";
-import { type TranslateDirection, type TranslateResult } from "../../api";
+import { type TranslateDirection, type TranslateResult } from "../../api/translate-api";
 import { lookupTranslation } from "../../model/translate-lookup";
 import { getCachedLookup } from "../../model/translate-cache";
 import { isTranslateHotkey } from "../../model/translate-path";
@@ -51,17 +53,18 @@ function mergeWordWithSentence(
   };
 }
 
-function errorMessage(error: unknown) {
-  const upgradeMessage = upgradeMessageFromError(error);
+function errorMessage(error: unknown, t: Translator) {
+  const upgradeMessage = upgradeMessageFromError(error, t);
   if (upgradeMessage) return upgradeMessage;
   if (error instanceof ApiError) return error.message;
   if (error instanceof Error) return error.message;
-  return "Translation is unavailable right now. Please try again.";
+  return t("translate.unavailable");
 }
 
 const DIRECTION: TranslateDirection = "en-vi";
 
 export function FloatingTranslate() {
+  const t = useWorkspaceI18n();
   const { open, setOpen, pickedWord, pickNonce, activeSentence } = useTranslateSession();
   const reduceMotion = useReducedMotion();
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -157,13 +160,13 @@ export function FloatingTranslate() {
         setResult(next);
         return next;
       } catch (lookupError) {
-        setError(errorMessage(lookupError));
+        setError(errorMessage(lookupError, t));
         return null;
       } finally {
         setPending(false);
       }
     },
-    [pending, text],
+    [pending, t, text],
   );
 
   const loadSentenceContext = useCallback(async (sentence: string, word: string) => {

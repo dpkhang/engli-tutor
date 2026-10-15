@@ -1,46 +1,46 @@
 "use client";
 
 import { memo } from "react";
-import { LocalizedLink as Link } from "@/features/i18n/localized-link";
+import { LocalizedLink as Link } from "@/features/i18n";
 import { ArrowRight, BriefcaseBusiness, Coffee, Mail, Mic2, Sparkles, Users } from "lucide-react";
 import { Button } from "@engli-tutor/ui";
 import { LESSON_PACKS } from "../../model/curriculum";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
-import { LocalizedLink } from "@/features/i18n/localized-link";
+import { useWorkspaceI18n } from "@/features/i18n";
+import { LocalizedLink } from "@/features/i18n";
 
 const SCENARIOS = [
   {
     id: "interview",
-    label: "Interview",
-    body: "Share your story with confidence",
+    labelKey: "workspace.interview",
+    bodyKey: "learn.scenario.interviewBody",
     icon: BriefcaseBusiness,
     color: "bg-violet-100 text-violet-700 dark:bg-violet-400/15 dark:text-violet-300",
   },
   {
     id: "standup",
-    label: "Team stand-up",
-    body: "Talk about plans and progress",
+    labelKey: "learn.scenario.standup",
+    bodyKey: "learn.scenario.standupBody",
     icon: Users,
     color: "bg-sky-100 text-sky-700 dark:bg-sky-400/15 dark:text-sky-300",
   },
   {
     id: "smalltalk",
-    label: "Small talk",
-    body: "Enjoy an easy office conversation",
+    labelKey: "workspace.smallTalk",
+    bodyKey: "learn.scenario.smalltalkBody",
     icon: Coffee,
     color: "bg-amber-100 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300",
   },
   {
     id: "email",
-    label: "Email",
-    body: "Write clear, natural messages",
+    labelKey: "workspace.email",
+    bodyKey: "learn.scenario.emailBody",
     icon: Mail,
     color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-300",
   },
   {
     id: "free",
-    label: "Choose your topic",
-    body: "Talk about anything on your mind",
+    labelKey: "learn.scenario.free",
+    bodyKey: "learn.scenario.freeBody",
     icon: Mic2,
     color: "bg-rose-100 text-rose-700 dark:bg-rose-400/15 dark:text-rose-300",
   },
@@ -81,10 +81,10 @@ export const StartPracticePageView = memo(function StartPracticePageView() {
               <span className={`grid size-10 place-items-center rounded-xl ${item.color}`}>
                 <item.icon className="size-4" />
               </span>
-              <p className="mt-4 font-semibold tracking-tight">{item.label}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{item.body}</p>
+              <p className="mt-4 font-semibold tracking-tight">{t(item.labelKey)}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{t(item.bodyKey)}</p>
               <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
-                Let&apos;s talk{" "}
+                {t("workspace.letsTalk")}{" "}
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
               </span>
             </LocalizedLink>
@@ -107,7 +107,7 @@ export const StartPracticePageView = memo(function StartPracticePageView() {
                 <div>
                   <p className="text-sm font-semibold">{lesson.title}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {lesson.level} · {lesson.duration} · {lesson.skills.join(" · ")}
+                    {lesson.level} · {lesson.duration} · {lesson.skills.map((skill) => t(`workspace.${skill.toLowerCase()}`)).join(" · ")}
                   </p>
                 </div>
                 <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-foreground" />

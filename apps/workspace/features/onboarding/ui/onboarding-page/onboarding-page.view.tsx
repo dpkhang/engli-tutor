@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import { LocalizedLink as Link } from "@/features/i18n/localized-link";
+import { LocalizedLink as Link } from "@/features/i18n";
 import {
   ArrowLeft,
   ArrowRight,
@@ -19,10 +19,10 @@ import {
 } from "lucide-react";
 import { Alert, AlertDescription, Badge, BrandLogo, Button, cn } from "@engli-tutor/ui";
 import type { Locale } from "@engli-tutor/i18n";
-import { LEVELS, type SkillLevel } from "@/features/learn/model/skill-exercises";
-import type { BillingPeriod } from "@/features/payments/api/billing";
-import { PERIOD_SUFFIX, planPeriodPrice, type ComparePlan } from "@/features/payments/model/plans";
-import { PlanPeriodSwitch } from "@/features/payments/ui/plan-period-switch";
+import { LEVELS, type SkillLevel } from "@/features/learn";
+import type { BillingPeriod } from "@/features/payments";
+import { PERIOD_SUFFIX_KEY, planPeriodPrice, type ComparePlan } from "@/features/payments";
+import { PlanPeriodSwitch } from "@/features/payments";
 import {
   INTRO_HIGHLIGHTS,
   LEARNING_GOALS,
@@ -31,7 +31,7 @@ import {
 } from "../../model/onboarding";
 import { OnboardingBackdrop } from "../onboarding-backdrop";
 import { WelcomeScreen } from "../welcome-screen";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 const STEPS = [
   { id: "intro", title: "Welcome" },
@@ -358,7 +358,7 @@ export const OnboardingPageView = memo(function OnboardingPageView({
                           <p className="mt-4 text-2xl font-semibold tracking-tight">
                             {formatVnd(price)}
                             <span className="ml-1 text-sm font-normal text-muted-foreground">
-                              {PERIOD_SUFFIX[period]}
+                              {t(PERIOD_SUFFIX_KEY[period])}
                             </span>
                           </p>
                           {discount > 0 ? (

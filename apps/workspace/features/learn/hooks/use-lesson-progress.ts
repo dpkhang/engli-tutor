@@ -1,13 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { SkillId } from "../model/skill-exercises";
 import {
   clearLessonProgress,
-  getLessonProgress,
-  invalidateLessonProgressCache,
-  LESSON_PROGRESS_EVENT,
-  LESSON_PROGRESS_KEY,
   markLessonCompleted,
   markLessonStarted,
   removeExerciseFavorite,
@@ -16,34 +12,13 @@ import {
   reopenLesson,
   toggleExerciseFavorite,
   toggleLessonFavorite,
+  useLessonProgressStore,
   type LessonListKind,
-  type LessonProgressState,
 } from "../model/lesson-progress";
 
-function subscribe(onStoreChange: () => void) {
-  const onStorage = (event: StorageEvent) => {
-    if (event.key !== null && !event.key.startsWith(LESSON_PROGRESS_KEY)) return;
-    invalidateLessonProgressCache();
-    onStoreChange();
-  };
-  window.addEventListener(LESSON_PROGRESS_EVENT, onStoreChange);
-  window.addEventListener("storage", onStorage);
-  return () => {
-    window.removeEventListener(LESSON_PROGRESS_EVENT, onStoreChange);
-    window.removeEventListener("storage", onStorage);
-  };
-}
-
-function getSnapshot(): LessonProgressState {
-  return getLessonProgress();
-}
-
-function getServerSnapshot(): LessonProgressState {
-  return { started: [], completed: [], favorites: [], exerciseFavorites: [] };
-}
-
 export function useLessonProgress() {
-  const progress = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  // Zustand renders the (empty) initial state during hydration, then the stored progress.
+  const progress = useLessonProgressStore((state) => state.progress);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {

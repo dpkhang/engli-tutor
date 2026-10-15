@@ -18,6 +18,7 @@ import { createPortal } from "react-dom";
 import { Check, ChevronDown, Search } from "lucide-react";
 import { cn, Input } from "@engli-tutor/ui";
 import { getCountryCallingCode, type Country } from "react-phone-number-input";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 type CountryOption = {
   value?: string;
@@ -113,6 +114,7 @@ export const PhoneCountrySelect = memo(function PhoneCountrySelect({
   onBlur,
   ...rest
 }: PhoneCountrySelectProps) {
+  const t = useWorkspaceI18n();
   const listId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -237,7 +239,7 @@ export const PhoneCountrySelect = memo(function PhoneCountrySelect({
             data-phone-country-menu={listId}
             id={listId}
             role="listbox"
-            aria-label="Select country"
+            aria-label={t("accounts.selectCountry")}
             style={menuStyle}
             className="overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-lg"
           >
@@ -246,8 +248,8 @@ export const PhoneCountrySelect = memo(function PhoneCountrySelect({
               <Input
                 ref={searchRef}
                 value={query}
-                placeholder="Search country or code"
-                aria-label="Search countries"
+                placeholder={t("accounts.searchCountryPlaceholder")}
+                aria-label={t("accounts.searchCountries")}
                 className="h-8 w-full rounded-md border border-input bg-transparent pr-10 pl-8 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/40"
                 onChange={(event) => setQuery(event.target.value)}
                 onKeyDown={(event) => {
@@ -261,7 +263,7 @@ export const PhoneCountrySelect = memo(function PhoneCountrySelect({
             <div className="max-h-64 overflow-y-auto p-1">
               {filtered.length === 0 ? (
                 <p className="px-2 py-3 text-center text-xs text-muted-foreground">
-                  No countries found
+                  {t("accounts.noCountries")}
                 </p>
               ) : (
                 filtered.map((entry) => (
@@ -287,7 +289,7 @@ export const PhoneCountrySelect = memo(function PhoneCountrySelect({
         type="button"
         name={name}
         disabled={locked}
-        aria-label={rest["aria-label"] ?? "Country calling code"}
+        aria-label={rest["aria-label"] ?? t("accounts.countryCallingCode")}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listId}
@@ -299,7 +301,7 @@ export const PhoneCountrySelect = memo(function PhoneCountrySelect({
           <FlagIcon
             aria-hidden
             country={value}
-            label={selectedEntry?.label ?? "International"}
+            label={selectedEntry?.label ?? t("accounts.international")}
           />
         </span>
         <ChevronDown

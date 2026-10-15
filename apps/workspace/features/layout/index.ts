@@ -4,6 +4,7 @@ export {
   ModulePlaceholder,
   type ModuleCapability,
   DataLoadingState,
+  RouteFallback,
   SignOutLoadingProvider,
   useSignOutLoading,
 } from "./ui/shared";

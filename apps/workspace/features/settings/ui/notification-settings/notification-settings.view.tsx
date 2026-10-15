@@ -4,7 +4,7 @@ import { memo } from "react";
 import { Bell, CreditCard } from "lucide-react";
 import { CardTitle, Label, cn } from "@engli-tutor/ui";
 import { SettingsCard, SettingsCardContent, SettingsCardHeader, SettingsPanel } from "../shared";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 const REMINDER_SLOTS = Array.from({ length: 96 }, (_, index) => index * 15);
 

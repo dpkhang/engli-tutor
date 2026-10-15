@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@engli-tutor/ui";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 type DataLoadingStateProps = {
   title?: string;

@@ -1,9 +1,10 @@
 import { Suspense } from "react";
+import { RouteFallback } from "@/features/layout";
 import { TutorChatPage } from "@/features/tutor-chat";
 
 export default function PracticeRoutePage() {
   return (
-    <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Opening chat room…</div>}>
+    <Suspense fallback={<RouteFallback messageKey="shell.openingChat" />}>
       <TutorChatPage />
     </Suspense>
   );

@@ -1,14 +1,14 @@
 "use client";
 
 import { memo } from "react";
-import { LocalizedLink as Link } from "@/features/i18n/localized-link";
-import { useUpgradeModal } from "@/features/payments/ui/upgrade-modal-provider";
+import { LocalizedLink as Link } from "@/features/i18n";
+import { useUpgradeModal } from "@/features/payments";
 import { ArrowRight, Gamepad2, Sparkles, Timer } from "lucide-react";
 import { DataLoadingState } from "@/features/layout";
 import { GAME_THEME } from "../../model/games";
 import type { LearningGameId } from "../../api/types";
-import { useWorkspaceI18n } from "@/features/i18n/workspace-i18n";
-import { LocalizedLink } from "@/features/i18n/localized-link";
+import { useWorkspaceI18n } from "@/features/i18n";
+import { LocalizedLink } from "@/features/i18n";
 
 export type GamesHubCard = {
   id: string;

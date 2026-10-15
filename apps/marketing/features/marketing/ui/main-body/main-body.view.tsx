@@ -121,43 +121,13 @@ function PolicyFaqLink({ href, children }: { href: string; children: ReactNode }
   );
 }
 
-const FAQS: { q: string; a: ReactNode }[] = [
-  {
-    q: "I'm A2 and weak at speaking — can I start?",
-    a: "Yes. The placement test covers listening, speaking, reading, and writing, then your path starts at the right level. You still practice all four skills, including the weak ones.",
-  },
-  {
-    q: "Can I only practice speaking?",
-    a: "Every session connects speaking with listening, reading, and a short writing task. Speaking gets focused time, but the input and review make your answers stronger.",
-  },
-  {
-    q: "How many minutes a day?",
-    a: "Plan for about 20–30 minutes for a complete loop: listen, read, speak with AI, then write and review feedback in Vietnamese.",
-  },
-  {
-    q: "How is Free different from paid plans?",
-    a: "Free lets you try the daily learning loop with limited AI tutor usage. Paid plans use the live billing catalog shown above, so the exact price and included benefits stay up to date.",
-  },
-  {
-    q: "What happens to my speaking audio?",
-    a: (
-      <>
-        Short clips are sent to speech providers so we can transcribe you and play tutor audio back.
-        We do not sell your voice or transcripts.
-        <PolicyFaqLink href="/policy#voice-and-ai">Read voice &amp; AI privacy →</PolicyFaqLink>
-      </>
-    ),
-  },
-  {
-    q: "How do you use cookies?",
-    a: (
-      <>
-        Session cookies keep you signed in. Preference storage on your device remembers theme and
-        playback settings. We do not run advertising cookies.
-        <PolicyFaqLink href="/policy/cookies">Read the Cookie Policy →</PolicyFaqLink>
-      </>
-    ),
-  },
+const FAQS: Array<{ id: string; link?: { href: string; labelKey: string } }> = [
+  { id: "start" },
+  { id: "speaking" },
+  { id: "minutes" },
+  { id: "plans" },
+  { id: "audio", link: { href: "/policy#voice-and-ai", labelKey: "home.faqVoiceLink" } },
+  { id: "cookies", link: { href: "/policy/cookies", labelKey: "home.faqCookieLink" } },
 ];
 
 const viewport = { once: true, amount: 0.18, margin: "0px 0px -6% 0px" } as const;
@@ -292,10 +262,10 @@ export const MainBodyView = memo(function MainBodyView({
               <div className="flex items-center justify-between gap-4 border-b border-border px-4 py-3">
                 <div>
                   <p className="text-sm font-semibold text-foreground">{t("home.lessonPreview")}</p>
-                  <p className="text-xs text-muted-foreground">Listen → Read → Speak → Write</p>
+                  <p className="text-xs text-muted-foreground">{t("home.loopSteps")}</p>
                 </div>
                 <span className="rounded-full bg-accent/15 px-2.5 py-1 text-[11px] font-medium text-accent">
-                  AI tutor
+                  {t("home.aiTutor")}
                 </span>
               </div>
 
@@ -304,11 +274,11 @@ export const MainBodyView = memo(function MainBodyView({
                   <span className="mb-1 block text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
                     {t("home.listenRead")}
                   </span>
-                  Prompt: “Tell me about a challenging project you worked on recently.”
+                  {t("home.promptLabel")} “Tell me about a challenging project you worked on recently.”
                 </div>
                 <div className="ml-auto max-w-[88%] rounded-2xl rounded-tr-md bg-primary px-3.5 py-2.5 text-sm leading-relaxed text-primary-foreground">
                   <span className="mb-1 block text-[10px] font-semibold tracking-wide text-primary-foreground/65 uppercase">
-                    Speak
+                    {t("workspace.speak")}
                   </span>
                   Last year I work on payment feature. It was difficult because deadline is short…
                 </div>
@@ -446,7 +416,7 @@ export const MainBodyView = memo(function MainBodyView({
               <div className="mt-8 rounded-3xl border border-border bg-card p-6 shadow-sm sm:mt-10" role="status" aria-live="polite">
                 <p className="text-lg font-semibold tracking-tight text-foreground">{t("home.loadingPlans")}</p>
                 <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
-                  We are checking the latest catalog before showing paid options. You can still start a free lesson now.
+                  {t("home.checkingCatalog")}
                 </p>
                 <Button type="button" className="mt-5 rounded-full" onClick={onEntryClick}>
                   {entryLabel}
@@ -454,19 +424,19 @@ export const MainBodyView = memo(function MainBodyView({
               </div>
             ) : pricingStatus === "error" ? (
               <div className="mt-8 rounded-3xl border border-border bg-card p-6 shadow-sm sm:mt-10" role="alert">
-                <p className="text-lg font-semibold tracking-tight text-foreground">Plans could not load</p>
+                <p className="text-lg font-semibold tracking-tight text-foreground">{t("workspace.plansCouldNotLoad")}</p>
                 <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
-                  {pricingError ?? "The pricing catalog is temporarily unavailable. We will not show fallback plans as current pricing."}
+                  {pricingError ?? t("home.pricingUnavailable")}
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
                   <Button type="button" className="rounded-full" onClick={onEntryClick}>
                     {entryLabel}
                   </Button>
                   <Button type="button" variant="outline" className="rounded-full" onClick={onRetryPricing}>
-                    Retry pricing
+                    {t("home.retryPricing")}
                   </Button>
                   <Button asChild type="button" variant="outline" className="rounded-full">
-                    <Link href="/payment">Open payment page</Link>
+                    <Link href="/payment">{t("home.openPayment")}</Link>
                   </Button>
                 </div>
               </div>
@@ -490,7 +460,7 @@ export const MainBodyView = memo(function MainBodyView({
                         <h3 className="text-xl font-semibold tracking-tight">{plan.name}</h3>
                         {plan.featured ? (
                           <span className="rounded-full bg-accent/16 px-2.5 py-1 text-[10px] font-semibold tracking-[0.14em] text-accent uppercase">
-                            Popular
+                            {t("payment.popular")}
                           </span>
                         ) : null}
                       </div>
@@ -565,19 +535,24 @@ export const MainBodyView = memo(function MainBodyView({
                 </p>
                 <div className="mt-6 flex flex-wrap gap-2">
                   <Button asChild variant="outline" size="sm" className="rounded-full">
-                    <Link href={localize("/policy")} target="_blank" rel="noopener noreferrer">Privacy Policy</Link>
+                    <Link href={localize("/policy")} target="_blank" rel="noopener noreferrer">{t("home.privacy")}</Link>
                   </Button>
                   <Button asChild variant="outline" size="sm" className="rounded-full">
-                    <Link href={localize("/policy/cookies")} target="_blank" rel="noopener noreferrer">Cookie Policy</Link>
+                    <Link href={localize("/policy/cookies")} target="_blank" rel="noopener noreferrer">{t("home.cookies")}</Link>
                   </Button>
                 </div>
               </div>
               <div className="rounded-3xl border border-border bg-card p-2 shadow-sm">
-                <Accordion type="single" collapsible defaultValue={FAQS[0]?.q}>
+                <Accordion type="single" collapsible defaultValue={FAQS[0]?.id}>
                   {FAQS.map((item, index) => (
-                    <AccordionItem key={item.q} value={item.q}>
+                    <AccordionItem key={item.id} value={item.id}>
                       <AccordionTrigger>{t(`home.faqItems.${index}.q`)}</AccordionTrigger>
-                      <AccordionContent>{t(`home.faqItems.${index}.a`)}</AccordionContent>
+                      <AccordionContent>
+                        {t(`home.faqItems.${index}.a`)}
+                        {item.link ? (
+                          <PolicyFaqLink href={item.link.href}>{t(item.link.labelKey)}</PolicyFaqLink>
+                        ) : null}
+                      </AccordionContent>
                     </AccordionItem>
                   ))}
                 </Accordion>

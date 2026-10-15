@@ -2,7 +2,7 @@
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { subscribeAccountChanged } from "@/features/accounts/model/account-sync";
+import { subscribeAccountChanged } from "@/features/accounts";
 import { createQueryClient, queryKeys } from "@/lib/query";
 
 export function QueryProvider({ children }: { children: React.ReactNode }) {
