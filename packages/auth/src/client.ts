@@ -11,7 +11,7 @@ export type EngliAuthClient = ReturnType<typeof createAuthClient<EngliAuthClient
 /**
  * Create Better Auth client.
  * - With `baseURL`: talk to API directly (local FE → Fly/API host).
- * - Without: same-origin `/api/auth` (Vercel rewrite → API; first-party cookies).
+ * - Without: same-origin `/api/auth` (Next rewrite → API; first-party cookies).
  */
 export function createEngliAuthClient(baseURL?: string): EngliAuthClient {
   return createAuthClient<EngliAuthClientOptions>({

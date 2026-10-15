@@ -7,11 +7,17 @@
 #   VPS_USER, VPS_IP        e.g. harry / 169.58.99.141
 #   ENV_WORKSPACE_BASE64    base64 of apps/workspace/.env.production
 #   ENV_MARKETING_BASE64    base64 of apps/marketing/.env.production
+#
+# Only apps touched by the merge are rebuilt (changes in packages/ or shared
+# build files rebuild both). Env-only changes are invisible to git diff:
+# run the pipeline manually with DEPLOY_APPS="workspace" / "marketing" / "workspace marketing".
 
 workflow:
   rules:
     # Only run after develop is merged into the default branch (main).
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TITLE =~ /^Merge branch .develop./'
+    # Manual "Run pipeline" on main, e.g. with DEPLOY_APPS after changing env variables.
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     - when: never
 
 stages:
@@ -30,7 +36,7 @@ deploy:vps:
   environment:
     name: production
   before_script:
-    - apk add --no-cache openssh-client rsync
+    - apk add --no-cache openssh-client rsync git
     - mkdir -p ~/.ssh
     - echo "$SSH_PRIVATE_KEY_BASE64" | base64 -d > ~/.ssh/id_ed25520
     - chmod 600 ~/.ssh/id_ed25520
@@ -38,6 +44,31 @@ deploy:vps:
     - printf "Host %s\n  IdentityFile ~/.ssh/id_ed25520\n  IdentitiesOnly yes\n" "$VPS_IP" > ~/.ssh/config
     - chmod 600 ~/.ssh/config
   script:
+    - |
+      if [ -n "$DEPLOY_APPS" ]; then
+        APPS="$DEPLOY_APPS"
+      else
+        CHANGED=$(git diff --name-only HEAD^1 HEAD 2>/dev/null) || CHANGED="__all__"
+        echo "Changed files:"; echo "$CHANGED"
+        APPS=""
+        if echo "$CHANGED" | grep -qE '^(__all__$|packages/|package\.json$|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|\.npmrc$|Dockerfile$|\.dockerignore$|docker-compose\.yml$)'; then
+          APPS="workspace marketing"
+        else
+          if echo "$CHANGED" | grep -q '^apps/workspace/'; then APPS="$APPS workspace"; fi
+          if echo "$CHANGED" | grep -q '^apps/marketing/'; then APPS="$APPS marketing"; fi
+        fi
+      fi
+      APPS=$(echo $APPS)
+      if [ -z "$APPS" ]; then echo "No app changes — skip deploy"; exit 0; fi
+      PORTS=""
+      for app in $APPS; do
+        case "$app" in
+          workspace) PORTS="$PORTS 3000" ;;
+          marketing) PORTS="$PORTS 3002" ;;
+          *) echo "Unknown app '$app' in DEPLOY_APPS"; exit 1 ;;
+        esac
+      done
+      echo "Deploying: $APPS"
     - test -n "$ENV_WORKSPACE_BASE64" || (echo 'Missing GitLab variable ENV_WORKSPACE_BASE64' && exit 1)
     - test -n "$ENV_MARKETING_BASE64" || (echo 'Missing GitLab variable ENV_MARKETING_BASE64' && exit 1)
     - ssh $SSH_HOST "mkdir -p .${WORK_SPACE_PATH}"
@@ -48,14 +79,14 @@ deploy:vps:
       ssh $SSH_HOST "
         set -e;
         cd .${WORK_SPACE_PATH};
-        docker compose up -d --build --remove-orphans;
+        docker compose up -d --build --no-deps --remove-orphans ${APPS};
         docker image prune -f;
-        for app in 3000 3002; do
+        for app in ${PORTS}; do
           ok=0;
           for i in 1 2 3 4 5 6 7 8 9 10; do
             code=\$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:\$app/en || true);
             if [ \"\$code\" = 200 ]; then ok=1; echo \"port \$app OK\"; break; fi;
             sleep 3;
           done;
-          if [ \$ok != 1 ]; then docker compose logs --tail=100; exit 1; fi;
+          if [ \$ok != 1 ]; then docker compose logs --tail=100 ${APPS}; exit 1; fi;
         done"

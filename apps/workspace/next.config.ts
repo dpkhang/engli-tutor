@@ -22,7 +22,7 @@ if (!process.env.NEXT_PUBLIC_API_URL?.trim()) {
 }
 
 // Always proxy API calls through the frontend origin. This keeps auth cookies
-// first-party on both Vercel domains and localhost while the upstream can still
+// first-party on both production domains and localhost while the upstream can still
 // be the production API.
 const useSameOriginProxy = true;
 

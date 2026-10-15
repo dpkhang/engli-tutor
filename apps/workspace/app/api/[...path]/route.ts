@@ -94,7 +94,7 @@ function adaptSetCookieForBrowser(raw: string, hostname: string, https: boolean)
   let adapted = raw.replace(/;\s*Partitioned=?[^;]*/gi, "");
 
   // Browsers reject Set-Cookie when an upstream shared domain does not contain
-  // the frontend proxy host (for example, a Vercel preview deployment).
+  // the frontend proxy host (for example, localhost or a LAN IP).
   if (!domainMatchesHost) adapted = adapted.replace(/;\s*Domain=[^;]*/gi, "");
 
   if (!https) {

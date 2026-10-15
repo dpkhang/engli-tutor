@@ -1,7 +1,7 @@
 import path from "node:path";
 import type { NextConfig } from "next";
 
-/** Baked into the client bundle. Prefer CI/Vercel env; local fallback is the API on :3001. */
+/** Baked into the client bundle. Prefer CI env; local fallback is the API on :3001. */
 const isProdBuild = process.env.NODE_ENV === "production";
 const DEFAULT_API_URL = isProdBuild
   ? "https://api.harrybox.cloud"
@@ -22,17 +22,17 @@ const useSameOriginProxy = true;
 
 if (!process.env.NEXT_PUBLIC_API_URL?.trim()) {
   console.warn(
-    `[engli-tutor-web] NEXT_PUBLIC_API_URL unset — using ${DEFAULT_API_URL}. Set it in Vercel/GitLab for production.`,
+    `[engli-tutor-web] NEXT_PUBLIC_API_URL unset — using ${DEFAULT_API_URL}. Set it in GitLab for production.`,
   );
 }
 if (!process.env.NEXT_PUBLIC_APP_URL?.trim()) {
   console.warn(
-    `[engli-tutor-web] NEXT_PUBLIC_APP_URL unset — using ${DEFAULT_APP_URL}. Set it in Vercel/GitLab for production.`,
+    `[engli-tutor-web] NEXT_PUBLIC_APP_URL unset — using ${DEFAULT_APP_URL}. Set it in GitLab for production.`,
   );
 }
 if (!process.env.NEXT_PUBLIC_SITE_URL?.trim()) {
   console.warn(
-    `[engli-tutor-web] NEXT_PUBLIC_SITE_URL unset — using ${DEFAULT_SITE_URL}. Set it in Vercel/GitLab for production.`,
+    `[engli-tutor-web] NEXT_PUBLIC_SITE_URL unset — using ${DEFAULT_SITE_URL}. Set it in GitLab for production.`,
   );
 }
 
