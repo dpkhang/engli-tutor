@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import { Bell, CreditCard } from "lucide-react";
-import { CardTitle, Label, cn } from "@engli-tutor/ui";
+import { Button, CardTitle, Label, cn } from "@engli-tutor/ui";
 import { SettingsCard, SettingsCardContent, SettingsCardHeader, SettingsPanel } from "../shared";
 import { useWorkspaceI18n } from "@/features/i18n";
 
@@ -58,6 +58,9 @@ export type NotificationSettingsViewProps = {
   scheduleEnabled: boolean;
   pending: boolean;
   notice: string | null;
+  noticeTone: "error" | "success";
+  canTest: boolean;
+  onSendTest: () => void;
   onToggleReminders: () => void;
   onToggleTutor: () => void;
   onToggleLessons: () => void;
@@ -75,6 +78,9 @@ export const NotificationSettingsView = memo(function NotificationSettingsView({
   scheduleEnabled,
   pending,
   notice,
+  noticeTone,
+  canTest,
+  onSendTest,
   onToggleReminders,
   onToggleTutor,
   onToggleLessons,
@@ -152,8 +158,31 @@ export const NotificationSettingsView = memo(function NotificationSettingsView({
           </SettingsCardContent>
         </SettingsCard>
 
+        {canTest ? (
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">{t("settings.notifications.testHint")}</p>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full"
+              disabled={pending}
+              onClick={onSendTest}
+            >
+              <Bell className="size-4" /> {t("settings.notifications.testButton")}
+            </Button>
+          </div>
+        ) : null}
+
         {notice ? (
-          <p className="text-sm text-rose-600 dark:text-rose-400" role="status">
+          <p
+            className={cn(
+              "text-sm",
+              noticeTone === "success"
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-rose-600 dark:text-rose-400",
+            )}
+            role="status"
+          >
             {notice}
           </p>
         ) : null}

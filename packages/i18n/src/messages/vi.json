@@ -1097,7 +1097,11 @@
       "enableFailed": "Không bật được thông báo.",
       "notConfigured": "Máy chủ này chưa hỗ trợ thông báo.",
       "saveFailed": "Không lưu được cài đặt thông báo.",
-      "noSubscription": "Trình duyệt này không trả về đăng ký nhận thông báo."
+      "noSubscription": "Trình duyệt này không trả về đăng ký nhận thông báo.",
+      "testHint": "Gửi một thông báo thử để kiểm tra thiết bị này.",
+      "testButton": "Gửi thông báo thử",
+      "testSent": "Đã gửi thông báo thử. Thông báo sẽ hiện sau vài giây.",
+      "testFailed": "Không gửi được thông báo thử."
     },
     "loadingTitle": "Đang tải cài đặt",
     "loadingDescription": "Đang cập nhật mục này…",
