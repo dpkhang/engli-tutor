@@ -275,7 +275,7 @@ QueryProvider
 ### 3.7 Build và deploy
 
 - `next.config.ts` dùng `output: "standalone"` với `outputFileTracingRoot` là gốc monorepo.
-- **Production chính:** GitLab CI (`deploy:vps`) rsync source lên VPS, ghi `.env.production` của từng app từ biến `ENV_WORKSPACE_BASE64` / `ENV_MARKETING_BASE64`, rồi build và chạy bằng Docker Compose (`Dockerfile` build một image cho mỗi app).
+- **Production chính:** GitLab CI (`deploy:vps`) rsync source lên VPS, ghi `.env.production` của từng app từ biến `ENV_WORKSPACE_BASE64` / `ENV_MARKETING_BASE64`, rồi build và chạy bằng Docker Compose (`Dockerfile` build một image cho mỗi app). Chỉ app có thay đổi mới được build lại. Hướng dẫn đầy đủ: [`docs/DEPLOY_VPS.md`](docs/DEPLOY_VPS.md).
 - Workspace là PWA: `public/sw.js`, manifest, web push. Khi dev, `allowedDevOrigins` cho phép mở từ điện thoại qua IP LAN.
 
 
@@ -602,3 +602,5 @@ Format: `pnpm exec oxfmt --write apps packages` (config `.oxfmtrc.json`).
 ```bash
 docker compose up -d --build   # cần apps/<app>/.env.production; NEXT_PUBLIC_* được bake lúc build
 ```
+
+Deploy production (GitLab CI, Nginx Proxy Manager, vận hành, troubleshooting): [`docs/DEPLOY_VPS.md`](docs/DEPLOY_VPS.md).
