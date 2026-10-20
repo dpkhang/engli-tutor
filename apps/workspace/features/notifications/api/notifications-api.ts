@@ -24,6 +24,7 @@ export const notificationsApi = {
     workspaceApiClient.put<NotificationPreferences>("/api/notifications/preferences", input),
   subscribe: (input: PushKeys) =>
     workspaceApiClient.post<{ ok: true }>("/api/notifications/subscriptions", input),
+  sendTest: () => workspaceApiClient.post<{ sent: number }>("/api/notifications/test"),
   unsubscribe: (endpoint: string) =>
     workspaceApiClient.delete<{ ok: true }>("/api/notifications/subscriptions", {
       body: JSON.stringify({ endpoint }),

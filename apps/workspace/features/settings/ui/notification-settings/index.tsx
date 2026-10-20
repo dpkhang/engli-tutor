@@ -29,15 +29,19 @@ export function NotificationSettings() {
   });
   const [pending, setPending] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [noticeTone, setNoticeTone] = useState<"error" | "success">("error");
   const [timeDraft, setTimeDraft] = useState<number | null>(null);
   const current = notificationsQuery.data;
   const reminderMinutes = timeDraft ?? current?.reminderMinutes ?? 9 * 60;
-  const scheduleEnabled = Boolean(current?.notifyReminders || current?.notifyLessons || current?.notifyCredits);
+  const scheduleEnabled = Boolean(
+    current?.notifyReminders || current?.notifyLessons || current?.notifyCredits,
+  );
 
   const persist = useCallback(
     async (next: Draft) => {
       setPending(true);
       setNotice(null);
+      setNoticeTone("error");
       try {
         if (anyEnabled(next)) {
           const device = await enableDevicePush(t);
@@ -83,7 +87,8 @@ export function NotificationSettings() {
   const onReminderTime = useCallback(
     (minutes: number) => {
       setTimeDraft(minutes);
-      if (!current || !(current.notifyReminders || current.notifyLessons || current.notifyCredits)) return;
+      if (!current || !(current.notifyReminders || current.notifyLessons || current.notifyCredits))
+        return;
       void persist({
         notifyReminders: current.notifyReminders,
         notifyTutor: current.notifyTutor,
@@ -96,6 +101,26 @@ export function NotificationSettings() {
     [current, persist],
   );
 
+  const sendTest = useCallback(async () => {
+    setPending(true);
+    setNotice(null);
+    setNoticeTone("error");
+    try {
+      const device = await enableDevicePush(t);
+      if (!device.ok) {
+        setNotice(device.message);
+        return;
+      }
+      await notificationsApi.sendTest();
+      setNoticeTone("success");
+      setNotice(t("settings.notifications.testSent"));
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : t("settings.notifications.testFailed"));
+    } finally {
+      setPending(false);
+    }
+  }, [t]);
+
   return (
     <NotificationSettingsView
       ready={notificationsQuery.isSuccess || notificationsQuery.isError}
@@ -107,6 +132,9 @@ export function NotificationSettings() {
       scheduleEnabled={scheduleEnabled}
       pending={pending || notificationsQuery.isLoading}
       notice={notice}
+      noticeTone={noticeTone}
+      canTest
+      onSendTest={() => void sendTest()}
       onToggleReminders={() => save({ notifyReminders: !current?.notifyReminders })}
       onToggleTutor={() => save({ notifyTutor: !current?.notifyTutor })}
       onToggleLessons={() => save({ notifyLessons: !current?.notifyLessons })}

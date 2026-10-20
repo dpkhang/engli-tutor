@@ -100,7 +100,7 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     (async () => {
       const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
-      if (windows.some((client) => client.focused)) return;
+      if (!payload.alwaysShow && windows.some((client) => client.focused)) return;
       await self.registration.showNotification(payload.title || "EngliTutor", {
         body: payload.body || "",
         icon: "/icons/icon-192.png",
