@@ -78,7 +78,9 @@ export async function enableDevicePush(t: Translate): Promise<PushResult> {
     };
   }
   if (!canPush()) return { ok: false, message: t("settings.notifications.unsupported") };
-  const permission = await Notification.requestPermission();
+  // iOS does not treat <select> changes as a user gesture, so re-requesting there reports "denied".
+  const permission =
+    Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
   if (permission !== "granted") {
     return {
       ok: false,
