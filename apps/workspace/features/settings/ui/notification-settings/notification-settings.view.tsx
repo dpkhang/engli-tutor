@@ -59,7 +59,6 @@ export type NotificationSettingsViewProps = {
   pending: boolean;
   notice: string | null;
   noticeTone: "error" | "success";
-  canTest: boolean;
   onSendTest: () => void;
   onToggleReminders: () => void;
   onToggleTutor: () => void;
@@ -79,7 +78,6 @@ export const NotificationSettingsView = memo(function NotificationSettingsView({
   pending,
   notice,
   noticeTone,
-  canTest,
   onSendTest,
   onToggleReminders,
   onToggleTutor,
@@ -158,20 +156,18 @@ export const NotificationSettingsView = memo(function NotificationSettingsView({
           </SettingsCardContent>
         </SettingsCard>
 
-        {canTest ? (
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-muted-foreground">{t("settings.notifications.testHint")}</p>
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-full"
-              disabled={pending}
-              onClick={onSendTest}
-            >
-              <Bell className="size-4" /> {t("settings.notifications.testButton")}
-            </Button>
-          </div>
-        ) : null}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">{t("settings.notifications.testHint")}</p>
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-full"
+            disabled={pending}
+            onClick={onSendTest}
+          >
+            <Bell className="size-4" /> {t("settings.notifications.testButton")}
+          </Button>
+        </div>
 
         {notice ? (
           <p

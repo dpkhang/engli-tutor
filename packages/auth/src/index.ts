@@ -6,6 +6,7 @@ export {
 } from "./client";
 export {
   completeSessionSync,
+  finishSessionSync,
   isAllowedSyncOrigin,
   resolveAllowedUrl,
   SESSION_SYNC_PATH,
