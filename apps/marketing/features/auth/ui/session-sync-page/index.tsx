@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { completeSessionSync } from "@engli-tutor/auth";
+import { finishSessionSync } from "@engli-tutor/auth";
 import { authClient } from "@/lib/auth-client";
 import { useMarketingI18n } from "@/features/i18n";
 import { getAppUrl, getSiteUrl } from "../../model/session";
@@ -9,10 +9,10 @@ import { getAppUrl, getSiteUrl } from "../../model/session";
 export function SessionSyncPage() {
   const t = useMarketingI18n();
   useEffect(() => {
-    void completeSessionSync(authClient, {
+    void finishSessionSync(authClient, {
       allowedOrigins: [window.location.origin, getSiteUrl(), getAppUrl()],
       fallback: getAppUrl(),
-    }).then((next) => window.location.replace(next));
+    });
   }, []);
 
   return (

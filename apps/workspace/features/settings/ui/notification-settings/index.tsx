@@ -133,7 +133,6 @@ export function NotificationSettings() {
       pending={pending || notificationsQuery.isLoading}
       notice={notice}
       noticeTone={noticeTone}
-      canTest
       onSendTest={() => void sendTest()}
       onToggleReminders={() => save({ notifyReminders: !current?.notifyReminders })}
       onToggleTutor={() => save({ notifyTutor: !current?.notifyTutor })}
