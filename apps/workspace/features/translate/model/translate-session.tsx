@@ -1,6 +1,21 @@
 "use client";
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import type { CompoundCandidate, ExpressionSource } from "./detect-expression";
+
+/** Multi-word expression around the clicked word (phrasal verb, compound, idiom…). */
+export type PickExpression = {
+  phrase: string;
+  base: string;
+  /** `ExpressionType`, or any string the AI sent. */
+  type: string;
+  source: ExpressionSource;
+  /** Offsets in the clicked text; absent for AI expressions until the text locates them. */
+  start?: number;
+  end?: number;
+  meaningVi?: string;
+  note?: string;
+};
 
 export type TranslateActivePick = {
   instanceId: string;
@@ -10,6 +25,9 @@ export type TranslateActivePick = {
   sentence?: string | null;
   sentenceStart?: number;
   sentenceEnd?: number;
+  expression?: PickExpression | null;
+  /** Two-word neighbours to check against the dictionary when no expression was recognised. */
+  compoundCandidates?: CompoundCandidate[];
 };
 
 type TranslateSessionValue = {
@@ -20,6 +38,8 @@ type TranslateSessionValue = {
   activePick: TranslateActivePick | null;
   activeSentence: string | null;
   pushWord: (word: string, pick?: TranslateActivePick | null) => void;
+  /** Replaces (or clears) the expression of the current pick without starting a new lookup. */
+  setPickExpression: (expression: PickExpression | null) => void;
 };
 
 const TranslateSessionContext = createContext<TranslateSessionValue | null>(null);
@@ -48,6 +68,10 @@ export function TranslateSessionProvider({ children }: { children: ReactNode }) 
     setPickNonce((value) => value + 1);
   }, []);
 
+  const setPickExpression = useCallback((expression: PickExpression | null) => {
+    setActivePick((current) => (current ? { ...current, expression } : current));
+  }, []);
+
   const value = useMemo(
     () => ({
       open,
@@ -57,8 +81,9 @@ export function TranslateSessionProvider({ children }: { children: ReactNode }) 
       activePick,
       activeSentence,
       pushWord,
+      setPickExpression,
     }),
-    [open, pickedWord, pickNonce, activePick, activeSentence, pushWord],
+    [open, pickedWord, pickNonce, activePick, activeSentence, pushWord, setPickExpression],
   );
 
   return <TranslateSessionContext.Provider value={value}>{children}</TranslateSessionContext.Provider>;

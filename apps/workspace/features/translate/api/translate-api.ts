@@ -16,6 +16,25 @@ export type TranslateChunk = {
   role: string;
 };
 
+export type TranslateClause = {
+  text: string;
+  meaningVi: string;
+  /** main | subordinate | relative | condition | contrast | purpose | other (free string from the AI). */
+  role: string;
+};
+
+export type TranslateExpression = {
+  /** Exactly as written in the sentence, e.g. "turn the light off". */
+  phrase: string;
+  /** Dictionary form, e.g. "turn off". */
+  base: string;
+  /** See `ExpressionType`; free string from the AI. */
+  type: string;
+  meaningVi: string;
+  separable: boolean;
+  note: string;
+};
+
 export type TranslateResult = {
   kind: TranslateKind;
   query: string;
@@ -36,6 +55,10 @@ export type TranslateResult = {
     breakdown: string;
     tone: string;
     chunks: TranslateChunk[];
+    /** Absent on payloads cached before clause analysis existed. */
+    clauses?: TranslateClause[];
+    /** Absent on payloads cached before expression analysis existed. */
+    expressions?: TranslateExpression[];
     moreNatural: string;
   } | null;
   tips: string[];

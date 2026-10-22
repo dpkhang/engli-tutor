@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, type FormEvent, type KeyboardEvent, type RefObject } from "react";
+import { memo, type FormEvent, type KeyboardEvent, type ReactNode, type RefObject } from "react";
 import { motion } from "motion/react";
 import {
   Check,
@@ -16,6 +16,182 @@ import {
 import { Button, cn } from "@engli-tutor/ui";
 import { useWorkspaceI18n } from "@/features/i18n";
 import { type TranslateResult } from "../../api/translate-api";
+import { EXPRESSION_TYPES } from "../../model/phrase-lexicon";
+import type { PickExpression } from "../../model/translate-session";
+import type { LookupSource } from "./index";
+
+type SentenceData = NonNullable<TranslateResult["sentence"]>;
+
+const KNOWN_CLAUSE_ROLES = new Set([
+  "main",
+  "subordinate",
+  "relative",
+  "condition",
+  "contrast",
+  "purpose",
+  "other",
+]);
+
+/** Whole-sentence analysis, shared by the typed-text result and the "in this sentence" section. */
+function SentenceAnalysis({
+  sentence,
+  translation,
+  showMeaning,
+}: {
+  sentence: SentenceData;
+  translation: string;
+  showMeaning: boolean;
+}) {
+  const t = useWorkspaceI18n();
+  const clauses = sentence.clauses ?? [];
+  return (
+    <div className="space-y-3">
+      {showMeaning ? (
+        <div>
+          <p className="text-[10px] font-bold tracking-[0.14em] text-muted-foreground uppercase">
+            {t("workspace.meaningInSentence")}
+          </p>
+          <p className="mt-1.5 text-xs leading-5">{sentence.meaningVi}</p>
+        </div>
+      ) : null}
+      {sentence.breakdown ? (
+        <p className="rounded-xl bg-muted/60 px-3 py-2.5 text-xs leading-5 text-muted-foreground">
+          {sentence.breakdown}
+        </p>
+      ) : null}
+      {clauses.length ? (
+        <div>
+          <p className="text-[10px] font-bold tracking-[0.14em] text-muted-foreground uppercase">
+            {t("translate.clausesTitle")}
+          </p>
+          <ol className="mt-2 space-y-1.5">
+            {clauses.map((clause, index) => {
+              const role = KNOWN_CLAUSE_ROLES.has(clause.role) ? clause.role : "other";
+              const isMain = role === "main";
+              return (
+                <li
+                  key={`${clause.text}-${index}`}
+                  className={cn(
+                    "rounded-xl border px-3 py-2 text-xs leading-5",
+                    isMain
+                      ? "border-primary/30 bg-primary/8"
+                      : "border-border/70 bg-card",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "text-[10px] font-semibold uppercase",
+                      isMain ? "text-primary" : "text-muted-foreground",
+                    )}
+                  >
+                    {t(`translate.clauseRole.${role}`)}
+                  </span>
+                  <p className="mt-0.5 font-medium">{clause.text}</p>
+                  <p className="text-muted-foreground">{clause.meaningVi}</p>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      ) : null}
+      {sentence.chunks.length ? (
+        <div className="flex flex-wrap gap-1.5">
+          {sentence.chunks.map((chunk, index) => (
+            <span
+              key={`${chunk.phrase}-${index}`}
+              className="group relative rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs"
+            >
+              <span className="font-medium">{chunk.phrase}</span>
+              <span className="text-muted-foreground"> · {chunk.meaningVi}</span>
+            </span>
+          ))}
+        </div>
+      ) : null}
+      {sentence.moreNatural && sentence.moreNatural !== translation ? (
+        <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/8 px-3 py-2.5">
+          <p className="text-[10px] font-bold tracking-wider text-emerald-700 uppercase dark:text-emerald-300">
+            {t("translate.moreNatural")}
+          </p>
+          <p className="mt-1 text-xs leading-5">{sentence.moreNatural}</p>
+        </div>
+      ) : null}
+      {sentence.tone ? (
+        <p className="text-[11px] text-muted-foreground">
+          {t("translate.tone")}{" "}
+          <span className="font-medium text-foreground">{sentence.tone}</span>
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/** The expression around the clicked word: type badge, phrase and its meaning. */
+function ExpressionCard({
+  expression,
+  meaning,
+  pending,
+  onDismiss,
+}: {
+  expression: PickExpression;
+  meaning: string;
+  pending: boolean;
+  onDismiss: () => void;
+}) {
+  const t = useWorkspaceI18n();
+  const typeKey = EXPRESSION_TYPES.has(expression.type) ? expression.type : "other";
+  const showBase = expression.base && expression.base !== expression.phrase.toLowerCase();
+  return (
+    <section className="rounded-xl border border-primary/25 bg-primary/8 p-3.5">
+      <div className="flex items-center justify-between gap-2">
+        <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold tracking-wider text-primary-foreground uppercase">
+          {t(`translate.expressionType.${typeKey}`)}
+        </span>
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="text-[11px] font-medium text-primary hover:underline"
+        >
+          {t("translate.onlyThisWord")}
+        </button>
+      </div>
+      <p className="mt-2 text-sm font-semibold tracking-tight text-foreground">
+        {expression.phrase}
+        {showBase ? (
+          <span className="ml-1.5 font-normal text-muted-foreground">· {expression.base}</span>
+        ) : null}
+      </p>
+      {meaning ? (
+        <p className="mt-1.5 text-base leading-7 font-semibold text-foreground">{meaning}</p>
+      ) : pending ? (
+        <div className="mt-2 h-5 w-3/5 animate-pulse rounded bg-muted" />
+      ) : null}
+      {expression.note ? (
+        <p className="mt-1.5 text-xs leading-5 text-muted-foreground">{expression.note}</p>
+      ) : null}
+    </section>
+  );
+}
+
+/** Collapses the single-word meaning while an expression card leads the panel. */
+function WordMeaningFold({
+  folded,
+  label,
+  children,
+}: {
+  folded: boolean;
+  label: string;
+  children: ReactNode;
+}) {
+  if (!folded) return <>{children}</>;
+  return (
+    <details className="rounded-xl border border-border/70 px-3 py-2.5">
+      <summary className="cursor-pointer text-[11px] font-semibold text-muted-foreground">
+        {label}
+      </summary>
+      <div className="mt-2.5">{children}</div>
+    </details>
+  );
+}
 
 function highlightWordInSentence(sentence: string, word: string) {
   const index = sentence.toLowerCase().indexOf(word.toLowerCase());
@@ -40,6 +216,13 @@ export type FloatingTranslateViewProps = {
   result: TranslateResult | null;
   copied: boolean;
   contextPending: boolean;
+  lookupSource: LookupSource;
+  sentenceContext: TranslateResult | null;
+  sentenceError: string | null;
+  expression: PickExpression | null;
+  expressionResult: TranslateResult | null;
+  expressionPending: boolean;
+  onDismissExpression: () => void;
   pickedWord: string | null;
   activeSentence: string | null;
   inputRef: RefObject<HTMLTextAreaElement | null>;
@@ -63,6 +246,13 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
   result,
   copied,
   contextPending,
+  lookupSource,
+  sentenceContext,
+  sentenceError,
+  expression,
+  expressionResult,
+  expressionPending,
+  onDismissExpression,
   pickedWord,
   activeSentence,
   inputRef,
@@ -77,6 +267,16 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
   onCopyText,
 }: FloatingTranslateViewProps) {
   const t = useWorkspaceI18n();
+  // A click on a word whose sentence differs from the word shows the sentence section.
+  const showSentenceSection = Boolean(
+    lookupSource === "pick" &&
+      activeSentence &&
+      pickedWord &&
+      activeSentence.trim().toLowerCase() !== pickedWord.trim().toLowerCase(),
+  );
+  const sentenceData = sentenceContext?.sentence ?? null;
+  const showExpression = lookupSource === "pick" && expression != null;
+
   return (
     <div className="pointer-events-none relative">
       <div
@@ -194,49 +394,62 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
 
         {result && !pending ? (
           <div className="min-h-0 flex-1 space-y-4 overflow-y-auto border-t border-border/70 px-4 py-4">
-            <section className="rounded-xl border border-primary/15 bg-primary/5 p-3.5">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-[10px] font-bold tracking-[0.14em] text-primary uppercase">
-                  {t("workspace.suggestedTranslation")}
-                </p>
-                <div className="flex">
-                  <button
-                    type="button"
-                    onClick={onSpeakEnglish}
-                    className="grid size-7 place-items-center rounded-md text-muted-foreground hover:bg-card hover:text-primary"
-                    aria-label={t("workspace.listenEnglish")}
-                  >
-                    <Volume2 className="size-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onCopyTranslation}
-                    className="grid size-7 place-items-center rounded-md text-muted-foreground hover:bg-card hover:text-primary"
-                    aria-label={t("workspace.copyTranslation")}
-                  >
-                    {copied ? (
-                      <Check className="size-3.5 text-emerald-600" />
-                    ) : (
-                      <Copy className="size-3.5" />
-                    )}
-                  </button>
+            {showExpression && expression ? (
+              <ExpressionCard
+                expression={expression}
+                meaning={expression.meaningVi || expressionResult?.translation || ""}
+                pending={expressionPending}
+                onDismiss={onDismissExpression}
+              />
+            ) : null}
+            <WordMeaningFold
+              folded={showExpression}
+              label={t("translate.wordOnlyMeaning", { word: pickedWord ?? result.query })}
+            >
+              <section className="rounded-xl border border-primary/15 bg-primary/5 p-3.5">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[10px] font-bold tracking-[0.14em] text-primary uppercase">
+                    {t("workspace.suggestedTranslation")}
+                  </p>
+                  <div className="flex">
+                    <button
+                      type="button"
+                      onClick={onSpeakEnglish}
+                      className="grid size-7 place-items-center rounded-md text-muted-foreground hover:bg-card hover:text-primary"
+                      aria-label={t("workspace.listenEnglish")}
+                    >
+                      <Volume2 className="size-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onCopyTranslation}
+                      className="grid size-7 place-items-center rounded-md text-muted-foreground hover:bg-card hover:text-primary"
+                      aria-label={t("workspace.copyTranslation")}
+                    >
+                      {copied ? (
+                        <Check className="size-3.5 text-emerald-600" />
+                      ) : (
+                        <Copy className="size-3.5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <p className="mt-2 text-sm font-semibold tracking-tight text-foreground">
-                {result.word?.headword || result.query}
-              </p>
-              {result.word?.phonetic ? (
-                <p className="mt-1 font-mono text-[13px] leading-5 text-muted-foreground">
-                  {result.word.phonetic}
+                <p className="mt-2 text-sm font-semibold tracking-tight text-foreground">
+                  {result.word?.headword || result.query}
                 </p>
-              ) : null}
-              <p className="mt-2 text-base leading-7 font-semibold text-foreground">
-                {result.translation}
-              </p>
-              {result.usageNote ? (
-                <p className="mt-2 text-xs leading-5 text-muted-foreground">{result.usageNote}</p>
-              ) : null}
-            </section>
+                {result.word?.phonetic ? (
+                  <p className="mt-1 font-mono text-[13px] leading-5 text-muted-foreground">
+                    {result.word.phonetic}
+                  </p>
+                ) : null}
+                <p className="mt-2 text-base leading-7 font-semibold text-foreground">
+                  {result.translation}
+                </p>
+                {result.usageNote ? (
+                  <p className="mt-2 text-xs leading-5 text-muted-foreground">{result.usageNote}</p>
+                ) : null}
+              </section>
+            </WordMeaningFold>
 
             {result.alternatives.length ? (
               <section>
@@ -275,10 +488,8 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
               </section>
             ) : null}
 
-            {activeSentence &&
-            pickedWord &&
-            activeSentence.trim().toLowerCase() !== pickedWord.trim().toLowerCase() ? (
-              <section className="space-y-2">
+            {showSentenceSection && activeSentence && pickedWord ? (
+              <section className="space-y-3">
                 <p className="text-[10px] font-bold tracking-[0.14em] text-muted-foreground uppercase">
                   {t("workspace.inThisSentence")}
                 </p>
@@ -291,50 +502,43 @@ export const FloatingTranslateView = memo(function FloatingTranslateView({
                     <div className="h-12 animate-pulse rounded-xl bg-muted/70" />
                   </div>
                 ) : null}
+                {sentenceError ? (
+                  <p
+                    className="rounded-lg bg-destructive/8 px-3 py-2 text-xs text-destructive"
+                    role="alert"
+                  >
+                    {sentenceError}
+                  </p>
+                ) : null}
+                {sentenceData ? (
+                  <>
+                    {sentenceData.meaningVi ? (
+                      <div className="rounded-xl border border-primary/15 bg-primary/5 p-3">
+                        <p className="text-[10px] font-bold tracking-[0.14em] text-primary uppercase">
+                          {t("translate.sentenceTranslation")}
+                        </p>
+                        <p className="mt-1.5 text-sm leading-6 font-semibold text-foreground">
+                          {sentenceData.meaningVi}
+                        </p>
+                      </div>
+                    ) : null}
+                    <SentenceAnalysis
+                      sentence={sentenceData}
+                      translation={sentenceContext?.translation ?? ""}
+                      showMeaning={false}
+                    />
+                  </>
+                ) : null}
               </section>
             ) : null}
 
-            {result.sentence ? (
-              <section className="space-y-3">
-                <div>
-                  <p className="text-[10px] font-bold tracking-[0.14em] text-muted-foreground uppercase">
-                    {t("workspace.meaningInSentence")}
-                  </p>
-                  <p className="mt-1.5 text-xs leading-5">{result.sentence.meaningVi}</p>
-                </div>
-                {result.sentence.breakdown ? (
-                  <p className="rounded-xl bg-muted/60 px-3 py-2.5 text-xs leading-5 text-muted-foreground">
-                    {result.sentence.breakdown}
-                  </p>
-                ) : null}
-                {result.sentence.chunks.length ? (
-                  <div className="flex flex-wrap gap-1.5">
-                    {result.sentence.chunks.map((chunk, index) => (
-                      <span
-                        key={`${chunk.phrase}-${index}`}
-                        className="group relative rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs"
-                      >
-                        <span className="font-medium">{chunk.phrase}</span>
-                        <span className="text-muted-foreground"> · {chunk.meaningVi}</span>
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-                {result.sentence.moreNatural &&
-                result.sentence.moreNatural !== result.translation ? (
-                  <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/8 px-3 py-2.5">
-                    <p className="text-[10px] font-bold tracking-wider text-emerald-700 uppercase dark:text-emerald-300">
-                      {t("translate.moreNatural")}
-                    </p>
-                    <p className="mt-1 text-xs leading-5">{result.sentence.moreNatural}</p>
-                  </div>
-                ) : null}
-                {result.sentence.tone ? (
-                  <p className="text-[11px] text-muted-foreground">
-                    {t("translate.tone")}{" "}
-                    <span className="font-medium text-foreground">{result.sentence.tone}</span>
-                  </p>
-                ) : null}
+            {result.sentence && !showSentenceSection ? (
+              <section>
+                <SentenceAnalysis
+                  sentence={result.sentence}
+                  translation={result.translation}
+                  showMeaning
+                />
               </section>
             ) : null}
 

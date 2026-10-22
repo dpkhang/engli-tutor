@@ -39,6 +39,31 @@ export async function lookupTranslation(input: {
   return request;
 }
 
+const dictionaryMisses = new Set<string>();
+
+/**
+ * Dictionary-only lookup for a short phrase such as "coffee machine": never reaches the AI,
+ * resolves null when the dictionary has no entry. Misses are remembered for the session.
+ */
+export async function lookupDictionaryPhrase(
+  phrase: string,
+  direction: TranslateDirection,
+): Promise<TranslateResult | null> {
+  const query = phrase.trim();
+  const cached = getCachedLookup(direction, query);
+  if (cached) return cached;
+  const key = cacheKey(direction, query);
+  if (dictionaryMisses.has(key)) return null;
+  try {
+    const result = await translateApi.lookup({ text: query, direction, mode: "dictionary" });
+    putCachedLookup(direction, query, result);
+    return result;
+  } catch {
+    dictionaryMisses.add(key);
+    return null;
+  }
+}
+
 export async function prefetchPassage(text: string, direction: TranslateDirection) {
   const words = uniquePassageWords(text).filter((word) => !getCachedLookup(direction, word));
   if (words.length === 0) return;
