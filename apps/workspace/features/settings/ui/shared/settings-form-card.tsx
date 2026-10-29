@@ -4,7 +4,11 @@ import type { ReactNode } from "react";
 import { LoaderCircle } from "lucide-react";
 import { Button, CardFooter, CardTitle } from "@engli-tutor/ui";
 import { useWorkspaceI18n } from "@/features/i18n";
-import { SettingsCard, SettingsCardContent, SettingsCardHeader } from "./settings-card";
+import {
+  SettingsCard,
+  SettingsCardContent,
+  SettingsCardHeader,
+} from "./settings-card";
 
 /** Card with a footer "Save" action. Pair with `useSettingsDraft`. */
 export function SettingsFormCard({
@@ -60,7 +64,9 @@ export function SettingsFormCard({
             aria-busy={saving}
             onClick={onSave}
           >
-            {saving ? <LoaderCircle aria-hidden className="size-4 animate-spin" /> : null}
+            {saving ? (
+              <LoaderCircle aria-hidden className="size-4 animate-spin" />
+            ) : null}
             {saving ? t("settings.form.saving") : t("settings.form.save")}
           </Button>
         </div>

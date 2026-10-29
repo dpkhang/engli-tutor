@@ -1,7 +1,15 @@
 "use client";
 
 import { memo, useId } from "react";
-import { Check, Copy, Gift, LoaderCircle, Share2, TicketPercent, UsersRound } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Gift,
+  LoaderCircle,
+  Share2,
+  TicketPercent,
+  UsersRound,
+} from "lucide-react";
 import { Alert, AlertDescription, Button, Input, Label } from "@engli-tutor/ui";
 import {
   SettingsCard,
@@ -92,14 +100,19 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
               description={`${t("workspace.shareInvite")} ${t("settings.referral.inviteDescription", { days: nf.format(referredDays) })}`}
             >
               <div className="grid gap-2 sm:grid-cols-3">
-                <ReferralStat label={t("workspace.friendsReferred")} value={nf.format(totalReferred)} />
+                <ReferralStat
+                  label={t("workspace.friendsReferred")}
+                  value={nf.format(totalReferred)}
+                />
                 <ReferralStat
                   label={t("workspace.premiumDaysEarned")}
                   value={`${nf.format(proDaysEarned)} / ${nf.format(maxDays)}`}
                 />
                 <ReferralStat
                   label={t("workspace.friendBonus")}
-                  value={t("settings.referral.daysValue", { days: nf.format(referredDays) })}
+                  value={t("settings.referral.daysValue", {
+                    days: nf.format(referredDays),
+                  })}
                 />
               </div>
 
@@ -109,7 +122,9 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
                       days: nf.format(rewardStatus.days),
                       max: nf.format(maxDays),
                     })
-                  : t("settings.referral.rewardLimit", { max: nf.format(maxDays) })}
+                  : t("settings.referral.rewardLimit", {
+                      max: nf.format(maxDays),
+                    })}
               </p>
 
               <div className="space-y-3 rounded-2xl border border-border/70 bg-muted/20 p-3.5">
@@ -117,9 +132,13 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
                   <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                     {t("workspace.yourCode")}
                   </p>
-                  <p className="break-all font-mono text-2xl font-semibold tracking-wider text-foreground">{code}</p>
+                  <p className="break-all font-mono text-2xl font-semibold tracking-wider text-foreground">
+                    {code}
+                  </p>
                   <p className="break-all text-xs text-muted-foreground">
-                    <span className="sr-only">{t("settings.referral.shareUrlLabel")}: </span>
+                    <span className="sr-only">
+                      {t("settings.referral.shareUrlLabel")}:{" "}
+                    </span>
                     {shareUrl}
                   </p>
                 </div>
@@ -131,8 +150,14 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
                     onClick={onCopyCode}
                     disabled={!code}
                   >
-                    {copied === "code" ? <Check className="size-4" /> : <Copy className="size-4" />}
-                    {copied === "code" ? t("workspace.copied") : t("workspace.copyCode")}
+                    {copied === "code" ? (
+                      <Check className="size-4" />
+                    ) : (
+                      <Copy className="size-4" />
+                    )}
+                    {copied === "code"
+                      ? t("workspace.copied")
+                      : t("workspace.copyCode")}
                   </Button>
                   <Button
                     type="button"
@@ -140,8 +165,14 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
                     onClick={onCopyLink}
                     disabled={!shareUrl}
                   >
-                    {copied === "link" ? <Check className="size-4" /> : <Share2 className="size-4" />}
-                    {copied === "link" ? t("workspace.copied") : t("workspace.copyLink")}
+                    {copied === "link" ? (
+                      <Check className="size-4" />
+                    ) : (
+                      <Share2 className="size-4" />
+                    )}
+                    {copied === "link"
+                      ? t("workspace.copied")
+                      : t("workspace.copyLink")}
                   </Button>
                 </div>
                 <p role="status" aria-live="polite" className="sr-only">
@@ -155,16 +186,24 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
         <SettingsCard>
           <SettingsCardContent className="pt-4">
             <SettingsSection
-              icon={<TicketPercent className="size-5 text-primary" aria-hidden />}
+              icon={
+                <TicketPercent className="size-5 text-primary" aria-hidden />
+              }
               title={t("workspace.redeemInvite")}
               description={
-                redeemedCode ? undefined : t("workspace.redeemInviteDescription", { days: nf.format(referredDays) })
+                redeemedCode
+                  ? undefined
+                  : t("workspace.redeemInviteDescription", {
+                      days: nf.format(referredDays),
+                    })
               }
             >
               {redeemedCode ? (
                 <Alert>
                   <AlertDescription>
-                    {t("settings.referral.alreadyRedeemed", { code: redeemedCode })}
+                    {t("settings.referral.alreadyRedeemed", {
+                      code: redeemedCode,
+                    })}
                   </AlertDescription>
                 </Alert>
               ) : (
@@ -176,11 +215,15 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
                   }}
                 >
                   <div className="min-w-0 flex-1 space-y-1.5">
-                    <Label htmlFor={codeInputId}>{t("settings.referral.codeLabel")}</Label>
+                    <Label htmlFor={codeInputId}>
+                      {t("settings.referral.codeLabel")}
+                    </Label>
                     <Input
                       id={codeInputId}
                       value={manualCode}
-                      onChange={(event) => onManualCodeChange(event.target.value)}
+                      onChange={(event) =>
+                        onManualCodeChange(event.target.value)
+                      }
                       placeholder={t("workspace.enterReferralCode")}
                       className="h-11 rounded-2xl font-mono uppercase"
                       autoComplete="off"
@@ -192,7 +235,12 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
                     disabled={pendingRedeem || !manualCode.trim()}
                     className="h-11 w-full rounded-full sm:w-auto"
                   >
-                    {pendingRedeem ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : null}
+                    {pendingRedeem ? (
+                      <LoaderCircle
+                        className="size-4 animate-spin"
+                        aria-hidden
+                      />
+                    ) : null}
                     {t("settings.referral.redeemButton")}
                   </Button>
                 </form>
@@ -220,12 +268,21 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
               {recentRedemptions.length ? (
                 <ul className="divide-y overflow-hidden rounded-2xl border border-border/70">
                   {recentRedemptions.map((item) => (
-                    <li key={item.id} className="flex items-center justify-between gap-3 px-3.5 py-3 text-sm">
+                    <li
+                      key={item.id}
+                      className="flex items-center justify-between gap-3 px-3.5 py-3 text-sm"
+                    >
                       <div className="min-w-0">
-                        <p className="truncate font-medium">{item.referredName}</p>
-                        <p className="truncate text-xs text-muted-foreground">{item.referredEmailMasked}</p>
+                        <p className="truncate font-medium">
+                          {item.referredName}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {item.referredEmailMasked}
+                        </p>
                       </div>
-                      <p className="shrink-0 text-xs text-muted-foreground">{item.createdAt}</p>
+                      <p className="shrink-0 text-xs text-muted-foreground">
+                        {item.createdAt}
+                      </p>
                     </li>
                   ))}
                 </ul>
@@ -242,7 +299,13 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
   );
 });
 
-const ReferralStat = memo(function ReferralStat({ label, value }: { label: string; value: string }) {
+const ReferralStat = memo(function ReferralStat({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
   return (
     <div className="rounded-2xl border border-border/70 bg-muted/25 px-3.5 py-3">
       <p className="text-xs text-muted-foreground">{label}</p>
