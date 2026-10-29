@@ -6,6 +6,7 @@ import {
   Building2,
   KeyRound,
   Languages,
+  LogOut,
   Mail,
   ShieldCheck,
   Target,
@@ -16,6 +17,7 @@ import {
   AlertDescription,
   Badge,
   Button,
+  CardFooter,
   CardTitle,
   Input,
   Label,
@@ -34,6 +36,7 @@ import {
   SettingsCardContent,
   SettingsCardHeader,
   SettingsPanel,
+  SettingsSection,
 } from "@/features/settings";
 import { AccountPhoneInput, getPhoneValidity } from "../account-phone-input";
 import { AddressAutocomplete } from "../address-autocomplete";
@@ -50,6 +53,14 @@ export type ProfileForm = {
   uiLocale: "en" | "vi";
   tutorExplanationLocale: "en" | "vi";
 };
+
+const FIELD_GRID_CLASS =
+  "grid gap-4 [&_input]:h-11 [&_input]:text-base sm:grid-cols-2 sm:[&_input]:h-9 sm:[&_input]:text-sm";
+/** Settings variant: no inner card padding, and phone-sized controls also cover select triggers. */
+const EMBEDDED_FIELD_GRID_CLASS = cn(
+  FIELD_GRID_CLASS,
+  "[&_[data-slot=select-trigger]]:h-11 sm:[&_[data-slot=select-trigger]]:h-9",
+);
 
 function Field({
   id,
@@ -112,16 +123,8 @@ export const AccountsPageView = memo(function AccountsPageView({
     phoneValid &&
     !(form?.city && !addressValid);
 
-  const body = form ? (
-    <div className={cn("grid items-start gap-4 lg:grid-cols-[1.4fr_1fr]", dirty && "pb-28")}>
-      <form className="space-y-4" onSubmit={onSubmit}>
-        <SettingsCard>
-          <SettingsCardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserRound className="size-5 text-primary" /> {t("workspace.profile")}
-            </CardTitle>
-          </SettingsCardHeader>
-          <SettingsCardContent className="grid gap-4 [&_input]:h-11 [&_input]:text-base sm:grid-cols-2 sm:[&_input]:h-9 sm:[&_input]:text-sm">
+  const profileFields = form ? (
+    <>
             <Field id="account-name" label={t("workspace.fullName")}>
               <Input
                 id="account-name"
@@ -194,16 +197,11 @@ export const AccountsPageView = memo(function AccountsPageView({
                 />
               </div>
             </Field>
-          </SettingsCardContent>
-        </SettingsCard>
+    </>
+  ) : null;
 
-        <SettingsCard>
-          <SettingsCardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="size-5 text-primary" /> {t("workspace.learningProfile")}
-            </CardTitle>
-          </SettingsCardHeader>
-          <SettingsCardContent className="grid gap-4 [&_input]:h-11 [&_input]:text-base sm:grid-cols-2 sm:[&_input]:h-9 sm:[&_input]:text-sm">
+  const learningFields = form ? (
+    <>
             <Field id="account-language" label={t("workspace.nativeLanguage")}>
               <div className="relative">
                 <Languages className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -276,7 +274,34 @@ export const AccountsPageView = memo(function AccountsPageView({
               />
               <p className="text-xs text-muted-foreground">{form.learningGoal.length}/280</p>
             </div>
-          </SettingsCardContent>
+    </>
+  ) : null;
+
+  const saveErrorAlert = saveError ? (
+    <Alert variant="destructive">
+      <AlertDescription>{saveError}</AlertDescription>
+    </Alert>
+  ) : null;
+
+  const body = form ? (
+    <div className={cn("grid items-start gap-4 lg:grid-cols-[1.4fr_1fr]", dirty && "pb-28")}>
+      <form className="space-y-4" onSubmit={onSubmit}>
+        <SettingsCard>
+          <SettingsCardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserRound className="size-5 text-primary" /> {t("workspace.profile")}
+            </CardTitle>
+          </SettingsCardHeader>
+          <SettingsCardContent className={FIELD_GRID_CLASS}>{profileFields}</SettingsCardContent>
+        </SettingsCard>
+
+        <SettingsCard>
+          <SettingsCardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="size-5 text-primary" /> {t("workspace.learningProfile")}
+            </CardTitle>
+          </SettingsCardHeader>
+          <SettingsCardContent className={FIELD_GRID_CLASS}>{learningFields}</SettingsCardContent>
         </SettingsCard>
 
         {saveError ? (
@@ -333,6 +358,93 @@ export const AccountsPageView = memo(function AccountsPageView({
     </div>
   ) : null;
 
+  const embeddedBody = form ? (
+    <div className="space-y-4">
+      <form onSubmit={onSubmit}>
+        <SettingsCard>
+          <SettingsCardContent className="space-y-6 pt-4">
+            <SettingsSection
+              icon={<UserRound className="size-5 text-primary" />}
+              title={t("workspace.profile")}
+              description={t("settings.account.profileDescription")}
+            >
+              <div className={EMBEDDED_FIELD_GRID_CLASS}>{profileFields}</div>
+            </SettingsSection>
+            <SettingsSection
+              icon={<Target className="size-5 text-primary" />}
+              title={t("workspace.learningProfile")}
+              description={t("settings.account.learningDescription")}
+            >
+              <div className={EMBEDDED_FIELD_GRID_CLASS}>{learningFields}</div>
+            </SettingsSection>
+            {saveErrorAlert}
+          </SettingsCardContent>
+          <CardFooter className="flex flex-col gap-2 border-t border-border px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground" role="status">
+              {dirty ? t("workspace.unsavedAccountChanges") : ""}
+            </p>
+            <div className="flex w-full gap-2 sm:w-auto">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 flex-1 rounded-full sm:h-9 sm:flex-none"
+                disabled={!dirty || savePending}
+                onClick={onDiscard}
+              >
+                {t("workspace.discard")}
+              </Button>
+              <Button
+                type="submit"
+                className="h-11 flex-1 rounded-full sm:h-9 sm:flex-none"
+                disabled={!dirty || !canSave}
+              >
+                {savePending ? t("workspace.savingChanges") : t("workspace.saveChanges")}
+              </Button>
+            </div>
+          </CardFooter>
+        </SettingsCard>
+      </form>
+
+      <SettingsCard>
+        <SettingsCardContent className="pt-4">
+          <SettingsSection
+            icon={<ShieldCheck className="size-5 text-primary" />}
+            title={t("workspace.security")}
+            description={t("settings.account.securityDescription")}
+          >
+            <ul className="divide-y rounded-2xl border text-sm">
+              <li className="flex items-center justify-between gap-3 p-3">
+                <span className="flex min-w-0 items-center gap-2">
+                  <Mail className="size-4 shrink-0 text-muted-foreground" />
+                  <span className="truncate">{t("workspace.email")}</span>
+                </span>
+                <Badge variant={emailVerified ? "secondary" : "outline"}>
+                  {emailVerified ? t("workspace.verified") : t("workspace.linked")}
+                </Badge>
+              </li>
+              <li className="flex items-center justify-between gap-3 p-3">
+                <span className="flex min-w-0 items-center gap-2">
+                  <KeyRound className="size-4 shrink-0 text-muted-foreground" />
+                  <span className="truncate">{t("workspace.password")}</span>
+                </span>
+                <Badge variant="outline">{t("workspace.inUse")}</Badge>
+              </li>
+            </ul>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 w-full sm:h-9 sm:w-auto"
+              onClick={onSignOut}
+            >
+              <LogOut className="size-4" />
+              {t("workspace.signOutSession")}
+            </Button>
+          </SettingsSection>
+        </SettingsCardContent>
+      </SettingsCard>
+    </div>
+  ) : null;
+
   return (
     <div className="space-y-4">
       {embedded ? null : (
@@ -343,7 +455,7 @@ export const AccountsPageView = memo(function AccountsPageView({
         />
       )}
       {embedded ? (
-        <SettingsPanel ready={ready}>{body}</SettingsPanel>
+        <SettingsPanel ready={ready}>{embeddedBody}</SettingsPanel>
       ) : ready ? (
         body
       ) : (

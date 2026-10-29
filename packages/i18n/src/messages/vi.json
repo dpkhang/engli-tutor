@@ -1192,6 +1192,11 @@
       "back": "Quay lại",
       "overview": "Tổng quan"
     },
+    "account": {
+      "profileDescription": "Tên, thông tin liên hệ và công việc của bạn.",
+      "learningDescription": "Ngôn ngữ, trình độ mục tiêu và điều bạn muốn đạt được.",
+      "securityDescription": "Cách bạn đăng nhập và phiên hiện tại."
+    },
     "overview": {
       "profile": "Hồ sơ",
       "viewProfile": "Quản lý tài khoản",

@@ -1192,6 +1192,11 @@
       "back": "Back",
       "overview": "Overview"
     },
+    "account": {
+      "profileDescription": "Your name, contact details, and work info.",
+      "learningDescription": "Languages, target level, and what you want to achieve.",
+      "securityDescription": "How you sign in and your current session."
+    },
     "overview": {
       "profile": "Profile",
       "viewProfile": "Manage account",
