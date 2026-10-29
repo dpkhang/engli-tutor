@@ -138,6 +138,7 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
                   key={option.id}
                   type="button"
                   aria-pressed={view.theme === option.id}
+                  disabled={saving}
                   onClick={() => onThemeChange(option.id)}
                   className={cn(
                     "min-w-0 rounded-2xl border p-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -167,6 +168,7 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
                     key={option.id}
                     type="button"
                     aria-pressed={active}
+                    disabled={saving}
                     onClick={() => onAccentChange(option.id)}
                     className={cn(
                       "flex min-h-11 min-w-0 flex-col items-center gap-1.5 rounded-2xl border px-2 py-2.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -202,6 +204,7 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
                       key={option.id}
                       active={view.textSize === option.id}
                       pressed={view.textSize === option.id}
+                      disabled={saving}
                       onClick={() => onTextSizeChange(option.id)}
                     >
                       {t(option.labelKey)}
@@ -237,6 +240,7 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
                       key={option.id}
                       active={view.reduceMotion === option.id}
                       pressed={view.reduceMotion === option.id}
+                      disabled={saving}
                       onClick={() => onReduceMotionChange(option.id)}
                     >
                       {t(option.labelKey)}

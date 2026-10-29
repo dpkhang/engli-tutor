@@ -3,7 +3,13 @@
 import { memo, useId } from "react";
 import { Check, Copy, Gift, LoaderCircle, Share2, TicketPercent, UsersRound } from "lucide-react";
 import { Alert, AlertDescription, Button, Input, Label } from "@engli-tutor/ui";
-import { SettingsCard, SettingsCardContent, SettingsPanel, SettingsSection } from "../shared";
+import {
+  SettingsCard,
+  SettingsCardContent,
+  SettingsErrorState,
+  SettingsPanel,
+  SettingsSection,
+} from "../shared";
 import { useWorkspaceI18n, useWorkspaceLocale } from "@/features/i18n";
 import type { ReferralRewardStatus } from "../../model/referrals";
 
@@ -66,18 +72,11 @@ export const ReferralSettingsView = memo(function ReferralSettingsView({
   if (error) {
     return (
       <SettingsPanel ready={ready}>
-        <SettingsCard>
-          <SettingsCardContent className="pt-4">
-            <Alert variant="destructive" role="alert">
-              <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <span>{t("settings.referral.loadFailed")}</span>
-                <Button type="button" variant="outline" className="h-11 w-full sm:w-auto" onClick={onRetry}>
-                  {t("settings.referral.retry")}
-                </Button>
-              </AlertDescription>
-            </Alert>
-          </SettingsCardContent>
-        </SettingsCard>
+        <SettingsErrorState
+          message={t("settings.referral.loadFailed")}
+          retryLabel={t("settings.referral.retry")}
+          onRetry={onRetry}
+        />
       </SettingsPanel>
     );
   }

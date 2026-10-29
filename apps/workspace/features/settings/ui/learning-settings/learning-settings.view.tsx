@@ -61,6 +61,7 @@ export const LearningSettingsView = memo(function LearningSettingsView({
                   key={item.id}
                   active={view.level === item.id}
                   pressed={view.level === item.id}
+                  disabled={saving}
                   onClick={() => onLevelChange(item.id)}
                 >
                   {item.id}
@@ -83,6 +84,7 @@ export const LearningSettingsView = memo(function LearningSettingsView({
                   <SegmentedSwitch
                     value={view.speechRate}
                     onChange={onSpeechRateChange}
+                    disabled={saving}
                     ariaLabel={t("workspace.playbackSpeed")}
                     options={(Object.keys(SPEECH_RATES) as SpeechRateId[]).map((id) => ({
                       id,
@@ -103,6 +105,7 @@ export const LearningSettingsView = memo(function LearningSettingsView({
                 <Switch
                   id={controlId}
                   checked={view.autoPlay}
+                  disabled={saving}
                   onCheckedChange={onAutoPlayChange}
                   aria-labelledby={labelId}
                   aria-describedby={descriptionId}

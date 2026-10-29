@@ -7,6 +7,7 @@ import {
   SettingsCard,
   SettingsCardContent,
   SettingsCardHeader,
+  SettingsErrorState,
   SettingsFormCard,
   SettingsPanel,
   SettingsRow,
@@ -60,6 +61,8 @@ export type NotificationValues = {
 
 export type NotificationSettingsViewProps = {
   ready: boolean;
+  loadFailed: boolean;
+  onRetryLoad: () => void;
   values: NotificationValues;
   scheduleEnabled: boolean;
   isDirty: boolean;
@@ -78,6 +81,8 @@ export type NotificationSettingsViewProps = {
 
 export const NotificationSettingsView = memo(function NotificationSettingsView({
   ready,
+  loadFailed,
+  onRetryLoad,
   values,
   scheduleEnabled,
   isDirty,
@@ -118,6 +123,13 @@ export const NotificationSettingsView = memo(function NotificationSettingsView({
   return (
     <SettingsPanel ready={ready}>
       <div className="space-y-4">
+        {loadFailed ? (
+          <SettingsErrorState
+            message={t("settings.notifications.loadFailed")}
+            retryLabel={t("settings.notifications.retry")}
+            onRetry={onRetryLoad}
+          />
+        ) : null}
         <SettingsFormCard
           isDirty={isDirty}
           saving={saving}
@@ -255,7 +267,7 @@ export const NotificationSettingsView = memo(function NotificationSettingsView({
                     ? "text-emerald-600 dark:text-emerald-400"
                     : "text-rose-600 dark:text-rose-400",
                 )}
-                role="status"
+                role={noticeTone === "error" ? "alert" : "status"}
               >
                 {notice}
               </p>

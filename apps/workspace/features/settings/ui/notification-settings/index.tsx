@@ -133,6 +133,8 @@ export function NotificationSettings({
   return (
     <NotificationSettingsView
       ready={notificationsQuery.isSuccess || notificationsQuery.isError}
+      loadFailed={notificationsQuery.isError && !current}
+      onRetryLoad={() => void notificationsQuery.refetch()}
       values={
         draft ?? {
           notifyReminders: false,

@@ -133,7 +133,7 @@ export const SecuritySettingsView = memo(function SecuritySettingsView({
                 )}
               </SettingsRow>
               {passwordError ? (
-                <Alert variant="destructive">
+                <Alert variant="destructive" role="alert">
                   <AlertDescription>{passwordError}</AlertDescription>
                 </Alert>
               ) : null}
@@ -157,7 +157,7 @@ export const SecuritySettingsView = memo(function SecuritySettingsView({
             description={t("settings.security.sessionsDescription")}
           >
             {sessionsError ? (
-              <Alert variant="destructive">
+              <Alert variant="destructive" role="alert">
                 <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <span>{sessionsError}</span>
                   <Button
@@ -229,7 +229,7 @@ export const SecuritySettingsView = memo(function SecuritySettingsView({
                   </p>
                 )}
                 {actionError ? (
-                  <Alert variant="destructive">
+                  <Alert variant="destructive" role="alert">
                     <AlertDescription>{actionError}</AlertDescription>
                   </Alert>
                 ) : null}
