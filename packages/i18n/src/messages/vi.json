@@ -673,22 +673,66 @@
     "sampleDescription": "Một chủ đề xuyên suốt buổi học để mỗi bước chuẩn bị cho bước tiếp theo.",
     "sampleSteps": "Các bước trong bài học mẫu",
     "learnerNeeds": [
-      { "title": "Nói rõ ràng khi công việc trở nên thực tế", "body": "Luyện đúng những tình huống quan trọng: họp nhanh, gọi khách hàng, phỏng vấn và cập nhật dự án." },
-      { "title": "Nhận phản hồi hữu ích thật nhanh", "body": "Biết cần sửa gì sau khi thử: ngữ pháp, phát âm, từ vựng và cách trả lời tự nhiên hơn." },
-      { "title": "Xây dựng thói quen hằng ngày", "body": "Buổi học ngắn giúp duy trì tiếng Anh mà không cần ngồi học một khóa dài sau giờ làm." },
-      { "title": "Hiểu lỗi sai bằng tiếng Việt", "body": "Giải thích bằng tiếng Việt giúp bạn hiểu vì sao câu chưa đúng và cách nói tốt hơn lần sau." }
+      {
+        "title": "Nói rõ ràng khi công việc trở nên thực tế",
+        "body": "Luyện đúng những tình huống quan trọng: họp nhanh, gọi khách hàng, phỏng vấn và cập nhật dự án."
+      },
+      {
+        "title": "Nhận phản hồi hữu ích thật nhanh",
+        "body": "Biết cần sửa gì sau khi thử: ngữ pháp, phát âm, từ vựng và cách trả lời tự nhiên hơn."
+      },
+      {
+        "title": "Xây dựng thói quen hằng ngày",
+        "body": "Buổi học ngắn giúp duy trì tiếng Anh mà không cần ngồi học một khóa dài sau giờ làm."
+      },
+      {
+        "title": "Hiểu lỗi sai bằng tiếng Việt",
+        "body": "Giải thích bằng tiếng Việt giúp bạn hiểu vì sao câu chưa đúng và cách nói tốt hơn lần sau."
+      }
     ],
     "sessionBeats": [
-      { "title": "Nghe để hiểu tình huống", "detail": "Nghe một yêu cầu ngắn về công việc hoặc phỏng vấn và nắm nhiệm vụ, từ khóa cùng giọng điệu chính." },
-      { "title": "Đọc ngữ cảnh", "detail": "Đọc nhanh email, mô tả công việc hoặc brief ngắn để câu trả lời có đúng chi tiết." },
-      { "title": "Nói cùng gia sư AI", "detail": "Trả lời câu hỏi tiếp theo thành tiếng rồi thử lại với ngữ pháp và phát âm rõ hơn." },
-      { "title": "Viết và xem lại", "detail": "Viết tóm tắt hoặc câu trả lời ngắn; nhận phản hồi tiếng Việt và bản viết tự nhiên hơn để luyện lại." }
+      {
+        "title": "Nghe để hiểu tình huống",
+        "detail": "Nghe một yêu cầu ngắn về công việc hoặc phỏng vấn và nắm nhiệm vụ, từ khóa cùng giọng điệu chính."
+      },
+      {
+        "title": "Đọc ngữ cảnh",
+        "detail": "Đọc nhanh email, mô tả công việc hoặc brief ngắn để câu trả lời có đúng chi tiết."
+      },
+      {
+        "title": "Nói cùng gia sư AI",
+        "detail": "Trả lời câu hỏi tiếp theo thành tiếng rồi thử lại với ngữ pháp và phát âm rõ hơn."
+      },
+      {
+        "title": "Viết và xem lại",
+        "detail": "Viết tóm tắt hoặc câu trả lời ngắn; nhận phản hồi tiếng Việt và bản viết tự nhiên hơn để luyện lại."
+      }
     ],
     "skillPath": [
-      { "skill": "Nghe", "focus": "Nắm ý trong cuộc họp và cuộc gọi", "practice": "Đoạn nghe ngắn, họp nhanh, câu hỏi khách hàng và câu hỏi phỏng vấn.", "outcome": "Theo dõi ý chính, yêu cầu quan trọng và bước tiếp theo với ít lần dừng hơn." },
-      { "skill": "Nói", "focus": "Trả lời có cấu trúc và tự tin", "practice": "Hội thoại theo tình huống: giới thiệu, dự án, quyết định và câu hỏi hành vi.", "outcome": "Đưa ra câu trả lời A2–B1 rõ hơn và thử lại sau phản hồi về phát âm, ngữ pháp." },
-      { "skill": "Đọc", "focus": "Hiểu văn bản công việc nhanh hơn", "practice": "Email, mô tả công việc, tài liệu ngắn và ghi chú bài học với từ vựng trong ngữ cảnh.", "outcome": "Tìm được chi tiết cần thiết mà không phải dịch từng từ." },
-      { "skill": "Viết", "focus": "Gửi phản hồi đơn giản, tự nhiên", "practice": "Viết cập nhật, tóm tắt và câu trả lời phỏng vấn ngắn sau mỗi bài nói.", "outcome": "Dùng thì, từ ngữ và trật tự câu tốt hơn trong văn viết thực tế." }
+      {
+        "skill": "Nghe",
+        "focus": "Nắm ý trong cuộc họp và cuộc gọi",
+        "practice": "Đoạn nghe ngắn, họp nhanh, câu hỏi khách hàng và câu hỏi phỏng vấn.",
+        "outcome": "Theo dõi ý chính, yêu cầu quan trọng và bước tiếp theo với ít lần dừng hơn."
+      },
+      {
+        "skill": "Nói",
+        "focus": "Trả lời có cấu trúc và tự tin",
+        "practice": "Hội thoại theo tình huống: giới thiệu, dự án, quyết định và câu hỏi hành vi.",
+        "outcome": "Đưa ra câu trả lời A2–B1 rõ hơn và thử lại sau phản hồi về phát âm, ngữ pháp."
+      },
+      {
+        "skill": "Đọc",
+        "focus": "Hiểu văn bản công việc nhanh hơn",
+        "practice": "Email, mô tả công việc, tài liệu ngắn và ghi chú bài học với từ vựng trong ngữ cảnh.",
+        "outcome": "Tìm được chi tiết cần thiết mà không phải dịch từng từ."
+      },
+      {
+        "skill": "Viết",
+        "focus": "Gửi phản hồi đơn giản, tự nhiên",
+        "practice": "Viết cập nhật, tóm tắt và câu trả lời phỏng vấn ngắn sau mỗi bài nói.",
+        "outcome": "Dùng thì, từ ngữ và trật tự câu tốt hơn trong văn viết thực tế."
+      }
     ],
     "lessonPreview": "Xem trước bài học · 4 kỹ năng",
     "listenRead": "Nghe + đọc",
@@ -698,15 +742,30 @@
     "skillsTitle": "Nghe, nói, đọc và viết trong một lộ trình thực tế.",
     "skillsDescription": "Bài kiểm tra đầu vào đánh giá cả 4 kỹ năng. Sau đó bài học kết nối chúng qua các tình huống bạn có thể dùng ở nơi làm việc hoặc phỏng vấn.",
     "whyItems": [
-      { "title": "Một chủ đề, bốn kỹ năng", "body": "Nghe, đọc, nói và viết củng cố cùng một tình huống thay vì trở thành các bài luyện tách rời." },
-      { "title": "Phản hồi sau khi thực hành", "body": "Bạn thử trước, sau đó nhận giải thích bằng tiếng Việt và cách diễn đạt tốt hơn để lặp lại ngay." },
-      { "title": "Luyện theo điểm yếu", "body": "Các lỗi thường gặp như thì, s/es, kết hợp từ hoặc bỏ sót từ khóa có thể được đưa vào buổi sau." }
+      {
+        "title": "Một chủ đề, bốn kỹ năng",
+        "body": "Nghe, đọc, nói và viết củng cố cùng một tình huống thay vì trở thành các bài luyện tách rời."
+      },
+      {
+        "title": "Phản hồi sau khi thực hành",
+        "body": "Bạn thử trước, sau đó nhận giải thích bằng tiếng Việt và cách diễn đạt tốt hơn để lặp lại ngay."
+      },
+      {
+        "title": "Luyện theo điểm yếu",
+        "body": "Các lỗi thường gặp như thì, s/es, kết hợp từ hoặc bỏ sót từ khóa có thể được đưa vào buổi sau."
+      }
     ],
     "why": "Vì sao hiệu quả",
     "whyTitle": "Dễ duy trì thói quen hơn khi mỗi bài học đều có mục tiêu.",
     "useCasesItems": [
-      { "title": "Trước buổi phỏng vấn dự án", "body": "Luyện cách nói về vai trò, vấn đề, giải pháp và điều đã học — rồi rút gọn câu trả lời." },
-      { "title": "Trước cuộc họp hằng tuần", "body": "Tập dượt cập nhật tiến độ, trả lời câu hỏi tiếp theo và chuyển ghi chú thành phần tóm tắt ngắn." }
+      {
+        "title": "Trước buổi phỏng vấn dự án",
+        "body": "Luyện cách nói về vai trò, vấn đề, giải pháp và điều đã học — rồi rút gọn câu trả lời."
+      },
+      {
+        "title": "Trước cuộc họp hằng tuần",
+        "body": "Tập dượt cập nhật tiến độ, trả lời câu hỏi tiếp theo và chuyển ghi chú thành phần tóm tắt ngắn."
+      }
     ],
     "useCases": "Tình huống minh họa",
     "useCasesTitle": "Chọn một tình huống thực tế rồi luyện tiếng Anh xoay quanh nó.",
@@ -717,12 +776,30 @@
     "loadingPlans": "Đang tải các gói…",
     "faq": "Câu hỏi thường gặp",
     "faqItems": [
-      { "q": "Tôi ở trình độ A2 và yếu nói — có thể bắt đầu không?", "a": "Có. Bài kiểm tra đầu vào đánh giá nghe, nói, đọc và viết, sau đó lộ trình bắt đầu ở đúng trình độ. Bạn vẫn luyện cả bốn kỹ năng, bao gồm kỹ năng còn yếu." },
-      { "q": "Tôi chỉ muốn luyện nói có được không?", "a": "Mỗi buổi học kết nối nói với nghe, đọc và một bài viết ngắn. Phần nói được tập trung, nhưng đầu vào và phần xem lại giúp câu trả lời tốt hơn." },
-      { "q": "Mỗi ngày cần học bao nhiêu phút?", "a": "Khoảng 20–30 phút cho một vòng đầy đủ: nghe, đọc, nói với AI, sau đó viết và xem lại phản hồi bằng tiếng Việt." },
-      { "q": "Gói Free khác gói trả phí thế nào?", "a": "Gói Free cho phép thử vòng học hằng ngày với giới hạn sử dụng gia sư AI. Gói trả phí dùng catalog trực tiếp bên trên để giá và quyền lợi luôn được cập nhật." },
-      { "q": "Âm thanh tôi nói được xử lý thế nào?", "a": "Đoạn âm thanh ngắn được gửi đến nhà cung cấp speech để phiên âm và phát âm thanh gia sư. Chúng tôi không bán giọng nói hay bản phiên âm của bạn." },
-      { "q": "Cookie được sử dụng thế nào?", "a": "Cookie phiên giúp bạn đăng nhập. Bộ nhớ tùy chọn trên thiết bị ghi nhớ giao diện và cài đặt phát. Chúng tôi không dùng cookie quảng cáo." }
+      {
+        "q": "Tôi ở trình độ A2 và yếu nói — có thể bắt đầu không?",
+        "a": "Có. Bài kiểm tra đầu vào đánh giá nghe, nói, đọc và viết, sau đó lộ trình bắt đầu ở đúng trình độ. Bạn vẫn luyện cả bốn kỹ năng, bao gồm kỹ năng còn yếu."
+      },
+      {
+        "q": "Tôi chỉ muốn luyện nói có được không?",
+        "a": "Mỗi buổi học kết nối nói với nghe, đọc và một bài viết ngắn. Phần nói được tập trung, nhưng đầu vào và phần xem lại giúp câu trả lời tốt hơn."
+      },
+      {
+        "q": "Mỗi ngày cần học bao nhiêu phút?",
+        "a": "Khoảng 20–30 phút cho một vòng đầy đủ: nghe, đọc, nói với AI, sau đó viết và xem lại phản hồi bằng tiếng Việt."
+      },
+      {
+        "q": "Gói Free khác gói trả phí thế nào?",
+        "a": "Gói Free cho phép thử vòng học hằng ngày với giới hạn sử dụng gia sư AI. Gói trả phí dùng catalog trực tiếp bên trên để giá và quyền lợi luôn được cập nhật."
+      },
+      {
+        "q": "Âm thanh tôi nói được xử lý thế nào?",
+        "a": "Đoạn âm thanh ngắn được gửi đến nhà cung cấp speech để phiên âm và phát âm thanh gia sư. Chúng tôi không bán giọng nói hay bản phiên âm của bạn."
+      },
+      {
+        "q": "Cookie được sử dụng thế nào?",
+        "a": "Cookie phiên giúp bạn đăng nhập. Bộ nhớ tùy chọn trên thiết bị ghi nhớ giao diện và cài đặt phát. Chúng tôi không dùng cookie quảng cáo."
+      }
     ],
     "faqTitle": "Giải đáp rõ ràng trước bài học đầu tiên.",
     "faqDescription": "Tìm hiểu về bài kiểm tra đầu vào, luyện tập hằng ngày, giới hạn gói và quyền riêng tư.",
