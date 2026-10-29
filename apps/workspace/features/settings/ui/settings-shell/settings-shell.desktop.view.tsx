@@ -37,8 +37,16 @@ export const SettingsDesktopNav = memo(function SettingsDesktopNav({
           {t("settings.nav.overview")}
         </Link>
         {GROUPS.map((group) => (
-          <div key={group.id} className="mt-3 flex flex-col gap-1">
-            <p className="px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground/80">
+          <div
+            key={group.id}
+            role="group"
+            aria-labelledby={`settings-nav-group-${group.id}`}
+            className="mt-3 flex flex-col gap-1"
+          >
+            <p
+              id={`settings-nav-group-${group.id}`}
+              className="px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+            >
               {t(group.labelKey)}
             </p>
             {group.items.map((item) => {

@@ -9,10 +9,10 @@ import {
   useRef,
   useState,
 } from "react";
-import { CircleCheck, Info, X } from "lucide-react";
+import { CircleAlert, CircleCheck, Info, X } from "lucide-react";
 import { cn } from "../lib/utils";
 
-type ToastTone = "default" | "success";
+type ToastTone = "default" | "success" | "error";
 
 type ToastOptions = {
   title: string;
@@ -31,6 +31,7 @@ type ToastItem = ToastOptions & {
 type ToastContextValue = {
   toast: (options: ToastOptions) => void;
   success: (title: string, description?: string) => void;
+  error: (title: string, description?: string) => void;
 };
 
 const ToastContext = createContext<ToastContextValue | null>(null);
@@ -93,6 +94,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     [toast],
   );
 
+  const error = useCallback(
+    (title: string, description?: string) => {
+      toast({ title, description, tone: "error" });
+    },
+    [toast],
+  );
+
   useEffect(
     () => () => {
       for (const timer of timers.current.values()) window.clearTimeout(timer);
@@ -101,7 +109,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
-  const value = useMemo(() => ({ toast, success }), [success, toast]);
+  const value = useMemo(() => ({ toast, success, error }), [error, success, toast]);
 
   return (
     <ToastContext.Provider value={value}>
@@ -112,24 +120,26 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         className="pointer-events-none fixed top-4 right-4 z-[120] flex w-[min(100%-2rem,24rem)] flex-col items-end gap-2"
       >
         {items.map((item) => {
-          const Icon = item.tone === "success" ? CircleCheck : Info;
+          const Icon =
+            item.tone === "success" ? CircleCheck : item.tone === "error" ? CircleAlert : Info;
           return (
             <div
               key={item.id}
-              role="status"
+              role={item.tone === "error" ? "alert" : "status"}
               className={cn(
                 "ui-toast pointer-events-auto relative w-full overflow-hidden rounded-xl border bg-popover/95 text-popover-foreground shadow-[0_18px_40px_-24px_rgba(15,23,42,0.45)] backdrop-blur-md",
                 item.exiting ? "ui-toast-out" : "ui-toast-in",
                 item.tone === "success" && "border-primary/25",
+                item.tone === "error" && "border-destructive/30",
               )}
             >
               <div className="flex items-start gap-3 p-3.5 pb-3">
                 <span
                   className={cn(
                     "grid size-8 shrink-0 place-items-center rounded-lg",
-                    item.tone === "success"
-                      ? "bg-primary/10 text-primary"
-                      : "bg-muted text-foreground",
+                    item.tone === "success" && "bg-primary/10 text-primary",
+                    item.tone === "error" && "bg-destructive/10 text-destructive",
+                    item.tone === "default" && "bg-muted text-foreground",
                     !item.exiting && "ui-toast-icon",
                   )}
                 >
@@ -156,7 +166,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 aria-hidden
                 className={cn(
                   "ui-toast-progress absolute inset-x-0 bottom-0 h-0.5 origin-left",
-                  item.tone === "success" ? "bg-primary" : "bg-foreground/35",
+                  item.tone === "success" && "bg-primary",
+                  item.tone === "error" && "bg-destructive",
+                  item.tone === "default" && "bg-foreground/35",
                 )}
                 style={{ animationDuration: `${item.durationMs}ms` }}
               />

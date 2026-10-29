@@ -3,8 +3,14 @@
 import { memo } from "react";
 import { LocalizedLink as Link } from "@/features/i18n";
 import { Check, CreditCard, Crown, Gauge, History, Sparkles } from "lucide-react";
-import { Alert, AlertDescription, Badge, Button } from "@engli-tutor/ui";
-import { SettingsCard, SettingsCardContent, SettingsPanel, SettingsSection } from "../shared";
+import { Badge, Button } from "@engli-tutor/ui";
+import {
+  SettingsCard,
+  SettingsCardContent,
+  SettingsErrorState,
+  SettingsPanel,
+  SettingsSection,
+} from "../shared";
 import { useWorkspaceI18n } from "@/features/i18n";
 
 export type BillingFact = {
@@ -70,18 +76,11 @@ export const BillingSettingsView = memo(function BillingSettingsView({
   if (error) {
     return (
       <SettingsPanel ready={ready}>
-        <SettingsCard>
-          <SettingsCardContent className="pt-4">
-            <Alert variant="destructive" role="alert">
-              <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <span>{t("settings.billing.loadFailed")}</span>
-                <Button type="button" variant="outline" className="h-11 w-full sm:w-auto" onClick={onRetry}>
-                  {t("settings.billing.retry")}
-                </Button>
-              </AlertDescription>
-            </Alert>
-          </SettingsCardContent>
-        </SettingsCard>
+        <SettingsErrorState
+          message={t("settings.billing.loadFailed")}
+          retryLabel={t("settings.billing.retry")}
+          onRetry={onRetry}
+        />
       </SettingsPanel>
     );
   }

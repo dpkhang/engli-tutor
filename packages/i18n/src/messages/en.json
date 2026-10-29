@@ -1119,6 +1119,8 @@
       "enableFailed": "Could not turn on notifications.",
       "notConfigured": "Notifications are not available on this server yet.",
       "saveFailed": "Could not save notifications.",
+      "loadFailed": "Could not load your notification settings.",
+      "retry": "Try again",
       "noSubscription": "This browser did not return a push subscription.",
       "testHint": "Send a test notification to check this device.",
       "testButton": "Send test notification",
@@ -1202,7 +1204,8 @@
     },
     "nav": {
       "back": "Back",
-      "overview": "Overview"
+      "overview": "Overview",
+      "backToSettings": "Back to Settings"
     },
     "account": {
       "profileDescription": "Your name, contact details, and work info.",

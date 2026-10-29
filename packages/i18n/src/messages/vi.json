@@ -1119,6 +1119,8 @@
       "enableFailed": "Không bật được thông báo.",
       "notConfigured": "Máy chủ này chưa hỗ trợ thông báo.",
       "saveFailed": "Không lưu được cài đặt thông báo.",
+      "loadFailed": "Không tải được cài đặt thông báo.",
+      "retry": "Thử lại",
       "noSubscription": "Trình duyệt này không trả về đăng ký nhận thông báo.",
       "testHint": "Gửi một thông báo thử để kiểm tra thiết bị này.",
       "testButton": "Gửi thông báo thử",
@@ -1202,7 +1204,8 @@
     },
     "nav": {
       "back": "Quay lại",
-      "overview": "Tổng quan"
+      "overview": "Tổng quan",
+      "backToSettings": "Quay lại Cài đặt"
     },
     "account": {
       "profileDescription": "Tên, thông tin liên hệ và công việc của bạn.",

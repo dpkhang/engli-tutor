@@ -43,10 +43,10 @@ export function useSettingsDraft<T extends Record<string, unknown>>({
       setOverride(null);
       toast.success(t("settings.form.saved"));
     } catch (error) {
-      toast.toast({
-        title: t("settings.form.saveFailed"),
-        description: error instanceof Error ? error.message : undefined,
-      });
+      toast.error(
+        t("settings.form.saveFailed"),
+        error instanceof Error ? error.message : undefined,
+      );
     } finally {
       setSaving(false);
     }
