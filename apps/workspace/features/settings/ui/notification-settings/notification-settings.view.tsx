@@ -1,10 +1,46 @@
 "use client";
 
-import { memo } from "react";
-import { Bell, CreditCard } from "lucide-react";
-import { Button, Label, Switch, cn } from "@engli-tutor/ui";
-import { SettingsFormCard, SettingsPanel, SettingsRow, SettingsSection } from "../shared";
+import { memo, type ReactNode } from "react";
+import { Bell, BellRing, CreditCard } from "lucide-react";
+import { Button, CardTitle, Switch, cn } from "@engli-tutor/ui";
+import {
+  SettingsCard,
+  SettingsCardContent,
+  SettingsCardHeader,
+  SettingsFormCard,
+  SettingsPanel,
+  SettingsRow,
+  SettingsSection,
+} from "../shared";
 import { useWorkspaceI18n } from "@/features/i18n";
+import type { DevicePushState } from "@/features/notifications";
+
+const STATE_LABEL: Record<DevicePushState, string | null> = {
+  unknown: null,
+  granted: "settings.notifications.statusGranted",
+  default: "settings.notifications.statusDefault",
+  denied: "settings.notifications.statusDenied",
+  unsupported: "settings.notifications.statusUnsupported",
+  "ios-install": "settings.notifications.statusIosInstall",
+};
+
+const STATE_HINT: Record<DevicePushState, string | null> = {
+  unknown: null,
+  granted: "settings.notifications.hintGranted",
+  default: "settings.notifications.hintDefault",
+  denied: "settings.notifications.blocked",
+  unsupported: "settings.notifications.unsupported",
+  "ios-install": "settings.notifications.iosHomeScreen",
+};
+
+const STATE_TONE: Record<DevicePushState, string> = {
+  unknown: "bg-muted text-muted-foreground",
+  granted: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+  default: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
+  denied: "bg-rose-500/10 text-rose-700 dark:text-rose-400",
+  unsupported: "bg-muted text-muted-foreground",
+  "ios-install": "bg-amber-500/10 text-amber-700 dark:text-amber-400",
+};
 
 const REMINDER_SLOTS = Array.from({ length: 96 }, (_, index) => index * 15);
 
@@ -30,6 +66,8 @@ export type NotificationSettingsViewProps = {
   saving: boolean;
   disabled: boolean;
   testPending: boolean;
+  pushState: DevicePushState;
+  installCard?: ReactNode;
   notice: string | null;
   noticeTone: "error" | "success";
   onChange: (patch: Partial<NotificationValues>) => void;
@@ -46,6 +84,8 @@ export const NotificationSettingsView = memo(function NotificationSettingsView({
   saving,
   disabled,
   testPending,
+  pushState,
+  installCard,
   notice,
   noticeTone,
   onChange,
@@ -78,42 +118,61 @@ export const NotificationSettingsView = memo(function NotificationSettingsView({
   return (
     <SettingsPanel ready={ready}>
       <div className="space-y-4">
-        <SettingsFormCard isDirty={isDirty} saving={saving} onSave={onSave} onReset={onReset}>
+        <SettingsFormCard
+          isDirty={isDirty}
+          saving={saving}
+          onSave={onSave}
+          onReset={onReset}
+        >
           <SettingsSection
             icon={<Bell className="size-5 text-primary" />}
-            title={t("workspace.practice")}
-            description={t("workspace.notificationDeviceDescription")}
+            title={t("settings.notifications.learningTitle")}
+            description={t("settings.notifications.learningDescription")}
           >
             {toggles.map((item) => (
-              <SettingsRow key={item.key} label={item.label} description={item.description}>
+              <SettingsRow
+                key={item.key}
+                label={item.label}
+                description={item.description}
+              >
                 {({ controlId, labelId, descriptionId }) => (
                   <Switch
                     id={controlId}
                     checked={values[item.key]}
                     disabled={disabled || saving}
-                    onCheckedChange={(checked) => onChange({ [item.key]: checked })}
+                    onCheckedChange={(checked) =>
+                      onChange({ [item.key]: checked })
+                    }
                     aria-labelledby={labelId}
                     aria-describedby={descriptionId}
                   />
                 )}
               </SettingsRow>
             ))}
-            <div className="space-y-2">
-              <Label htmlFor="reminder-time">{t("workspace.time")}</Label>
-              <select
-                id="reminder-time"
-                value={values.reminderMinutes}
-                disabled={!scheduleEnabled || disabled || saving}
-                onChange={(event) => onChange({ reminderMinutes: Number(event.target.value) })}
-                className="h-10 w-full max-w-xs rounded-xl border border-border bg-background px-3 text-sm disabled:opacity-60"
-              >
-                {REMINDER_SLOTS.map((minutes) => (
-                  <option key={minutes} value={minutes}>
-                    {formatReminder(minutes)}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <SettingsRow
+              label={t("workspace.time")}
+              description={t("settings.notifications.reminderTimeDescription")}
+            >
+              {({ controlId, labelId, descriptionId }) => (
+                <select
+                  id={controlId}
+                  value={values.reminderMinutes}
+                  disabled={!scheduleEnabled || disabled || saving}
+                  onChange={(event) =>
+                    onChange({ reminderMinutes: Number(event.target.value) })
+                  }
+                  aria-labelledby={labelId}
+                  aria-describedby={descriptionId}
+                  className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm disabled:opacity-60 lg:w-40"
+                >
+                  {REMINDER_SLOTS.map((minutes) => (
+                    <option key={minutes} value={minutes}>
+                      {formatReminder(minutes)}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </SettingsRow>
           </SettingsSection>
 
           <SettingsSection
@@ -129,7 +188,9 @@ export const NotificationSettingsView = memo(function NotificationSettingsView({
                   id={controlId}
                   checked={values.notifyBilling}
                   disabled={disabled || saving}
-                  onCheckedChange={(checked) => onChange({ notifyBilling: checked })}
+                  onCheckedChange={(checked) =>
+                    onChange({ notifyBilling: checked })
+                  }
                   aria-labelledby={labelId}
                   aria-describedby={descriptionId}
                 />
@@ -138,32 +199,71 @@ export const NotificationSettingsView = memo(function NotificationSettingsView({
           </SettingsSection>
         </SettingsFormCard>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-muted-foreground">{t("settings.notifications.testHint")}</p>
-          <Button
-            type="button"
-            variant="outline"
-            className="rounded-full"
-            disabled={testPending || saving}
-            onClick={onSendTest}
-          >
-            <Bell className="size-4" /> {t("settings.notifications.testButton")}
-          </Button>
-        </div>
+        <SettingsCard>
+          <SettingsCardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BellRing className="size-5 text-primary" />{" "}
+              {t("settings.notifications.deviceTitle")}
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              {t("workspace.notificationDeviceDescription")}
+            </p>
+          </SettingsCardHeader>
+          <SettingsCardContent className="space-y-4">
+            <div className="space-y-1.5" aria-live="polite">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-sm font-medium">
+                  {t("settings.notifications.permissionLabel")}
+                </span>
+                <span
+                  className={cn(
+                    "rounded-full px-2.5 py-0.5 text-xs font-medium",
+                    STATE_TONE[pushState],
+                  )}
+                >
+                  {STATE_LABEL[pushState] ? t(STATE_LABEL[pushState]) : "—"}
+                </span>
+              </div>
+              {STATE_HINT[pushState] ? (
+                <p className="text-sm text-muted-foreground">
+                  {t(STATE_HINT[pushState])}
+                </p>
+              ) : null}
+            </div>
 
-        {notice ? (
-          <p
-            className={cn(
-              "text-sm",
-              noticeTone === "success"
-                ? "text-emerald-600 dark:text-emerald-400"
-                : "text-rose-600 dark:text-rose-400",
-            )}
-            role="status"
-          >
-            {notice}
-          </p>
-        ) : null}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-muted-foreground">
+                {t("settings.notifications.testHint")}
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full rounded-full sm:w-auto"
+                disabled={testPending || saving || pushState === "unsupported"}
+                onClick={onSendTest}
+              >
+                <Bell className="size-4" />{" "}
+                {t("settings.notifications.testButton")}
+              </Button>
+            </div>
+
+            {notice ? (
+              <p
+                className={cn(
+                  "text-sm",
+                  noticeTone === "success"
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-rose-600 dark:text-rose-400",
+                )}
+                role="status"
+              >
+                {notice}
+              </p>
+            ) : null}
+          </SettingsCardContent>
+        </SettingsCard>
+
+        {installCard}
       </div>
     </SettingsPanel>
   );
