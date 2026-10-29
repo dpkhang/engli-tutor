@@ -2,6 +2,7 @@ import type {
   LearningGame,
   LearningGameId,
   LearningGameRound,
+  LearningLevel,
   LearningQuestion,
   LearningSkill,
 } from "../api/types";
@@ -109,24 +110,142 @@ export function shuffleInPlace<T>(items: T[]): T[] {
   return next;
 }
 
-export function pickGameRounds(rounds: LearningGameRound[], lesson?: string | null): LearningGameRound[] {
+const LEVEL_ORDER: LearningLevel[] = ["A2", "B1", "TOEIC", "IELTS"];
+const SESSION_SIZE = 5;
+const SAME_LEVEL_TARGET = 4;
+
+/**
+ * Picks a session. With `level`, most rounds match that level, one stretch round comes from a
+ * higher level, and the rest fill in from whatever is left. The lesson filter still wins first.
+ */
+export function pickGameRounds(
+  rounds: LearningGameRound[],
+  lesson?: string | null,
+  level?: LearningLevel | null,
+): LearningGameRound[] {
   const tagged = lesson ? rounds.filter((round) => round.lessonIds?.includes(lesson)) : [];
-  const pool = tagged.length ? tagged : rounds;
-  return shuffleInPlace(pool).slice(0, 5);
+  const pool = shuffleInPlace(tagged.length ? tagged : rounds);
+  const rank = level ? LEVEL_ORDER.indexOf(level) : -1;
+  if (rank < 0) return pool.slice(0, SESSION_SIZE);
+
+  const same = pool.filter((round) => round.level === level);
+  const higher = pool.filter((round) => LEVEL_ORDER.indexOf(round.level) > rank);
+  const lower = pool.filter((round) => LEVEL_ORDER.indexOf(round.level) < rank);
+  const core = [...same.slice(0, SAME_LEVEL_TARGET), ...higher.slice(0, 1)];
+  const rest = [...same.slice(SAME_LEVEL_TARGET), ...higher.slice(1), ...lower];
+  return [...core, ...rest].slice(0, SESSION_SIZE);
 }
 
 function normalize(value: string) {
   return value.trim().toLowerCase();
 }
 
-function scoreOpen(answer: string, question: Extract<LearningQuestion, { kind: "open" }>, maxWords?: number) {
+function tokenize(value: string): string[] {
+  return value.toLowerCase().replace(/[’‘]/g, "'").match(/[a-z0-9]+(?:'[a-z]+)?/g) ?? [];
+}
+
+/** Inflected forms of a keyword so "start" also accepts "started" / "starting". */
+function wordForms(key: string): Set<string> {
+  const forms = new Set([key]);
+  if (key.length < 3) return forms;
+  const last = key[key.length - 1] ?? "";
+  for (const suffix of ["s", "es", "ed", "d", "ing"]) forms.add(key + suffix);
+  if (key.endsWith("e")) {
+    forms.add(`${key.slice(0, -1)}ing`);
+  }
+  if (key.endsWith("y")) {
+    forms.add(`${key.slice(0, -1)}ied`);
+    forms.add(`${key.slice(0, -1)}ies`);
+  }
+  if (/[^aeiou][aeiou][^aeiouwxy]$/.test(key)) {
+    forms.add(`${key}${last}ed`);
+    forms.add(`${key}${last}ing`);
+  }
+  return forms;
+}
+
+function phraseMatches(tokens: string[], phrase: string): boolean {
+  const key = tokenize(phrase);
+  if (key.length === 0) return false;
+  for (let start = 0; start + key.length <= tokens.length; start += 1) {
+    if (key.every((word, offset) => wordForms(word).has(tokens[start + offset] ?? ""))) return true;
+  }
+  return false;
+}
+
+export type OpenEvaluation = {
+  correct: boolean;
+  /** First phrase of each keyword group that the answer covered. */
+  matched: string[];
+  /** First phrase of each keyword group the answer missed. */
+  missing: string[];
+  wordCount: number;
+  overLimit: boolean;
+};
+
+export function evaluateOpen(
+  answer: string,
+  question: Extract<LearningQuestion, { kind: "open" }>,
+  extra?: { maxWords?: number },
+): OpenEvaluation {
   const text = normalize(answer);
-  if (!text) return false;
-  const keys = question.keywords ?? [];
-  const keysOk = keys.length === 0 ? text.length >= 12 : keys.every((key) => text.includes(key.toLowerCase()));
-  if (!keysOk) return false;
-  if (!maxWords) return true;
-  return text.split(/\s+/).filter(Boolean).length <= maxWords;
+  const wordCount = text.split(/\s+/).filter(Boolean).length;
+  const overLimit = Boolean(extra?.maxWords) && wordCount > (extra?.maxWords ?? 0);
+  const groups = question.keywordGroups?.length
+    ? question.keywordGroups
+    : (question.keywords ?? []).map((key) => [key]);
+  if (!text) {
+    return { correct: false, matched: [], missing: groups.map((group) => group[0] ?? ""), wordCount: 0, overLimit: false };
+  }
+  if (groups.length === 0) {
+    return { correct: text.length >= 12 && !overLimit, matched: [], missing: [], wordCount, overLimit };
+  }
+
+  const tokens = tokenize(text);
+  const matched: string[] = [];
+  const missing: string[] = [];
+  for (const group of groups) {
+    const label = group[0] ?? "";
+    if (group.some((phrase) => phraseMatches(tokens, phrase))) matched.push(label);
+    else missing.push(label);
+  }
+  return { correct: missing.length === 0 && !overLimit, matched, missing, wordCount, overLimit };
+}
+
+const BASE_PROMPT_WORDS = 10;
+const WORDS_PER_EXTRA_SECOND = 3;
+const MAX_EXTRA_SECONDS = 10;
+
+/** Open rounds get extra time when the prompt is long (more to read before answering). */
+export function timeLimitFor(round: Pick<LearningGameRound, "seconds" | "question">): number {
+  if (round.question.kind !== "open") return round.seconds;
+  const promptWords = round.question.prompt.split(/\s+/).filter(Boolean).length;
+  const extra = Math.ceil(Math.max(0, promptWords - BASE_PROMPT_WORDS) / WORDS_PER_EXTRA_SECOND);
+  return round.seconds + Math.min(MAX_EXTRA_SECONDS, extra);
+}
+
+export const POINTS_PER_CORRECT = 100;
+export const MAX_SPEED_BONUS = 50;
+
+/** 100 points for a correct round, plus up to 50 for the share of time left. */
+export function roundPoints(correct: boolean, secondsLeft: number, totalSeconds: number): number {
+  if (!correct) return 0;
+  const ratio = totalSeconds > 0 ? Math.min(1, Math.max(0, secondsLeft / totalSeconds)) : 0;
+  return POINTS_PER_CORRECT + Math.round(MAX_SPEED_BONUS * ratio);
+}
+
+export function longestStreak(scores: boolean[]): number {
+  let best = 0;
+  let run = 0;
+  for (const score of scores) {
+    run = score ? run + 1 : 0;
+    best = Math.max(best, run);
+  }
+  return best;
+}
+
+function scoreOpen(answer: string, question: Extract<LearningQuestion, { kind: "open" }>, maxWords?: number) {
+  return evaluateOpen(answer, question, { maxWords }).correct;
 }
 
 export function scoreGameRound(

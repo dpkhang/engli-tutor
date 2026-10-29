@@ -5,8 +5,10 @@ export {
   SettingsCard,
   SettingsCardContent,
   SettingsCardHeader,
+  SettingsSection,
 } from "./ui/shared";
 export { SettingsShell } from "./ui/settings-shell";
+export { SettingsOverview } from "./ui/settings-overview";
 export { AppearanceSettings } from "./ui/appearance-settings";
 export { LearningSettings } from "./ui/learning-settings";
 export { NotificationSettings } from "./ui/notification-settings";

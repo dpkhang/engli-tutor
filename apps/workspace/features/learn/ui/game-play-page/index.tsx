@@ -11,7 +11,7 @@ import { markLessonStarted } from "../../model/lesson-progress";
 import { useGame } from "../../hooks/use-learning-catalog";
 import { useVocabProgress } from "../../hooks/use-vocab-progress";
 import { gameSessionsApi } from "../../api/vocab-api";
-import { pickGameRounds, shuffleInPlace } from "../../model/games";
+import { pickGameRounds, roundPoints, shuffleInPlace } from "../../model/games";
 import {
   isMastered,
   needsReview,
@@ -22,7 +22,13 @@ import {
   type VocabMode,
 } from "../../model/vocab-trainer";
 import type { LearningGameRound, LearningLevel } from "../../api/types";
-import { GamePlayPageView, type FlashcardDeckOption, type GamePlayPhase } from "./game-play-page.view";
+import {
+  GamePlayPageView,
+  type FlashcardDeckOption,
+  type GamePlayPhase,
+  type RoundAnswer,
+  type RoundTiming,
+} from "./game-play-page.view";
 
 export function GamePlayPage({ slug }: { slug: string }) {
   const searchParams = useSearchParams();
@@ -36,6 +42,7 @@ export function GamePlayPage({ slug }: { slug: string }) {
   const [session, setSession] = useState<LearningGameRound[]>([]);
   const [index, setIndex] = useState(0);
   const [scores, setScores] = useState<boolean[]>([]);
+  const [answers, setAnswers] = useState<Array<RoundAnswer | undefined>>([]);
   const [playId, setPlayId] = useState(0);
   const [enter, setEnter] = useState<"next" | "back">("next");
   const isVocab = game?.id === "flashcard";
@@ -43,7 +50,7 @@ export function GamePlayPage({ slug }: { slug: string }) {
   const profileQuery = useQuery({
     queryKey: queryKeys.account,
     queryFn: accountApi.get,
-    enabled: allDecks.length > 0,
+    enabled: allDecks.length > 0 || game?.id === "speed-reply",
   });
   const [pickedLevel, setPickedLevel] = useState<LearningLevel | null>(null);
   const [pickedDeckId, setPickedDeckId] = useState<string | null>(null);
@@ -103,6 +110,7 @@ export function GamePlayPage({ slug }: { slug: string }) {
     setEnter("next");
     setIndex(0);
     setScores([]);
+    setAnswers([]);
     setPlayId((current) => current + 1);
     startedAt.current = Date.now();
     setPhase("playing");
@@ -128,7 +136,7 @@ export function GamePlayPage({ slug }: { slug: string }) {
     if (isVocab && modeLocked) return;
     if (lesson) markLessonStarted(lesson);
     if (!isVocab) {
-      begin(pickGameRounds(game.rounds, lesson), 0, "flip");
+      begin(pickGameRounds(game.rounds, lesson, profileLevel), 0, "flip");
       return;
     }
     const tagged = lesson ? game.rounds.filter((round) => round.lessonIds?.includes(lesson)) : [];
@@ -136,7 +144,7 @@ export function GamePlayPage({ slug }: { slug: string }) {
     const pool = tagged.length ? tagged : inDeck.length ? inDeck : game.rounds;
     const picked = pickVocabSession(pool, progress, mode);
     vocabSession(picked.length ? picked : pickVocabSession(pool, progress, "flip"), 0, mode);
-  }, [begin, deckId, game, isVocab, lesson, mode, modeLocked, playsBlocked, progress, vocabSession]);
+  }, [begin, deckId, game, isVocab, lesson, mode, modeLocked, playsBlocked, profileLevel, progress, vocabSession]);
 
   const cardsById = useMemo(() => new Map((game?.rounds ?? []).map((round) => [round.id, round])), [game]);
 
@@ -170,10 +178,19 @@ export function GamePlayPage({ slug }: { slug: string }) {
 
   const autoAdvance = isVocab && sessionMode === "flip";
 
-  const onRoundSubmit = useCallback((_value: string, isCorrect: boolean) => {
+  const onRoundSubmit = useCallback((value: string, isCorrect: boolean, timing: RoundTiming) => {
     setScores((prev) => {
       const next = [...prev];
       next[index] = isCorrect;
+      return next;
+    });
+    setAnswers((prev) => {
+      const next = [...prev];
+      next[index] = {
+        value,
+        correct: isCorrect,
+        points: roundPoints(isCorrect, timing.secondsLeft, timing.totalSeconds),
+      };
       return next;
     });
     if (!isVocab) return;
@@ -201,6 +218,14 @@ export function GamePlayPage({ slug }: { slug: string }) {
   }, []);
 
   const correctCount = scores.filter(Boolean).length;
+  const totalPoints = answers.reduce((sum, answer) => sum + (answer?.points ?? 0), 0);
+
+  const onRetryMissedRounds = useCallback(() => {
+    if (isVocab || playsBlocked) return;
+    const missed = session.filter((_, i) => scores[i] === false);
+    if (!missed.length) return;
+    begin(shuffleInPlace(missed), 0, "flip");
+  }, [begin, isVocab, playsBlocked, scores, session]);
 
   useEffect(() => {
     if (phase !== "results" || !game || recordedPlayId.current === playId || !session.length) return;
@@ -249,6 +274,9 @@ export function GamePlayPage({ slug }: { slug: string }) {
       onPracticeMissed={onPracticeMissed}
       onStart={onStart}
       onRoundSubmit={onRoundSubmit}
+      answers={answers}
+      totalPoints={totalPoints}
+      onRetryMissedRounds={onRetryMissedRounds}
       onNextRound={onNextRound}
       onPreviousRound={onPreviousRound}
       onBackToDecks={onBackToDecks}

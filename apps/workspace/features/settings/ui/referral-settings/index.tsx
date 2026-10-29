@@ -1,19 +1,15 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "@engli-tutor/api-client";
 import type { Translator } from "@engli-tutor/i18n";
 import { referralsApi } from "@/features/referrals";
 import { billingMeQueryKey } from "@/features/payments";
-import { formatBillingDateTime } from "@/features/payments";
 import { queryKeys } from "@/lib/query";
-import { useWorkspaceI18n } from "@/features/i18n";
+import { useWorkspaceI18n, useWorkspaceLocale } from "@/features/i18n";
+import { normalizeReferralCode, referralRewardStatus } from "../../model/referrals";
 import { ReferralSettingsView, type ReferralRedemptionRow } from "./referral-settings.view";
-
-function normalizeReferralCode(code: string) {
-  return code.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
-}
 
 function referralErrorMessage(error: unknown, t: Translator) {
   if (error instanceof ApiError) return error.message;
@@ -23,6 +19,8 @@ function referralErrorMessage(error: unknown, t: Translator) {
 
 export function ReferralSettings() {
   const t = useWorkspaceI18n();
+  const locale = useWorkspaceLocale();
+  const copyTimer = useRef<number | null>(null);
   const queryClient = useQueryClient();
   const [manualCode, setManualCode] = useState("");
   const [copied, setCopied] = useState<"code" | "link" | null>(null);
@@ -53,20 +51,46 @@ export function ReferralSettings() {
 
   const data = referralQuery.data;
   const recentRedemptions = useMemo((): ReferralRedemptionRow[] => {
+    const formatter = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
     return (data?.recentRedemptions ?? []).map((item) => ({
       id: item.id,
       referredName: item.referredName,
       referredEmailMasked: item.referredEmailMasked,
-      createdAt: formatBillingDateTime(item.createdAt),
+      createdAt: formatter.format(new Date(item.createdAt)),
     }));
-  }, [data?.recentRedemptions]);
+  }, [data?.recentRedemptions, locale]);
 
-  const copy = useCallback(async (kind: "code" | "link", value: string) => {
-    if (!value) return;
-    await navigator.clipboard.writeText(value);
-    setCopied(kind);
-    window.setTimeout(() => setCopied(null), 1500);
+  const rewardStatus = useMemo(
+    () =>
+      referralRewardStatus({
+        referrerDays: data?.rewards.referrerDays ?? 0,
+        referrerMaxDays: data?.rewards.referrerMaxDays ?? 0,
+      }),
+    [data?.rewards.referrerDays, data?.rewards.referrerMaxDays],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (copyTimer.current !== null) window.clearTimeout(copyTimer.current);
+    };
   }, []);
+
+  const copy = useCallback(
+    async (kind: "code" | "link", value: string) => {
+      if (!value) return;
+      try {
+        await navigator.clipboard.writeText(value);
+      } catch {
+        setNotice({ tone: "error", message: t("settings.referral.copyFailed") });
+        return;
+      }
+      setNotice(null);
+      setCopied(kind);
+      if (copyTimer.current !== null) window.clearTimeout(copyTimer.current);
+      copyTimer.current = window.setTimeout(() => setCopied(null), 1500);
+    },
+    [t],
+  );
 
   const onManualCodeChange = useCallback((value: string) => {
     setManualCode(normalizeReferralCode(value));
@@ -82,11 +106,12 @@ export function ReferralSettings() {
   return (
     <ReferralSettingsView
       ready={referralQuery.isSuccess || referralQuery.isError}
+      error={referralQuery.isError && !data}
+      onRetry={() => void referralQuery.refetch()}
       code={data?.code ?? ""}
       shareUrl={data?.shareUrl ?? ""}
-      referrerDays={data?.rewards.referrerDays ?? 0}
       referredDays={data?.rewards.referredDays ?? 0}
-      referrerMaxDays={data?.rewards.referrerMaxDays ?? 0}
+      rewardStatus={rewardStatus}
       totalReferred={data?.stats.totalReferred ?? 0}
       proDaysEarned={data?.stats.proDaysEarned ?? 0}
       redeemedCode={data?.redeemed?.code ?? null}

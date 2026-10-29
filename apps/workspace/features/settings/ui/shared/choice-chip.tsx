@@ -7,14 +7,18 @@ export function ChoiceChip({
   active,
   children,
   onClick,
+  pressed,
 }: {
   active: boolean;
   children: ReactNode;
   onClick: () => void;
+  /** Optional aria-pressed (set for toggle-style groups). */
+  pressed?: boolean;
 }) {
   return (
     <button
       type="button"
+      aria-pressed={pressed}
       onClick={onClick}
       className={cn(
         "inline-flex min-h-11 items-center justify-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium transition-colors",

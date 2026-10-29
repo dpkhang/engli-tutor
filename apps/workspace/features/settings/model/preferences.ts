@@ -352,3 +352,31 @@ export function applyAppearancePreferences(prefs: {
 export function resolveSpeechRates() {
   return SPEECH_RATES[getSpeechRateId()];
 }
+
+/**
+ * Explicit "Save" for the Appearance page. Awaits the account update first and
+ * throws on failure (so the caller keeps its draft); only then paints and stores
+ * locally. The debounced background sync is skipped (and any pending one is
+ * cancelled) because the server already has these values.
+ */
+export async function saveAppearancePreferences(prefs: {
+  theme: ThemePreference;
+  accent: AccentId;
+  textSize: TextSizeId;
+  reduceMotion: ReduceMotionPreference;
+}) {
+  const { accountApi } = await import("@/features/accounts/api/accounts-api");
+  await accountApi.update({
+    appearanceTheme: prefs.theme,
+    appearanceAccent: prefs.accent,
+    appearanceTextSize: prefs.textSize,
+  });
+  if (appearanceSyncTimer) clearTimeout(appearanceSyncTimer);
+  appearanceSyncTimer = null;
+  applyingRemoteAppearance = true;
+  try {
+    applyAppearancePreferences(prefs);
+  } finally {
+    applyingRemoteAppearance = false;
+  }
+}

@@ -2,6 +2,7 @@
   "name": "engli-tutor-fe",
   "version": "0.1.0",
   "private": true,
+  "license": "UNLICENSED",
   "scripts": {
     "install:workspace": "pnpm --dir ../.. install:workspace",
     "install:all": "pnpm --dir ../.. install:all",

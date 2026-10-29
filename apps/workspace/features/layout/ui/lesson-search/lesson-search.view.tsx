@@ -13,6 +13,8 @@ export type LessonSearchViewProps = {
   matches: LessonPack[];
   rootRef: RefObject<HTMLDivElement | null>;
   inputRef: RefObject<HTMLInputElement | null>;
+  /** Unique per instance (mobile and desktop headers each mount one). */
+  listboxId: string;
   onShow: () => void;
   onQueryChange: (value: string) => void;
   onClearQuery: () => void;
@@ -28,6 +30,7 @@ export const LessonSearchView = memo(function LessonSearchView({
   matches,
   rootRef,
   inputRef,
+  listboxId,
   onShow,
   onQueryChange,
   onClearQuery,
@@ -69,7 +72,7 @@ export const LessonSearchView = memo(function LessonSearchView({
               placeholder={t("workspace.searchLessonsPlaceholder")}
               className="h-12 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
               role="combobox"
-              aria-controls="lesson-search-results"
+              aria-controls={listboxId}
               aria-expanded={open}
             />
             {query ? (
@@ -84,7 +87,7 @@ export const LessonSearchView = memo(function LessonSearchView({
             ) : null}
           </form>
 
-          <div id="lesson-search-results" role="listbox" className="max-h-80 overflow-y-auto p-2">
+          <div id={listboxId} role="listbox" className="max-h-80 overflow-y-auto p-2">
             {loading ? (
               <p className="px-3 py-5 text-center text-sm text-muted-foreground">
                 {t("workspace.findingLessons")}
