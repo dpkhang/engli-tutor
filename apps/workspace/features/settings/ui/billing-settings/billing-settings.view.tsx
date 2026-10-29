@@ -2,7 +2,14 @@
 
 import { memo } from "react";
 import { LocalizedLink as Link } from "@/features/i18n";
-import { Check, CreditCard, Crown, Gauge, History, Sparkles } from "lucide-react";
+import {
+  Check,
+  CreditCard,
+  Crown,
+  Gauge,
+  History,
+  Sparkles,
+} from "lucide-react";
 import { Badge, Button } from "@engli-tutor/ui";
 import {
   SettingsCard,
@@ -96,31 +103,50 @@ export const BillingSettingsView = memo(function BillingSettingsView({
               description={t("settings.billing.planDescription")}
             >
               <div className="flex flex-wrap items-center gap-2">
-                <p className="break-words text-lg font-semibold tracking-tight">{planName}</p>
-                <Badge variant={isPremium ? "default" : "secondary"} className="gap-1">
+                <p className="break-words text-lg font-semibold tracking-tight">
+                  {planName}
+                </p>
+                <Badge
+                  variant={isPremium ? "default" : "secondary"}
+                  className="gap-1"
+                >
                   {isPremium ? <Crown className="size-3" aria-hidden /> : null}
                   {sourceLabel}
                 </Badge>
               </div>
               {planDescription ? (
-                <p className="text-sm leading-6 text-muted-foreground">{planDescription}</p>
+                <p className="text-sm leading-6 text-muted-foreground">
+                  {planDescription}
+                </p>
               ) : null}
 
               <dl className="grid gap-2 sm:grid-cols-2">
                 {facts.map((fact) => (
-                  <div key={fact.id} className="rounded-2xl border border-border/70 bg-muted/25 px-3.5 py-3">
-                    <dt className="text-xs text-muted-foreground">{fact.label}</dt>
-                    <dd className="mt-0.5 break-words text-sm font-medium">{fact.value}</dd>
+                  <div
+                    key={fact.id}
+                    className="rounded-2xl border border-border/70 bg-muted/25 px-3.5 py-3"
+                  >
+                    <dt className="text-xs text-muted-foreground">
+                      {fact.label}
+                    </dt>
+                    <dd className="mt-0.5 break-words text-sm font-medium">
+                      {fact.value}
+                    </dd>
                   </div>
                 ))}
               </dl>
 
               {features.length ? (
                 <div className="space-y-2">
-                  <p className="text-sm font-semibold">{t("workspace.includedPlan")}</p>
+                  <p className="text-sm font-semibold">
+                    {t("workspace.includedPlan")}
+                  </p>
                   <ul className="space-y-2 rounded-2xl border border-border/70 bg-muted/20 p-3.5 text-sm">
                     {features.map((feature) => (
-                      <li key={feature} className="flex gap-2.5 text-muted-foreground">
+                      <li
+                        key={feature}
+                        className="flex gap-2.5 text-muted-foreground"
+                      >
                         <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-primary/10">
                           <Check className="size-3 text-primary" aria-hidden />
                         </span>
@@ -147,9 +173,14 @@ export const BillingSettingsView = memo(function BillingSettingsView({
             >
               <div className="grid grid-cols-2 gap-2">
                 {usage.map((row) => (
-                  <div key={row.id} className="rounded-2xl border border-primary/20 bg-primary/5 px-3.5 py-3">
+                  <div
+                    key={row.id}
+                    className="rounded-2xl border border-primary/20 bg-primary/5 px-3.5 py-3"
+                  >
                     <p className="text-xs text-muted-foreground">{row.label}</p>
-                    <p className="mt-0.5 break-words text-lg font-semibold tracking-tight">{row.value}</p>
+                    <p className="mt-0.5 break-words text-lg font-semibold tracking-tight">
+                      {row.value}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -174,19 +205,27 @@ export const BillingSettingsView = memo(function BillingSettingsView({
                       <div className="min-w-0">
                         <p className="break-words font-medium">{item.title}</p>
                         {item.status ? (
-                          <p className="break-words text-xs text-muted-foreground">{item.status}</p>
+                          <p className="break-words text-xs text-muted-foreground">
+                            {item.status}
+                          </p>
                         ) : null}
                       </div>
                       {item.date ? (
-                        <p className="text-xs text-muted-foreground sm:shrink-0">{item.date}</p>
+                        <p className="text-xs text-muted-foreground sm:shrink-0">
+                          {item.date}
+                        </p>
                       ) : null}
                     </li>
                   ))}
                 </ul>
               ) : (
                 <div className="space-y-1 rounded-2xl border border-dashed border-border p-5 text-center text-sm">
-                  <p className="font-medium">{t("settings.billing.historyEmpty")}</p>
-                  <p className="text-muted-foreground">{t("settings.billing.historyEmptyHint")}</p>
+                  <p className="font-medium">
+                    {t("settings.billing.historyEmpty")}
+                  </p>
+                  <p className="text-muted-foreground">
+                    {t("settings.billing.historyEmptyHint")}
+                  </p>
                 </div>
               )}
             </SettingsSection>
@@ -203,22 +242,37 @@ export const BillingSettingsView = memo(function BillingSettingsView({
               >
                 <ul className="grid gap-2 sm:grid-cols-2">
                   {otherPlans.map((item) => (
-                    <li key={item.id} className="rounded-2xl border border-border/70 bg-muted/20 px-3.5 py-3">
+                    <li
+                      key={item.id}
+                      className="rounded-2xl border border-border/70 bg-muted/20 px-3.5 py-3"
+                    >
                       <div className="flex items-center justify-between gap-2">
-                        <p className="min-w-0 break-words font-semibold">{item.name}</p>
+                        <p className="min-w-0 break-words font-semibold">
+                          {item.name}
+                        </p>
                         {item.featured ? (
-                          <Badge className="shrink-0 rounded-full">{t("workspace.popular")}</Badge>
+                          <Badge className="shrink-0 rounded-full">
+                            {t("workspace.popular")}
+                          </Badge>
                         ) : null}
                       </div>
                       <p className="mt-1 break-words text-sm">{item.price}</p>
                       {item.summary ? (
-                        <p className="break-words text-xs text-muted-foreground">{item.summary}</p>
+                        <p className="break-words text-xs text-muted-foreground">
+                          {item.summary}
+                        </p>
                       ) : null}
                     </li>
                   ))}
                 </ul>
-                <Button asChild variant="outline" className="h-11 w-full rounded-full sm:w-auto">
-                  <Link href="/payments">{t("workspace.compareChangePlan")}</Link>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="h-11 w-full rounded-full sm:w-auto"
+                >
+                  <Link href="/payments">
+                    {t("workspace.compareChangePlan")}
+                  </Link>
                 </Button>
               </SettingsSection>
             </SettingsCardContent>

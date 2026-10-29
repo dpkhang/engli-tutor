@@ -45,7 +45,12 @@ export const LearningSettingsView = memo(function LearningSettingsView({
   return (
     <SettingsPanel ready={view !== null}>
       {view ? (
-        <SettingsFormCard isDirty={isDirty} saving={saving} onSave={onSave} onReset={onReset}>
+        <SettingsFormCard
+          isDirty={isDirty}
+          saving={saving}
+          onSave={onSave}
+          onReset={onReset}
+        >
           <SettingsSection
             icon={<Target className="size-5 text-primary" />}
             title={t("workspace.preferredLevel")}
@@ -86,10 +91,12 @@ export const LearningSettingsView = memo(function LearningSettingsView({
                     onChange={onSpeechRateChange}
                     disabled={saving}
                     ariaLabel={t("workspace.playbackSpeed")}
-                    options={(Object.keys(SPEECH_RATES) as SpeechRateId[]).map((id) => ({
-                      id,
-                      label: t(SPEECH_RATES[id].labelKey),
-                    }))}
+                    options={(Object.keys(SPEECH_RATES) as SpeechRateId[]).map(
+                      (id) => ({
+                        id,
+                        label: t(SPEECH_RATES[id].labelKey),
+                      }),
+                    )}
                   />
                 )}
               </SettingsRow>

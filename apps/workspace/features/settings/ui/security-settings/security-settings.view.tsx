@@ -11,7 +11,12 @@ import {
   Label,
   Switch,
 } from "@engli-tutor/ui";
-import { SettingsCard, SettingsCardContent, SettingsRow, SettingsSection } from "../shared";
+import {
+  SettingsCard,
+  SettingsCardContent,
+  SettingsRow,
+  SettingsSection,
+} from "../shared";
 import { useWorkspaceI18n } from "@/features/i18n";
 
 export type SessionItem = {
@@ -81,19 +86,25 @@ export const SecuritySettingsView = memo(function SecuritySettingsView({
           >
             <form className="space-y-3" onSubmit={onSubmit}>
               <div className="space-y-1.5">
-                <Label htmlFor="current-password">{t("workspace.currentPassword")}</Label>
+                <Label htmlFor="current-password">
+                  {t("workspace.currentPassword")}
+                </Label>
                 <Input
                   id="current-password"
                   type="password"
                   autoComplete="current-password"
                   value={currentPassword}
-                  onChange={(event) => onCurrentPasswordChange(event.target.value)}
+                  onChange={(event) =>
+                    onCurrentPasswordChange(event.target.value)
+                  }
                   required
                   className="h-11 text-base sm:h-9 sm:text-sm"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="new-password">{t("workspace.newPassword")}</Label>
+                <Label htmlFor="new-password">
+                  {t("workspace.newPassword")}
+                </Label>
                 <Input
                   id="new-password"
                   type="password"
@@ -106,13 +117,17 @@ export const SecuritySettingsView = memo(function SecuritySettingsView({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="confirm-password">{t("workspace.confirmNewPassword")}</Label>
+                <Label htmlFor="confirm-password">
+                  {t("workspace.confirmNewPassword")}
+                </Label>
                 <Input
                   id="confirm-password"
                   type="password"
                   autoComplete="new-password"
                   value={confirmPassword}
-                  onChange={(event) => onConfirmPasswordChange(event.target.value)}
+                  onChange={(event) =>
+                    onConfirmPasswordChange(event.target.value)
+                  }
                   minLength={8}
                   required
                   className="h-11 text-base sm:h-9 sm:text-sm"
@@ -142,7 +157,9 @@ export const SecuritySettingsView = memo(function SecuritySettingsView({
                 disabled={passwordPending}
                 className="h-11 w-full sm:w-auto"
               >
-                {passwordPending ? t("workspace.updating") : t("workspace.updatePassword")}
+                {passwordPending
+                  ? t("workspace.updating")
+                  : t("workspace.updatePassword")}
               </Button>
             </form>
           </SettingsSection>
@@ -180,10 +197,16 @@ export const SecuritySettingsView = memo(function SecuritySettingsView({
                   {sessions.map((session) => {
                     const meta = [
                       session.ip
-                        ? t("settings.security.ipAddress").replace("{ip}", session.ip)
+                        ? t("settings.security.ipAddress").replace(
+                            "{ip}",
+                            session.ip,
+                          )
                         : null,
                       session.lastActive
-                        ? t("settings.security.lastActive").replace("{date}", session.lastActive)
+                        ? t("settings.security.lastActive").replace(
+                            "{date}",
+                            session.lastActive,
+                          )
                         : null,
                     ]
                       .filter(Boolean)
@@ -205,7 +228,9 @@ export const SecuritySettingsView = memo(function SecuritySettingsView({
                             ) : null}
                           </div>
                           {meta ? (
-                            <p className="break-all text-xs text-muted-foreground">{meta}</p>
+                            <p className="break-all text-xs text-muted-foreground">
+                              {meta}
+                            </p>
                           ) : null}
                         </div>
                         {session.isCurrent ? null : (

@@ -673,22 +673,66 @@
     "sampleDescription": "One topic runs through the whole session, so every step prepares you for the next one.",
     "sampleSteps": "Sample lesson steps",
     "learnerNeeds": [
-      { "title": "Speak clearly when work gets real", "body": "Practice the exact moments that matter: stand-ups, client calls, interviews, and project updates." },
-      { "title": "Get useful feedback fast", "body": "See what to fix after you try: grammar, pronunciation, vocabulary, and a more natural answer." },
-      { "title": "Build a daily habit", "body": "Short sessions keep English active without asking you to sit through a long course after work." },
-      { "title": "Understand mistakes in Vietnamese", "body": "Vietnamese explanations help you notice why a sentence sounds wrong and how to say it better next time." }
+      {
+        "title": "Speak clearly when work gets real",
+        "body": "Practice the exact moments that matter: stand-ups, client calls, interviews, and project updates."
+      },
+      {
+        "title": "Get useful feedback fast",
+        "body": "See what to fix after you try: grammar, pronunciation, vocabulary, and a more natural answer."
+      },
+      {
+        "title": "Build a daily habit",
+        "body": "Short sessions keep English active without asking you to sit through a long course after work."
+      },
+      {
+        "title": "Understand mistakes in Vietnamese",
+        "body": "Vietnamese explanations help you notice why a sentence sounds wrong and how to say it better next time."
+      }
     ],
     "sessionBeats": [
-      { "title": "Listen for the situation", "detail": "Hear a short workplace or interview prompt and catch the main task, keywords, and tone." },
-      { "title": "Read the context", "detail": "Scan an email, job description, or short brief so your answer has the right details." },
-      { "title": "Speak with the AI tutor", "detail": "Answer follow-up questions out loud, then retry with clearer grammar and pronunciation." },
-      { "title": "Write and review", "detail": "Write a short summary or reply; get Vietnamese feedback and a natural rewrite to practice aloud." }
+      {
+        "title": "Listen for the situation",
+        "detail": "Hear a short workplace or interview prompt and catch the main task, keywords, and tone."
+      },
+      {
+        "title": "Read the context",
+        "detail": "Scan an email, job description, or short brief so your answer has the right details."
+      },
+      {
+        "title": "Speak with the AI tutor",
+        "detail": "Answer follow-up questions out loud, then retry with clearer grammar and pronunciation."
+      },
+      {
+        "title": "Write and review",
+        "detail": "Write a short summary or reply; get Vietnamese feedback and a natural rewrite to practice aloud."
+      }
     ],
     "skillPath": [
-      { "skill": "Listening", "focus": "Catch meaning in meetings and calls", "practice": "Short clips, stand-ups, customer questions, and interview prompts.", "outcome": "Follow the main idea, key requirements, and next actions with less pausing." },
-      { "skill": "Speaking", "focus": "Answer with structure and confidence", "practice": "Scenario conversations for introductions, projects, decisions, and behavioral questions.", "outcome": "Give clearer A2–B1 answers and retry after pronunciation and grammar feedback." },
-      { "skill": "Reading", "focus": "Understand workplace text faster", "practice": "Emails, job descriptions, short docs, and lesson notes with vocabulary in context.", "outcome": "Find the useful details without translating every word." },
-      { "skill": "Writing", "focus": "Send simple, natural replies", "practice": "Write short updates, summaries, and interview answers after each speaking task.", "outcome": "Use better tense, word choice, and sentence order in practical writing." }
+      {
+        "skill": "Listening",
+        "focus": "Catch meaning in meetings and calls",
+        "practice": "Short clips, stand-ups, customer questions, and interview prompts.",
+        "outcome": "Follow the main idea, key requirements, and next actions with less pausing."
+      },
+      {
+        "skill": "Speaking",
+        "focus": "Answer with structure and confidence",
+        "practice": "Scenario conversations for introductions, projects, decisions, and behavioral questions.",
+        "outcome": "Give clearer A2–B1 answers and retry after pronunciation and grammar feedback."
+      },
+      {
+        "skill": "Reading",
+        "focus": "Understand workplace text faster",
+        "practice": "Emails, job descriptions, short docs, and lesson notes with vocabulary in context.",
+        "outcome": "Find the useful details without translating every word."
+      },
+      {
+        "skill": "Writing",
+        "focus": "Send simple, natural replies",
+        "practice": "Write short updates, summaries, and interview answers after each speaking task.",
+        "outcome": "Use better tense, word choice, and sentence order in practical writing."
+      }
     ],
     "lessonPreview": "Lesson preview · 4 skills",
     "listenRead": "Listen + read",
@@ -698,15 +742,30 @@
     "skillsTitle": "Listening, speaking, reading, and writing in one practical path.",
     "skillsDescription": "Placement checks all four skills. Lessons then connect them around situations you can use at work or in interviews.",
     "whyItems": [
-      { "title": "One topic, four skills", "body": "Listening, reading, speaking, and writing reinforce the same situation instead of becoming separate drills." },
-      { "title": "Feedback after action", "body": "You try first, then receive Vietnamese explanations and improved phrasing you can immediately repeat." },
-      { "title": "Practice follows weak spots", "body": "Common errors such as tense, s/es, collocation, or missed keywords can carry into the next session." }
+      {
+        "title": "One topic, four skills",
+        "body": "Listening, reading, speaking, and writing reinforce the same situation instead of becoming separate drills."
+      },
+      {
+        "title": "Feedback after action",
+        "body": "You try first, then receive Vietnamese explanations and improved phrasing you can immediately repeat."
+      },
+      {
+        "title": "Practice follows weak spots",
+        "body": "Common errors such as tense, s/es, collocation, or missed keywords can carry into the next session."
+      }
     ],
     "why": "Why it works",
     "whyTitle": "Practice is easier to repeat when every lesson has a job.",
     "useCasesItems": [
-      { "title": "Before a project interview", "body": "Practice explaining your role, the problem, your solution, and what you learned — then tighten the answer." },
-      { "title": "Before a weekly meeting", "body": "Rehearse a status update, answer follow-up questions, and turn your notes into a short written summary." }
+      {
+        "title": "Before a project interview",
+        "body": "Practice explaining your role, the problem, your solution, and what you learned — then tighten the answer."
+      },
+      {
+        "title": "Before a weekly meeting",
+        "body": "Rehearse a status update, answer follow-up questions, and turn your notes into a short written summary."
+      }
     ],
     "useCases": "Illustrative use cases",
     "useCasesTitle": "Choose a real situation, then practice the English around it.",
@@ -717,12 +776,30 @@
     "loadingPlans": "Loading plans…",
     "faq": "FAQ",
     "faqItems": [
-      { "q": "I'm A2 and weak at speaking — can I start?", "a": "Yes. The placement test covers listening, speaking, reading, and writing, then your path starts at the right level. You still practice all four skills, including the weak ones." },
-      { "q": "Can I only practice speaking?", "a": "Every session connects speaking with listening, reading, and a short writing task. Speaking gets focused time, but the input and review make your answers stronger." },
-      { "q": "How many minutes a day?", "a": "Plan for about 20–30 minutes for a complete loop: listen, read, speak with AI, then write and review feedback in Vietnamese." },
-      { "q": "How is Free different from paid plans?", "a": "Free lets you try the daily learning loop with limited AI tutor usage. Paid plans use the live billing catalog shown above, so the exact price and included benefits stay up to date." },
-      { "q": "What happens to my speaking audio?", "a": "Short clips are sent to speech providers so we can transcribe you and play tutor audio back. We do not sell your voice or transcripts." },
-      { "q": "How do you use cookies?", "a": "Session cookies keep you signed in. Preference storage on your device remembers theme and playback settings. We do not run advertising cookies." }
+      {
+        "q": "I'm A2 and weak at speaking — can I start?",
+        "a": "Yes. The placement test covers listening, speaking, reading, and writing, then your path starts at the right level. You still practice all four skills, including the weak ones."
+      },
+      {
+        "q": "Can I only practice speaking?",
+        "a": "Every session connects speaking with listening, reading, and a short writing task. Speaking gets focused time, but the input and review make your answers stronger."
+      },
+      {
+        "q": "How many minutes a day?",
+        "a": "Plan for about 20–30 minutes for a complete loop: listen, read, speak with AI, then write and review feedback in Vietnamese."
+      },
+      {
+        "q": "How is Free different from paid plans?",
+        "a": "Free lets you try the daily learning loop with limited AI tutor usage. Paid plans use the live billing catalog shown above, so the exact price and included benefits stay up to date."
+      },
+      {
+        "q": "What happens to my speaking audio?",
+        "a": "Short clips are sent to speech providers so we can transcribe you and play tutor audio back. We do not sell your voice or transcripts."
+      },
+      {
+        "q": "How do you use cookies?",
+        "a": "Session cookies keep you signed in. Preference storage on your device remembers theme and playback settings. We do not run advertising cookies."
+      }
     ],
     "faqTitle": "Clear answers before your first lesson.",
     "faqDescription": "Learn what to expect from placement, daily practice, plan limits, and privacy.",

@@ -24,18 +24,60 @@ import {
   type TextSizeId,
   type ThemePreference,
 } from "../../model/preferences";
-import { ChoiceChip, SettingsFormCard, SettingsPanel, SettingsRow, SettingsSection } from "../shared";
+import {
+  ChoiceChip,
+  SettingsFormCard,
+  SettingsPanel,
+  SettingsRow,
+  SettingsSection,
+} from "../shared";
 import { useWorkspaceI18n } from "@/features/i18n";
 
-const THEME_OPTIONS: Array<{ id: ThemePreference; labelKey: string; hintKey: string }> = [
-  { id: "light", labelKey: "workspace.light", hintKey: "settings.theme.lightHint" },
-  { id: "warm", labelKey: "workspace.warm", hintKey: "settings.theme.warmHint" },
-  { id: "dark", labelKey: "workspace.dark", hintKey: "settings.theme.darkHint" },
-  { id: "midnight", labelKey: "workspace.midnight", hintKey: "settings.theme.midnightHint" },
-  { id: "forest", labelKey: "workspace.forest", hintKey: "settings.theme.forestHint" },
-  { id: "ocean", labelKey: "workspace.ocean", hintKey: "settings.theme.oceanHint" },
-  { id: "dusk", labelKey: "workspace.dusk", hintKey: "settings.theme.duskHint" },
-  { id: "system", labelKey: "workspace.system", hintKey: "settings.theme.systemHint" },
+const THEME_OPTIONS: Array<{
+  id: ThemePreference;
+  labelKey: string;
+  hintKey: string;
+}> = [
+  {
+    id: "light",
+    labelKey: "workspace.light",
+    hintKey: "settings.theme.lightHint",
+  },
+  {
+    id: "warm",
+    labelKey: "workspace.warm",
+    hintKey: "settings.theme.warmHint",
+  },
+  {
+    id: "dark",
+    labelKey: "workspace.dark",
+    hintKey: "settings.theme.darkHint",
+  },
+  {
+    id: "midnight",
+    labelKey: "workspace.midnight",
+    hintKey: "settings.theme.midnightHint",
+  },
+  {
+    id: "forest",
+    labelKey: "workspace.forest",
+    hintKey: "settings.theme.forestHint",
+  },
+  {
+    id: "ocean",
+    labelKey: "workspace.ocean",
+    hintKey: "settings.theme.oceanHint",
+  },
+  {
+    id: "dusk",
+    labelKey: "workspace.dusk",
+    hintKey: "settings.theme.duskHint",
+  },
+  {
+    id: "system",
+    labelKey: "workspace.system",
+    hintKey: "settings.theme.systemHint",
+  },
 ];
 
 const THEME_ICONS: Record<ThemePreference, ReactNode> = {
@@ -53,13 +95,48 @@ const THEME_PREVIEW: Record<
   Exclude<ThemePreference, "system">,
   { bg: string; bar: string; card: string; border: string }
 > = {
-  light: { bg: "#f3f5f8", bar: "#c9d1db", card: "#ffffff", border: "border-border/80" },
-  warm: { bg: "#f6f0e6", bar: "#d9c8b0", card: "#fbf7f0", border: "border-[#e2d4c0]" },
-  dark: { bg: "#12161d", bar: "#3b4656", card: "#1c232c", border: "border-white/10" },
-  midnight: { bg: "#06080f", bar: "#2a3348", card: "#0d1220", border: "border-white/8" },
-  forest: { bg: "#0c1510", bar: "#2f4a3a", card: "#142019", border: "border-white/8" },
-  ocean: { bg: "#0a1219", bar: "#2a4558", card: "#11202b", border: "border-white/8" },
-  dusk: { bg: "#16101c", bar: "#4a3558", card: "#22182c", border: "border-white/8" },
+  light: {
+    bg: "#f3f5f8",
+    bar: "#c9d1db",
+    card: "#ffffff",
+    border: "border-border/80",
+  },
+  warm: {
+    bg: "#f6f0e6",
+    bar: "#d9c8b0",
+    card: "#fbf7f0",
+    border: "border-[#e2d4c0]",
+  },
+  dark: {
+    bg: "#12161d",
+    bar: "#3b4656",
+    card: "#1c232c",
+    border: "border-white/10",
+  },
+  midnight: {
+    bg: "#06080f",
+    bar: "#2a3348",
+    card: "#0d1220",
+    border: "border-white/8",
+  },
+  forest: {
+    bg: "#0c1510",
+    bar: "#2f4a3a",
+    card: "#142019",
+    border: "border-white/8",
+  },
+  ocean: {
+    bg: "#0a1219",
+    bar: "#2a4558",
+    card: "#11202b",
+    border: "border-white/8",
+  },
+  dusk: {
+    bg: "#16101c",
+    bar: "#4a3558",
+    card: "#22182c",
+    border: "border-white/8",
+  },
 };
 
 export type AppearanceViewState = {
@@ -88,11 +165,20 @@ function ThemePreview({ mode }: { mode: ThemePreference }) {
   const preview = THEME_PREVIEW[mode];
   return (
     <div
-      className={cn("h-20 overflow-hidden rounded-xl border p-2.5", preview.border)}
+      className={cn(
+        "h-20 overflow-hidden rounded-xl border p-2.5",
+        preview.border,
+      )}
       style={{ backgroundColor: preview.bg }}
     >
-      <div className="h-1.5 w-12 rounded-full" style={{ backgroundColor: preview.bar }} />
-      <div className="mt-2 h-10 rounded-lg shadow-sm" style={{ backgroundColor: preview.card }}>
+      <div
+        className="h-1.5 w-12 rounded-full"
+        style={{ backgroundColor: preview.bar }}
+      />
+      <div
+        className="mt-2 h-10 rounded-lg shadow-sm"
+        style={{ backgroundColor: preview.card }}
+      >
         <div className="m-2 h-2 w-16 rounded-full bg-primary/70" />
       </div>
     </div>
@@ -126,7 +212,12 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
   return (
     <SettingsPanel ready={view !== null}>
       {view ? (
-        <SettingsFormCard isDirty={isDirty} saving={saving} onSave={onSave} onReset={onReset}>
+        <SettingsFormCard
+          isDirty={isDirty}
+          saving={saving}
+          onSave={onSave}
+          onReset={onReset}
+        >
           <SettingsSection
             icon={THEME_ICONS[view.theme]}
             title={t("workspace.theme")}
@@ -148,8 +239,12 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
                   )}
                 >
                   <ThemePreview mode={option.id} />
-                  <span className="mt-2 block text-sm font-semibold">{t(option.labelKey)}</span>
-                  <span className="mt-0.5 block text-xs text-muted-foreground">{t(option.hintKey)}</span>
+                  <span className="mt-2 block text-sm font-semibold">
+                    {t(option.labelKey)}
+                  </span>
+                  <span className="mt-0.5 block text-xs text-muted-foreground">
+                    {t(option.hintKey)}
+                  </span>
                 </button>
               ))}
             </div>
@@ -198,7 +293,11 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
           >
             <SettingsRow label={t("workspace.textSize")}>
               {({ labelId }) => (
-                <div role="group" aria-labelledby={labelId} className="flex flex-wrap gap-2">
+                <div
+                  role="group"
+                  aria-labelledby={labelId}
+                  className="flex flex-wrap gap-2"
+                >
                   {TEXT_SIZES.map((option) => (
                     <ChoiceChip
                       key={option.id}
@@ -223,7 +322,8 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
                     : "text-sm",
               )}
             >
-              {t("settings.textSize.preview")} “She booked a meeting for Tuesday afternoon.”
+              {t("settings.textSize.preview")} “She booked a meeting for Tuesday
+              afternoon.”
             </p>
           </SettingsSection>
 
@@ -234,7 +334,11 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
           >
             <SettingsRow label={t("workspace.motion")}>
               {({ labelId }) => (
-                <div role="group" aria-labelledby={labelId} className="flex flex-wrap gap-2">
+                <div
+                  role="group"
+                  aria-labelledby={labelId}
+                  className="flex flex-wrap gap-2"
+                >
                   {REDUCE_MOTION_OPTIONS.map((option) => (
                     <ChoiceChip
                       key={option.id}
@@ -250,7 +354,11 @@ export const AppearanceSettingsView = memo(function AppearanceSettingsView({
               )}
             </SettingsRow>
             <p className="text-xs text-muted-foreground">
-              {t(REDUCE_MOTION_OPTIONS.find((item) => item.id === view.reduceMotion)?.hintKey ?? "")}
+              {t(
+                REDUCE_MOTION_OPTIONS.find(
+                  (item) => item.id === view.reduceMotion,
+                )?.hintKey ?? "",
+              )}
             </p>
           </SettingsSection>
         </SettingsFormCard>
