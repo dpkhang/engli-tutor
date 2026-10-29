@@ -1123,7 +1123,19 @@
       "testHint": "Gửi một thông báo thử để kiểm tra thiết bị này.",
       "testButton": "Gửi thông báo thử",
       "testSent": "Đã gửi thông báo thử. Thông báo sẽ hiện sau vài giây.",
-      "testFailed": "Không gửi được thông báo thử."
+      "testFailed": "Không gửi được thông báo thử.",
+      "learningTitle": "Học tập",
+      "learningDescription": "Nhắc nhở giúp bạn duy trì thói quen học.",
+      "reminderTimeDescription": "Thời điểm gửi nhắc nhở hằng ngày.",
+      "deviceTitle": "Thiết bị này",
+      "permissionLabel": "Quyền thông báo",
+      "statusGranted": "Đã cho phép",
+      "statusDefault": "Chưa cấp quyền",
+      "statusDenied": "Đã chặn",
+      "statusUnsupported": "Không hỗ trợ",
+      "statusIosInstall": "Cần cài ứng dụng",
+      "hintGranted": "Thiết bị này có thể nhận thông báo.",
+      "hintDefault": "Trình duyệt sẽ hỏi quyền khi bạn lưu với ít nhất một loại thông báo được bật."
     },
     "form": {
       "save": "Lưu",

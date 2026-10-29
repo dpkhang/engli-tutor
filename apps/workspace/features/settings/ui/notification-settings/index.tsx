@@ -1,13 +1,21 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { notificationsApi, type NotificationPreferences } from "@/features/notifications";
-import { dropSubscription, enableDevicePush, preferencePayload } from "@/features/notifications";
+import {
+  notificationsApi,
+  type NotificationPreferences,
+} from "@/features/notifications";
+import {
+  dropSubscription,
+  enableDevicePush,
+  preferencePayload,
+} from "@/features/notifications";
 import { queryKeys } from "@/lib/query";
 import { useWorkspaceI18n } from "@/features/i18n";
 import { useSettingsDraft } from "../shared";
 import { NotificationSettingsView } from "./notification-settings.view";
+import { useDevicePushState } from "./use-device-push-state";
 
 type Draft = Omit<NotificationPreferences, "configured" | "reminderTimeZone">;
 
@@ -29,9 +37,14 @@ type PrefsDraft = {
   reminderMinutes: number;
 };
 
-export function NotificationSettings() {
+export function NotificationSettings({
+  installCard,
+}: {
+  installCard?: ReactNode;
+}) {
   const t = useWorkspaceI18n();
   const queryClient = useQueryClient();
+  const { state: pushState, refresh: refreshPushState } = useDevicePushState();
   const notificationsQuery = useQuery({
     queryKey: queryKeys.notifications,
     queryFn: notificationsApi.preferences,
@@ -63,22 +76,31 @@ export function NotificationSettings() {
         ...next,
         notifyCredits: current.notifyCredits,
       };
-      if (anyEnabled(payload)) {
-        const device = await enableDevicePush(t);
-        if (!device.ok) throw new Error(device.message);
-      }
-      const result = await notificationsApi.savePreferences(preferencePayload(payload));
-      queryClient.setQueryData(queryKeys.notifications, result);
-      if (!anyEnabled(result)) await dropSubscription();
-      if (anyEnabled(result) && !result.configured) {
-        setNoticeTone("error");
-        setNotice(t("settings.notifications.notConfigured"));
+      try {
+        if (anyEnabled(payload)) {
+          const device = await enableDevicePush(t);
+          if (!device.ok) throw new Error(device.message);
+        }
+        const result = await notificationsApi.savePreferences(
+          preferencePayload(payload),
+        );
+        queryClient.setQueryData(queryKeys.notifications, result);
+        if (!anyEnabled(result)) await dropSubscription();
+        if (anyEnabled(result) && !result.configured) {
+          setNoticeTone("error");
+          setNotice(t("settings.notifications.notConfigured"));
+        }
+      } finally {
+        refreshPushState();
       }
     },
-    [current, queryClient, t],
+    [current, queryClient, t, refreshPushState],
   );
 
-  const { draft, patch, reset, isDirty, saving, save } = useSettingsDraft({ saved, persist });
+  const { draft, patch, reset, isDirty, saving, save } = useSettingsDraft({
+    saved,
+    persist,
+  });
   const scheduleEnabled = Boolean(
     draft?.notifyReminders || draft?.notifyLessons || current?.notifyCredits,
   );
@@ -97,21 +119,36 @@ export function NotificationSettings() {
       setNoticeTone("success");
       setNotice(t("settings.notifications.testSent"));
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : t("settings.notifications.testFailed"));
+      setNotice(
+        error instanceof Error
+          ? error.message
+          : t("settings.notifications.testFailed"),
+      );
     } finally {
       setPending(false);
+      refreshPushState();
     }
-  }, [t]);
+  }, [t, refreshPushState]);
 
   return (
     <NotificationSettingsView
       ready={notificationsQuery.isSuccess || notificationsQuery.isError}
-      values={draft ?? { notifyReminders: false, notifyTutor: false, notifyLessons: false, notifyBilling: false, reminderMinutes: 9 * 60 }}
+      values={
+        draft ?? {
+          notifyReminders: false,
+          notifyTutor: false,
+          notifyLessons: false,
+          notifyBilling: false,
+          reminderMinutes: 9 * 60,
+        }
+      }
       scheduleEnabled={scheduleEnabled}
       isDirty={isDirty}
       saving={saving}
       disabled={!saved}
       testPending={pending}
+      pushState={pushState}
+      installCard={installCard}
       notice={notice}
       noticeTone={noticeTone}
       onChange={patch}

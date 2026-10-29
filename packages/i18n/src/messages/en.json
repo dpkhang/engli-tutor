@@ -1123,7 +1123,19 @@
       "testHint": "Send a test notification to check this device.",
       "testButton": "Send test notification",
       "testSent": "Test notification sent. It should appear in a few seconds.",
-      "testFailed": "Could not send the test notification."
+      "testFailed": "Could not send the test notification.",
+      "learningTitle": "Learning",
+      "learningDescription": "Reminders that keep your study habit going.",
+      "reminderTimeDescription": "When to send your daily reminder.",
+      "deviceTitle": "This device",
+      "permissionLabel": "Notification permission",
+      "statusGranted": "Allowed",
+      "statusDefault": "Not granted yet",
+      "statusDenied": "Blocked",
+      "statusUnsupported": "Not supported",
+      "statusIosInstall": "Install app first",
+      "hintGranted": "This device can receive notifications.",
+      "hintDefault": "Your browser will ask for permission when you save with at least one notification turned on."
     },
     "form": {
       "save": "Save",
