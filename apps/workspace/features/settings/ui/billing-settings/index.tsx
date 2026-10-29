@@ -3,11 +3,8 @@
 import { useMemo } from "react";
 import { useBillingMe } from "@/features/payments";
 import {
-  accessNote,
   allPlansForCompare,
   currentPlanDetails,
-  currentPlanId,
-  formatBillingDate,
   formatVnd,
   planPeriodPrice,
   PERIOD_LABEL_KEY,
@@ -15,62 +12,97 @@ import {
   STATUS_LABEL_KEY,
   usageRows,
 } from "@/features/payments";
-import { useWorkspaceI18n } from "@/features/i18n";
+import { useWorkspaceI18n, useWorkspaceLocale } from "@/features/i18n";
+import { billingHistory, resolveBillingSummary } from "../../model/billing";
 import {
   BillingSettingsView,
   type BillingFact,
+  type BillingHistoryRow,
   type BillingOtherPlan,
   type BillingUsageRow,
 } from "./billing-settings.view";
 
+const SOURCE_KEYS = {
+  subscription: "settings.overview.sourceSubscription",
+  trial: "settings.overview.sourceTrial",
+  bonus: "settings.overview.sourceBonus",
+  free: "settings.overview.sourceFree",
+} as const;
+
 export function BillingSettings() {
   const t = useWorkspaceI18n();
+  const locale = useWorkspaceLocale();
   const billing = useBillingMe();
   const data = billing.data;
   const ready = billing.isSuccess || billing.isError;
   const plan = useMemo(() => currentPlanDetails(data, t), [data, t]);
-  const planId = currentPlanId(data);
-  const hasPaidPlan = Boolean(data?.hasPaidPlan);
-  const hasPremiumAccess = hasPaidPlan || Boolean(data?.entitlements?.proUntil);
-  const subscription = data?.subscription;
-  const catalogPlan = data?.subscriptionPlans.find((item) => item.id === subscription?.planId);
+  const summary = useMemo(() => resolveBillingSummary(data), [data]);
+  const history = useMemo(() => billingHistory(data), [data]);
+  const planId = plan.id;
+  const catalogPlan = data?.subscriptionPlans.find((item) => item.id === data.subscription.planId);
+
+  const formatDate = useMemo(() => {
+    const formatter = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
+    return (value: string) => formatter.format(new Date(value));
+  }, [locale]);
 
   const facts = useMemo((): BillingFact[] => {
+    if (!summary) return [];
     const rows: BillingFact[] = [];
-    const status = subscription?.status;
-    if (status) {
+    if (summary.status) {
       rows.push({
+        id: "status",
         label: t("billing.settings.status"),
-        value: STATUS_LABEL_KEY[status] ? t(STATUS_LABEL_KEY[status]) : status,
+        value: STATUS_LABEL_KEY[summary.status] ? t(STATUS_LABEL_KEY[summary.status]) : summary.status,
       });
     }
-    const note = accessNote(data, t);
-    if (note) rows.push({ label: t("workspace.premiumAccess"), value: note });
-    if (hasPaidPlan && subscription?.billingPeriod) {
+    if (summary.period) {
       rows.push({
+        id: "cycle",
         label: t("checkout.billingCycle"),
-        value: PERIOD_LABEL_KEY[subscription.billingPeriod]
-          ? t(PERIOD_LABEL_KEY[subscription.billingPeriod])
-          : subscription.billingPeriod,
+        value: PERIOD_LABEL_KEY[summary.period] ? t(PERIOD_LABEL_KEY[summary.period]) : summary.period,
       });
     }
-    if (hasPaidPlan && catalogPlan && catalogPlan.priceVndMonthly > 0) {
-      const period = subscription?.billingPeriod ?? "monthly";
+    if (summary.source === "subscription" && catalogPlan && catalogPlan.priceVndMonthly > 0) {
+      const period = summary.period ?? "monthly";
       rows.push({
+        id: "price",
         label: t("billing.settings.price"),
         value: `${formatVnd(planPeriodPrice(catalogPlan, period))} ${t(PERIOD_SUFFIX_KEY[period])}`,
       });
     } else {
-      rows.push({ label: t("billing.settings.price"), value: t("workspace.free") });
+      rows.push({ id: "price", label: t("billing.settings.price"), value: t("workspace.free") });
     }
-    if (hasPaidPlan && subscription?.currentPeriodEnd) {
+    if (summary.expiry) {
       rows.push({
-        label: t("workspace.nextRenewal"),
-        value: formatBillingDate(subscription.currentPeriodEnd),
+        id: "expiry",
+        label: t(summary.expiry.kind === "renews" ? "settings.billing.renewsOnLabel" : "settings.billing.endsOnLabel"),
+        value: formatDate(summary.expiry.date),
       });
     }
     return rows;
-  }, [catalogPlan, data, hasPaidPlan, subscription, t]);
+  }, [catalogPlan, formatDate, summary, t]);
+
+  const historyRows = useMemo(
+    (): BillingHistoryRow[] =>
+      history.map((entry) => ({
+        id: entry.id,
+        title:
+          entry.kind === "trial"
+            ? t("settings.billing.historyTrial")
+            : entry.kind === "bonus"
+              ? t("settings.billing.historyBonus")
+              : entry.planName,
+        status: entry.status ? (STATUS_LABEL_KEY[entry.status] ? t(STATUS_LABEL_KEY[entry.status]) : entry.status) : null,
+        date:
+          entry.date && entry.dateKind
+            ? t(entry.dateKind === "renews" ? "settings.overview.renewsOn" : "settings.overview.endsOn", {
+                date: formatDate(entry.date),
+              })
+            : null,
+      })),
+    [formatDate, history, t],
+  );
 
   const usage = useMemo(
     (): BillingUsageRow[] =>
@@ -99,11 +131,16 @@ export function BillingSettings() {
   return (
     <BillingSettingsView
       ready={ready}
-      planName={plan.name}
+      error={billing.isError && !data}
+      onRetry={() => void billing.refetch()}
+      planName={summary?.planName ?? plan.name}
       planDescription={plan.description}
-      hasPaidPlan={hasPremiumAccess}
+      sourceLabel={t(SOURCE_KEYS[summary?.source ?? "free"])}
+      isPremium={summary?.isPremium ?? false}
+      ctaLabel={summary?.canUpgrade === false ? t("workspace.managePlan") : t("settings.billing.upgrade")}
       features={plan.features}
       facts={facts}
+      history={historyRows}
       usage={usage}
       otherPlans={otherPlans}
     />

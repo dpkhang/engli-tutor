@@ -1,18 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import {
-  applyAppearancePreferences,
   getAccentPreference,
   getReduceMotionPreference,
   getTextSizePreference,
   getThemePreference,
-  type AccentId,
-  type ReduceMotionPreference,
-  type TextSizeId,
-  type ThemePreference,
+  saveAppearancePreferences,
   PREFERENCES_EVENT,
 } from "../../model/preferences";
+import { useSettingsDraft } from "../shared";
 import {
   AppearanceSettingsView,
   type AppearanceViewState,
@@ -27,83 +24,43 @@ function readAppearance(): AppearanceViewState {
   };
 }
 
-function isDirty(draft: AppearanceViewState, saved: AppearanceViewState) {
-  return (
-    draft.theme !== saved.theme ||
-    draft.accent !== saved.accent ||
-    draft.textSize !== saved.textSize ||
-    draft.reduceMotion !== saved.reduceMotion
-  );
-}
-
+/**
+ * Save rule (ET-3 #4): nothing is painted or persisted until Save is clicked.
+ * The draft is never previewed live, so Discard (reset) and leaving the page
+ * need no restore.
+ */
 export function AppearanceSettings() {
-  const [view, setView] = useState<AppearanceViewState | null>(null);
   const [saved, setSaved] = useState<AppearanceViewState | null>(null);
 
   useLayoutEffect(() => {
-    const current = readAppearance();
-    setView(current);
-    setSaved(current);
+    setSaved(readAppearance());
   }, []);
 
-  const dirty = Boolean(view && saved && isDirty(view, saved));
-
-  const update = useCallback(<K extends keyof AppearanceViewState>(key: K, value: AppearanceViewState[K]) => {
-    setView((current) => (current ? { ...current, [key]: value } : current));
-  }, []);
-
-  const onThemeChange = useCallback(
-    (theme: ThemePreference) => update("theme", theme),
-    [update],
-  );
-  const onAccentChange = useCallback(
-    (accent: AccentId) => update("accent", accent),
-    [update],
-  );
-  const onTextSizeChange = useCallback(
-    (size: TextSizeId) => update("textSize", size),
-    [update],
-  );
-  const onReduceMotionChange = useCallback(
-    (value: ReduceMotionPreference) => update("reduceMotion", value),
-    [update],
-  );
-
-  const onApply = useCallback(() => {
-    if (!view) return;
-    applyAppearancePreferences(view);
-    setSaved(view);
-  }, [view]);
-
-  const onDiscard = useCallback(() => {
-    if (!saved) return;
-    setView(saved);
-  }, [saved]);
-
-  const dirtyRef = useRef(dirty);
-  dirtyRef.current = dirty;
-
+  // Reflect external changes; a dirty draft lives in useSettingsDraft's override and is kept.
   useEffect(() => {
-    const sync = () => {
-      if (dirtyRef.current) return;
-      const next = readAppearance();
-      setView(next);
-      setSaved(next);
-    };
+    const sync = () => setSaved(readAppearance());
     window.addEventListener(PREFERENCES_EVENT, sync);
     return () => window.removeEventListener(PREFERENCES_EVENT, sync);
   }, []);
 
+  const persist = useCallback(async (next: AppearanceViewState) => {
+    await saveAppearancePreferences(next);
+    setSaved(readAppearance());
+  }, []);
+
+  const { draft, patch, reset, isDirty, saving, save } = useSettingsDraft({ saved, persist });
+
   return (
     <AppearanceSettingsView
-      view={view}
-      dirty={dirty}
-      onThemeChange={onThemeChange}
-      onAccentChange={onAccentChange}
-      onTextSizeChange={onTextSizeChange}
-      onReduceMotionChange={onReduceMotionChange}
-      onApply={onApply}
-      onDiscard={onDiscard}
+      view={draft}
+      isDirty={isDirty}
+      saving={saving}
+      onThemeChange={useCallback((theme) => patch({ theme }), [patch])}
+      onAccentChange={useCallback((accent) => patch({ accent }), [patch])}
+      onTextSizeChange={useCallback((textSize) => patch({ textSize }), [patch])}
+      onReduceMotionChange={useCallback((reduceMotion) => patch({ reduceMotion }), [patch])}
+      onSave={() => void save()}
+      onReset={reset}
     />
   );
 }

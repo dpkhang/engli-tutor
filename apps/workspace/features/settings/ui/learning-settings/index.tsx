@@ -13,15 +13,8 @@ import {
   setPreferredLevel,
   type SpeechRateId,
 } from "../../model/preferences";
+import { useSettingsDraft } from "../shared";
 import { LearningSettingsView, type LearningViewState } from "./learning-settings.view";
-
-function isDirty(draft: LearningViewState, saved: LearningViewState) {
-  return (
-    draft.level !== saved.level ||
-    draft.speechRate !== saved.speechRate ||
-    draft.autoPlay !== saved.autoPlay
-  );
-}
 
 export function LearningSettings() {
   const queryClient = useQueryClient();
@@ -29,70 +22,44 @@ export function LearningSettings() {
     queryKey: queryKeys.account,
     queryFn: accountApi.get,
   });
-  const [view, setView] = useState<LearningViewState | null>(null);
   const [saved, setSaved] = useState<LearningViewState | null>(null);
-  const [savePending, setSavePending] = useState(false);
 
   useLayoutEffect(() => {
     if (saved) return;
     if (!profileQuery.isSuccess && !profileQuery.isError) return;
     const serverLevel = profileQuery.data?.targetLevel ?? null;
     if (serverLevel) setPreferredLevel(serverLevel);
-    const current: LearningViewState = {
+    setSaved({
       level: serverLevel ?? getPreferredLevel(),
       speechRate: getSpeechRateId(),
       autoPlay: getAutoPlayListening(),
-    };
-    setView(current);
-    setSaved(current);
+    });
   }, [profileQuery.isSuccess, profileQuery.isError, profileQuery.data, saved]);
 
-  const dirty = Boolean(view && saved && isDirty(view, saved));
-
-  const onLevelChange = useCallback((next: SkillLevel) => {
-    setView((current) => (current ? { ...current, level: next } : current));
-  }, []);
-
-  const onSpeechRateChange = useCallback((id: SpeechRateId) => {
-    setView((current) => (current ? { ...current, speechRate: id } : current));
-  }, []);
-
-  const onToggleAutoPlay = useCallback(() => {
-    setView((current) => (current ? { ...current, autoPlay: !current.autoPlay } : current));
-  }, []);
-
-  const onApply = useCallback(async () => {
-    if (!view) return;
-    setSavePending(true);
-    try {
-      applyLearningPreferences(view);
-      if (view.level && view.level !== saved?.level) {
-        const profile = await accountApi.update({ targetLevel: view.level });
+  const persist = useCallback(
+    async (next: LearningViewState) => {
+      if (next.level && next.level !== saved?.level) {
+        const profile = await accountApi.update({ targetLevel: next.level });
         queryClient.setQueryData(queryKeys.account, profile);
       }
-      setSaved(view);
-    } catch {
-      setSaved(view);
-    } finally {
-      setSavePending(false);
-    }
-  }, [queryClient, saved?.level, view]);
+      applyLearningPreferences(next);
+      setSaved(next);
+    },
+    [queryClient, saved?.level],
+  );
 
-  const onDiscard = useCallback(() => {
-    if (!saved) return;
-    setView(saved);
-  }, [saved]);
+  const { draft, patch, reset, isDirty, saving, save } = useSettingsDraft({ saved, persist });
 
   return (
     <LearningSettingsView
-      view={view}
-      dirty={dirty}
-      savePending={savePending}
-      onLevelChange={onLevelChange}
-      onSpeechRateChange={onSpeechRateChange}
-      onToggleAutoPlay={onToggleAutoPlay}
-      onApply={onApply}
-      onDiscard={onDiscard}
+      view={draft}
+      isDirty={isDirty}
+      saving={saving}
+      onLevelChange={useCallback((level: SkillLevel) => patch({ level }), [patch])}
+      onSpeechRateChange={useCallback((speechRate: SpeechRateId) => patch({ speechRate }), [patch])}
+      onAutoPlayChange={useCallback((autoPlay: boolean) => patch({ autoPlay }), [patch])}
+      onSave={() => void save()}
+      onReset={reset}
     />
   );
 }

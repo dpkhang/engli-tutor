@@ -75,6 +75,7 @@ function AppShellFrame({ children }: { children: ReactNode }) {
   const aiToolsInnerRef = useRef<HTMLDivElement>(null);
   const [aiToolsHeight, setAiToolsHeight] = useState(0);
   const accountMenuRef = useRef<HTMLDivElement>(null);
+  const mobileAccountMenuRef = useRef<HTMLDivElement>(null);
   const { data } = useSession();
   const user = data?.user;
   const billing = useBillingMe(Boolean(user));
@@ -104,7 +105,12 @@ function AppShellFrame({ children }: { children: ReactNode }) {
 
     const closeOnOutsideClick = (event: PointerEvent) => {
       const target = event.target as Node;
-      if (!accountMenuRef.current?.contains(target)) setAccountOpen(false);
+      if (
+        !accountMenuRef.current?.contains(target) &&
+        !mobileAccountMenuRef.current?.contains(target)
+      ) {
+        setAccountOpen(false);
+      }
     };
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") setAccountOpen(false);
@@ -217,6 +223,7 @@ function AppShellFrame({ children }: { children: ReactNode }) {
       showAiDock={showAiDock}
       translateOpen={translateOpen}
       accountMenuRef={accountMenuRef}
+      mobileAccountMenuRef={mobileAccountMenuRef}
       aiToolsInnerRef={aiToolsInnerRef}
       onToggleAccount={onToggleAccount}
       onSignOut={onSignOut}

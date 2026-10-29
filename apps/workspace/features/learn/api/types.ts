@@ -20,6 +20,8 @@ export type LearningQuestion =
       kind: "open";
       prompt: string;
       keywords: string[];
+      /** Synonym groups; every group needs one match. Falls back to `keywords` when absent. */
+      keywordGroups?: string[][];
       sampleAnswer: string;
       explanation: string;
     }

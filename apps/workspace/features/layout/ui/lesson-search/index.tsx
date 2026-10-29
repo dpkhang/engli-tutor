@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { withCurrentLocale } from "@/lib/locale-path";
 import { useLessonPacks } from "@/features/learn";
@@ -17,6 +17,7 @@ export function LessonSearch() {
   const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listboxId = useId();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const { packs, loading, fetching } = useLessonPacks();
@@ -36,6 +37,9 @@ export function LessonSearch() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        // The shell mounts one instance per (mobile/desktop) header and hides
+        // the inactive one with CSS; only the visible instance handles ⌘K.
+        if (!rootRef.current || rootRef.current.getClientRects().length === 0) return;
         event.preventDefault();
         setOpen(true);
         window.requestAnimationFrame(() => inputRef.current?.focus());
@@ -85,6 +89,7 @@ export function LessonSearch() {
       matches={matches}
       rootRef={rootRef}
       inputRef={inputRef}
+      listboxId={listboxId}
       onShow={onShow}
       onQueryChange={onQueryChange}
       onClearQuery={onClearQuery}

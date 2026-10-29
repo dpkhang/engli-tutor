@@ -6,17 +6,20 @@ import { useQueryClient } from "@tanstack/react-query";
 import { accountApi } from "@/features/accounts";
 import { billingApi } from "@/features/payments";
 import { billingMeQueryKey } from "@/features/payments";
+import { stripLocalePath } from "@/lib/locale-path";
 import { queryKeys } from "@/lib/query";
-import { SETTINGS_NAV, getSettingsSection } from "../../model/nav";
+import { SETTINGS_NAV, getSettingsSection, isSettingsOverview } from "../../model/nav";
 import { SettingsShellView } from "./settings-shell.view";
 
 export function SettingsShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const section = getSettingsSection(pathname);
+  const routePath = stripLocalePath(pathname ?? "");
+  const section = getSettingsSection(routePath);
 
   useEffect(() => {
+    router.prefetch("/settings");
     for (const item of SETTINGS_NAV) {
       router.prefetch(item.href);
     }
@@ -25,7 +28,11 @@ export function SettingsShell({ children }: { children: ReactNode }) {
   }, [queryClient, router]);
 
   return (
-    <SettingsShellView pathname={pathname} section={section}>
+    <SettingsShellView
+      pathname={routePath}
+      isOverview={isSettingsOverview(routePath)}
+      section={section}
+    >
       {children}
     </SettingsShellView>
   );

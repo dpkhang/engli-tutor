@@ -1,83 +1,19 @@
 "use client";
 
-import { memo, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
-import { LocalizedLink as Link } from "@/features/i18n";
-import {
-  BookOpen,
-  ChevronDown,
-  Crown,
-  Gamepad2,
-  Gauge,
-  House,
-  LogOut,
-  MessageCircle,
-  Mic2,
-  Route,
-  Settings,
-  Sparkles,
-  TrendingUp,
-  UserRound,
-  X,
-} from "lucide-react";
-import { BrandLogo, cn, ThemeToggle } from "@engli-tutor/ui";
-import { AnimatePresence, motion } from "motion/react";
-import { FloatingTranslate } from "@/features/translate";
-import { HeaderInstallButton } from "@/features/pwa";
-import { useWorkspaceI18n } from "@/features/i18n";
-import { WorkspaceLanguageSwitcher } from "@/features/i18n";
-import { withLocalePath, getPathLocale } from "@/lib/locale-path";
+import { memo } from "react";
+import { cn } from "@engli-tutor/ui";
+import { getPathLocale, withLocalePath } from "@/lib/locale-path";
+import { AiDock } from "./ai-dock";
+import { AppShellDesktopHeader } from "./app-shell.desktop.view";
+import { AppShellMobileHeader, AppShellMobileTabBar } from "./app-shell.mobile.view";
+import { PRIMARY_NAV, type AppShellViewProps } from "./app-shell.model";
 
-const PRIMARY_NAV = [
-  { href: "/", key: "workspace.today", icon: House },
-  { href: "/skills", key: "workspace.skills", icon: BookOpen },
-  { href: "/games", key: "workspace.games", icon: Gamepad2 },
-  { href: "/lessons", key: "workspace.myPath", icon: Route },
-  { href: "/progress", key: "workspace.myProgress", icon: TrendingUp, private: true },
-] as const;
+export type { AppShellViewProps } from "./app-shell.model";
 
-function isActivePath(pathname: string, href: string) {
-  if (href === "/") return pathname === "/";
-  if (href === "/lessons") {
-    return pathname === "/lessons" || (pathname.startsWith("/lessons/") && !pathname.startsWith("/lessons/progress"));
-  }
-  if (href === "/progress") {
-    return pathname === "/progress" || pathname.startsWith("/progress/");
-  }
-  if (href === "/skills") {
-    return pathname === "/skills" || pathname.startsWith("/skills/");
-  }
-  if (href === "/games") {
-    return pathname === "/games" || pathname.startsWith("/games/");
-  }
-  return pathname.startsWith(href);
-}
-
-export type AppShellViewProps = {
-  children: ReactNode;
-  routeReset: ReactNode;
-  pathname: string;
-  search: ReactNode;
-  accountOpen: boolean;
-  aiToolsOpen: boolean;
-  aiLauncherExpanded: boolean;
-  clipAiTools: boolean;
-  aiToolsHeight: number;
-  user: { name?: string | null; email?: string | null } | undefined;
-  hasPaidPlan: boolean;
-  displayName: string;
-  initials: string;
-  isPracticeExercise: boolean;
-  showTranslate: boolean;
-  showAiDock: boolean;
-  translateOpen: boolean;
-  accountMenuRef: RefObject<HTMLDivElement | null>;
-  aiToolsInnerRef: RefObject<HTMLDivElement | null>;
-  onToggleAccount: () => void;
-  onSignOut: () => void;
-  onToggleAiDock: () => void;
-  onAiToolsAnimationComplete: () => void;
-};
-
+/**
+ * Composes the shell: separate mobile / desktop chrome (CSS-gated at `lg`),
+ * a single AI dock and a single content area (children rendered once).
+ */
 export const AppShellView = memo(function AppShellView({
   children,
   routeReset,
@@ -97,34 +33,32 @@ export const AppShellView = memo(function AppShellView({
   showAiDock,
   translateOpen,
   accountMenuRef,
+  mobileAccountMenuRef,
   aiToolsInnerRef,
   onToggleAccount,
   onSignOut,
   onToggleAiDock,
   onAiToolsAnimationComplete,
 }: AppShellViewProps) {
-  const t = useWorkspaceI18n();
-  const launcherLabelRef = useRef<HTMLSpanElement>(null);
-  const [launcherWidth, setLauncherWidth] = useState(160);
-
-  useLayoutEffect(() => {
-    const label = launcherLabelRef.current;
-    if (!label) return;
-    // px-4 on both sides + gap-3 + Sparkles icon + 1px border on both sides
-    const measure = () => setLauncherWidth(Math.ceil(label.scrollWidth) + 32 + 12 + 20 + 2);
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(label);
-    return () => observer.disconnect();
-  }, [showAiDock]);
   const locale = getPathLocale(pathname);
   const localize = (href: string) => withLocalePath(href, locale);
   const routePath = locale ? pathname.slice(locale.length + 1) || "/" : pathname;
-  const raiseFabForExerciseBar = isPracticeExercise;
   const navItems = PRIMARY_NAV.filter((item) => !("private" in item && item.private) || Boolean(user));
   const hideHeader = routePath.startsWith("/policy");
   // Exercise pages have their own fixed action bar at the bottom.
   const showBottomTabs = !hideHeader && !isPracticeExercise;
+
+  const chrome = {
+    localize,
+    search,
+    user,
+    hasPaidPlan,
+    displayName,
+    initials,
+    accountOpen,
+    onToggleAccount,
+    onSignOut,
+  };
 
   return (
     <div
@@ -135,315 +69,34 @@ export const AppShellView = memo(function AppShellView({
     >
       {routeReset}
       {hideHeader ? null : (
-      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
-          <div className="flex min-w-0 items-center gap-3">
-            <Link
-              href={localize("/")}
-              className="group flex shrink-0 items-center text-foreground"
-            >
-              <BrandLogo size={30} />
-            </Link>
-
-            <nav className="ml-4 hidden items-center gap-1 lg:flex" aria-label={t("workspace.primaryNavigation")}>
-              {navItems.map((item) => {
-                const active = isActivePath(routePath, item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={localize(item.href)}
-                    className={cn(
-                      "rounded-full px-3.5 py-2 text-sm font-medium transition-colors",
-                      active
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                    )}
-                  >
-                    {t(item.key)}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            {search}
-            <HeaderInstallButton />
-            {user ? null : <ThemeToggle />}
-            {user ? (
-              <div className="relative" ref={accountMenuRef}>
-                <button
-                  type="button"
-                  className="flex items-center gap-2 rounded-full px-2 py-1.5 text-left hover:bg-muted"
-                  aria-haspopup="menu"
-                  aria-expanded={accountOpen}
-                  onClick={onToggleAccount}
-                >
-                  <span
-                    className={cn(
-                      "relative grid size-8 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground",
-                      hasPaidPlan &&
-                        "ring-2 ring-primary ring-offset-2 ring-offset-background shadow-[0_0_18px_-5px_hsl(var(--primary))]",
-                    )}
-                  >
-                    {initials}
-                    {hasPaidPlan ? (
-                      <span className="absolute -top-1.5 -left-1.5 grid size-4 place-items-center rounded-full bg-primary text-primary-foreground ring-2 ring-background shadow-sm">
-                        <Crown className="size-2.5 fill-current" strokeWidth={2} />
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className="hidden max-w-32 truncate text-sm font-medium sm:inline">
-                    {displayName}
-                  </span>
-                  <ChevronDown
-                    className={cn(
-                      "hidden size-3.5 text-muted-foreground transition-transform sm:block",
-                      accountOpen && "rotate-180",
-                    )}
-                  />
-                </button>
-
-                <AnimatePresence>
-                  {accountOpen ? (
-                    <motion.div
-                      role="menu"
-                      className="absolute top-full right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-border bg-popover p-1.5 shadow-lg"
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 4 }}
-                      transition={{ duration: 0.16 }}
-                    >
-                      <div className="border-b border-border px-3 py-2.5">
-                        <p className="truncate text-sm font-semibold">{displayName}</p>
-                        <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-                      </div>
-                      <div className="py-1">
-                        <Link
-                          href={localize("/settings/account")}
-                          role="menuitem"
-                          className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-muted"
-                        >
-                          <UserRound className="size-4 text-muted-foreground" />
-                          {t("workspace.account")}
-                        </Link>
-                        <Link
-                          href={localize("/payments")}
-                          role="menuitem"
-                          className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-muted"
-                        >
-                          <Gauge className="size-4 text-muted-foreground" />
-                          {t("workspace.plans")}
-                        </Link>
-                        <Link
-                          href={localize("/settings")}
-                          role="menuitem"
-                          className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-muted"
-                        >
-                          <Settings className="size-4 text-muted-foreground" />
-                          {t("workspace.settings")}
-                        </Link>
-                      </div>
-                      <div className="border-t border-border pt-1">
-                        <div className="flex items-center justify-between gap-3 rounded-xl px-3 py-2">
-                          <span className="text-sm text-muted-foreground">{t("workspace.language")}</span>
-                          <WorkspaceLanguageSwitcher />
-                        </div>
-                        <button
-                          type="button"
-                          role="menuitem"
-                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                          onClick={onSignOut}
-                        >
-                          <LogOut className="size-4" />
-                          {t("workspace.signOut")}
-                        </button>
-                      </div>
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
-              </div>
-            ) : null}
-          </div>
-        </div>
-
-      </header>
+        <>
+          <AppShellMobileHeader {...chrome} accountMenuRef={mobileAccountMenuRef} />
+          <AppShellDesktopHeader
+            {...chrome}
+            routePath={routePath}
+            navItems={navItems}
+            accountMenuRef={accountMenuRef}
+          />
+        </>
       )}
 
       {showBottomTabs ? (
-        <nav
-          className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden group-has-data-not-found/shell:hidden"
-          aria-label={t("workspace.primaryNavigation")}
-        >
-          <div className="mx-auto flex h-(--tabbar-h) max-w-xl items-stretch">
-            {navItems.map((item) => {
-              const active = isActivePath(routePath, item.href);
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={localize(item.href)}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "flex min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 text-[11px] font-medium transition-colors",
-                    active ? "text-primary" : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "grid h-7 w-12 place-items-center rounded-full transition-colors",
-                      active && "bg-primary/12",
-                    )}
-                  >
-                    <Icon className="size-5" strokeWidth={active ? 2.25 : 1.75} />
-                  </span>
-                  <span className="max-w-full truncate">{t(item.key)}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
+        <AppShellMobileTabBar routePath={routePath} navItems={navItems} localize={localize} />
       ) : null}
 
-      {showAiDock || showTranslate ? (
-      <div
-        className="pointer-events-none fixed z-60 flex w-max max-w-[calc(100vw-2rem)] flex-col items-end group-has-data-not-found/shell:hidden"
-        style={{
-          right: "max(1rem, env(safe-area-inset-right, 0px))",
-          bottom: raiseFabForExerciseBar
-            ? "max(6rem, calc(env(safe-area-inset-bottom, 0px) + 5.5rem))"
-            : "calc(var(--tabbar-h, 0px) + max(1.25rem, env(safe-area-inset-bottom, 0px)))",
-        }}
-      >
-        {showTranslate ? (
-          <div className="pointer-events-none absolute bottom-[calc(100%+0.75rem)] right-0">
-            <FloatingTranslate />
-          </div>
-        ) : null}
-
-        {showAiDock ? (
-          <>
-        <motion.button
-          type="button"
-          onClick={onToggleAiDock}
-          className={cn(
-            "pointer-events-auto relative flex h-12 max-w-[calc(100vw-2rem)] items-center overflow-hidden rounded-full shadow-[0_10px_28px_-8px_hsl(var(--primary)/0.65)] transition-[background-color,color,border-color] duration-300 ease-out",
-            aiLauncherExpanded
-              ? "justify-between border border-transparent bg-primary text-primary-foreground hover:bg-primary/90"
-              : "justify-center border border-border bg-card text-muted-foreground hover:text-foreground",
-          )}
-          initial={false}
-          animate={{ width: aiLauncherExpanded ? launcherWidth : 48 }}
-          transition={{ width: { duration: 0.3, ease: [0.22, 1, 0.36, 1] } }}
-          whileHover={{ y: -2 }}
-          whileTap={{ scale: 0.94 }}
-          aria-expanded={aiToolsOpen}
-          aria-label={aiToolsOpen ? t("workspace.hideAiTools") : t("workspace.showAiTools")}
-          title={aiToolsOpen ? t("workspace.hideAiTools") : t("workspace.showAiTools")}
-        >
-          <motion.span
-            className="absolute inset-0 grid place-items-center"
-            animate={{
-              opacity: aiLauncherExpanded ? 0 : 1,
-              rotate: aiLauncherExpanded ? 45 : 0,
-              scale: aiLauncherExpanded ? 0.7 : 1,
-            }}
-            transition={{ duration: aiLauncherExpanded ? 0.08 : 0.18 }}
-          >
-            <X className="size-4" />
-          </motion.span>
-
-          <span className="absolute inset-0 flex items-center justify-between gap-3 px-4 whitespace-nowrap">
-            <motion.span
-              ref={launcherLabelRef}
-              className="speak-infinity-text text-sm font-semibold"
-              animate={{ opacity: aiLauncherExpanded ? 1 : 0 }}
-              transition={{
-                delay: aiLauncherExpanded ? 0.22 : 0,
-                duration: aiLauncherExpanded ? 0.16 : 0.1,
-              }}
-            >
-              {t("workspace.speakWithAi")}
-            </motion.span>
-            <motion.span
-              animate={{
-                opacity: aiLauncherExpanded ? 1 : 0,
-                scale: aiLauncherExpanded ? 1 : 0.8,
-              }}
-              transition={{
-                delay: aiLauncherExpanded ? 0.22 : 0,
-                duration: 0.16,
-              }}
-            >
-              <Sparkles className="size-5 shrink-0" />
-            </motion.span>
-          </span>
-        </motion.button>
-
-        <motion.div
-          initial={false}
-          animate={{
-            height: aiToolsOpen ? aiToolsHeight : 0,
-            opacity: aiToolsOpen ? 1 : 0,
-          }}
-          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          onAnimationComplete={onAiToolsAnimationComplete}
-          className={cn(
-            "w-max min-w-13",
-            clipAiTools || !aiToolsOpen ? "overflow-hidden" : "overflow-visible",
-          )}
-          aria-hidden={!aiToolsOpen}
-        >
-          <div
-            ref={aiToolsInnerRef}
-            className="pointer-events-none flex flex-col items-end gap-2 pt-2"
-          >
-            <Link
-              href={localize("/speaking")}
-              tabIndex={aiToolsOpen ? 0 : -1}
-              className="pointer-events-auto group flex h-13 max-w-[calc(100vw-2rem)] items-center justify-end rounded-full bg-primary px-2.5 text-primary-foreground shadow-[0_12px_32px_-10px_hsl(var(--primary)/0.7)] transition-colors hover:bg-primary/90"
-              aria-label={t("shell.startSpeaking")}
-            >
-              <span className="grid grid-cols-[0fr] transition-[grid-template-columns] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:grid-cols-[1fr] group-focus-visible:grid-cols-[1fr]">
-                <span className="min-w-0 overflow-hidden">
-                  <span className="block whitespace-nowrap pr-2.5 text-sm font-semibold opacity-0 transition-opacity duration-200 delay-0 group-hover:opacity-100 group-hover:delay-200 group-focus-visible:opacity-100 group-focus-visible:delay-200">
-                    {t("workspace.speakWithAi")}
-                  </span>
-                </span>
-              </span>
-              <span className="grid size-8 shrink-0 place-items-center rounded-full bg-white/15">
-                <Mic2 className="size-4" />
-              </span>
-            </Link>
-
-            <Link
-              href={localize("/practice")}
-              tabIndex={aiToolsOpen ? 0 : -1}
-              className="pointer-events-auto group relative flex h-13 max-w-[calc(100vw-2rem)] items-center justify-end rounded-full border border-border bg-card px-2.5 text-foreground shadow-lg transition-colors hover:border-primary/30"
-              aria-label={t("shell.openTutorChat")}
-            >
-              <span className="grid grid-cols-[0fr] transition-[grid-template-columns] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:grid-cols-[1fr] group-focus-visible:grid-cols-[1fr]">
-                <span className="min-w-0 overflow-hidden">
-                  <span className="block whitespace-nowrap pr-2.5 text-sm font-semibold opacity-0 transition-opacity duration-200 delay-0 group-hover:opacity-100 group-hover:delay-200 group-focus-visible:opacity-100 group-focus-visible:delay-200">
-                    {t("workspace.chatWithAi")}
-                  </span>
-                </span>
-              </span>
-              <span className="relative grid size-8 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
-                <MessageCircle className="size-4" />
-                <Sparkles className="absolute -right-0.5 -top-0.5 size-2.5 text-amber-400" />
-              </span>
-              <span
-                className="absolute right-1 top-1 size-2 rounded-full border-2 border-card bg-emerald-400"
-                aria-hidden
-              />
-            </Link>
-          </div>
-        </motion.div>
-          </>
-        ) : null}
-      </div>
-      ) : null}
+      <AiDock
+        localize={localize}
+        raiseFabForExerciseBar={isPracticeExercise}
+        showAiDock={showAiDock}
+        showTranslate={showTranslate}
+        aiToolsOpen={aiToolsOpen}
+        aiLauncherExpanded={aiLauncherExpanded}
+        clipAiTools={clipAiTools}
+        aiToolsHeight={aiToolsHeight}
+        aiToolsInnerRef={aiToolsInnerRef}
+        onToggleAiDock={onToggleAiDock}
+        onAiToolsAnimationComplete={onAiToolsAnimationComplete}
+      />
 
       <div
         className={cn(
