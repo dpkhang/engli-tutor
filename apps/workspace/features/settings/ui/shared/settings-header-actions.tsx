@@ -18,7 +18,11 @@ const SettingsHeaderActionsContext =
   createContext<SettingsHeaderActionsContextValue | null>(null);
 
 /** Shares the mobile section header's action slot with the section content. */
-export function SettingsHeaderActionsProvider({ children }: { children: ReactNode }) {
+export function SettingsHeaderActionsProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const [slot, setSlot] = useState<HTMLElement | null>(null);
   const value = useMemo(() => ({ slot, setSlot }), [slot]);
   return (

@@ -39,7 +39,9 @@ export function SettingsFormCard({
   const t = useWorkspaceI18n();
   const headerSlot = useSettingsHeaderActionsSlot();
   const disabled = !isDirty || saving;
-  const saveLabel = saving ? t("settings.form.saving") : t("settings.form.save");
+  const saveLabel = saving
+    ? t("settings.form.saving")
+    : t("settings.form.save");
   return (
     <SettingsCard>
       <SettingsHeaderActions>
