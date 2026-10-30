@@ -870,6 +870,7 @@
     "signOutTitle": "Đăng xuất?",
     "signOutDescription": "Bạn sẽ cần đăng nhập lại để tiếp tục học với EngliTutor.",
     "signOutFailed": "Đăng xuất thất bại",
+    "sessionRevoked": "Phiên đăng nhập trên thiết bị này đã kết thúc. Hãy đăng nhập lại để tiếp tục.",
     "awaitingApi": "Giao diện sẵn sàng · đang chờ API",
     "modulePlaceholderNote": "Mô-đun này đã có đường dẫn và điều hướng. Cần thêm model cơ sở dữ liệu và API tương ứng trước khi bật ghi dữ liệu.",
     "loadingTitle": "Đang mở không gian học",
