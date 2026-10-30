@@ -2,7 +2,7 @@
 
 import { memo, Suspense } from "react";
 import { PageHeader } from "@/features/layout";
-import { SettingsContentLoading } from "../shared";
+import { SettingsContentLoading, SettingsHeaderActionsProvider } from "../shared";
 import { useWorkspaceI18n } from "@/features/i18n";
 import { SettingsDesktopNav } from "./settings-shell.desktop.view";
 import { SettingsMobileNav } from "./settings-shell.mobile.view";
@@ -19,6 +19,7 @@ export const SettingsShellView = memo(function SettingsShellView({
 }: SettingsShellViewProps) {
   const t = useWorkspaceI18n();
   return (
+    <SettingsHeaderActionsProvider>
     <div className="space-y-4 pb-[calc(var(--tabbar-h,0px)+1rem)] sm:space-y-5 lg:pb-0">
       {section ? <SettingsMobileNav section={section} /> : null}
       <div className={section ? "hidden lg:block" : undefined}>
@@ -37,5 +38,6 @@ export const SettingsShellView = memo(function SettingsShellView({
         </div>
       </div>
     </div>
+    </SettingsHeaderActionsProvider>
   );
 });
