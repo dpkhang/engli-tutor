@@ -21,6 +21,7 @@ export type LoginPageViewProps = {
   isLogin: boolean;
   pending: boolean;
   error: string | null;
+  notice?: string | null;
   nameField: UseFormRegisterReturn;
   emailField: UseFormRegisterReturn;
   passwordField: UseFormRegisterReturn;
@@ -46,6 +47,7 @@ export function LoginPageView({
   isLogin,
   pending,
   error,
+  notice,
   nameField,
   emailField,
   passwordField,
@@ -62,12 +64,13 @@ export function LoginPageView({
   onTogglePassword,
   onSubmit,
 }: LoginPageViewProps) {
-
   return (
     <main className="relative flex h-svh flex-col overflow-x-hidden overflow-y-auto bg-slate-950 bg-[radial-gradient(circle_at_10%_0%,hsl(var(--primary)/0.35),transparent_36%),radial-gradient(circle_at_92%_92%,hsl(var(--primary)/0.12),transparent_34%),linear-gradient(160deg,#070a15_0%,#111633_52%,#080b18_100%)] bg-local">
-
       <header className="relative z-20 mx-auto flex w-full max-w-7xl shrink-0 items-center justify-between px-5 py-3 sm:px-8 lg:px-10">
-        <a href={homeHref} className="group inline-flex items-center gap-2.5 text-white">
+        <a
+          href={homeHref}
+          className="group inline-flex items-center gap-2.5 text-white"
+        >
           <BrandLogo size={28} wordmarkClassName="text-white" />
           <span className="text-sm font-normal text-white/45">Workspace</span>
         </a>
@@ -91,8 +94,8 @@ export function LoginPageView({
             </span>
           </h1>
           <p className="mt-4 max-w-xl text-base leading-7 text-slate-300/70">
-            Plan lessons, continue practice, and see your English improve—all from one focused
-            workspace.
+            Plan lessons, continue practice, and see your English improve—all
+            from one focused workspace.
           </p>
 
           <div className="relative mt-6 max-w-2xl rounded-[1.45rem] border border-white/10 bg-white/6 p-3 shadow-2xl shadow-black/35">
@@ -101,7 +104,9 @@ export function LoginPageView({
                 <span className="size-2.5 rounded-full bg-rose-400/80" />
                 <span className="size-2.5 rounded-full bg-amber-300/80" />
                 <span className="size-2.5 rounded-full bg-emerald-400/80" />
-                <span className="ml-3 text-[11px] text-white/30">app.english-tutor.ai</span>
+                <span className="ml-3 text-[11px] text-white/30">
+                  app.english-tutor.ai
+                </span>
               </div>
               <div className="grid grid-cols-[3.5rem_1fr]">
                 <div className="flex flex-col items-center gap-4 border-r border-white/8 py-4 text-white/35">
@@ -120,15 +125,21 @@ export function LoginPageView({
                   <div className="mt-4 grid grid-cols-3 gap-2.5">
                     <div className="rounded-xl border border-white/8 bg-linear-to-br from-orange-400/20 to-orange-400/5 p-3">
                       <p className="text-[10px] text-white/40">Day streak</p>
-                      <p className="mt-1 text-xl font-semibold text-white">12</p>
+                      <p className="mt-1 text-xl font-semibold text-white">
+                        12
+                      </p>
                     </div>
                     <div className="rounded-xl border border-white/8 bg-linear-to-br from-primary/25 to-primary/5 p-3">
                       <p className="text-[10px] text-white/40">Words learned</p>
-                      <p className="mt-1 text-xl font-semibold text-white">348</p>
+                      <p className="mt-1 text-xl font-semibold text-white">
+                        348
+                      </p>
                     </div>
                     <div className="rounded-xl border border-white/8 bg-linear-to-br from-cyan-400/20 to-cyan-400/5 p-3">
                       <p className="text-[10px] text-white/40">CEFR level</p>
-                      <p className="mt-1 text-xl font-semibold text-white">B1</p>
+                      <p className="mt-1 text-xl font-semibold text-white">
+                        B1
+                      </p>
                     </div>
                   </div>
                   <div className="mt-3 flex items-center gap-3 rounded-xl border border-white/8 bg-white/4 p-3">
@@ -136,7 +147,9 @@ export function LoginPageView({
                       <BookOpen className="size-4 text-primary" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-white">Workplace English</p>
+                      <p className="text-xs font-medium text-white">
+                        Workplace English
+                      </p>
                       <div className="mt-1.5 h-1.5 rounded-full bg-white/8">
                         <div className="h-full w-[68%] rounded-full bg-primary" />
                       </div>
@@ -164,6 +177,16 @@ export function LoginPageView({
             </p>
           </div>
 
+          {notice ? (
+            <p
+              role="status"
+              className="mb-5 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm leading-5 text-amber-800 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-200"
+            >
+              <LockKeyhole className="mt-0.5 size-4 shrink-0" />
+              <span>{notice}</span>
+            </p>
+          ) : null}
+
           <SegmentedSwitch
             value={mode}
             onChange={onModeChange}
@@ -176,8 +199,16 @@ export function LoginPageView({
             ]}
           />
 
-          <form className="space-y-0.5" onSubmit={onSubmit} noValidate aria-busy={pending}>
-            <div className="auth-field-reveal" data-open={!isLogin || undefined}>
+          <form
+            className="space-y-0.5"
+            onSubmit={onSubmit}
+            noValidate
+            aria-busy={pending}
+          >
+            <div
+              className="auth-field-reveal"
+              data-open={!isLogin || undefined}
+            >
               <div>
                 <label className="block pb-0.5 text-sm">
                   <span className="mb-1.5 block font-medium text-slate-700 dark:text-slate-200">
@@ -225,12 +256,12 @@ export function LoginPageView({
                 />
               </div>
               <p
-                    id="workspace-email-error"
-                    className="min-h-4 pt-1 text-xs leading-4 text-rose-500"
-                    role={emailError ? "alert" : undefined}
-                  >
-                    {emailError ?? ""}
-                  </p>
+                id="workspace-email-error"
+                className="min-h-4 pt-1 text-xs leading-4 text-rose-500"
+                role={emailError ? "alert" : undefined}
+              >
+                {emailError ?? ""}
+              </p>
             </label>
             <label className="block text-sm">
               <span className="mb-1.5 block font-medium text-slate-700 dark:text-slate-200">
@@ -256,16 +287,20 @@ export function LoginPageView({
                   className="absolute top-1/2 right-3 grid size-7 -translate-y-1/2 place-items-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-white"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  {showPassword ? (
+                    <EyeOff className="size-4" />
+                  ) : (
+                    <Eye className="size-4" />
+                  )}
                 </button>
               </div>
               <p
-                    id="workspace-password-error"
-                    className="min-h-4 pt-1 text-xs leading-4 text-rose-500"
-                    role={passwordError ? "alert" : undefined}
-                  >
-                    {passwordError ?? ""}
-                  </p>
+                id="workspace-password-error"
+                className="min-h-4 pt-1 text-xs leading-4 text-rose-500"
+                role={passwordError ? "alert" : undefined}
+              >
+                {passwordError ?? ""}
+              </p>
             </label>
             {!isLogin && (
               <label className="block text-sm">
@@ -283,12 +318,12 @@ export function LoginPageView({
                   {...referralField}
                 />
                 <p
-                    id="workspace-referral-error"
-                    className="min-h-4 pt-1 text-xs leading-4 text-rose-500"
-                    role={referralError ? "alert" : undefined}
-                  >
-                    {referralError ?? ""}
-                  </p>
+                  id="workspace-referral-error"
+                  className="min-h-4 pt-1 text-xs leading-4 text-rose-500"
+                  role={referralError ? "alert" : undefined}
+                >
+                  {referralError ?? ""}
+                </p>
               </label>
             )}
             <p
@@ -306,7 +341,9 @@ export function LoginPageView({
               {pending ? (
                 <>
                   <LoaderCircle className="size-4 animate-spin" />
-                  <span>{isLogin ? "Opening workspace…" : "Creating workspace…"}</span>
+                  <span>
+                    {isLogin ? "Opening workspace…" : "Creating workspace…"}
+                  </span>
                 </>
               ) : (
                 <>
@@ -320,7 +357,9 @@ export function LoginPageView({
             </span>
           </form>
           <p className="mt-6 text-center text-xs leading-5 text-slate-400 dark:text-slate-500">
-            {isLogin ? "Secure authentication · Your data stays private." : "By creating an account you agree to our policies."}{" "}
+            {isLogin
+              ? "Secure authentication · Your data stays private."
+              : "By creating an account you agree to our policies."}{" "}
             <a
               href={policyHref}
               target="_blank"

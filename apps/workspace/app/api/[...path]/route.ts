@@ -63,7 +63,10 @@ function adaptLocalHttpRequestCookies(headers: Headers) {
   if (!cookie) return;
   headers.set(
     "cookie",
-    cookie.replace(/(^|;\s*)((?:englitutor(?:-v2)?|better-auth)\.)/g, "$1__Secure-$2"),
+    cookie.replace(
+      /(^|;\s*)((?:englitutor(?:-v2)?|better-auth)\.)/g,
+      "$1__Secure-$2",
+    ),
   );
 }
 
@@ -85,8 +88,15 @@ function expireLegacySharedCookies(request: NextRequest, res: NextResponse) {
   }
 }
 
-function adaptSetCookieForBrowser(raw: string, hostname: string, https: boolean): string {
-  const cookieDomain = raw.match(/;\s*Domain=([^;]*)/i)?.[1]?.trim().replace(/^\./, "");
+function adaptSetCookieForBrowser(
+  raw: string,
+  hostname: string,
+  https: boolean,
+): string {
+  const cookieDomain = raw
+    .match(/;\s*Domain=([^;]*)/i)?.[1]
+    ?.trim()
+    .replace(/^\./, "");
   const domainMatchesHost = cookieDomain
     ? hostname === cookieDomain || hostname.endsWith(`.${cookieDomain}`)
     : true;
@@ -130,14 +140,29 @@ async function proxy(request: NextRequest, context: RouteContext) {
   const response = await fetch(upstream, {
     method: request.method,
     headers,
-    body: request.method === "GET" || request.method === "HEAD" ? undefined : await request.arrayBuffer(),
+    body:
+      request.method === "GET" || request.method === "HEAD"
+        ? undefined
+        : await request.arrayBuffer(),
     redirect: "manual",
     cache: "no-store",
+    // Closes the upstream stream (e.g. SSE) when the browser disconnects.
+    signal: request.signal,
   });
 
   const hasNoBody =
-    request.method === "HEAD" || response.status === 204 || response.status === 205;
-  const body = hasNoBody ? null : await response.arrayBuffer();
+    request.method === "HEAD" ||
+    response.status === 204 ||
+    response.status === 205;
+  // Server-sent events must be piped through unbuffered.
+  const isEventStream = (response.headers.get("content-type") ?? "").includes(
+    "text/event-stream",
+  );
+  const body = hasNoBody
+    ? null
+    : isEventStream
+      ? response.body
+      : await response.arrayBuffer();
   const res = new NextResponse(body, {
     status: response.status,
     statusText: response.statusText,
@@ -148,19 +173,31 @@ async function proxy(request: NextRequest, context: RouteContext) {
     if (lower === "set-cookie" || HOP_BY_HOP.has(lower)) continue;
     res.headers.append(key, value);
   }
+  if (isEventStream) {
+    res.headers.set("cache-control", "no-cache, no-transform");
+    res.headers.set("x-accel-buffering", "no");
+  }
 
   if (process.env.NODE_ENV !== "production") {
     res.headers.set("x-upstream-url", upstream.toString());
-    console.info(`[api-proxy] ${request.method} ${upstream.toString()} → ${response.status}`);
+    console.info(
+      `[api-proxy] ${request.method} ${upstream.toString()} → ${response.status}`,
+    );
   }
 
   const rawCookies = response.headers.getSetCookie();
   if (rawCookies.length > 0) {
     const names = rawCookies.map((c) => c.split("=")[0] ?? "?").join(", ");
-    console.info(`[api-proxy] ${request.method} /api/${path.join("/")} set-cookie: ${names}`);
+    console.info(
+      `[api-proxy] ${request.method} /api/${path.join("/")} set-cookie: ${names}`,
+    );
   }
   for (const raw of rawCookies) {
-    const value = adaptSetCookieForBrowser(raw, request.nextUrl.hostname, https);
+    const value = adaptSetCookieForBrowser(
+      raw,
+      request.nextUrl.hostname,
+      https,
+    );
     res.headers.append("set-cookie", value);
   }
   if (!local) expireLegacySharedCookies(request, res);
@@ -170,4 +207,11 @@ async function proxy(request: NextRequest, context: RouteContext) {
 
 export const dynamic = "force-dynamic";
 
-export { proxy as GET, proxy as POST, proxy as PUT, proxy as PATCH, proxy as DELETE, proxy as OPTIONS };
+export {
+  proxy as GET,
+  proxy as POST,
+  proxy as PUT,
+  proxy as PATCH,
+  proxy as DELETE,
+  proxy as OPTIONS,
+};

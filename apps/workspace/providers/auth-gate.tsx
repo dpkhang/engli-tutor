@@ -5,7 +5,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { BrandLogo } from "@engli-tutor/ui";
 import { SESSION_SYNC_PATH } from "@engli-tutor/auth";
-import { getMarketingUrl, redirectAfterSignIn, useSession } from "@/lib/auth-client";
+import {
+  getMarketingUrl,
+  redirectAfterSignIn,
+  useSession,
+} from "@/lib/auth-client";
 import { isLocale, type Locale } from "@engli-tutor/i18n";
 import { accountApi } from "@/features/accounts";
 import {
@@ -19,10 +23,14 @@ import { useSignOutLoading } from "@/features/layout";
 import { CACHE_TIMES, queryKeys } from "@/lib/query";
 import { withCurrentLocale } from "@/lib/locale-path";
 import { useWorkspaceI18n } from "@/features/i18n";
+import { SessionRevocationWatcher } from "./session-revocation-watcher";
 
 const LOGIN_PATH = "/login";
 
-function stripLocale(pathname: string): { locale: Locale | null; path: string } {
+function stripLocale(pathname: string): {
+  locale: Locale | null;
+  path: string;
+} {
   const segment = pathname.split("/")[1];
   return isLocale(segment)
     ? { locale: segment, path: pathname.slice(segment.length + 1) || "/" }
@@ -37,7 +45,15 @@ function isPublicPath(pathname: string) {
   );
 }
 
-export function AuthSplash({ message, busy = true, children }: { message: string; busy?: boolean; children?: React.ReactNode }) {
+export function AuthSplash({
+  message,
+  busy = true,
+  children,
+}: {
+  message: string;
+  busy?: boolean;
+  children?: React.ReactNode;
+}) {
   return (
     <main
       className="flex min-h-svh items-center justify-center bg-background px-6"
@@ -58,10 +74,12 @@ export function AuthSplash({ message, busy = true, children }: { message: string
 
 function getSafeReturnTo(): string {
   const value = new URLSearchParams(window.location.search).get("returnTo");
-  if (value?.startsWith("/") && !value.startsWith("//")) return withCurrentLocale(value);
+  if (value?.startsWith("/") && !value.startsWith("//"))
+    return withCurrentLocale(value);
   try {
     const target = new URL(value ?? "");
-    if (target.origin === new URL(getMarketingUrl()).origin) return target.toString();
+    if (target.origin === new URL(getMarketingUrl()).origin)
+      return target.toString();
   } catch {
     // Invalid and external return URLs fall back to the workspace root.
   }
@@ -73,7 +91,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { locale, path: routePath } = stripLocale(pathname);
-  const withLocale = (path: string) => locale ? (path === "/" ? `/${locale}` : `/${locale}${path}`) : path;
+  const withLocale = (path: string) =>
+    locale ? (path === "/" ? `/${locale}` : `/${locale}${path}`) : path;
   const isLogin = routePath === LOGIN_PATH;
   const isOnboarding = routePath === ONBOARDING_PATH;
   const isWelcome = routePath === WELCOME_PATH;
@@ -115,7 +134,13 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    if (user && isWelcome && profileQuery.isSuccess && !needsSetup && !needsWelcome) {
+    if (
+      user &&
+      isWelcome &&
+      profileQuery.isSuccess &&
+      !needsSetup &&
+      !needsWelcome
+    ) {
       redirected.current = true;
       window.location.replace(getSafeReturnTo());
       return;
@@ -129,14 +154,31 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    if (user && !isOnboarding && !isWelcome && !isPublic && profileQuery.isSuccess && needsSetup) {
+    if (
+      user &&
+      !isOnboarding &&
+      !isWelcome &&
+      !isPublic &&
+      profileQuery.isSuccess &&
+      needsSetup
+    ) {
       redirected.current = true;
       const returnTo = encodeURIComponent(safeOnboardingReturnTo(pathname));
-      window.location.replace(`${withLocale(ONBOARDING_PATH)}?returnTo=${returnTo}`);
+      window.location.replace(
+        `${withLocale(ONBOARDING_PATH)}?returnTo=${returnTo}`,
+      );
       return;
     }
 
-    if (user && needsWelcome && !isWelcome && !isOnboarding && !isPublic && !isLogin && !isPaymentResult) {
+    if (
+      user &&
+      needsWelcome &&
+      !isWelcome &&
+      !isOnboarding &&
+      !isPublic &&
+      !isLogin &&
+      !isPaymentResult
+    ) {
       redirected.current = true;
       router.replace(
         `${WELCOME_PATH}?returnTo=${encodeURIComponent(safeOnboardingReturnTo(pathname))}`,
@@ -169,7 +211,11 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   if (isLogin) {
     if (isPending || user) {
-      return <AuthSplash message={user ? t("shell.opening") : t("shell.checkingSession")} />;
+      return (
+        <AuthSplash
+          message={user ? t("shell.opening") : t("shell.checkingSession")}
+        />
+      );
     }
     return <>{children}</>;
   }
@@ -183,17 +229,39 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   if (isPending) return <AuthSplash message={t("shell.preparing")} />;
   if (!user) return <AuthSplash message={t("shell.redirectingSignIn")} />;
 
+  const watcher = <SessionRevocationWatcher userId={user.id} />;
+
   if (!isOnboarding && !isWelcome && !isPaymentResult && !profileReady) {
-    return <AuthSplash message={t("shell.preparing")} />;
+    return (
+      <>
+        {watcher}
+        <AuthSplash message={t("shell.preparing")} />
+      </>
+    );
   }
 
   if (!isOnboarding && !isWelcome && !isPaymentResult && needsSetup) {
-    return <AuthSplash message={t("shell.settingUpPath")} />;
+    return (
+      <>
+        {watcher}
+        <AuthSplash message={t("shell.settingUpPath")} />
+      </>
+    );
   }
 
   if (!isOnboarding && !isWelcome && !isPaymentResult && needsWelcome) {
-    return <AuthSplash message={t("shell.welcomeIn")} />;
+    return (
+      <>
+        {watcher}
+        <AuthSplash message={t("shell.welcomeIn")} />
+      </>
+    );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {watcher}
+      {children}
+    </>
+  );
 }

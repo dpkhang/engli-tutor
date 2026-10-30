@@ -12,16 +12,21 @@ import {
   redirectAfterSignIn,
   useSession,
 } from "@/lib/auth-client";
-import { loginFormSchema, type LoginFormValues } from "../../model/login-schema";
+import {
+  loginFormSchema,
+  type LoginFormValues,
+} from "../../model/login-schema";
 import { LoginPageView, type AuthMode } from "./login-page.view";
 import { persistPendingReferral } from "@/features/referrals";
+import { useWorkspaceI18n } from "@/features/i18n";
 
 function resolveReturnTo(raw: string | null, marketingUrl: string): string {
   if (!raw) return "/";
   if (raw.startsWith("/") && !raw.startsWith("//")) return raw;
   try {
     const target = new URL(raw);
-    if (target.origin === new URL(marketingUrl).origin) return target.toString();
+    if (target.origin === new URL(marketingUrl).origin)
+      return target.toString();
   } catch {
     // Invalid and external return URLs fall back to the workspace root.
   }
@@ -29,7 +34,12 @@ function resolveReturnTo(raw: string | null, marketingUrl: string): string {
 }
 
 export function LoginPage() {
+  const t = useWorkspaceI18n();
   const searchParams = useSearchParams();
+  const notice =
+    searchParams.get("reason") === "session-revoked"
+      ? t("shell.sessionRevoked")
+      : null;
   const marketingUrl = getMarketingUrl();
   const returnTo = resolveReturnTo(searchParams.get("returnTo"), marketingUrl);
   const { data, isPending: sessionPending } = useSession();
@@ -60,19 +70,26 @@ export function LoginPage() {
     void redirectAfterSignIn(withCurrentLocale(returnTo));
   }, [sessionPending, data?.user, returnTo]);
 
-  const changeMode = useCallback((nextMode: AuthMode) => {
-    setMode(nextMode);
-    setError(null);
-    form.reset({
-      mode: nextMode,
-      name: "",
-      email: form.getValues("email"),
-      password: "",
-      referralCode: nextMode === "register" ? form.getValues("referralCode") : "",
-    });
-  }, [form]);
+  const changeMode = useCallback(
+    (nextMode: AuthMode) => {
+      setMode(nextMode);
+      setError(null);
+      form.reset({
+        mode: nextMode,
+        name: "",
+        email: form.getValues("email"),
+        password: "",
+        referralCode:
+          nextMode === "register" ? form.getValues("referralCode") : "",
+      });
+    },
+    [form],
+  );
 
-  const togglePassword = useCallback(() => setShowPassword((value) => !value), []);
+  const togglePassword = useCallback(
+    () => setShowPassword((value) => !value),
+    [],
+  );
 
   const onSubmit = useMemo(
     () =>
@@ -111,7 +128,9 @@ export function LoginPage() {
           // false cookie failure; AuthGate verifies the fresh session on navigation.
           if (values.mode === "register") {
             const next =
-              returnTo.startsWith("/") && !returnTo.startsWith("//") && returnTo !== "/onboarding"
+              returnTo.startsWith("/") &&
+              !returnTo.startsWith("//") &&
+              returnTo !== "/onboarding"
                 ? `/onboarding?returnTo=${encodeURIComponent(returnTo)}`
                 : "/onboarding";
             await redirectAfterSignIn(withCurrentLocale(next));
@@ -138,6 +157,7 @@ export function LoginPage() {
       isLogin={mode === "login"}
       pending={pending || (hydrated && sessionPending)}
       error={error}
+      notice={notice}
       nameField={form.register("name")}
       emailField={form.register("email")}
       passwordField={form.register("password")}
