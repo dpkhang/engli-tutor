@@ -6,8 +6,12 @@ import { LocalizedLink as Link } from "@/features/i18n";
 import { useWorkspaceI18n } from "@/features/i18n";
 import type { SettingsSection } from "../../model/nav";
 import { settingsNavLabelKey } from "./settings-shell.model";
+import { useSettingsHeaderActionsSlotRef } from "../shared";
 
-/** Mobile (<1024px): round back button + title/description on section pages. Hidden from `lg` via CSS. */
+/**
+ * Mobile (<1024px): round back button + title/description on section pages, with a right-side
+ * slot for section actions (e.g. Save/Discard from `SettingsFormCard`). Hidden from `lg` via CSS.
+ */
 export const SettingsMobileNav = memo(function SettingsMobileNav({
   section,
 }: {
@@ -15,6 +19,7 @@ export const SettingsMobileNav = memo(function SettingsMobileNav({
 }) {
   const t = useWorkspaceI18n();
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const actionsSlotRef = useSettingsHeaderActionsSlotRef();
   const sectionHref = section.href;
 
   useEffect(() => {
@@ -39,8 +44,14 @@ export const SettingsMobileNav = memo(function SettingsMobileNav({
         >
           {t(settingsNavLabelKey(section))}
         </h2>
-        <p className="line-clamp-2 text-xs text-muted-foreground">{t(section.descriptionKey)}</p>
+        <p className="line-clamp-2 text-xs text-muted-foreground">
+          {t(section.descriptionKey)}
+        </p>
       </div>
+      <div
+        ref={actionsSlotRef}
+        className="flex shrink-0 items-center gap-2 empty:hidden"
+      />
     </header>
   );
 });

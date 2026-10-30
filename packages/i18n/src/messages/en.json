@@ -870,6 +870,7 @@
     "signOutTitle": "Sign out?",
     "signOutDescription": "You’ll need to sign in again to keep learning with EngliTutor.",
     "signOutFailed": "Sign out failed",
+    "sessionRevoked": "Your session on this device was ended. Sign in again to continue.",
     "awaitingApi": "UI ready · awaiting API",
     "modulePlaceholderNote": "This module already has a route and navigation. Add the matching database model and API before enabling data writes.",
     "loadingTitle": "Opening your workspace",
