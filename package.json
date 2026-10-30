@@ -1,6 +1,7 @@
 {
   "name": "@engli-tutor/fe",
   "private": true,
+  "license": "UNLICENSED",
   "scripts": {
     "install:all": "bash ./scripts/install-workspace.sh all",
     "install:workspace": "bash ./scripts/install-workspace.sh workspace",

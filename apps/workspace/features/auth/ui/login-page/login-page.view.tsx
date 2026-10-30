@@ -1,7 +1,5 @@
-"use client";
-
-import { memo, useState, type FormEvent } from "react";
-import type { FieldErrors, UseFormRegister } from "react-hook-form";
+import type { FormEvent } from "react";
+import type { UseFormRegisterReturn } from "react-hook-form";
 import {
   ArrowRight,
   BarChart3,
@@ -16,50 +14,54 @@ import {
   UserRound,
 } from "lucide-react";
 import { BrandLogo, Button, Input, SegmentedSwitch } from "@engli-tutor/ui";
-import type { LoginFormValues } from "../../model/login-schema";
 
 export type AuthMode = "login" | "register";
 export type LoginPageViewProps = {
   mode: AuthMode;
+  isLogin: boolean;
   pending: boolean;
   error: string | null;
-  register: UseFormRegister<LoginFormValues>;
-  errors: FieldErrors<LoginFormValues>;
+  nameField: UseFormRegisterReturn;
+  emailField: UseFormRegisterReturn;
+  passwordField: UseFormRegisterReturn;
+  referralField: UseFormRegisterReturn;
+  nameError?: string;
+  emailError?: string;
+  passwordError?: string;
+  referralError?: string;
+  showPassword: boolean;
   policyHref: string;
   cookiesHref: string;
   homeHref: string;
   onModeChange: (mode: AuthMode) => void;
+  onTogglePassword: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 };
 
-function FieldMessage({ id, message }: { id: string; message?: string }) {
-  return (
-    <p
-      id={id}
-      className="min-h-4 pt-1 text-xs leading-4 text-rose-500"
-      role={message ? "alert" : undefined}
-    >
-      {message ?? ""}
-    </p>
-  );
-}
+const inputClass =
+  "h-12 rounded-xl border-slate-200 bg-white/80 pl-10 shadow-none transition-[border-color,box-shadow] placeholder:text-slate-400 hover:border-slate-300 focus-visible:border-primary focus-visible:ring-primary/15 dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20";
 
-export const LoginPageView = memo(function LoginPageView({
+export function LoginPageView({
   mode,
+  isLogin,
   pending,
   error,
-  register,
-  errors,
+  nameField,
+  emailField,
+  passwordField,
+  referralField,
+  nameError,
+  emailError,
+  passwordError,
+  referralError,
+  showPassword,
   policyHref,
   cookiesHref,
   homeHref,
   onModeChange,
+  onTogglePassword,
   onSubmit,
 }: LoginPageViewProps) {
-  const [showPassword, setShowPassword] = useState(false);
-  const isLogin = mode === "login";
-  const inputClass =
-    "h-12 rounded-xl border-slate-200 bg-white/80 pl-10 shadow-none transition-[border-color,box-shadow] placeholder:text-slate-400 hover:border-slate-300 focus-visible:border-primary focus-visible:ring-primary/15 dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20";
 
   return (
     <main className="relative flex h-svh flex-col overflow-x-hidden overflow-y-auto bg-slate-950 bg-[radial-gradient(circle_at_10%_0%,hsl(var(--primary)/0.35),transparent_36%),radial-gradient(circle_at_92%_92%,hsl(var(--primary)/0.12),transparent_34%),linear-gradient(160deg,#070a15_0%,#111633_52%,#080b18_100%)] bg-local">
@@ -116,27 +118,18 @@ export const LoginPageView = memo(function LoginPageView({
                     Ready for today&apos;s practice?
                   </p>
                   <div className="mt-4 grid grid-cols-3 gap-2.5">
-                    {[
-                      {
-                        label: "Day streak",
-                        value: "12",
-                        color: "from-orange-400/20 to-orange-400/5",
-                      },
-                      {
-                        label: "Words learned",
-                        value: "348",
-                        color: "from-primary/25 to-primary/5",
-                      },
-                      { label: "CEFR level", value: "B1", color: "from-cyan-400/20 to-cyan-400/5" },
-                    ].map((item) => (
-                      <div
-                        key={item.label}
-                        className={`rounded-xl border border-white/8 bg-linear-to-br ${item.color} p-3`}
-                      >
-                        <p className="text-[10px] text-white/40">{item.label}</p>
-                        <p className="mt-1 text-xl font-semibold text-white">{item.value}</p>
-                      </div>
-                    ))}
+                    <div className="rounded-xl border border-white/8 bg-linear-to-br from-orange-400/20 to-orange-400/5 p-3">
+                      <p className="text-[10px] text-white/40">Day streak</p>
+                      <p className="mt-1 text-xl font-semibold text-white">12</p>
+                    </div>
+                    <div className="rounded-xl border border-white/8 bg-linear-to-br from-primary/25 to-primary/5 p-3">
+                      <p className="text-[10px] text-white/40">Words learned</p>
+                      <p className="mt-1 text-xl font-semibold text-white">348</p>
+                    </div>
+                    <div className="rounded-xl border border-white/8 bg-linear-to-br from-cyan-400/20 to-cyan-400/5 p-3">
+                      <p className="text-[10px] text-white/40">CEFR level</p>
+                      <p className="mt-1 text-xl font-semibold text-white">B1</p>
+                    </div>
                   </div>
                   <div className="mt-3 flex items-center gap-3 rounded-xl border border-white/8 bg-white/4 p-3">
                     <span className="grid size-9 place-items-center rounded-lg bg-primary/20">
@@ -197,13 +190,19 @@ export const LoginPageView = memo(function LoginPageView({
                       autoComplete="name"
                       disabled={pending || isLogin}
                       tabIndex={isLogin ? -1 : undefined}
-                      aria-invalid={Boolean(errors.name)}
+                      aria-invalid={!!nameError}
                       aria-describedby="workspace-name-error"
                       className={inputClass}
-                      {...register("name")}
+                      {...nameField}
                     />
                   </div>
-                  <FieldMessage id="workspace-name-error" message={errors.name?.message} />
+                  <p
+                    id="workspace-name-error"
+                    className="min-h-4 pt-1 text-xs leading-4 text-rose-500"
+                    role={nameError ? "alert" : undefined}
+                  >
+                    {nameError ?? ""}
+                  </p>
                 </label>
               </div>
             </div>
@@ -219,13 +218,19 @@ export const LoginPageView = memo(function LoginPageView({
                   placeholder="you@example.com"
                   autoComplete="email"
                   disabled={pending}
-                  aria-invalid={Boolean(errors.email)}
+                  aria-invalid={!!emailError}
                   aria-describedby="workspace-email-error"
                   className={inputClass}
-                  {...register("email")}
+                  {...emailField}
                 />
               </div>
-              <FieldMessage id="workspace-email-error" message={errors.email?.message} />
+              <p
+                    id="workspace-email-error"
+                    className="min-h-4 pt-1 text-xs leading-4 text-rose-500"
+                    role={emailError ? "alert" : undefined}
+                  >
+                    {emailError ?? ""}
+                  </p>
             </label>
             <label className="block text-sm">
               <span className="mb-1.5 block font-medium text-slate-700 dark:text-slate-200">
@@ -238,23 +243,29 @@ export const LoginPageView = memo(function LoginPageView({
                   placeholder="Minimum 8 characters"
                   autoComplete={isLogin ? "current-password" : "new-password"}
                   disabled={pending}
-                  aria-invalid={Boolean(errors.password)}
+                  aria-invalid={!!passwordError}
                   aria-describedby="workspace-password-error"
                   className={`${inputClass} pr-20`}
                   clearButtonClassName="right-11"
-                  {...register("password")}
+                  {...passwordField}
                 />
                 <button
                   type="button"
                   disabled={pending}
-                  onClick={() => setShowPassword((value) => !value)}
+                  onClick={onTogglePassword}
                   className="absolute top-1/2 right-3 grid size-7 -translate-y-1/2 place-items-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-white"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </div>
-              <FieldMessage id="workspace-password-error" message={errors.password?.message} />
+              <p
+                    id="workspace-password-error"
+                    className="min-h-4 pt-1 text-xs leading-4 text-rose-500"
+                    role={passwordError ? "alert" : undefined}
+                  >
+                    {passwordError ?? ""}
+                  </p>
             </label>
             {!isLogin && (
               <label className="block text-sm">
@@ -266,12 +277,18 @@ export const LoginPageView = memo(function LoginPageView({
                   autoComplete="off"
                   maxLength={24}
                   disabled={pending}
-                  aria-invalid={Boolean(errors.referralCode)}
+                  aria-invalid={!!referralError}
                   aria-describedby="workspace-referral-error"
                   className="h-12 rounded-xl uppercase"
-                  {...register("referralCode")}
+                  {...referralField}
                 />
-                <FieldMessage id="workspace-referral-error" message={errors.referralCode?.message} />
+                <p
+                    id="workspace-referral-error"
+                    className="min-h-4 pt-1 text-xs leading-4 text-rose-500"
+                    role={referralError ? "alert" : undefined}
+                  >
+                    {referralError ?? ""}
+                  </p>
               </label>
             )}
             <p
@@ -326,4 +343,4 @@ export const LoginPageView = memo(function LoginPageView({
       </div>
     </main>
   );
-});
+}

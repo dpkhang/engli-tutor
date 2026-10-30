@@ -1,12 +1,21 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { notificationsApi, type NotificationPreferences } from "@/features/notifications";
-import { dropSubscription, enableDevicePush, preferencePayload } from "@/features/notifications";
+import {
+  notificationsApi,
+  type NotificationPreferences,
+} from "@/features/notifications";
+import {
+  dropSubscription,
+  enableDevicePush,
+  preferencePayload,
+} from "@/features/notifications";
 import { queryKeys } from "@/lib/query";
 import { useWorkspaceI18n } from "@/features/i18n";
+import { useSettingsDraft } from "../shared";
 import { NotificationSettingsView } from "./notification-settings.view";
+import { useDevicePushState } from "./use-device-push-state";
 
 type Draft = Omit<NotificationPreferences, "configured" | "reminderTimeZone">;
 
@@ -20,9 +29,22 @@ function anyEnabled(prefs: Draft) {
   );
 }
 
-export function NotificationSettings() {
+type PrefsDraft = {
+  notifyReminders: boolean;
+  notifyTutor: boolean;
+  notifyLessons: boolean;
+  notifyBilling: boolean;
+  reminderMinutes: number;
+};
+
+export function NotificationSettings({
+  installCard,
+}: {
+  installCard?: ReactNode;
+}) {
   const t = useWorkspaceI18n();
   const queryClient = useQueryClient();
+  const { state: pushState, refresh: refreshPushState } = useDevicePushState();
   const notificationsQuery = useQuery({
     queryKey: queryKeys.notifications,
     queryFn: notificationsApi.preferences,
@@ -30,75 +52,57 @@ export function NotificationSettings() {
   const [pending, setPending] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [noticeTone, setNoticeTone] = useState<"error" | "success">("error");
-  const [timeDraft, setTimeDraft] = useState<number | null>(null);
   const current = notificationsQuery.data;
-  const reminderMinutes = timeDraft ?? current?.reminderMinutes ?? 9 * 60;
-  const scheduleEnabled = Boolean(
-    current?.notifyReminders || current?.notifyLessons || current?.notifyCredits,
+
+  const saved = useMemo<PrefsDraft | null>(
+    () =>
+      current
+        ? {
+            notifyReminders: current.notifyReminders,
+            notifyTutor: current.notifyTutor,
+            notifyLessons: current.notifyLessons,
+            notifyBilling: current.notifyBilling,
+            reminderMinutes: current.reminderMinutes ?? 9 * 60,
+          }
+        : null,
+    [current],
   );
 
   const persist = useCallback(
-    async (next: Draft) => {
-      setPending(true);
+    async (next: PrefsDraft) => {
+      if (!current) return;
       setNotice(null);
-      setNoticeTone("error");
+      const payload: Draft = {
+        ...next,
+        notifyCredits: current.notifyCredits,
+      };
       try {
-        if (anyEnabled(next)) {
+        if (anyEnabled(payload)) {
           const device = await enableDevicePush(t);
-          if (!device.ok) {
-            setNotice(device.message);
-            return;
-          }
+          if (!device.ok) throw new Error(device.message);
         }
-        const saved = await notificationsApi.savePreferences(preferencePayload(next));
-        queryClient.setQueryData(queryKeys.notifications, saved);
-        if (!anyEnabled(saved)) await dropSubscription();
-        if (anyEnabled(saved) && !saved.configured) {
+        const result = await notificationsApi.savePreferences(
+          preferencePayload(payload),
+        );
+        queryClient.setQueryData(queryKeys.notifications, result);
+        if (!anyEnabled(result)) await dropSubscription();
+        if (anyEnabled(result) && !result.configured) {
+          setNoticeTone("error");
           setNotice(t("settings.notifications.notConfigured"));
         }
-      } catch (error) {
-        setNotice(error instanceof Error ? error.message : t("settings.notifications.saveFailed"));
       } finally {
-        setPending(false);
+        refreshPushState();
       }
     },
-    [queryClient, t],
+    [current, queryClient, t, refreshPushState],
   );
 
-  const save = useCallback(
-    (patch: Partial<Draft>) => {
-      if (!current) return;
-      const turningScheduleOn =
-        (patch.notifyReminders || patch.notifyLessons || patch.notifyCredits) &&
-        !(current.notifyReminders || current.notifyLessons || current.notifyCredits);
-      void persist({
-        notifyReminders: current.notifyReminders,
-        notifyTutor: current.notifyTutor,
-        notifyLessons: current.notifyLessons,
-        notifyCredits: current.notifyCredits,
-        notifyBilling: current.notifyBilling,
-        reminderMinutes: turningScheduleOn ? reminderMinutes : current.reminderMinutes,
-        ...patch,
-      });
-    },
-    [current, persist, reminderMinutes],
-  );
-
-  const onReminderTime = useCallback(
-    (minutes: number) => {
-      setTimeDraft(minutes);
-      if (!current || !(current.notifyReminders || current.notifyLessons || current.notifyCredits))
-        return;
-      void persist({
-        notifyReminders: current.notifyReminders,
-        notifyTutor: current.notifyTutor,
-        notifyLessons: current.notifyLessons,
-        notifyCredits: current.notifyCredits,
-        notifyBilling: current.notifyBilling,
-        reminderMinutes: minutes,
-      });
-    },
-    [current, persist],
+  const { draft, patch, reset, isDirty, saving, save } = useSettingsDraft({
+    saved,
+    persist,
+  });
+  const scheduleEnabled = Boolean(
+    draft?.notifyReminders || draft?.notifyLessons || current?.notifyCredits,
   );
 
   const sendTest = useCallback(async () => {
@@ -115,30 +119,44 @@ export function NotificationSettings() {
       setNoticeTone("success");
       setNotice(t("settings.notifications.testSent"));
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : t("settings.notifications.testFailed"));
+      setNotice(
+        error instanceof Error
+          ? error.message
+          : t("settings.notifications.testFailed"),
+      );
     } finally {
       setPending(false);
+      refreshPushState();
     }
-  }, [t]);
+  }, [t, refreshPushState]);
 
   return (
     <NotificationSettingsView
       ready={notificationsQuery.isSuccess || notificationsQuery.isError}
-      notifyReminders={current?.notifyReminders ?? false}
-      notifyTutor={current?.notifyTutor ?? false}
-      notifyLessons={current?.notifyLessons ?? false}
-      notifyBilling={current?.notifyBilling ?? false}
-      reminderMinutes={reminderMinutes}
+      loadFailed={notificationsQuery.isError && !current}
+      onRetryLoad={() => void notificationsQuery.refetch()}
+      values={
+        draft ?? {
+          notifyReminders: false,
+          notifyTutor: false,
+          notifyLessons: false,
+          notifyBilling: false,
+          reminderMinutes: 9 * 60,
+        }
+      }
       scheduleEnabled={scheduleEnabled}
-      pending={pending || notificationsQuery.isLoading}
+      isDirty={isDirty}
+      saving={saving}
+      disabled={!saved}
+      testPending={pending}
+      pushState={pushState}
+      installCard={installCard}
       notice={notice}
       noticeTone={noticeTone}
+      onChange={patch}
+      onSave={() => void save()}
+      onReset={reset}
       onSendTest={() => void sendTest()}
-      onToggleReminders={() => save({ notifyReminders: !current?.notifyReminders })}
-      onToggleTutor={() => save({ notifyTutor: !current?.notifyTutor })}
-      onToggleLessons={() => save({ notifyLessons: !current?.notifyLessons })}
-      onToggleBilling={() => save({ notifyBilling: !current?.notifyBilling })}
-      onReminderTime={onReminderTime}
     />
   );
 }

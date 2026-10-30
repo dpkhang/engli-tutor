@@ -8,6 +8,7 @@ import { type TranslateActivePick } from "../../model/translate-session";
 const ACTIVE_WORD =
   "rounded-[0.28rem] bg-primary px-[0.18em] py-[0.06em] font-semibold text-primary-foreground ring-1 ring-primary/50";
 const MATCH_WORD = "rounded-[0.28rem] bg-primary/15 px-[0.12em] py-[0.04em] text-primary";
+const EXPRESSION_WORD = "rounded-[0.28rem] bg-primary/20 font-semibold text-primary";
 
 type WordToken = Extract<TextToken, { kind: "word" }>;
 
@@ -20,6 +21,8 @@ export type ClickableTranslateTextViewProps = {
   instanceId: string;
   rootRef: RefObject<HTMLSpanElement | null>;
   localPick: TranslateActivePick | null;
+  /** Span of the multi-word expression around the clicked word, highlighted as a whole. */
+  expressionRange: { start: number; end: number } | null;
   query: string;
   onPlainClick: (event: MouseEvent<HTMLSpanElement>) => void;
   onWordClick: (token: WordToken, event: MouseEvent<HTMLSpanElement>) => void;
@@ -34,6 +37,7 @@ export const ClickableTranslateTextView = memo(function ClickableTranslateTextVi
   instanceId,
   rootRef,
   localPick,
+  expressionRange,
   query,
   onPlainClick,
   onWordClick,
@@ -43,15 +47,19 @@ export const ClickableTranslateTextView = memo(function ClickableTranslateTextVi
   if (!hot) {
     const sentenceStart = localPick?.sentenceStart ?? localPick?.start ?? 0;
     const sentenceEnd = localPick?.sentenceEnd ?? localPick?.end ?? 0;
+    const expressionStart = Math.min(expressionRange?.start ?? Infinity, localPick?.start ?? 0);
+    const expressionEnd = Math.max(expressionRange?.end ?? 0, localPick?.end ?? 0);
     return (
       <span ref={rootRef} onClick={onPlainClick} className={cn("cursor-pointer", className)}>
         {localPick ? (
           <>
             {text.slice(0, sentenceStart)}
             <span className="rounded-sm bg-primary/8">
-              {text.slice(sentenceStart, localPick.start)}
+              {text.slice(sentenceStart, expressionStart)}
+              <span className={EXPRESSION_WORD}>{text.slice(expressionStart, localPick.start)}</span>
               <span className={ACTIVE_WORD}>{text.slice(localPick.start, localPick.end)}</span>
-              {text.slice(localPick.end, sentenceEnd)}
+              <span className={EXPRESSION_WORD}>{text.slice(localPick.end, expressionEnd)}</span>
+              {text.slice(expressionEnd, sentenceEnd)}
             </span>
             {text.slice(sentenceEnd)}
           </>
@@ -82,6 +90,10 @@ export const ClickableTranslateTextView = memo(function ClickableTranslateTextVi
           localPick.sentenceEnd != null &&
           token.start >= localPick.sentenceStart &&
           token.end <= localPick.sentenceEnd;
+        const inExpression =
+          expressionRange != null &&
+          token.start >= expressionRange.start &&
+          token.end <= expressionRange.end;
 
         return (
           <span
@@ -92,6 +104,7 @@ export const ClickableTranslateTextView = memo(function ClickableTranslateTextVi
               "hover:bg-primary/15 hover:text-primary hover:underline hover:decoration-primary/70 hover:underline-offset-2",
               inActiveSentence && !active && "bg-primary/8",
               sameWord && !active && MATCH_WORD,
+              inExpression && !active && EXPRESSION_WORD,
               active && ACTIVE_WORD,
             )}
           >

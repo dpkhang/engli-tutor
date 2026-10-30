@@ -14,10 +14,11 @@ import type { Translator } from "@engli-tutor/i18n";
 import { useWorkspaceI18n } from "@/features/i18n";
 import { upgradeMessageFromError } from "@/features/payments";
 import { type TranslateDirection, type TranslateResult } from "../../api/translate-api";
-import { lookupTranslation } from "../../model/translate-lookup";
+import { pickExpressionForWord } from "../../model/detect-expression";
+import { lookupDictionaryPhrase, lookupTranslation } from "../../model/translate-lookup";
 import { getCachedLookup } from "../../model/translate-cache";
 import { isTranslateHotkey } from "../../model/translate-path";
-import { useTranslateSession } from "../../model/translate-session";
+import { useTranslateSession, type TranslateActivePick } from "../../model/translate-session";
 import { FloatingTranslateView } from "./floating-translate.view";
 
 function mergeWord(
@@ -63,9 +64,13 @@ function errorMessage(error: unknown, t: Translator) {
 
 const DIRECTION: TranslateDirection = "en-vi";
 
+/** How the current result was requested: a word click in the reading text, or text typed in the box. */
+export type LookupSource = "pick" | "typed";
+
 export function FloatingTranslate() {
   const t = useWorkspaceI18n();
-  const { open, setOpen, pickedWord, pickNonce, activeSentence } = useTranslateSession();
+  const { open, setOpen, pickedWord, pickNonce, activeSentence, activePick, setPickExpression } =
+    useTranslateSession();
   const reduceMotion = useReducedMotion();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [text, setText] = useState("");
@@ -74,7 +79,15 @@ export function FloatingTranslate() {
   const [result, setResult] = useState<TranslateResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [contextPending, setContextPending] = useState(false);
+  const [lookupSource, setLookupSource] = useState<LookupSource>("pick");
+  const [sentenceContext, setSentenceContext] = useState<TranslateResult | null>(null);
+  const [sentenceError, setSentenceError] = useState<string | null>(null);
+  const [expressionResult, setExpressionResult] = useState<TranslateResult | null>(null);
+  const [expressionPending, setExpressionPending] = useState(false);
   const contextRequestRef = useRef(0);
+  const expressionRequestRef = useRef(0);
+  /** pickNonce whose expression the learner dismissed; the AI must not bring it back. */
+  const dismissedNonceRef = useRef(0);
 
   useEffect(() => {
     const openOnShortcut = (event: KeyboardEvent) => {
@@ -108,14 +121,29 @@ export function FloatingTranslate() {
     return () => window.cancelAnimationFrame(frame);
   }, [open]);
 
-  const clear = useCallback(() => {
+  const dropSentenceContext = useCallback(() => {
+    // Bumping the id makes any in-flight sentence request ignore its own result.
     contextRequestRef.current += 1;
+    setContextPending(false);
+    setSentenceContext(null);
+    setSentenceError(null);
+  }, []);
+
+  const resetExpression = useCallback(() => {
+    expressionRequestRef.current += 1;
+    setExpressionResult(null);
+    setExpressionPending(false);
+  }, []);
+
+  const clear = useCallback(() => {
+    dropSentenceContext();
+    resetExpression();
+    setLookupSource("typed");
     setText("");
     setResult(null);
     setError(null);
-    setContextPending(false);
     inputRef.current?.focus();
-  }, []);
+  }, [dropSentenceContext, resetExpression]);
 
   const copyTranslation = useCallback(async () => {
     if (!result?.translation) return;
@@ -169,41 +197,134 @@ export function FloatingTranslate() {
     [pending, t, text],
   );
 
-  const loadSentenceContext = useCallback(async (sentence: string, word: string) => {
-    const requestId = ++contextRequestRef.current;
-    const cachedContext = getCachedLookup(DIRECTION, sentence, word);
-    if (cachedContext) {
-      setResult((current) => mergeWordWithSentence(current, cachedContext));
-      setContextPending(false);
+  const loadSentenceContext = useCallback(
+    async (sentence: string, word: string) => {
+      const requestId = ++contextRequestRef.current;
+      setSentenceError(null);
+      const cachedContext = getCachedLookup(DIRECTION, sentence, word);
+      if (cachedContext) {
+        setSentenceContext(cachedContext);
+        setResult((current) => mergeWordWithSentence(current, cachedContext));
+        setContextPending(false);
+        return;
+      }
+      setSentenceContext(null);
+      setContextPending(true);
+      try {
+        const contextual = await lookupTranslation({
+          text: sentence,
+          direction: DIRECTION,
+          focusWord: word,
+        });
+        if (requestId !== contextRequestRef.current) return;
+        setSentenceContext(contextual);
+        setResult((current) => mergeWordWithSentence(current, contextual));
+      } catch (contextError) {
+        if (requestId !== contextRequestRef.current) return;
+        // Shown inside the sentence section only; the word result above stays usable.
+        setSentenceError(upgradeMessageFromError(contextError, t) ?? t("translate.sentenceError"));
+      } finally {
+        if (requestId === contextRequestRef.current) setContextPending(false);
+      }
+    },
+    [t],
+  );
+
+  /** Meaning of the expression around the clicked word, or a dictionary check for open compounds. */
+  const loadExpression = useCallback(
+    async (pick: TranslateActivePick | null) => {
+      resetExpression();
+      const requestId = expressionRequestRef.current;
+      const expression = pick?.expression;
+      const candidates = expression ? [] : (pick?.compoundCandidates ?? []);
+      if (!expression && !candidates.length) return;
+      setExpressionPending(true);
+      try {
+        if (expression) {
+          const meaning = await lookupTranslation({
+            text: expression.base || expression.phrase,
+            direction: DIRECTION,
+          });
+          if (requestId === expressionRequestRef.current) setExpressionResult(meaning);
+          return;
+        }
+        for (const candidate of candidates) {
+          const hit = await lookupDictionaryPhrase(candidate.phrase, DIRECTION);
+          if (requestId !== expressionRequestRef.current) return;
+          if (!hit) continue;
+          setExpressionResult(hit);
+          setPickExpression({
+            phrase: candidate.phrase,
+            base: candidate.phrase.toLowerCase(),
+            type: "compound_noun",
+            source: "dictionary",
+            start: candidate.start,
+            end: candidate.end,
+          });
+          return;
+        }
+      } catch {
+        // The card still shows the label (and the AI meaning once the sentence analysis arrives).
+      } finally {
+        if (requestId === expressionRequestRef.current) setExpressionPending(false);
+      }
+    },
+    [resetExpression, setPickExpression],
+  );
+
+  const dismissExpression = useCallback(() => {
+    dismissedNonceRef.current = pickNonce;
+    resetExpression();
+    setPickExpression(null);
+  }, [pickNonce, resetExpression, setPickExpression]);
+
+  // The sentence analysis is the better judge: it tells "look up the word" from "look up at the sky".
+  useEffect(() => {
+    const expressions = sentenceContext?.sentence?.expressions ?? [];
+    if (!sentenceContext || sentenceContext.demo || sentenceContext.source !== "ai") return;
+    if (!expressions.length || !pickedWord || !activeSentence) return;
+    if (dismissedNonceRef.current === pickNonce) return;
+    const current = activePick?.expression ?? null;
+    if (current?.source === "hyphen") return;
+
+    const match = pickExpressionForWord(activeSentence, pickedWord, expressions);
+    if (!match) {
+      if (current) {
+        resetExpression();
+        setPickExpression(null);
+      }
       return;
     }
-    setContextPending(true);
-    try {
-      const contextual = await lookupTranslation({
-        text: sentence,
-        direction: DIRECTION,
-        focusWord: word,
-      });
-      if (requestId !== contextRequestRef.current) return;
-      setResult((current) => mergeWordWithSentence(current, contextual));
-    } catch {
-      if (requestId !== contextRequestRef.current) return;
-    } finally {
-      if (requestId === contextRequestRef.current) setContextPending(false);
-    }
-  }, []);
+    const base = (match.base || match.phrase).toLowerCase();
+    if (current && current.base !== base) resetExpression();
+    setPickExpression({
+      phrase: match.phrase,
+      base,
+      type: match.type,
+      source: "ai",
+      meaningVi: match.meaningVi,
+      note: match.note,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reconcile once per sentence result
+  }, [sentenceContext]);
 
   useEffect(() => {
     if (!open || !pickedWord || pickNonce === 0) return;
     setError(null);
+    setLookupSource("pick");
+    void loadExpression(activePick);
     void (async () => {
       const sentence = activeSentence?.trim() ?? "";
       const sameAsWord = sentence.toLowerCase() === pickedWord.trim().toLowerCase();
       const wordLookup = submit(pickedWord);
-      const contextLookup =
-        sentence && !sameAsWord ? loadSentenceContext(sentence, pickedWord) : Promise.resolve();
+      let contextLookup: Promise<void> = Promise.resolve();
+      if (sentence && !sameAsWord) {
+        contextLookup = loadSentenceContext(sentence, pickedWord);
+      } else {
+        // No separate sentence this time: forget the previous click's sentence section.
+        dropSentenceContext();
+      }
       await Promise.all([wordLookup, contextLookup]);
-      if (!sentence || sameAsWord) setContextPending(false);
     })();
     if (window.matchMedia("(min-width: 1024px)").matches) {
       inputRef.current?.focus({ preventScroll: true });
@@ -221,11 +342,18 @@ export function FloatingTranslate() {
 
   const onClose = useCallback(() => setOpen(false), [setOpen]);
   const onToggle = useCallback(() => setOpen(!open), [open, setOpen]);
-  const onTextChange = useCallback((value: string) => {
-    setText(value);
-    setResult(null);
-    setError(null);
-  }, []);
+  const onTextChange = useCallback(
+    (value: string) => {
+      // Typing starts a fresh lookup of exactly what was typed: no "sentence of the clicked word".
+      dropSentenceContext();
+      resetExpression();
+      setLookupSource("typed");
+      setText(value);
+      setResult(null);
+      setError(null);
+    },
+    [dropSentenceContext, resetExpression],
+  );
   const onComposerKeyDown = useCallback(
     (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
       if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
@@ -255,6 +383,13 @@ export function FloatingTranslate() {
       result={result}
       copied={copied}
       contextPending={contextPending}
+      lookupSource={lookupSource}
+      sentenceContext={sentenceContext}
+      sentenceError={sentenceError}
+      expression={activePick?.expression ?? null}
+      expressionResult={expressionResult}
+      expressionPending={expressionPending}
+      onDismissExpression={dismissExpression}
       pickedWord={pickedWord}
       activeSentence={activeSentence}
       inputRef={inputRef}

@@ -166,10 +166,8 @@
     "cookies": "Chính sách cookie"
   },
   "workspace": {
-    "settings": "Cài đặt",
     "personal": "Cá nhân",
     "manageWorkspace": "Quản lý workspace EngliTutor của bạn.",
-    "account": "Tài khoản",
     "accountDescription": "Tên, thông tin công việc và hồ sơ học tập",
     "appearance": "Giao diện",
     "appearanceDescription": "Chủ đề, màu sắc, cỡ chữ và chuyển động",
@@ -177,11 +175,9 @@
     "learningDescription": "Trình độ, tốc độ phát và kỹ năng nghe",
     "notifications": "Thông báo",
     "notificationsDescription": "Nhắc nhở, bài học và thanh toán",
-    "security": "Bảo mật",
     "securityDescription": "Mật khẩu và thiết bị đã đăng nhập",
     "referrals": "Giới thiệu",
     "referralsDescription": "Mời bạn bè và đổi mã",
-    "billing": "Thanh toán",
     "billingDescription": "Gói, mức sử dụng và thanh toán",
     "privacyPolicy": "Chính sách quyền riêng tư",
     "cookiePolicy": "Chính sách cookie",
@@ -197,12 +193,10 @@
     "ocean": "Đại dương",
     "dusk": "Chạng vạng",
     "system": "Theo hệ thống",
-    "discard": "Hủy thay đổi",
     "apply": "Áp dụng",
     "saving": "Đang lưu...",
     "unsavedAppearance": "Bạn có thay đổi giao diện chưa lưu.",
     "unsavedLearning": "Bạn có thay đổi học tập chưa lưu.",
-    "practice": "Luyện tập",
     "notificationDeviceDescription": "Trên điện thoại hoặc máy tính này. Với iPhone, hãy thêm EngliTutor vào Màn hình chính trước khi tab trình duyệt có thể nhận thông báo.",
     "dailyStudyReminder": "Nhắc học hằng ngày",
     "dailyStudyReminderDescription": "Một thông báo mỗi ngày vào thời gian bạn chọn.",
@@ -211,7 +205,6 @@
     "tutorReplies": "Phản hồi của gia sư",
     "tutorRepliesDescription": "Hiển thị khi không có cửa sổ EngliTutor nào đang mở phía trước.",
     "time": "Thời gian",
-    "account": "Tài khoản",
     "planPayment": "Gói và thanh toán",
     "planPaymentDescription": "Khi gia hạn thất bại hoặc gói kết thúc.",
     "pwaInstallTitle": "Cài ứng dụng",
@@ -236,7 +229,6 @@
     "myPath": "Lộ trình",
     "myProgress": "Tiến độ",
     "primaryNavigation": "Điều hướng chính",
-    "account": "Tài khoản",
     "plans": "Các gói",
     "settings": "Cài đặt",
     "signOut": "Đăng xuất",
@@ -285,7 +277,6 @@
     "continueWaiting": "Bạn vẫn còn “{title}” đang chờ. Học tiếp hoặc bắt đầu một buổi luyện nói mới.",
     "noPressure": "Không áp lực, không bảng điều khiển phức tạp. Chọn một hoạt động nhỏ và biến hôm nay thành một ngày đáng giá.",
     "continueTitle": "Học tiếp",
-    "speakWithAi": "Nói chuyện với AI",
     "speakWithAiNow": "Nói chuyện với AI ngay",
     "chatWithAi": "Chat với AI",
     "jumpIn": "Bắt đầu ngay",
@@ -311,10 +302,7 @@
     "savedForLater": "Đã lưu để học sau",
     "manage": "Quản lý",
     "tinyTip": "Mẹo nhỏ",
-    "speakFirst": "Cứ nói trước, hoàn hảo sau",
-    "niceWork": "Làm tốt lắm",
     "recentlyFinished": "Hoàn thành gần đây",
-    "allDone": "Đã hoàn thành",
     "moreWaysToLearn": "Thêm cách học",
     "moreWaysDescription": "Các hoạt động ngắn phù hợp với năng lượng của bạn hôm nay.",
     "explore": "Khám phá",
@@ -345,14 +333,12 @@
     "lessons": "Bài học",
     "fullLessonPacks": "Bộ bài học đầy đủ",
     "quickDrills": "Bài luyện nhanh",
-    "search": "Tìm kiếm",
     "findAnything": "Tìm bất kỳ nội dung nào",
     "unlockMorePractice": "Mở khóa thêm bài luyện",
     "continueLesson": "Tiếp tục “{title}”",
     "billing": "Thanh toán",
     "moreInProgressLessons": "Các bài học đang thực hiện sẽ xuất hiện ở đây khi bạn bắt đầu.",
     "recommendedNext": "Đề xuất tiếp theo",
-    "startLesson": "Bắt đầu bài học",
     "speakFirst": "Cứ nói trước, hoàn hảo sau",
     "playNow": "Chơi ngay",
     "dailyChallenge": "Thử thách hôm nay",
@@ -364,7 +350,6 @@
     "focusedSkillPractice": "luyện tập kỹ năng chuyên sâu",
     "integratedLessons": " Đang hiển thị các bài học tích hợp từ Learning API.",
     "manageFavoritesProgress": "Quản lý bài lưu và tiến độ",
-    "searchLessons": "Tìm bài học theo chủ đề, kỹ năng hoặc trình độ…",
     "clearLessonSearch": "Xóa tìm kiếm bài học",
     "myProgressArrow": "Tiến độ của tôi →",
     "fourSkillExercises": "Bài tập 4 kỹ năng →",
@@ -375,9 +360,7 @@
     "game": "Trò chơi: ",
     "practiceWithAi": "Luyện tập với AI",
     "playMiniGame": "Chơi trò chơi ngắn",
-    "noLessonsFound": "Không tìm thấy bài học",
     "tryAnotherKeyword": "Hãy thử từ khóa khác hoặc xóa bộ lọc hiện tại.",
-    "clearSearch": "Xóa tìm kiếm",
     "allLevels": "Tất cả trình độ",
     "loadingExercises": "Đang tải bài tập",
     "preparingPractice": "Đang chuẩn bị bài luyện cho trình độ này.",
@@ -403,7 +386,6 @@
     "exerciseUnavailable": "Bài tập này không khả dụng",
     "exerciseUnavailableDescription": "Bài có thể đã được chuyển hoặc liên kết chưa đầy đủ. Hãy quay lại kỹ năng này và chọn hoạt động khác.",
     "backToSkill": "Quay lại kỹ năng",
-    "backToToday": "Quay lại Hôm nay",
     "listen": "Nghe",
     "hideScript": "Ẩn nội dung",
     "showScript": "Hiện nội dung",
@@ -435,7 +417,6 @@
     "search": "Tìm kiếm",
     "resultsFor": "Kết quả cho “{query}”",
     "lessonsFound": "bài học được tìm thấy",
-    "browseAllLessons": "Xem tất cả bài học",
     "searchingLessons": "Đang tìm bài học",
     "searchingLessonsDescription": "Đang tìm nội dung phù hợp với mục tiêu của bạn.",
     "startLesson": "Bắt đầu bài học",
@@ -566,7 +547,6 @@
     "notFoundTitle": "Trang này không có trong kế hoạch học hôm nay",
     "notFoundDescription": "Liên kết có thể đã cũ hoặc hoạt động này đã được chuyển. Hãy chọn một lộ trình bên dưới và tiếp tục luyện tập.",
     "backToToday": "Về Hôm nay",
-    "practice": "Luyện tập",
     "notFoundHint": "Hãy tìm kiếm từ phần đầu trang hoặc chọn một lối tắt ở trên.",
     "searchLessons": "Tìm bài học",
     "searchLessonsPlaceholder": "Tìm theo chủ đề, kỹ năng hoặc trình độ…",
@@ -693,22 +673,66 @@
     "sampleDescription": "Một chủ đề xuyên suốt buổi học để mỗi bước chuẩn bị cho bước tiếp theo.",
     "sampleSteps": "Các bước trong bài học mẫu",
     "learnerNeeds": [
-      { "title": "Nói rõ ràng khi công việc trở nên thực tế", "body": "Luyện đúng những tình huống quan trọng: họp nhanh, gọi khách hàng, phỏng vấn và cập nhật dự án." },
-      { "title": "Nhận phản hồi hữu ích thật nhanh", "body": "Biết cần sửa gì sau khi thử: ngữ pháp, phát âm, từ vựng và cách trả lời tự nhiên hơn." },
-      { "title": "Xây dựng thói quen hằng ngày", "body": "Buổi học ngắn giúp duy trì tiếng Anh mà không cần ngồi học một khóa dài sau giờ làm." },
-      { "title": "Hiểu lỗi sai bằng tiếng Việt", "body": "Giải thích bằng tiếng Việt giúp bạn hiểu vì sao câu chưa đúng và cách nói tốt hơn lần sau." }
+      {
+        "title": "Nói rõ ràng khi công việc trở nên thực tế",
+        "body": "Luyện đúng những tình huống quan trọng: họp nhanh, gọi khách hàng, phỏng vấn và cập nhật dự án."
+      },
+      {
+        "title": "Nhận phản hồi hữu ích thật nhanh",
+        "body": "Biết cần sửa gì sau khi thử: ngữ pháp, phát âm, từ vựng và cách trả lời tự nhiên hơn."
+      },
+      {
+        "title": "Xây dựng thói quen hằng ngày",
+        "body": "Buổi học ngắn giúp duy trì tiếng Anh mà không cần ngồi học một khóa dài sau giờ làm."
+      },
+      {
+        "title": "Hiểu lỗi sai bằng tiếng Việt",
+        "body": "Giải thích bằng tiếng Việt giúp bạn hiểu vì sao câu chưa đúng và cách nói tốt hơn lần sau."
+      }
     ],
     "sessionBeats": [
-      { "title": "Nghe để hiểu tình huống", "detail": "Nghe một yêu cầu ngắn về công việc hoặc phỏng vấn và nắm nhiệm vụ, từ khóa cùng giọng điệu chính." },
-      { "title": "Đọc ngữ cảnh", "detail": "Đọc nhanh email, mô tả công việc hoặc brief ngắn để câu trả lời có đúng chi tiết." },
-      { "title": "Nói cùng gia sư AI", "detail": "Trả lời câu hỏi tiếp theo thành tiếng rồi thử lại với ngữ pháp và phát âm rõ hơn." },
-      { "title": "Viết và xem lại", "detail": "Viết tóm tắt hoặc câu trả lời ngắn; nhận phản hồi tiếng Việt và bản viết tự nhiên hơn để luyện lại." }
+      {
+        "title": "Nghe để hiểu tình huống",
+        "detail": "Nghe một yêu cầu ngắn về công việc hoặc phỏng vấn và nắm nhiệm vụ, từ khóa cùng giọng điệu chính."
+      },
+      {
+        "title": "Đọc ngữ cảnh",
+        "detail": "Đọc nhanh email, mô tả công việc hoặc brief ngắn để câu trả lời có đúng chi tiết."
+      },
+      {
+        "title": "Nói cùng gia sư AI",
+        "detail": "Trả lời câu hỏi tiếp theo thành tiếng rồi thử lại với ngữ pháp và phát âm rõ hơn."
+      },
+      {
+        "title": "Viết và xem lại",
+        "detail": "Viết tóm tắt hoặc câu trả lời ngắn; nhận phản hồi tiếng Việt và bản viết tự nhiên hơn để luyện lại."
+      }
     ],
     "skillPath": [
-      { "skill": "Nghe", "focus": "Nắm ý trong cuộc họp và cuộc gọi", "practice": "Đoạn nghe ngắn, họp nhanh, câu hỏi khách hàng và câu hỏi phỏng vấn.", "outcome": "Theo dõi ý chính, yêu cầu quan trọng và bước tiếp theo với ít lần dừng hơn." },
-      { "skill": "Nói", "focus": "Trả lời có cấu trúc và tự tin", "practice": "Hội thoại theo tình huống: giới thiệu, dự án, quyết định và câu hỏi hành vi.", "outcome": "Đưa ra câu trả lời A2–B1 rõ hơn và thử lại sau phản hồi về phát âm, ngữ pháp." },
-      { "skill": "Đọc", "focus": "Hiểu văn bản công việc nhanh hơn", "practice": "Email, mô tả công việc, tài liệu ngắn và ghi chú bài học với từ vựng trong ngữ cảnh.", "outcome": "Tìm được chi tiết cần thiết mà không phải dịch từng từ." },
-      { "skill": "Viết", "focus": "Gửi phản hồi đơn giản, tự nhiên", "practice": "Viết cập nhật, tóm tắt và câu trả lời phỏng vấn ngắn sau mỗi bài nói.", "outcome": "Dùng thì, từ ngữ và trật tự câu tốt hơn trong văn viết thực tế." }
+      {
+        "skill": "Nghe",
+        "focus": "Nắm ý trong cuộc họp và cuộc gọi",
+        "practice": "Đoạn nghe ngắn, họp nhanh, câu hỏi khách hàng và câu hỏi phỏng vấn.",
+        "outcome": "Theo dõi ý chính, yêu cầu quan trọng và bước tiếp theo với ít lần dừng hơn."
+      },
+      {
+        "skill": "Nói",
+        "focus": "Trả lời có cấu trúc và tự tin",
+        "practice": "Hội thoại theo tình huống: giới thiệu, dự án, quyết định và câu hỏi hành vi.",
+        "outcome": "Đưa ra câu trả lời A2–B1 rõ hơn và thử lại sau phản hồi về phát âm, ngữ pháp."
+      },
+      {
+        "skill": "Đọc",
+        "focus": "Hiểu văn bản công việc nhanh hơn",
+        "practice": "Email, mô tả công việc, tài liệu ngắn và ghi chú bài học với từ vựng trong ngữ cảnh.",
+        "outcome": "Tìm được chi tiết cần thiết mà không phải dịch từng từ."
+      },
+      {
+        "skill": "Viết",
+        "focus": "Gửi phản hồi đơn giản, tự nhiên",
+        "practice": "Viết cập nhật, tóm tắt và câu trả lời phỏng vấn ngắn sau mỗi bài nói.",
+        "outcome": "Dùng thì, từ ngữ và trật tự câu tốt hơn trong văn viết thực tế."
+      }
     ],
     "lessonPreview": "Xem trước bài học · 4 kỹ năng",
     "listenRead": "Nghe + đọc",
@@ -718,15 +742,30 @@
     "skillsTitle": "Nghe, nói, đọc và viết trong một lộ trình thực tế.",
     "skillsDescription": "Bài kiểm tra đầu vào đánh giá cả 4 kỹ năng. Sau đó bài học kết nối chúng qua các tình huống bạn có thể dùng ở nơi làm việc hoặc phỏng vấn.",
     "whyItems": [
-      { "title": "Một chủ đề, bốn kỹ năng", "body": "Nghe, đọc, nói và viết củng cố cùng một tình huống thay vì trở thành các bài luyện tách rời." },
-      { "title": "Phản hồi sau khi thực hành", "body": "Bạn thử trước, sau đó nhận giải thích bằng tiếng Việt và cách diễn đạt tốt hơn để lặp lại ngay." },
-      { "title": "Luyện theo điểm yếu", "body": "Các lỗi thường gặp như thì, s/es, kết hợp từ hoặc bỏ sót từ khóa có thể được đưa vào buổi sau." }
+      {
+        "title": "Một chủ đề, bốn kỹ năng",
+        "body": "Nghe, đọc, nói và viết củng cố cùng một tình huống thay vì trở thành các bài luyện tách rời."
+      },
+      {
+        "title": "Phản hồi sau khi thực hành",
+        "body": "Bạn thử trước, sau đó nhận giải thích bằng tiếng Việt và cách diễn đạt tốt hơn để lặp lại ngay."
+      },
+      {
+        "title": "Luyện theo điểm yếu",
+        "body": "Các lỗi thường gặp như thì, s/es, kết hợp từ hoặc bỏ sót từ khóa có thể được đưa vào buổi sau."
+      }
     ],
     "why": "Vì sao hiệu quả",
     "whyTitle": "Dễ duy trì thói quen hơn khi mỗi bài học đều có mục tiêu.",
     "useCasesItems": [
-      { "title": "Trước buổi phỏng vấn dự án", "body": "Luyện cách nói về vai trò, vấn đề, giải pháp và điều đã học — rồi rút gọn câu trả lời." },
-      { "title": "Trước cuộc họp hằng tuần", "body": "Tập dượt cập nhật tiến độ, trả lời câu hỏi tiếp theo và chuyển ghi chú thành phần tóm tắt ngắn." }
+      {
+        "title": "Trước buổi phỏng vấn dự án",
+        "body": "Luyện cách nói về vai trò, vấn đề, giải pháp và điều đã học — rồi rút gọn câu trả lời."
+      },
+      {
+        "title": "Trước cuộc họp hằng tuần",
+        "body": "Tập dượt cập nhật tiến độ, trả lời câu hỏi tiếp theo và chuyển ghi chú thành phần tóm tắt ngắn."
+      }
     ],
     "useCases": "Tình huống minh họa",
     "useCasesTitle": "Chọn một tình huống thực tế rồi luyện tiếng Anh xoay quanh nó.",
@@ -737,12 +776,30 @@
     "loadingPlans": "Đang tải các gói…",
     "faq": "Câu hỏi thường gặp",
     "faqItems": [
-      { "q": "Tôi ở trình độ A2 và yếu nói — có thể bắt đầu không?", "a": "Có. Bài kiểm tra đầu vào đánh giá nghe, nói, đọc và viết, sau đó lộ trình bắt đầu ở đúng trình độ. Bạn vẫn luyện cả bốn kỹ năng, bao gồm kỹ năng còn yếu." },
-      { "q": "Tôi chỉ muốn luyện nói có được không?", "a": "Mỗi buổi học kết nối nói với nghe, đọc và một bài viết ngắn. Phần nói được tập trung, nhưng đầu vào và phần xem lại giúp câu trả lời tốt hơn." },
-      { "q": "Mỗi ngày cần học bao nhiêu phút?", "a": "Khoảng 20–30 phút cho một vòng đầy đủ: nghe, đọc, nói với AI, sau đó viết và xem lại phản hồi bằng tiếng Việt." },
-      { "q": "Gói Free khác gói trả phí thế nào?", "a": "Gói Free cho phép thử vòng học hằng ngày với giới hạn sử dụng gia sư AI. Gói trả phí dùng catalog trực tiếp bên trên để giá và quyền lợi luôn được cập nhật." },
-      { "q": "Âm thanh tôi nói được xử lý thế nào?", "a": "Đoạn âm thanh ngắn được gửi đến nhà cung cấp speech để phiên âm và phát âm thanh gia sư. Chúng tôi không bán giọng nói hay bản phiên âm của bạn." },
-      { "q": "Cookie được sử dụng thế nào?", "a": "Cookie phiên giúp bạn đăng nhập. Bộ nhớ tùy chọn trên thiết bị ghi nhớ giao diện và cài đặt phát. Chúng tôi không dùng cookie quảng cáo." }
+      {
+        "q": "Tôi ở trình độ A2 và yếu nói — có thể bắt đầu không?",
+        "a": "Có. Bài kiểm tra đầu vào đánh giá nghe, nói, đọc và viết, sau đó lộ trình bắt đầu ở đúng trình độ. Bạn vẫn luyện cả bốn kỹ năng, bao gồm kỹ năng còn yếu."
+      },
+      {
+        "q": "Tôi chỉ muốn luyện nói có được không?",
+        "a": "Mỗi buổi học kết nối nói với nghe, đọc và một bài viết ngắn. Phần nói được tập trung, nhưng đầu vào và phần xem lại giúp câu trả lời tốt hơn."
+      },
+      {
+        "q": "Mỗi ngày cần học bao nhiêu phút?",
+        "a": "Khoảng 20–30 phút cho một vòng đầy đủ: nghe, đọc, nói với AI, sau đó viết và xem lại phản hồi bằng tiếng Việt."
+      },
+      {
+        "q": "Gói Free khác gói trả phí thế nào?",
+        "a": "Gói Free cho phép thử vòng học hằng ngày với giới hạn sử dụng gia sư AI. Gói trả phí dùng catalog trực tiếp bên trên để giá và quyền lợi luôn được cập nhật."
+      },
+      {
+        "q": "Âm thanh tôi nói được xử lý thế nào?",
+        "a": "Đoạn âm thanh ngắn được gửi đến nhà cung cấp speech để phiên âm và phát âm thanh gia sư. Chúng tôi không bán giọng nói hay bản phiên âm của bạn."
+      },
+      {
+        "q": "Cookie được sử dụng thế nào?",
+        "a": "Cookie phiên giúp bạn đăng nhập. Bộ nhớ tùy chọn trên thiết bị ghi nhớ giao diện và cài đặt phát. Chúng tôi không dùng cookie quảng cáo."
+      }
     ],
     "faqTitle": "Giải đáp rõ ràng trước bài học đầu tiên.",
     "faqDescription": "Tìm hiểu về bài kiểm tra đầu vào, luyện tập hằng ngày, giới hạn gói và quyền riêng tư.",
@@ -965,6 +1022,22 @@
       "nextWord": "Từ tiếp theo",
       "timerWaits": "Đồng hồ bắt đầu khi phát âm thanh…",
       "hearAgain": "Nghe lại (còn {count} lượt)",
+      "hunt": {
+        "listenFirst": "Nghe đoạn âm thanh rồi chọn các từ khoá bạn nghe được.",
+        "hearAgain": "Nghe lại (còn {count} lượt)",
+        "pick": "Chọn {count} từ",
+        "counterLabel": "Đã chọn {selected}/{total}",
+        "hit": "Đúng",
+        "falsePick": "Chọn sai",
+        "missed": "Bỏ lỡ",
+        "transcript": "Bản ghi",
+        "tapKeyword": "Chạm vào từ được tô sáng để xem nghĩa.",
+        "meaning": "Nghĩa",
+        "speakWord": "Nghe {word}",
+        "keywordsFound": "{hits}/{total} từ khoá",
+        "roundSummary": "Kết quả từng vòng",
+        "missedWords": "Từ hay bỏ lỡ nhất"
+      },
       "onTrack": "Đúng hướng",
       "checkHint": "Xem gợi ý",
       "sample": "Câu mẫu:",
@@ -975,7 +1048,18 @@
       "startDeck": "Bắt đầu {deck} · {count} từ",
       "reviewRound": "Vòng ôn tập {count}",
       "practiceMissedHint": "Luyện lại {count} từ bạn đánh dấu ✗ cho đến khi thuộc hết.",
-      "pickAnother": "Chọn bộ thẻ khác hoặc chơi lại bộ này."
+      "pickAnother": "Chọn bộ thẻ khác hoặc chơi lại bộ này.",
+      "covered": "Đã có",
+      "missingParts": "Còn thiếu",
+      "overLimit": "Quá dài: {count} từ (tối đa {max}).",
+      "wordsUsed": "{count} từ",
+      "timerPaused": "Đồng hồ tạm dừng khi bạn đang nói",
+      "points": "{count} điểm",
+      "bestStreak": "Chuỗi đúng dài nhất: {count}",
+      "reviewAnswers": "Câu trả lời của bạn",
+      "yourAnswer": "Bạn:",
+      "noAnswer": "(chưa trả lời)",
+      "retryMissed": "Làm lại câu sai ({count})"
     },
     "removeSavedExercise": "Bỏ lưu bài tập",
     "scenario": {
@@ -1045,6 +1129,12 @@
     "upgradeFailed": "Không tạo được phiên nâng cấp"
   },
   "settings": {
+    "appearance": {
+      "themeDescription": "Chọn giao diện của ứng dụng. Thay đổi được áp dụng khi bạn lưu.",
+      "accentDescription": "Màu nhấn cho nút và các mục đang chọn",
+      "textSizeDescription": "Giúp chữ dễ đọc hơn trên toàn ứng dụng",
+      "motionDescription": "Điều chỉnh hiệu ứng chuyển động"
+    },
     "textSize": {
       "default": "Mặc định",
       "defaultHint": "16px",
@@ -1088,7 +1178,32 @@
       "updatedOthers": "Mật khẩu đã được đổi. Các thiết bị khác đã bị đăng xuất.",
       "updated": "Đổi mật khẩu thành công.",
       "ok": "OK",
-      "updateFailed": "Không cập nhật được mật khẩu. Hãy thử lại."
+      "updateFailed": "Không cập nhật được mật khẩu. Hãy thử lại.",
+      "passwordDescription": "Hãy dùng mật khẩu mạnh và không dùng lại ở nơi khác.",
+      "revokeOthersDescription": "Đăng xuất mọi thiết bị khác khi đổi mật khẩu.",
+      "confirmChangeTitle": "Đổi mật khẩu?",
+      "confirmChange": "Mật khẩu của tài khoản này sẽ được thay đổi.",
+      "confirmChangeOthers": "Mật khẩu sẽ được thay đổi và tất cả thiết bị khác sẽ bị đăng xuất.",
+      "cancel": "Hủy",
+      "sessionsTitle": "Thiết bị đã đăng nhập",
+      "sessionsDescription": "Các thiết bị đang đăng nhập vào tài khoản của bạn.",
+      "thisDevice": "Thiết bị này",
+      "unknownDevice": "Thiết bị không xác định",
+      "lastActive": "Hoạt động lần cuối {date}",
+      "ipAddress": "IP {ip}",
+      "signOut": "Đăng xuất",
+      "signOutAll": "Đăng xuất tất cả thiết bị khác",
+      "noOtherSessions": "Không có thiết bị nào khác đang đăng nhập.",
+      "sessionsLoading": "Đang tải thiết bị…",
+      "sessionsLoadFailed": "Không tải được danh sách thiết bị. Hãy thử lại.",
+      "retry": "Thử lại",
+      "revokeTitle": "Đăng xuất thiết bị này?",
+      "revokeDescription": "{device} sẽ bị đăng xuất khỏi tài khoản của bạn.",
+      "revokeAllTitle": "Đăng xuất tất cả thiết bị khác?",
+      "revokeAllDescription": "Mọi thiết bị ngoại trừ thiết bị này sẽ bị đăng xuất.",
+      "revokeFailed": "Không đăng xuất được thiết bị. Hãy thử lại.",
+      "revokedAllTitle": "Đã đăng xuất thiết bị",
+      "revokedAll": "Đã đăng xuất tất cả thiết bị khác."
     },
     "notifications": {
       "iosHomeScreen": "Trên iPhone, hãy thêm EngliTutor vào Màn hình chính để thiết bị này nhận được thông báo.",
@@ -1097,11 +1212,32 @@
       "enableFailed": "Không bật được thông báo.",
       "notConfigured": "Máy chủ này chưa hỗ trợ thông báo.",
       "saveFailed": "Không lưu được cài đặt thông báo.",
+      "loadFailed": "Không tải được cài đặt thông báo.",
+      "retry": "Thử lại",
       "noSubscription": "Trình duyệt này không trả về đăng ký nhận thông báo.",
       "testHint": "Gửi một thông báo thử để kiểm tra thiết bị này.",
       "testButton": "Gửi thông báo thử",
       "testSent": "Đã gửi thông báo thử. Thông báo sẽ hiện sau vài giây.",
-      "testFailed": "Không gửi được thông báo thử."
+      "testFailed": "Không gửi được thông báo thử.",
+      "learningTitle": "Học tập",
+      "learningDescription": "Nhắc nhở giúp bạn duy trì thói quen học.",
+      "reminderTimeDescription": "Thời điểm gửi nhắc nhở hằng ngày.",
+      "deviceTitle": "Thiết bị này",
+      "permissionLabel": "Quyền thông báo",
+      "statusGranted": "Đã cho phép",
+      "statusDefault": "Chưa cấp quyền",
+      "statusDenied": "Đã chặn",
+      "statusUnsupported": "Không hỗ trợ",
+      "statusIosInstall": "Cần cài ứng dụng",
+      "hintGranted": "Thiết bị này có thể nhận thông báo.",
+      "hintDefault": "Trình duyệt sẽ hỏi quyền khi bạn lưu với ít nhất một loại thông báo được bật."
+    },
+    "form": {
+      "save": "Lưu",
+      "saving": "Đang lưu…",
+      "saved": "Đã lưu",
+      "saveFailed": "Lưu thất bại",
+      "unsaved": "Bạn có thay đổi chưa lưu."
     },
     "loadingTitle": "Đang tải cài đặt",
     "loadingDescription": "Đang cập nhật mục này…",
@@ -1121,11 +1257,69 @@
     },
     "referral": {
       "redeemFailed": "Không dùng được mã giới thiệu. Hãy thử lại.",
+      "inviteDescription": "Bạn bè nhận {days} ngày Premium khi đổi mã của bạn.",
+      "rewardEarning": "Bạn nhận {days} ngày cho mỗi người bạn (tối đa {max} ngày).",
+      "rewardLimit": "Bạn đã đạt giới hạn thưởng giới thiệu {max} ngày.",
+      "daysValue": "{days} ngày",
+      "shareUrlLabel": "Liên kết chia sẻ",
+      "copyFailed": "Không sao chép được vào bộ nhớ tạm. Hãy sao chép thủ công.",
+      "codeLabel": "Mã giới thiệu",
+      "redeemButton": "Đổi mã",
+      "alreadyRedeemed": "Bạn đã dùng mã giới thiệu {code}.",
+      "loadFailed": "Không tải được thông tin giới thiệu.",
+      "retry": "Thử lại",
+      "recentDescription": "Những người bạn vừa đổi mã của bạn.",
       "redeemedNotice": "Đã dùng mã giới thiệu. Bạn nhận được {days} ngày Premium.",
       "redeemedTitle": "Đã dùng mã giới thiệu",
       "redeemedDescription": "Bạn nhận được {days} ngày Premium.",
       "notRedeemedTitle": "Chưa dùng được mã giới thiệu",
       "notRedeemedDescription": "Hãy thử lại trong Cài đặt → Giới thiệu. Tài khoản của bạn không bị ảnh hưởng."
+    },
+    "billing": {
+      "planDescription": "Gói của bạn, chu kỳ thanh toán và ngày gia hạn.",
+      "upgrade": "Nâng cấp lên Premium",
+      "renewsOnLabel": "Gia hạn vào",
+      "endsOnLabel": "Kết thúc vào",
+      "historyTitle": "Lịch sử thanh toán",
+      "historyDescription": "Hoạt động của gói hiện tại. Hóa đơn cũ không hiển thị ở đây.",
+      "historyEmpty": "Chưa có lịch sử thanh toán.",
+      "historyEmptyHint": "Khi bạn dùng thử hoặc đăng ký, hoạt động của gói sẽ hiển thị ở đây.",
+      "historyTrial": "Dùng thử Premium",
+      "historyBonus": "Ngày Premium thưởng",
+      "loadFailed": "Không tải được thông tin thanh toán.",
+      "retry": "Thử lại"
+    },
+    "groups": {
+      "account": "Tài khoản",
+      "learning": "Học tập",
+      "app": "Ứng dụng",
+      "plan": "Gói & ưu đãi"
+    },
+    "nav": {
+      "back": "Quay lại",
+      "overview": "Tổng quan",
+      "backToSettings": "Quay lại Cài đặt"
+    },
+    "account": {
+      "profileDescription": "Tên, thông tin liên hệ và công việc của bạn.",
+      "learningDescription": "Ngôn ngữ, trình độ mục tiêu và điều bạn muốn đạt được.",
+      "securityDescription": "Cách bạn đăng nhập và phiên hiện tại."
+    },
+    "overview": {
+      "profile": "Hồ sơ",
+      "viewProfile": "Quản lý tài khoản",
+      "plan": "Gói hiện tại",
+      "managePlan": "Quản lý thanh toán",
+      "sourceSubscription": "Đăng ký",
+      "sourceTrial": "Dùng thử",
+      "sourceBonus": "Ngày tặng",
+      "sourceFree": "Miễn phí",
+      "renewsOn": "Gia hạn {date}",
+      "endsOn": "Kết thúc {date}",
+      "shortcuts": "Lối tắt",
+      "legal": "Pháp lý",
+      "loadFailed": "Hiện chưa thể tải nội dung này.",
+      "unnamed": "Tài khoản của bạn"
     }
   },
   "translate": {
@@ -1134,6 +1328,34 @@
     "tone": "Sắc thái:",
     "keywordInContext": "Từ khoá trong ngữ cảnh",
     "remember": "Ghi nhớ",
+    "sentenceTranslation": "Bản dịch cả câu",
+    "sentenceError": "Chưa phân tích được câu này. Phần nghĩa của từ vẫn dùng được.",
+    "clausesTitle": "Cấu trúc câu",
+    "clauseRole": {
+      "main": "Mệnh đề chính",
+      "subordinate": "Mệnh đề phụ",
+      "relative": "Mệnh đề quan hệ",
+      "condition": "Điều kiện",
+      "contrast": "Tương phản",
+      "purpose": "Mục đích",
+      "other": "Mệnh đề"
+    },
+    "onlyThisWord": "Chỉ xem từ này",
+    "wordOnlyMeaning": "Nghĩa riêng của từ “{word}”",
+    "expressionType": {
+      "phrasal_verb": "Cụm động từ",
+      "prepositional_verb": "Động từ + giới từ",
+      "verb_phrase": "Cụm động từ chia thì",
+      "compound_noun": "Danh từ ghép",
+      "compound_adj": "Tính từ ghép",
+      "noun_phrase": "Cụm danh từ",
+      "adj_prep": "Tính từ + giới từ",
+      "noun_prep": "Danh từ + giới từ",
+      "prepositional_phrase": "Cụm giới từ",
+      "idiom": "Thành ngữ",
+      "collocation": "Cụm từ cố định",
+      "other": "Cụm từ"
+    },
     "sourceDictionary": "Từ từ điển · không dùng AI",
     "sourceDemo": "Chế độ demo · cấu hình OpenAI để dịch thật",
     "sourceAi": "Kết quả đã lưu hoặc từ AI · hãy kiểm tra lại nội dung quan trọng",

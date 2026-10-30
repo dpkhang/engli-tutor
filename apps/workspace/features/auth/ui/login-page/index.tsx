@@ -35,6 +35,7 @@ export function LoginPage() {
   const { data, isPending: sessionPending } = useSession();
   const [mode, setMode] = useState<AuthMode>("login");
   const [pending, setPending] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // useSession().isPending is true during SSR and false on the first client
   // paint, which would otherwise mismatch the submit button label/disabled.
@@ -70,6 +71,8 @@ export function LoginPage() {
       referralCode: nextMode === "register" ? form.getValues("referralCode") : "",
     });
   }, [form]);
+
+  const togglePassword = useCallback(() => setShowPassword((value) => !value), []);
 
   const onSubmit = useMemo(
     () =>
@@ -123,6 +126,8 @@ export function LoginPage() {
     [form, returnTo],
   );
 
+  const { errors } = form.formState;
+
   if (sessionPending || data?.user) {
     return null;
   }
@@ -130,14 +135,23 @@ export function LoginPage() {
   return (
     <LoginPageView
       mode={mode}
+      isLogin={mode === "login"}
       pending={pending || (hydrated && sessionPending)}
       error={error}
-      register={form.register}
-      errors={form.formState.errors}
+      nameField={form.register("name")}
+      emailField={form.register("email")}
+      passwordField={form.register("password")}
+      referralField={form.register("referralCode")}
+      nameError={errors.name?.message}
+      emailError={errors.email?.message}
+      passwordError={errors.password?.message}
+      referralError={errors.referralCode?.message}
+      showPassword={showPassword}
       policyHref="/policy"
       cookiesHref="/policy/cookies"
       homeHref={marketingUrl}
       onModeChange={changeMode}
+      onTogglePassword={togglePassword}
       onSubmit={onSubmit}
     />
   );

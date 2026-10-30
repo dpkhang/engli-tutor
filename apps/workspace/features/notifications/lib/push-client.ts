@@ -1,4 +1,9 @@
-import { notificationsApi, type NotificationPreferences, type PushKeys } from "../api/notifications-api";
+import {
+  notificationsApi,
+  type NotificationPreferences,
+  type PushKeys,
+} from "../api/notifications-api";
+import { resolveDevicePushState, type DevicePushState } from "./push-state";
 
 type PushResult = { ok: true } | { ok: false; message: string };
 
@@ -10,10 +15,13 @@ function browserTimeZone() {
 
 export function iosNeedsHomeScreen() {
   const ua = navigator.userAgent;
-  const ios = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const ios =
+    /iPhone|iPad|iPod/i.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const standalone =
     window.matchMedia("(display-mode: standalone)").matches ||
-    ("standalone" in navigator && Boolean((navigator as Navigator & { standalone?: boolean }).standalone));
+    ("standalone" in navigator &&
+      Boolean((navigator as Navigator & { standalone?: boolean }).standalone));
   return ios && !standalone;
 }
 
@@ -22,12 +30,28 @@ function urlBase64ToUint8Array(value: string) {
   const base64 = (value + padding).replace(/-/g, "+").replace(/_/g, "/");
   const raw = atob(base64);
   const output = new Uint8Array(raw.length);
-  for (let index = 0; index < raw.length; index += 1) output[index] = raw.charCodeAt(index);
+  for (let index = 0; index < raw.length; index += 1)
+    output[index] = raw.charCodeAt(index);
   return output;
 }
 
 function canPush() {
-  return "Notification" in window && "serviceWorker" in navigator && "PushManager" in window;
+  return (
+    "Notification" in window &&
+    "serviceWorker" in navigator &&
+    "PushManager" in window
+  );
+}
+
+/** Read-only: never prompts the user. */
+export function readDevicePushState(): DevicePushState {
+  if (typeof window === "undefined") return "unknown";
+  const supported = canPush();
+  return resolveDevicePushState({
+    iosNeedsHomeScreen: iosNeedsHomeScreen(),
+    canPush: supported,
+    permission: supported ? Notification.permission : null,
+  });
 }
 
 async function currentSubscription() {
@@ -66,7 +90,9 @@ export async function dropSubscription() {
   if (!("serviceWorker" in navigator)) return;
   const subscription = await currentSubscription();
   if (!subscription) return;
-  await notificationsApi.unsubscribe(subscription.endpoint).catch(() => undefined);
+  await notificationsApi
+    .unsubscribe(subscription.endpoint)
+    .catch(() => undefined);
   await subscription.unsubscribe();
 }
 
@@ -77,10 +103,13 @@ export async function enableDevicePush(t: Translate): Promise<PushResult> {
       message: t("settings.notifications.iosHomeScreen"),
     };
   }
-  if (!canPush()) return { ok: false, message: t("settings.notifications.unsupported") };
+  if (!canPush())
+    return { ok: false, message: t("settings.notifications.unsupported") };
   // iOS does not treat <select> changes as a user gesture, so re-requesting there reports "denied".
   const permission =
-    Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
+    Notification.permission === "granted"
+      ? "granted"
+      : await Notification.requestPermission();
   if (permission !== "granted") {
     return {
       ok: false,
@@ -102,7 +131,12 @@ export async function enableDevicePush(t: Translate): Promise<PushResult> {
 }
 
 export async function syncGrantedSubscription() {
-  if (!canPush() || Notification.permission !== "granted" || iosNeedsHomeScreen()) return;
+  if (
+    !canPush() ||
+    Notification.permission !== "granted" ||
+    iosNeedsHomeScreen()
+  )
+    return;
   const prefs = await notificationsApi.preferences();
   if (
     !prefs.notifyReminders &&

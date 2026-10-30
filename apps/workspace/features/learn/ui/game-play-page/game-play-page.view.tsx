@@ -3,13 +3,33 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LocalizedLink as Link } from "@/features/i18n";
 import { useUpgradeModal } from "@/features/payments";
-import { ArrowLeft, Bookmark, Check, ChevronLeft, Gamepad2, House, Lightbulb, Mic2, RotateCcw, Volume2, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Bookmark,
+  Check,
+  ChevronLeft,
+  Gamepad2,
+  House,
+  Lightbulb,
+  Mic2,
+  RotateCcw,
+  Volume2,
+  X,
+} from "lucide-react";
 import { Button, SegmentedSwitch, cn } from "@engli-tutor/ui";
 import { DataLoadingState, NotFoundPage } from "@/features/layout";
 import { ClickableTranslateText } from "@/features/translate";
 import { useAiSpeech } from "@/features/speaking-lab";
 import { useVoiceInput } from "@/features/tutor-chat";
-import { sampleAnswerFor, scoreGameRound, shuffleInPlace } from "../../model/games";
+import {
+  evaluateOpen,
+  longestStreak,
+  sampleAnswerFor,
+  scoreGameRound,
+  shuffleInPlace,
+  timeLimitFor,
+  type OpenEvaluation,
+} from "../../model/games";
 import type {
   LearningGame,
   LearningGameDeck,
@@ -21,8 +41,21 @@ import type { LessonPack } from "../../model/curriculum";
 import { VOCAB_MODES, type VocabMode } from "../../model/vocab-trainer";
 import { useWorkspaceI18n } from "@/features/i18n";
 import { LocalizedLink } from "@/features/i18n";
+import { HuntRound } from "./hunt-round";
+import { HuntReveal, HuntResultsSummary } from "./hunt-reveal";
 
 export type GamePlayPhase = "intro" | "playing" | "results";
+
+/** Seconds of timer freeze allowed per round while the mic is recording. */
+const MAX_MIC_PAUSE_SECONDS = 20;
+
+export type RoundTiming = { secondsLeft: number; totalSeconds: number };
+
+export type RoundAnswer = {
+  value: string;
+  correct: boolean;
+  points: number;
+};
 
 export type FlashcardDeckOption = LearningGameDeck & {
   reviewCount: number;
@@ -87,15 +120,21 @@ function DeckPicker({
                 onClick={() => onPickDeck(deck.id)}
                 className="flex-1 px-4 py-3 text-left"
               >
-                <span className="block text-sm font-semibold text-foreground">{deck.title}</span>
+                <span className="block text-sm font-semibold text-foreground">
+                  {deck.title}
+                </span>
                 <span className="mt-1 block text-xs text-muted-foreground">
                   {t("learn.game.wordCount", { count: deck.cardCount })}
-                  {deck.masteredCount > 0 ? ` · ${t("learn.game.mastered", { count: deck.masteredCount })}` : ""}
+                  {deck.masteredCount > 0
+                    ? ` · ${t("learn.game.mastered", { count: deck.masteredCount })}`
+                    : ""}
                 </span>
                 <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-muted">
                   <span
                     className="block h-full rounded-full bg-emerald-500"
-                    style={{ width: `${Math.round((deck.masteredCount / Math.max(1, deck.cardCount)) * 100)}%` }}
+                    style={{
+                      width: `${Math.round((deck.masteredCount / Math.max(1, deck.cardCount)) * 100)}%`,
+                    }}
                   />
                 </span>
               </button>
@@ -114,7 +153,9 @@ function DeckPicker({
         })}
       </div>
       <div className="space-y-2">
-        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{t("learn.game.mode")}</p>
+        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          {t("learn.game.mode")}
+        </p>
         <SegmentedSwitch
           value={mode}
           onChange={onPickMode}
@@ -131,10 +172,15 @@ function DeckPicker({
           <p className="text-xs text-muted-foreground">
             {t("learn.game.lockedModesNote")}
           </p>
-        ) : mode === "picture" && activeDeck && activeDeck.pictureCount < activeDeck.cardCount ? (
+        ) : mode === "picture" &&
+          activeDeck &&
+          activeDeck.pictureCount < activeDeck.cardCount ? (
           <p className="text-xs text-muted-foreground">
             {activeDeck.pictureCount
-              ? t("learn.game.picturesPartial", { count: activeDeck.pictureCount, total: activeDeck.cardCount })
+              ? t("learn.game.picturesPartial", {
+                  count: activeDeck.pictureCount,
+                  total: activeDeck.cardCount,
+                })
               : t("learn.game.noPictures")}
           </p>
         ) : null}
@@ -192,10 +238,19 @@ function ChoiceRound({
             onClick={() => onChange(String(optionIndex))}
             className={cn(
               "flex w-full rounded-xl border px-4 py-3.5 text-left text-sm transition-all",
-              selected && !locked && "border-primary bg-primary/8 ring-2 ring-primary/10",
-              locked && isCorrect && "border-emerald-400 bg-emerald-50 dark:bg-emerald-400/10",
-              locked && selected && !isCorrect && "border-destructive/50 bg-destructive/5",
-              !selected && !locked && "border-border hover:border-primary/50 hover:bg-primary/5",
+              selected &&
+                !locked &&
+                "border-primary bg-primary/8 ring-2 ring-primary/10",
+              locked &&
+                isCorrect &&
+                "border-emerald-400 bg-emerald-50 dark:bg-emerald-400/10",
+              locked &&
+                selected &&
+                !isCorrect &&
+                "border-destructive/50 bg-destructive/5",
+              !selected &&
+                !locked &&
+                "border-border hover:border-primary/50 hover:bg-primary/5",
               locked && "cursor-default",
             )}
           >
@@ -213,15 +268,36 @@ function OpenRound({
   placeholder,
   allowMic,
   onChange,
+  onRecordingChange,
 }: {
   value: string;
   locked: boolean;
   placeholder: string;
   allowMic: boolean;
   onChange: (value: string) => void;
+  onRecordingChange?: (recording: boolean) => void;
 }) {
   const t = useWorkspaceI18n();
-  const voice = useVoiceInput((text) => onChange(text));
+  const valueRef = useRef(value);
+  valueRef.current = value;
+  const lockedRef = useRef(locked);
+  lockedRef.current = locked;
+  // Text typed before the mic started; the transcript is appended to it instead of replacing it.
+  const prefixRef = useRef("");
+  const voice = useVoiceInput((text) => {
+    if (lockedRef.current) return;
+    onChange(`${prefixRef.current} ${text}`.trim());
+  });
+  const { recording, stop: stopVoice } = voice;
+
+  useEffect(() => {
+    onRecordingChange?.(recording);
+  }, [onRecordingChange, recording]);
+
+  useEffect(() => {
+    if (locked && recording) stopVoice();
+  }, [locked, recording, stopVoice]);
+
   return (
     <div className="space-y-3">
       <textarea
@@ -239,15 +315,24 @@ function OpenRound({
             variant="outline"
             className="rounded-full"
             disabled={!voice.supported}
-            onClick={() => void voice.toggle()}
+            onClick={() => {
+              if (!voice.recording) prefixRef.current = valueRef.current.trim();
+              void voice.toggle();
+            }}
           >
             <Mic2 className="size-4" />
-            {voice.recording ? t("learn.game.stop") : t("learn.game.speakInstead")}
+            {voice.recording
+              ? t("learn.game.stop")
+              : t("learn.game.speakInstead")}
           </Button>
           {voice.interim ? (
-            <span className="text-xs text-muted-foreground">{voice.interim}</span>
+            <span className="text-xs text-muted-foreground">
+              {voice.interim}
+            </span>
           ) : null}
-          {voice.error ? <span className="text-xs text-destructive">{voice.error}</span> : null}
+          {voice.error ? (
+            <span className="text-xs text-destructive">{voice.error}</span>
+          ) : null}
         </div>
       ) : null}
     </div>
@@ -282,14 +367,21 @@ function OrderRound({
               disabled={locked}
               onClick={() => {
                 if (locked) return;
-                if (picked) onChange(value.filter((entry) => entry !== item.originalIndex));
+                if (picked)
+                  onChange(
+                    value.filter((entry) => entry !== item.originalIndex),
+                  );
                 else onChange([...value, item.originalIndex]);
               }}
               className={cn(
                 "flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left text-sm transition-all",
                 picked && !locked && "border-primary bg-primary/8",
-                locked && picked && "border-emerald-400 bg-emerald-50 dark:bg-emerald-400/10",
-                !picked && !locked && "border-border hover:border-primary/50 hover:bg-primary/5",
+                locked &&
+                  picked &&
+                  "border-emerald-400 bg-emerald-50 dark:bg-emerald-400/10",
+                !picked &&
+                  !locked &&
+                  "border-border hover:border-primary/50 hover:bg-primary/5",
                 locked && "cursor-default",
               )}
             >
@@ -319,7 +411,9 @@ function MatchRound({
   onChange: (value: Array<number | null>) => void;
 }) {
   const [selectedLeft, setSelectedLeft] = useState<number | null>(null);
-  const usedRights = new Set(mapping.filter((item): item is number => item !== null));
+  const usedRights = new Set(
+    mapping.filter((item): item is number => item !== null),
+  );
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
@@ -334,8 +428,11 @@ function MatchRound({
               onClick={() => setSelectedLeft(leftIndex)}
               className={cn(
                 "w-full rounded-xl border px-4 py-3 text-left text-sm",
-                selectedLeft === leftIndex && "border-primary bg-primary/8 ring-2 ring-primary/10",
-                matched !== null && matched !== undefined && "border-emerald-400/60",
+                selectedLeft === leftIndex &&
+                  "border-primary bg-primary/8 ring-2 ring-primary/10",
+                matched !== null &&
+                  matched !== undefined &&
+                  "border-emerald-400/60",
                 !locked && "hover:border-primary/50",
                 locked && "cursor-default",
               )}
@@ -380,7 +477,13 @@ function MatchRound({
   );
 }
 
-function PicturePrompt({ imageUrl, imageEmoji }: { imageUrl?: string; imageEmoji?: string }) {
+function PicturePrompt({
+  imageUrl,
+  imageEmoji,
+}: {
+  imageUrl?: string;
+  imageEmoji?: string;
+}) {
   const [failed, setFailed] = useState(false);
   const showImage = Boolean(imageUrl) && !failed;
   return (
@@ -415,7 +518,10 @@ function SpellRound({
   onChange: (value: string) => void;
 }) {
   const shuffled = useMemo(
-    () => shuffleInPlace(letters.map((letter, originalIndex) => ({ originalIndex, letter }))),
+    () =>
+      shuffleInPlace(
+        letters.map((letter, originalIndex) => ({ originalIndex, letter })),
+      ),
     [letters],
   );
   const t = useWorkspaceI18n();
@@ -493,54 +599,6 @@ function SpellRound({
   );
 }
 
-function HuntRound({
-  options,
-  selected,
-  locked,
-  targetCount,
-  onChange,
-}: {
-  options: string[];
-  selected: string[];
-  locked: boolean;
-  targetCount: number;
-  onChange: (value: string[]) => void;
-}) {
-  const t = useWorkspaceI18n();
-  return (
-    <div className="space-y-3">
-      <p className="text-xs text-muted-foreground">
-        {t("learn.game.huntHint", { count: targetCount })} · {selected.length}/{targetCount}
-      </p>
-      <div className="flex flex-wrap gap-2">
-        {options.map((word) => {
-          const on = selected.includes(word);
-          return (
-            <button
-              key={word}
-              type="button"
-              disabled={locked || (!on && selected.length >= targetCount)}
-              onClick={() => {
-                if (locked) return;
-                onChange(on ? selected.filter((item) => item !== word) : [...selected, word]);
-              }}
-              className={cn(
-                "rounded-full border px-3.5 py-2 text-sm",
-                on && !locked && "border-primary bg-primary text-primary-foreground",
-                locked && on && "border-emerald-400 bg-emerald-50 dark:bg-emerald-400/10",
-                !on && !locked && "border-border hover:border-primary/50",
-                locked && "cursor-default",
-              )}
-            >
-              {word}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 function ShortcutTip({ label }: { label: string }) {
   return (
     <span className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-10 -translate-x-1/2 translate-y-1 opacity-0 transition duration-150 group-hover:translate-y-0 group-hover:opacity-100">
@@ -582,11 +640,20 @@ function FlashRound({
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (locked || event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
+      if (
+        locked ||
+        event.repeat ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey
+      )
+        return;
       const target = event.target;
       if (
         target instanceof HTMLElement &&
-        (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
       ) {
         return;
       }
@@ -604,20 +671,24 @@ function FlashRound({
 
   return (
     <div className="mx-auto w-full max-w-md space-y-5">
-      <div className="[perspective:1400px]">
+      <div className="perspective-[1400px]">
         <button
           type="button"
-          aria-label={flipped ? question.word : t("learn.game.flipWord", { word: question.word })}
+          aria-label={
+            flipped
+              ? question.word
+              : t("learn.game.flipWord", { word: question.word })
+          }
           className={cn(
-            "relative grid min-h-[28rem] w-full [transform-style:preserve-3d] transition-transform duration-500",
+            "relative grid min-h-112 w-full transform-3d transition-transform duration-500",
             !locked && !flipped && "hover:-translate-y-1",
-            flipped && "[transform:rotateY(180deg)]",
+            flipped && "transform-[rotateY(180deg)]",
             locked && "cursor-default",
           )}
           disabled={locked}
           onClick={() => setFlipped((open) => !open)}
         >
-          <span className="col-start-1 row-start-1 flex flex-col overflow-hidden rounded-[2rem] border border-black/8 bg-card dark:border-white/10 text-left shadow-[0_18px_40px_-28px_rgba(15,23,42,0.35)] ring-1 ring-black/5 dark:shadow-[0_24px_50px_-28px_rgba(0,0,0,0.65)] dark:ring-white/10 [backface-visibility:hidden]">
+          <span className="col-start-1 row-start-1 flex flex-col overflow-hidden rounded-4xl border border-black/8 bg-card dark:border-white/10 text-left shadow-[0_18px_40px_-28px_rgba(15,23,42,0.35)] ring-1 ring-black/5 dark:shadow-[0_24px_50px_-28px_rgba(0,0,0,0.65)] dark:ring-white/10 backface-hidden">
             <span className="relative block aspect-square max-h-[50svh] w-full overflow-hidden border-b border-black/5 bg-muted/40 dark:border-white/10">
               {imageUrl && !imageFailed ? (
                 <>
@@ -638,35 +709,57 @@ function FlashRound({
                   />
                 </>
               ) : (
-                <span className="grid size-full place-items-center text-6xl" aria-hidden>
+                <span
+                  className="grid size-full place-items-center text-6xl"
+                  aria-hidden
+                >
                   Aa
                 </span>
               )}
             </span>
-            <span className={cn("flex flex-1 flex-col items-center justify-center px-6 py-5 text-center", enter === "back" ? "flashcard-enter-back" : "flashcard-enter-next")}>
-              <span className="text-4xl font-semibold tracking-[-0.04em] capitalize sm:text-5xl">{question.word}</span>
-              <span className="mt-2 text-xs text-muted-foreground">{t("learn.game.tapToReveal")}</span>
+            <span
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center px-6 py-5 text-center",
+                enter === "back"
+                  ? "flashcard-enter-back"
+                  : "flashcard-enter-next",
+              )}
+            >
+              <span className="text-4xl font-semibold tracking-[-0.04em] capitalize sm:text-5xl">
+                {question.word}
+              </span>
+              <span className="mt-2 text-xs text-muted-foreground">
+                {t("learn.game.tapToReveal")}
+              </span>
             </span>
           </span>
 
-          <span className="col-start-1 row-start-1 flex flex-col justify-between overflow-hidden rounded-[2rem] border border-black/8 bg-card dark:border-white/10 p-7 text-left shadow-[0_18px_40px_-28px_rgba(15,23,42,0.35)] ring-1 ring-black/5 dark:shadow-[0_24px_50px_-28px_rgba(0,0,0,0.65)] dark:ring-white/10 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+          <span className="col-start-1 row-start-1 flex flex-col justify-between overflow-hidden rounded-4xl border border-black/8 bg-card dark:border-white/10 p-7 text-left shadow-[0_18px_40px_-28px_rgba(15,23,42,0.35)] ring-1 ring-black/5 dark:shadow-[0_24px_50px_-28px_rgba(0,0,0,0.65)] dark:ring-white/10 backface-hidden transform-[rotateY(180deg)]">
             <span>
               <span className="text-[11px] font-semibold tracking-[0.16em] text-muted-foreground uppercase">
                 {question.word}
               </span>
-              <span className="mt-4 block text-base text-primary">{question.ipa}</span>
+              <span className="mt-4 block text-base text-primary">
+                {question.ipa}
+              </span>
               {question.partOfSpeech ? (
                 <span className="mt-2 inline-flex w-fit rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold tracking-[0.08em] text-primary uppercase">
                   {question.partOfSpeech}
                 </span>
               ) : null}
-              <span className="mt-2 block text-4xl font-semibold tracking-tight">{question.meaningVi}</span>
-              <span className="mt-4 block text-sm leading-6 text-muted-foreground">{question.gloss}</span>
+              <span className="mt-2 block text-4xl font-semibold tracking-tight">
+                {question.meaningVi}
+              </span>
+              <span className="mt-4 block text-sm leading-6 text-muted-foreground">
+                {question.gloss}
+              </span>
             </span>
             <span className="space-y-2 rounded-2xl bg-muted/70 px-4 py-3 text-sm leading-6 text-foreground">
               <span className="block">{question.example}</span>
               {question.exampleVi ? (
-                <span className="block border-t border-border/60 pt-2 text-muted-foreground">{question.exampleVi}</span>
+                <span className="block border-t border-border/60 pt-2 text-muted-foreground">
+                  {question.exampleVi}
+                </span>
               ) : null}
             </span>
           </span>
@@ -679,7 +772,10 @@ function FlashRound({
           variant="outline"
           aria-label={t("learn.game.previousWord")}
           disabled={!canGoBack}
-          className={cn(outline, "border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800")}
+          className={cn(
+            outline,
+            "border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800",
+          )}
           onClick={onBack}
         >
           <ChevronLeft className="size-5" />
@@ -703,7 +799,10 @@ function FlashRound({
           type="button"
           variant="outline"
           aria-label={t("learn.game.hear")}
-          className={cn(outline, "border-primary/40 text-primary hover:bg-primary/10")}
+          className={cn(
+            outline,
+            "border-primary/40 text-primary hover:bg-primary/10",
+          )}
           onClick={onSpeak}
         >
           <Volume2 className="size-5" />
@@ -715,7 +814,10 @@ function FlashRound({
             aria-label={t("learn.game.studyAgain")}
             aria-keyshortcuts="x"
             disabled={locked}
-            className={cn(mark, "border-rose-200 text-rose-600 hover:border-rose-300 hover:bg-rose-50 dark:border-rose-400/30 dark:text-rose-300 dark:hover:bg-rose-400/10")}
+            className={cn(
+              mark,
+              "border-rose-200 text-rose-600 hover:border-rose-300 hover:bg-rose-50 dark:border-rose-400/30 dark:text-rose-300 dark:hover:bg-rose-400/10",
+            )}
             onClick={() => onRate("xmart")}
           >
             <X className="size-5" strokeWidth={1.75} />
@@ -729,7 +831,10 @@ function FlashRound({
             aria-label={t("learn.game.nextWord")}
             aria-keyshortcuts="Enter"
             disabled={locked}
-            className={cn(mark, "border-emerald-200 text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50 dark:border-emerald-400/30 dark:text-emerald-300 dark:hover:bg-emerald-400/10")}
+            className={cn(
+              mark,
+              "border-emerald-200 text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50 dark:border-emerald-400/30 dark:text-emerald-300 dark:hover:bg-emerald-400/10",
+            )}
             onClick={() => onRate("check")}
           >
             <Check className="size-5" strokeWidth={1.75} />
@@ -758,34 +863,49 @@ function RoundPlay({
   savedCards: Set<string>;
   onSaveCard: (cardId: string) => void;
   onBack: () => void;
-  onSubmit: (value: string, correct: boolean) => void;
+  onSubmit: (value: string, correct: boolean, timing: RoundTiming) => void;
 }) {
   const t = useWorkspaceI18n();
   const { speak, stop } = useAiSpeech();
   const [value, setValue] = useState("");
-  const [seconds, setSeconds] = useState(round.seconds);
+  const totalSeconds = useMemo(() => timeLimitFor(round), [round]);
+  const [seconds, setSeconds] = useState(totalSeconds);
   const [hears, setHears] = useState(0);
   const [audioStarted, setAudioStarted] = useState(false);
   const [locked, setLocked] = useState(false);
   const [correct, setCorrect] = useState<boolean | null>(null);
+  const [evaluation, setEvaluation] = useState<OpenEvaluation | null>(null);
+  const [micPaused, setMicPaused] = useState(false);
   const question = round.question;
   const timed = question.kind !== "flash";
   const waitsForAudio = timed && Boolean(round.material?.speakable);
 
   const valueRef = useRef(value);
   valueRef.current = value;
+  const secondsRef = useRef(seconds);
+  secondsRef.current = seconds;
+  const recordingRef = useRef(false);
+  const micPausedSecondsRef = useRef(0);
+  const handleRecordingChange = useCallback((recording: boolean) => {
+    recordingRef.current = recording;
+  }, []);
   const lockedRef = useRef(false);
   const finishRef = useRef<(raw: string) => void>(() => undefined);
 
   const shuffledOrder = useMemo(() => {
     if (question.kind !== "order") return [];
-    return shuffleInPlace(question.items.map((text, originalIndex) => ({ originalIndex, text })));
+    return shuffleInPlace(
+      question.items.map((text, originalIndex) => ({ originalIndex, text })),
+    );
   }, [question]);
 
   const shuffledRights = useMemo(() => {
     if (question.kind !== "match") return [];
     return shuffleInPlace(
-      question.pairs.map((pair, originalIndex) => ({ originalIndex, text: pair.right })),
+      question.pairs.map((pair, originalIndex) => ({
+        originalIndex,
+        text: pair.right,
+      })),
     );
   }, [question]);
 
@@ -796,19 +916,24 @@ function RoundPlay({
 
   useEffect(() => {
     setValue(
-      question.kind === "order" || question.kind === "match" || question.kind === "hunt"
+      question.kind === "order" ||
+        question.kind === "match" ||
+        question.kind === "hunt"
         ? question.kind === "match"
           ? JSON.stringify(question.pairs.map(() => null))
           : "[]"
         : "",
     );
-    setSeconds(round.seconds);
+    setSeconds(totalSeconds);
     setHears(0);
     setAudioStarted(false);
     setLocked(false);
     setCorrect(null);
+    setEvaluation(null);
+    setMicPaused(false);
+    micPausedSecondsRef.current = 0;
     lockedRef.current = false;
-  }, [round.id, question]);
+  }, [round.id, question, totalSeconds]);
 
   useEffect(() => {
     if (!round.material?.speakable) return;
@@ -828,18 +953,35 @@ function RoundPlay({
     (raw: string) => {
       if (lockedRef.current) return;
       lockedRef.current = true;
-      const scored = scoreGameRound(question, raw, { maxWords: round.maxWords });
+      const detail =
+        question.kind === "open"
+          ? evaluateOpen(raw, question, { maxWords: round.maxWords })
+          : null;
+      const scored = detail
+        ? detail.correct
+        : scoreGameRound(question, raw, { maxWords: round.maxWords });
       setLocked(true);
       setCorrect(scored);
-      onSubmit(raw, scored);
+      setEvaluation(detail);
+      setMicPaused(false);
+      onSubmit(raw, scored, { secondsLeft: secondsRef.current, totalSeconds });
     },
-    [onSubmit, question, round.maxWords],
+    [onSubmit, question, round.maxWords, totalSeconds],
   );
   finishRef.current = finish;
 
   useEffect(() => {
     if (locked || !timed || (waitsForAudio && !audioStarted)) return;
     const timer = window.setInterval(() => {
+      if (
+        recordingRef.current &&
+        micPausedSecondsRef.current < MAX_MIC_PAUSE_SECONDS
+      ) {
+        micPausedSecondsRef.current += 1;
+        setMicPaused(true);
+        return;
+      }
+      setMicPaused(false);
       setSeconds((current) => {
         if (current <= 1) {
           window.clearInterval(timer);
@@ -857,15 +999,19 @@ function RoundPlay({
   }, [seconds, locked, timed]);
 
   const hearMax = round.hearAgainMax ?? 2;
-  const canHear = Boolean(round.material?.speakable) && hears < hearMax && !locked;
+  const canHear =
+    Boolean(round.material?.speakable) && hears < hearMax && !locked;
 
   const ready =
     question.kind === "order"
-      ? parseJson(value || "[]", [] as number[]).length === question.items.length
+      ? parseJson(value || "[]", [] as number[]).length ===
+        question.items.length
       : question.kind === "match"
-        ? parseJson(value || "[]", [] as Array<number | null>).every((item) => item !== null)
+        ? parseJson(value || "[]", [] as Array<number | null>).every(
+            (item) => item !== null,
+          )
         : question.kind === "hunt"
-          ? parseJson(value || "[]", [] as string[]).length === question.correctWords.length
+          ? parseJson(value || "[]", [] as string[]).length >= 1
           : question.kind === "spell"
             ? value.trim().length === question.answer.length
             : value.trim().length > 0;
@@ -886,20 +1032,37 @@ function RoundPlay({
           </p>
           {timed ? (
             waitsForAudio && !audioStarted ? (
-              <span className="text-xs text-muted-foreground">{t("learn.game.timerWaits")}</span>
+              <span className="text-xs text-muted-foreground">
+                {t("learn.game.timerWaits")}
+              </span>
             ) : (
-              <TimerRing seconds={seconds} total={round.seconds} />
+              <div className="flex items-center gap-2">
+                {micPaused ? (
+                  <span className="text-xs text-muted-foreground">
+                    {t("learn.game.timerPaused")}
+                  </span>
+                ) : null}
+                <TimerRing seconds={seconds} total={totalSeconds} />
+              </div>
             )
           ) : null}
         </div>
       )}
       {question.kind === "flash" ? null : (
-        <h3 className="text-lg font-semibold tracking-tight">{question.prompt}</h3>
+        <h3 className="text-lg font-semibold tracking-tight">
+          {question.prompt}
+        </h3>
       )}
 
-      {question.kind !== "flash" && (round.material?.imageUrl || round.material?.imageEmoji) ? (
-        <PicturePrompt imageUrl={round.material.imageUrl} imageEmoji={round.material.imageEmoji} />
-      ) : question.kind !== "flash" && round.material ? (
+      {question.kind !== "flash" &&
+      (round.material?.imageUrl || round.material?.imageEmoji) ? (
+        <PicturePrompt
+          imageUrl={round.material.imageUrl}
+          imageEmoji={round.material.imageEmoji}
+        />
+      ) : question.kind !== "flash" &&
+        question.kind !== "hunt" &&
+        round.material ? (
         <div className="space-y-3 rounded-xl border border-border/60 bg-muted/40 px-4 py-3">
           {round.material.speakable ? (
             <div className="flex flex-wrap gap-2">
@@ -918,7 +1081,9 @@ function RoundPlay({
                 <Volume2 className="size-4" />
                 {hears === 0
                   ? t("workspace.listen")
-                  : t("learn.game.hearAgain", { count: Math.max(0, hearMax - hears) })}
+                  : t("learn.game.hearAgain", {
+                      count: Math.max(0, hearMax - hears),
+                    })}
               </Button>
             </div>
           ) : (
@@ -930,13 +1095,19 @@ function RoundPlay({
       ) : null}
 
       {question.kind === "choice" || question.kind === "fix" ? (
-        <ChoiceRound question={question} value={value} locked={locked} onChange={setValue} />
+        <ChoiceRound
+          question={question}
+          value={value}
+          locked={locked}
+          onChange={setValue}
+        />
       ) : null}
       {question.kind === "open" ? (
         <OpenRound
           value={value}
           locked={locked}
           allowMic={gameId === "speed-reply"}
+          onRecordingChange={handleRecordingChange}
           placeholder={t("workspace.typeAnswerEnglish")}
           onChange={setValue}
         />
@@ -953,17 +1124,30 @@ function RoundPlay({
         <MatchRound
           pairs={question.pairs}
           rights={shuffledRights}
-          mapping={parseJson(value || "[]", question.pairs.map(() => null) as Array<number | null>)}
+          mapping={parseJson(
+            value || "[]",
+            question.pairs.map(() => null) as Array<number | null>,
+          )}
           locked={locked}
           onChange={(next) => setValue(JSON.stringify(next))}
         />
       ) : null}
       {question.kind === "hunt" ? (
         <HuntRound
+          question={question}
           options={shuffledHunt}
           selected={parseJson(value || "[]", [] as string[])}
           locked={locked}
-          targetCount={question.correctWords.length}
+          speakable={Boolean(round.material?.speakable)}
+          fallbackText={round.material?.body}
+          hearsLeft={Math.max(0, hearMax - hears)}
+          canHear={canHear}
+          onHear={() => {
+            if (!round.material?.speakable) return;
+            const markStarted = () => setAudioStarted(true);
+            void speak(round.material.body, markStarted, markStarted);
+            setHears((count) => count + 1);
+          }}
           onChange={(next) => setValue(JSON.stringify(next))}
         />
       ) : null}
@@ -991,13 +1175,69 @@ function RoundPlay({
         />
       ) : null}
 
-      {locked && question.kind !== "flash" ? (
+      {locked && question.kind === "hunt" ? (
+        <HuntReveal
+          question={question}
+          picked={parseJson(value || "[]", [] as string[])}
+          transcript={question.transcript ?? round.material?.body}
+          correct={correct}
+          onSpeak={(word) => void speak(word)}
+        />
+      ) : locked && question.kind !== "flash" ? (
         <div className="space-y-2 rounded-xl border border-accent/25 bg-accent/8 px-4 py-3">
           <p className="flex items-center gap-2 text-sm font-semibold">
             <Check className="size-4 text-accent" />
             {correct ? t("learn.game.onTrack") : t("learn.game.checkHint")}
           </p>
-          <p className="text-sm leading-relaxed text-muted-foreground">{explanationOf(question)}</p>
+          {evaluation ? (
+            <div className="space-y-1.5 text-sm">
+              {evaluation.matched.length ? (
+                <p className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {t("learn.game.covered")}
+                  </span>
+                  {evaluation.matched.map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-300"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </p>
+              ) : null}
+              {evaluation.missing.length ? (
+                <p className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {t("learn.game.missingParts")}
+                  </span>
+                  {evaluation.missing.map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-700 dark:bg-rose-400/15 dark:text-rose-300"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </p>
+              ) : null}
+              {evaluation.overLimit && round.maxWords ? (
+                <p className="text-xs font-medium text-rose-600 dark:text-rose-300">
+                  {t("learn.game.overLimit", {
+                    count: evaluation.wordCount,
+                    max: round.maxWords,
+                  })}
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  {t("learn.game.wordsUsed", { count: evaluation.wordCount })}
+                </p>
+              )}
+            </div>
+          ) : null}
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {explanationOf(question)}
+          </p>
           <p className="text-sm text-foreground">
             <span className="font-medium">{t("learn.game.sample")} </span>
             {sampleAnswerFor(question)}
@@ -1046,7 +1286,16 @@ export type GamePlayPageViewProps = {
   missedRounds: LearningGameRound[];
   onPracticeMissed: () => void;
   onStart: () => void;
-  onRoundSubmit: (value: string, isCorrect: boolean) => void;
+  onRoundSubmit: (
+    value: string,
+    isCorrect: boolean,
+    timing: RoundTiming,
+  ) => void;
+  /** Per-round answers, used by the speed-reply results screen. */
+  answers: Array<RoundAnswer | undefined>;
+  totalPoints: number;
+  /** Retry only the rounds answered wrong (non-flashcard games). */
+  onRetryMissedRounds: () => void;
   onNextRound: () => void;
   onPreviousRound: () => void;
   onBackToDecks: () => void;
@@ -1083,6 +1332,9 @@ export const GamePlayPageView = memo(function GamePlayPageView({
   onPracticeMissed,
   onStart,
   onRoundSubmit,
+  answers,
+  totalPoints,
+  onRetryMissedRounds,
   onNextRound,
   onPreviousRound,
   onBackToDecks,
@@ -1122,7 +1374,12 @@ export const GamePlayPageView = memo(function GamePlayPageView({
         title={t("workspace.gameUnavailable")}
         description={t("workspace.gameUnavailableDescription")}
         actions={[
-          { href: "/games", label: t("workspace.allGames"), icon: <Gamepad2 />, primary: true },
+          {
+            href: "/games",
+            label: t("workspace.allGames"),
+            icon: <Gamepad2 />,
+            primary: true,
+          },
           { href: "/", label: t("workspace.backToToday"), icon: <House /> },
         ]}
       />
@@ -1132,11 +1389,21 @@ export const GamePlayPageView = memo(function GamePlayPageView({
   return (
     <div className="w-full min-w-0 space-y-8 overflow-x-clip pb-10">
       {inDeck ? (
-        <Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={onBackToDecks}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="-ml-2 text-muted-foreground"
+          onClick={onBackToDecks}
+        >
           <ArrowLeft /> {t("workspace.allLevelsGame")}
         </Button>
       ) : (
-        <Button variant="ghost" size="sm" asChild className="-ml-2 text-muted-foreground">
+        <Button
+          variant="ghost"
+          size="sm"
+          asChild
+          className="-ml-2 text-muted-foreground"
+        >
           <Link href="/games">
             <ArrowLeft /> {t("workspace.allGames")}
           </Link>
@@ -1145,13 +1412,19 @@ export const GamePlayPageView = memo(function GamePlayPageView({
 
       <header className="workspace-hero-accent relative overflow-hidden rounded-3xl bg-linear-to-br from-rose-500 to-orange-400 px-5 py-6 text-white sm:rounded-[1.75rem] sm:px-9 sm:py-10">
         <p className="hidden text-[11px] font-semibold tracking-[0.18em] text-white/70 uppercase sm:block">
-          {game.skill} · {t("learn.game.minutes", { count: game.durationMinutes })}
+          {game.skill} ·{" "}
+          {t("learn.game.minutes", { count: game.durationMinutes })}
         </p>
-        <h1 className="text-xl font-semibold tracking-tight sm:mt-2 sm:text-4xl">{game.title}</h1>
-        <p className="mt-3 hidden max-w-2xl text-sm text-white/80 sm:block">{game.howToPlay}</p>
+        <h1 className="text-xl font-semibold tracking-tight sm:mt-2 sm:text-4xl">
+          {game.title}
+        </h1>
+        <p className="mt-3 hidden max-w-2xl text-sm text-white/80 sm:block">
+          {game.howToPlay}
+        </p>
         {lessonPack ? (
           <p className="mt-4 hidden text-xs text-white/75 sm:block">
-            {t("workspace.fromLesson")}{lessonPack.title}
+            {t("workspace.fromLesson")}
+            {lessonPack.title}
           </p>
         ) : null}
       </header>
@@ -1161,7 +1434,9 @@ export const GamePlayPageView = memo(function GamePlayPageView({
           <p className="flex gap-2 text-sm leading-6 text-muted-foreground">
             <Lightbulb className="mt-0.5 size-4 shrink-0 text-accent" />
             {game.body}{" "}
-            {decks.length ? t("workspace.playFullDeck") : t("workspace.shortRoundsDescription")}
+            {decks.length
+              ? t("workspace.playFullDeck")
+              : t("workspace.shortRoundsDescription")}
           </p>
           {decks.length ? (
             <DeckPicker
@@ -1179,31 +1454,52 @@ export const GamePlayPageView = memo(function GamePlayPageView({
             />
           ) : null}
           {playsBlocked ? (
-            <p className="rounded-2xl bg-muted/60 px-4 py-3 text-sm text-muted-foreground" role="status">
+            <p
+              className="rounded-2xl bg-muted/60 px-4 py-3 text-sm text-muted-foreground"
+              role="status"
+            >
               {t("workspace.freePlaysUsedGame")}
             </p>
           ) : playsLeft !== null ? (
             <p className="text-xs text-muted-foreground">
-              {t(playsLeft === 1 ? "learn.game.playsLeftOne" : "learn.game.playsLeftOther", { count: playsLeft })}
+              {t(
+                playsLeft === 1
+                  ? "learn.game.playsLeftOne"
+                  : "learn.game.playsLeftOther",
+                {
+                  count: playsLeft,
+                },
+              )}
             </p>
           ) : null}
           <div className="flex flex-wrap gap-3">
             {playsBlocked || modeLocked ? (
-              <Button type="button" className="h-11 rounded-full px-6" onClick={openUpgradeModal}>
-                {playsBlocked ? t("workspace.seePlans") : t("workspace.unlockStandard")}
+              <Button
+                type="button"
+                className="h-11 rounded-full px-6"
+                onClick={openUpgradeModal}
+              >
+                {playsBlocked
+                  ? t("workspace.seePlans")
+                  : t("workspace.unlockStandard")}
               </Button>
             ) : (
               <Button className="h-11 rounded-full px-6" onClick={onStart}>
                 {activeDeck
                   ? t("learn.game.startDeck", {
                       deck: activeDeck.title,
-                      count: mode === "picture" && activeDeck.pictureCount > 0 ? activeDeck.pictureCount : activeDeck.cardCount,
+                      count:
+                        mode === "picture" && activeDeck.pictureCount > 0
+                          ? activeDeck.pictureCount
+                          : activeDeck.cardCount,
                     })
                   : t("workspace.startPlaying")}
               </Button>
             )}
             <Button asChild variant="outline" className="h-11 rounded-full">
-              <Link href={`/skills/${game.relatedSkill}`}>{t("workspace.relatedSkillDrill")}</Link>
+              <Link href={`/skills/${game.relatedSkill}`}>
+                {t("workspace.relatedSkillDrill")}
+              </Link>
             </Button>
           </div>
         </section>
@@ -1217,7 +1513,10 @@ export const GamePlayPageView = memo(function GamePlayPageView({
                 {t("learn.game.reviewRound", { count: reviewRound })}
               </span>
             ) : null}
-            {t("workspace.roundOf", { current: index + 1, total: session.length })}
+            {t("workspace.roundOf", {
+              current: index + 1,
+              total: session.length,
+            })}
           </p>
           <div className="h-2 overflow-hidden rounded-full bg-muted">
             <div
@@ -1240,7 +1539,9 @@ export const GamePlayPageView = memo(function GamePlayPageView({
           />
           {!autoAdvance && scores[index] !== undefined ? (
             <Button className="h-11 rounded-full px-6" onClick={onNextRound}>
-              {index + 1 >= session.length ? t("workspace.seeResults") : t("workspace.nextRound")}
+              {index + 1 >= session.length
+                ? t("workspace.seeResults")
+                : t("workspace.nextRound")}
             </Button>
           ) : null}
         </section>
@@ -1250,16 +1551,23 @@ export const GamePlayPageView = memo(function GamePlayPageView({
         <div className="space-y-5 overflow-hidden rounded-[1.75rem] border border-primary/20 bg-linear-to-br from-primary to-primary/80 px-6 py-8 text-primary-foreground">
           <div>
             <p className="text-[11px] font-semibold tracking-[0.18em] text-primary-foreground/70 uppercase">
-              {missedRounds.length ? t("workspace.keepGoing") : t("workspace.allLearned")}
+              {missedRounds.length
+                ? t("workspace.keepGoing")
+                : t("workspace.allLearned")}
             </p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight">
               {missedRounds.length
-                ? t("workspace.youKnowWords", { correct: correctCount, total: session.length })
+                ? t("workspace.youKnowWords", {
+                    correct: correctCount,
+                    total: session.length,
+                  })
                 : t("workspace.allWordsSet")}
             </h2>
             <p className="mt-2 max-w-xl text-sm text-primary-foreground/75">
               {missedRounds.length
-                ? t("learn.game.practiceMissedHint", { count: missedRounds.length })
+                ? t("learn.game.practiceMissedHint", {
+                    count: missedRounds.length,
+                  })
                 : t("learn.game.pickAnother")}
             </p>
           </div>
@@ -1267,9 +1575,16 @@ export const GamePlayPageView = memo(function GamePlayPageView({
             <ul className="grid gap-2 sm:grid-cols-2">
               {missedRounds.map((item) =>
                 item.question.kind === "flash" ? (
-                  <li key={item.id} className="rounded-2xl bg-white/10 px-4 py-2.5">
-                    <span className="block text-sm font-semibold capitalize">{item.question.word}</span>
-                    <span className="block text-xs text-primary-foreground/75">{item.question.meaningVi}</span>
+                  <li
+                    key={item.id}
+                    className="rounded-2xl bg-white/10 px-4 py-2.5"
+                  >
+                    <span className="block text-sm font-semibold capitalize">
+                      {item.question.word}
+                    </span>
+                    <span className="block text-xs text-primary-foreground/75">
+                      {item.question.meaningVi}
+                    </span>
                   </li>
                 ) : null,
               )}
@@ -1299,7 +1614,11 @@ export const GamePlayPageView = memo(function GamePlayPageView({
               </Button>
             ) : null}
             {playsBlocked ? (
-              <Button type="button" className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25" onClick={openUpgradeModal}>
+              <Button
+                type="button"
+                className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25"
+                onClick={openUpgradeModal}
+              >
                 {t("workspace.seePlans")}
               </Button>
             ) : (
@@ -1338,31 +1657,108 @@ export const GamePlayPageView = memo(function GamePlayPageView({
             {t("workspace.niceWork")}
           </p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight">
-            {t("workspace.youGotScore", { correct: correctCount, total: session.length })}
+            {t("workspace.youGotScore", {
+              correct: correctCount,
+              total: session.length,
+            })}
           </h2>
           <p className="mt-2 max-w-xl text-sm text-primary-foreground/75">
             {t("workspace.gameScoreDescription")}
           </p>
+          {game.id === "speed-reply" ? (
+            <div className="mt-5 space-y-4">
+              <p className="flex flex-wrap gap-2 text-sm font-semibold">
+                <span className="rounded-full bg-white/15 px-3 py-1">
+                  {t("learn.game.points", { count: totalPoints })}
+                </span>
+                <span className="rounded-full bg-white/15 px-3 py-1">
+                  {t("learn.game.bestStreak", { count: longestStreak(scores) })}
+                </span>
+              </p>
+              <div className="space-y-2">
+                <p className="text-[11px] font-semibold tracking-[0.18em] text-primary-foreground/70 uppercase">
+                  {t("learn.game.reviewAnswers")}
+                </p>
+                <ul className="space-y-2">
+                  {session.map((item, i) => {
+                    const answer = answers[i];
+                    return (
+                      <li
+                        key={`${item.id}-${i}`}
+                        className="space-y-1 rounded-2xl bg-white/10 px-4 py-3 text-sm"
+                      >
+                        <p className="flex items-start justify-between gap-3 font-semibold">
+                          <span>{item.question.prompt}</span>
+                          <span className="shrink-0 text-xs">
+                            {answer?.correct ? "✓" : "✗"}{" "}
+                            {t("learn.game.points", {
+                              count: answer?.points ?? 0,
+                            })}
+                          </span>
+                        </p>
+                        <p className="text-primary-foreground/85">
+                          <span className="font-medium">
+                            {t("learn.game.yourAnswer")}{" "}
+                          </span>
+                          {answer?.value.trim()
+                            ? answer.value
+                            : t("learn.game.noAnswer")}
+                        </p>
+                        <p className="text-primary-foreground/70">
+                          <span className="font-medium">
+                            {t("learn.game.sample")}{" "}
+                          </span>
+                          {sampleAnswerFor(item.question)}
+                        </p>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
+          ) : null}
+          {game.id === "keyword-hunt" ? (
+            <HuntResultsSummary session={session} answers={answers} />
+          ) : null}
           <div className="mt-5 flex flex-wrap gap-3">
             {playsBlocked ? (
-              <Button type="button" className="rounded-full border-0 bg-white text-[#0b1524] hover:bg-white/90" onClick={openUpgradeModal}>
-                {t("workspace.seePlans")}
-              </Button>
-            ) : (
               <Button
                 type="button"
                 className="rounded-full border-0 bg-white text-[#0b1524] hover:bg-white/90"
-                onClick={onStart}
+                onClick={openUpgradeModal}
               >
-                <RotateCcw className="size-4" />
-                {t("workspace.playAgain")}
+                {t("workspace.seePlans")}
               </Button>
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  className="rounded-full border-0 bg-white text-[#0b1524] hover:bg-white/90"
+                  onClick={onStart}
+                >
+                  <RotateCcw className="size-4" />
+                  {t("workspace.playAgain")}
+                </Button>
+                {game.id === "speed-reply" && scores.some((score) => !score) ? (
+                  <Button
+                    type="button"
+                    className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25"
+                    onClick={onRetryMissedRounds}
+                  >
+                    {t("learn.game.retryMissed", {
+                      count: scores.filter((score) => !score).length,
+                    })}
+                  </Button>
+                ) : null}
+              </>
             )}
             <Button
               asChild
               className="rounded-full border-0 bg-white/15 text-white hover:bg-white/25"
             >
-              <Link href={`/skills/${game.relatedSkill}`}>{t("workspace.relatedSkill")}</Link>
+              <Link href={`/skills/${game.relatedSkill}`}>
+                {t("workspace.relatedSkill")}
+              </Link>
             </Button>
             <Button
               asChild

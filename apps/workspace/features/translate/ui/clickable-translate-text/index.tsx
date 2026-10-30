@@ -10,11 +10,12 @@ import {
   useState,
   type MouseEvent,
 } from "react";
+import { compoundCandidates, detectExpression, locatePhrase } from "../../model/detect-expression";
 import { textOffsetFromPoint, wordBounds } from "../../model/pick-word";
 import { sentenceBounds } from "../../model/sentence-at";
 import { scheduleIdle, tokenizeWords, type TextToken } from "../../model/tokenize-words";
 import { prefetchPassage } from "../../model/translate-lookup";
-import { useTranslateSession } from "../../model/translate-session";
+import { useTranslateSession, type TranslateActivePick } from "../../model/translate-session";
 import { ClickableTranslateTextView } from "./clickable-translate-text.view";
 
 type ClickableTranslateTextProps = {
@@ -40,6 +41,29 @@ export function ClickableTranslateText({ text, className }: ClickableTranslateTe
     return scheduleIdle(() => startTransition(() => setHot(true)));
   }, [open, text]);
 
+  const pushPick = useCallback(
+    (word: string, start: number, end: number, wordIndex: number | null) => {
+      const sentence = sentenceBounds(text, start);
+      const pick: TranslateActivePick = {
+        instanceId,
+        start,
+        end,
+        wordIndex,
+        sentence: sentence?.sentence ?? null,
+        sentenceStart: sentence?.start,
+        sentenceEnd: sentence?.end,
+      };
+      if (wordIndex != null) {
+        pick.expression = detectExpression(text, tokens, wordIndex, sentence);
+        if (!pick.expression) {
+          pick.compoundCandidates = compoundCandidates(text, tokens, wordIndex, sentence);
+        }
+      }
+      pushWord(word, pick);
+    },
+    [instanceId, pushWord, text, tokens],
+  );
+
   const pickAtOffset = useCallback(
     (offset: number) => {
       const bounds = wordBounds(text, offset);
@@ -47,18 +71,14 @@ export function ClickableTranslateText({ text, className }: ClickableTranslateTe
       const token = tokens.find(
         (item) => item.kind === "word" && item.start === bounds.start && item.end === bounds.end,
       );
-      const sentence = sentenceBounds(text, bounds.start);
-      pushWord(bounds.word, {
-        instanceId,
-        start: bounds.start,
-        end: bounds.end,
-        wordIndex: token && token.kind === "word" ? token.wordIndex : null,
-        sentence: sentence?.sentence ?? null,
-        sentenceStart: sentence?.start,
-        sentenceEnd: sentence?.end,
-      });
+      pushPick(
+        bounds.word,
+        bounds.start,
+        bounds.end,
+        token && token.kind === "word" ? token.wordIndex : null,
+      );
     },
-    [instanceId, pushWord, text, tokens],
+    [pushPick, text, tokens],
   );
 
   const onPlainClick = useCallback(
@@ -78,22 +98,27 @@ export function ClickableTranslateText({ text, className }: ClickableTranslateTe
     (token: WordToken, event: MouseEvent<HTMLSpanElement>) => {
       event.preventDefault();
       event.stopPropagation();
-      const sentence = sentenceBounds(text, token.start);
-      pushWord(token.value, {
-        instanceId,
-        start: token.start,
-        end: token.end,
-        wordIndex: token.wordIndex,
-        sentence: sentence?.sentence ?? null,
-        sentenceStart: sentence?.start,
-        sentenceEnd: sentence?.end,
-      });
+      pushPick(token.value, token.start, token.end, token.wordIndex);
     },
-    [instanceId, pushWord, text],
+    [pushPick],
   );
 
   const localPick = activePick?.instanceId === instanceId ? activePick : null;
   const query = pickedWord?.toLowerCase() ?? "";
+
+  // Expressions from the AI only carry the phrase; find where it sits around the clicked word.
+  const expressionRange = useMemo(() => {
+    const expression = localPick?.expression;
+    if (!localPick || !expression) return null;
+    if (expression.start != null && expression.end != null) {
+      return { start: expression.start, end: expression.end };
+    }
+    const sentence =
+      localPick.sentenceStart != null && localPick.sentenceEnd != null
+        ? { start: localPick.sentenceStart, end: localPick.sentenceEnd }
+        : null;
+    return locatePhrase(text, expression.phrase, localPick, sentence);
+  }, [localPick, text]);
 
   return (
     <ClickableTranslateTextView
@@ -105,6 +130,7 @@ export function ClickableTranslateText({ text, className }: ClickableTranslateTe
       instanceId={instanceId}
       rootRef={rootRef}
       localPick={localPick}
+      expressionRange={expressionRange}
       query={query}
       onPlainClick={onPlainClick}
       onWordClick={onWordClick}

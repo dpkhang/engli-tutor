@@ -166,10 +166,8 @@
     "cookies": "Cookie Policy"
   },
   "workspace": {
-    "settings": "Settings",
     "personal": "Personal",
     "manageWorkspace": "Manage your EngliTutor workspace.",
-    "account": "Account",
     "accountDescription": "Name, work details, and learning profile",
     "appearance": "Appearance",
     "appearanceDescription": "Theme, color, text size, and motion",
@@ -177,11 +175,9 @@
     "learningDescription": "Level, playback speed, and listening",
     "notifications": "Notifications",
     "notificationsDescription": "Reminders, lessons, and billing",
-    "security": "Security",
     "securityDescription": "Password and signed-in devices",
     "referrals": "Referrals",
     "referralsDescription": "Invite friends and redeem codes",
-    "billing": "Billing",
     "billingDescription": "Plan, usage, and payments",
     "privacyPolicy": "Privacy Policy",
     "cookiePolicy": "Cookie Policy",
@@ -197,12 +193,10 @@
     "ocean": "Ocean",
     "dusk": "Dusk",
     "system": "System",
-    "discard": "Discard",
     "apply": "Apply",
     "saving": "Saving...",
     "unsavedAppearance": "You have unsaved appearance changes.",
     "unsavedLearning": "You have unsaved learning changes.",
-    "practice": "Practice",
     "notificationDeviceDescription": "On this laptop or phone. On iPhone, add EngliTutor to your Home Screen before this browser tab can receive them.",
     "dailyStudyReminder": "Daily study reminder",
     "dailyStudyReminderDescription": "One notification a day, at the time you pick.",
@@ -211,7 +205,6 @@
     "tutorReplies": "Tutor replies",
     "tutorRepliesDescription": "Shown when no EngliTutor window is in front.",
     "time": "Time",
-    "account": "Account",
     "planPayment": "Plan and payment",
     "planPaymentDescription": "When a renewal fails or the plan ends.",
     "pwaInstallTitle": "Install the app",
@@ -236,7 +229,6 @@
     "myPath": "My path",
     "myProgress": "My progress",
     "primaryNavigation": "Primary navigation",
-    "account": "Account",
     "plans": "Plans",
     "settings": "Settings",
     "signOut": "Sign out",
@@ -285,7 +277,6 @@
     "continueWaiting": "You still have “{title}” waiting. Jump back in or start a fresh speaking session.",
     "noPressure": "No pressure, no complicated dashboard. Pick one small activity and make today count.",
     "continueTitle": "Continue",
-    "speakWithAi": "Speak with AI",
     "speakWithAiNow": "Speak with AI now",
     "chatWithAi": "Chat with AI",
     "jumpIn": "Jump in",
@@ -311,10 +302,7 @@
     "savedForLater": "Saved for later",
     "manage": "Manage",
     "tinyTip": "Tiny tip",
-    "speakFirst": "Speak first, perfect later",
-    "niceWork": "Nice work",
     "recentlyFinished": "Recently finished",
-    "allDone": "All done",
     "moreWaysToLearn": "More ways to learn",
     "moreWaysDescription": "Short activities for whichever energy level you have today.",
     "explore": "Explore",
@@ -345,14 +333,12 @@
     "lessons": "Lessons",
     "fullLessonPacks": "Full lesson packs",
     "quickDrills": "Quick drills",
-    "search": "Search",
     "findAnything": "Find anything",
     "unlockMorePractice": "Unlock more practice",
     "continueLesson": "Continue “{title}”",
     "billing": "Billing",
     "moreInProgressLessons": "More in-progress lessons will stack here as you start them.",
     "recommendedNext": "Recommended next",
-    "startLesson": "Start lesson",
     "speakFirst": "Speak first, perfect later",
     "playNow": "Play now",
     "dailyChallenge": "Daily challenge",
@@ -364,7 +350,6 @@
     "focusedSkillPractice": "focused skill practice",
     "integratedLessons": " Showing integrated lessons from the learning API.",
     "manageFavoritesProgress": "Manage favorites & progress",
-    "searchLessons": "Search lessons by topic, skill, or level…",
     "clearLessonSearch": "Clear lesson search",
     "myProgressArrow": "My progress →",
     "fourSkillExercises": "4-skill exercises →",
@@ -375,9 +360,7 @@
     "game": "Game: ",
     "practiceWithAi": "Practice with AI",
     "playMiniGame": "Play mini-game",
-    "noLessonsFound": "No lessons found",
     "tryAnotherKeyword": "Try another keyword or clear the active filters.",
-    "clearSearch": "Clear search",
     "allLevels": "All levels",
     "loadingExercises": "Loading exercises",
     "preparingPractice": "Preparing practice for this level.",
@@ -403,7 +386,6 @@
     "exerciseUnavailable": "This exercise isn’t available",
     "exerciseUnavailableDescription": "It may have been moved or the link is incomplete. Go back to this skill and pick another activity.",
     "backToSkill": "Back to skill",
-    "backToToday": "Back to Today",
     "listen": "Listen",
     "hideScript": "Hide script",
     "showScript": "Show script",
@@ -435,7 +417,6 @@
     "search": "Search",
     "resultsFor": "Results for “{query}”",
     "lessonsFound": "lessons found",
-    "browseAllLessons": "Browse all lessons",
     "searchingLessons": "Searching lessons",
     "searchingLessonsDescription": "Finding learning content that matches your goal.",
     "startLesson": "Start lesson",
@@ -566,7 +547,6 @@
     "notFoundTitle": "This page isn’t on today’s lesson plan",
     "notFoundDescription": "The link may be old, or this activity was moved. Pick a path below and keep practicing.",
     "backToToday": "Back to Today",
-    "practice": "Practice",
     "notFoundHint": "Try search from the header, or pick a shortcut above.",
     "searchLessons": "Search lessons",
     "searchLessonsPlaceholder": "Search by topic, skill, or level…",
@@ -693,22 +673,66 @@
     "sampleDescription": "One topic runs through the whole session, so every step prepares you for the next one.",
     "sampleSteps": "Sample lesson steps",
     "learnerNeeds": [
-      { "title": "Speak clearly when work gets real", "body": "Practice the exact moments that matter: stand-ups, client calls, interviews, and project updates." },
-      { "title": "Get useful feedback fast", "body": "See what to fix after you try: grammar, pronunciation, vocabulary, and a more natural answer." },
-      { "title": "Build a daily habit", "body": "Short sessions keep English active without asking you to sit through a long course after work." },
-      { "title": "Understand mistakes in Vietnamese", "body": "Vietnamese explanations help you notice why a sentence sounds wrong and how to say it better next time." }
+      {
+        "title": "Speak clearly when work gets real",
+        "body": "Practice the exact moments that matter: stand-ups, client calls, interviews, and project updates."
+      },
+      {
+        "title": "Get useful feedback fast",
+        "body": "See what to fix after you try: grammar, pronunciation, vocabulary, and a more natural answer."
+      },
+      {
+        "title": "Build a daily habit",
+        "body": "Short sessions keep English active without asking you to sit through a long course after work."
+      },
+      {
+        "title": "Understand mistakes in Vietnamese",
+        "body": "Vietnamese explanations help you notice why a sentence sounds wrong and how to say it better next time."
+      }
     ],
     "sessionBeats": [
-      { "title": "Listen for the situation", "detail": "Hear a short workplace or interview prompt and catch the main task, keywords, and tone." },
-      { "title": "Read the context", "detail": "Scan an email, job description, or short brief so your answer has the right details." },
-      { "title": "Speak with the AI tutor", "detail": "Answer follow-up questions out loud, then retry with clearer grammar and pronunciation." },
-      { "title": "Write and review", "detail": "Write a short summary or reply; get Vietnamese feedback and a natural rewrite to practice aloud." }
+      {
+        "title": "Listen for the situation",
+        "detail": "Hear a short workplace or interview prompt and catch the main task, keywords, and tone."
+      },
+      {
+        "title": "Read the context",
+        "detail": "Scan an email, job description, or short brief so your answer has the right details."
+      },
+      {
+        "title": "Speak with the AI tutor",
+        "detail": "Answer follow-up questions out loud, then retry with clearer grammar and pronunciation."
+      },
+      {
+        "title": "Write and review",
+        "detail": "Write a short summary or reply; get Vietnamese feedback and a natural rewrite to practice aloud."
+      }
     ],
     "skillPath": [
-      { "skill": "Listening", "focus": "Catch meaning in meetings and calls", "practice": "Short clips, stand-ups, customer questions, and interview prompts.", "outcome": "Follow the main idea, key requirements, and next actions with less pausing." },
-      { "skill": "Speaking", "focus": "Answer with structure and confidence", "practice": "Scenario conversations for introductions, projects, decisions, and behavioral questions.", "outcome": "Give clearer A2–B1 answers and retry after pronunciation and grammar feedback." },
-      { "skill": "Reading", "focus": "Understand workplace text faster", "practice": "Emails, job descriptions, short docs, and lesson notes with vocabulary in context.", "outcome": "Find the useful details without translating every word." },
-      { "skill": "Writing", "focus": "Send simple, natural replies", "practice": "Write short updates, summaries, and interview answers after each speaking task.", "outcome": "Use better tense, word choice, and sentence order in practical writing." }
+      {
+        "skill": "Listening",
+        "focus": "Catch meaning in meetings and calls",
+        "practice": "Short clips, stand-ups, customer questions, and interview prompts.",
+        "outcome": "Follow the main idea, key requirements, and next actions with less pausing."
+      },
+      {
+        "skill": "Speaking",
+        "focus": "Answer with structure and confidence",
+        "practice": "Scenario conversations for introductions, projects, decisions, and behavioral questions.",
+        "outcome": "Give clearer A2–B1 answers and retry after pronunciation and grammar feedback."
+      },
+      {
+        "skill": "Reading",
+        "focus": "Understand workplace text faster",
+        "practice": "Emails, job descriptions, short docs, and lesson notes with vocabulary in context.",
+        "outcome": "Find the useful details without translating every word."
+      },
+      {
+        "skill": "Writing",
+        "focus": "Send simple, natural replies",
+        "practice": "Write short updates, summaries, and interview answers after each speaking task.",
+        "outcome": "Use better tense, word choice, and sentence order in practical writing."
+      }
     ],
     "lessonPreview": "Lesson preview · 4 skills",
     "listenRead": "Listen + read",
@@ -718,15 +742,30 @@
     "skillsTitle": "Listening, speaking, reading, and writing in one practical path.",
     "skillsDescription": "Placement checks all four skills. Lessons then connect them around situations you can use at work or in interviews.",
     "whyItems": [
-      { "title": "One topic, four skills", "body": "Listening, reading, speaking, and writing reinforce the same situation instead of becoming separate drills." },
-      { "title": "Feedback after action", "body": "You try first, then receive Vietnamese explanations and improved phrasing you can immediately repeat." },
-      { "title": "Practice follows weak spots", "body": "Common errors such as tense, s/es, collocation, or missed keywords can carry into the next session." }
+      {
+        "title": "One topic, four skills",
+        "body": "Listening, reading, speaking, and writing reinforce the same situation instead of becoming separate drills."
+      },
+      {
+        "title": "Feedback after action",
+        "body": "You try first, then receive Vietnamese explanations and improved phrasing you can immediately repeat."
+      },
+      {
+        "title": "Practice follows weak spots",
+        "body": "Common errors such as tense, s/es, collocation, or missed keywords can carry into the next session."
+      }
     ],
     "why": "Why it works",
     "whyTitle": "Practice is easier to repeat when every lesson has a job.",
     "useCasesItems": [
-      { "title": "Before a project interview", "body": "Practice explaining your role, the problem, your solution, and what you learned — then tighten the answer." },
-      { "title": "Before a weekly meeting", "body": "Rehearse a status update, answer follow-up questions, and turn your notes into a short written summary." }
+      {
+        "title": "Before a project interview",
+        "body": "Practice explaining your role, the problem, your solution, and what you learned — then tighten the answer."
+      },
+      {
+        "title": "Before a weekly meeting",
+        "body": "Rehearse a status update, answer follow-up questions, and turn your notes into a short written summary."
+      }
     ],
     "useCases": "Illustrative use cases",
     "useCasesTitle": "Choose a real situation, then practice the English around it.",
@@ -737,12 +776,30 @@
     "loadingPlans": "Loading plans…",
     "faq": "FAQ",
     "faqItems": [
-      { "q": "I'm A2 and weak at speaking — can I start?", "a": "Yes. The placement test covers listening, speaking, reading, and writing, then your path starts at the right level. You still practice all four skills, including the weak ones." },
-      { "q": "Can I only practice speaking?", "a": "Every session connects speaking with listening, reading, and a short writing task. Speaking gets focused time, but the input and review make your answers stronger." },
-      { "q": "How many minutes a day?", "a": "Plan for about 20–30 minutes for a complete loop: listen, read, speak with AI, then write and review feedback in Vietnamese." },
-      { "q": "How is Free different from paid plans?", "a": "Free lets you try the daily learning loop with limited AI tutor usage. Paid plans use the live billing catalog shown above, so the exact price and included benefits stay up to date." },
-      { "q": "What happens to my speaking audio?", "a": "Short clips are sent to speech providers so we can transcribe you and play tutor audio back. We do not sell your voice or transcripts." },
-      { "q": "How do you use cookies?", "a": "Session cookies keep you signed in. Preference storage on your device remembers theme and playback settings. We do not run advertising cookies." }
+      {
+        "q": "I'm A2 and weak at speaking — can I start?",
+        "a": "Yes. The placement test covers listening, speaking, reading, and writing, then your path starts at the right level. You still practice all four skills, including the weak ones."
+      },
+      {
+        "q": "Can I only practice speaking?",
+        "a": "Every session connects speaking with listening, reading, and a short writing task. Speaking gets focused time, but the input and review make your answers stronger."
+      },
+      {
+        "q": "How many minutes a day?",
+        "a": "Plan for about 20–30 minutes for a complete loop: listen, read, speak with AI, then write and review feedback in Vietnamese."
+      },
+      {
+        "q": "How is Free different from paid plans?",
+        "a": "Free lets you try the daily learning loop with limited AI tutor usage. Paid plans use the live billing catalog shown above, so the exact price and included benefits stay up to date."
+      },
+      {
+        "q": "What happens to my speaking audio?",
+        "a": "Short clips are sent to speech providers so we can transcribe you and play tutor audio back. We do not sell your voice or transcripts."
+      },
+      {
+        "q": "How do you use cookies?",
+        "a": "Session cookies keep you signed in. Preference storage on your device remembers theme and playback settings. We do not run advertising cookies."
+      }
     ],
     "faqTitle": "Clear answers before your first lesson.",
     "faqDescription": "Learn what to expect from placement, daily practice, plan limits, and privacy.",
@@ -965,6 +1022,22 @@
       "nextWord": "Next word",
       "timerWaits": "Timer starts with the audio…",
       "hearAgain": "Hear again ({count} left)",
+      "hunt": {
+        "listenFirst": "Listen to the audio, then pick the key words you hear.",
+        "hearAgain": "Hear again ({count} left)",
+        "pick": "Pick {count} words",
+        "counterLabel": "Selected {selected} of {total}",
+        "hit": "Found",
+        "falsePick": "Wrong pick",
+        "missed": "Missed",
+        "transcript": "Transcript",
+        "tapKeyword": "Tap a highlighted word to see its meaning.",
+        "meaning": "Meaning",
+        "speakWord": "Hear {word}",
+        "keywordsFound": "{hits}/{total} keywords",
+        "roundSummary": "Round results",
+        "missedWords": "Most missed words"
+      },
       "onTrack": "On track",
       "checkHint": "Check the hint",
       "sample": "Sample:",
@@ -975,7 +1048,18 @@
       "startDeck": "Start {deck} · {count} words",
       "reviewRound": "Review round {count}",
       "practiceMissedHint": "Practice the {count} word(s) you marked ✗ until none are left.",
-      "pickAnother": "Pick another deck or play this one again."
+      "pickAnother": "Pick another deck or play this one again.",
+      "covered": "Covered",
+      "missingParts": "Missing",
+      "overLimit": "Too long: {count} words (max {max}).",
+      "wordsUsed": "{count} words",
+      "timerPaused": "Timer paused while you speak",
+      "points": "{count} pts",
+      "bestStreak": "Best streak: {count}",
+      "reviewAnswers": "Your answers",
+      "yourAnswer": "You:",
+      "noAnswer": "(no answer)",
+      "retryMissed": "Retry missed ({count})"
     },
     "removeSavedExercise": "Remove saved exercise",
     "scenario": {
@@ -1045,6 +1129,12 @@
     "upgradeFailed": "Could not create an upgrade session"
   },
   "settings": {
+    "appearance": {
+      "themeDescription": "Choose how the app looks. Changes apply when you save.",
+      "accentDescription": "Highlight color for buttons and active items",
+      "textSizeDescription": "Make text easier to read across the app",
+      "motionDescription": "Control animations and transitions"
+    },
     "textSize": {
       "default": "Default",
       "defaultHint": "16px",
@@ -1088,7 +1178,32 @@
       "updatedOthers": "Your password was changed. Other devices have been signed out.",
       "updated": "Your password was changed successfully.",
       "ok": "OK",
-      "updateFailed": "Couldn't update the password. Try again."
+      "updateFailed": "Couldn't update the password. Try again.",
+      "passwordDescription": "Use a strong password you don't use anywhere else.",
+      "revokeOthersDescription": "Sign out every other device when the password changes.",
+      "confirmChangeTitle": "Change your password?",
+      "confirmChange": "Your password will be changed on this account.",
+      "confirmChangeOthers": "Your password will be changed and all other devices will be signed out.",
+      "cancel": "Cancel",
+      "sessionsTitle": "Signed-in devices",
+      "sessionsDescription": "Devices currently signed in to your account.",
+      "thisDevice": "This device",
+      "unknownDevice": "Unknown device",
+      "lastActive": "Last active {date}",
+      "ipAddress": "IP {ip}",
+      "signOut": "Sign out",
+      "signOutAll": "Sign out all other devices",
+      "noOtherSessions": "No other devices are signed in.",
+      "sessionsLoading": "Loading devices…",
+      "sessionsLoadFailed": "Couldn't load your devices. Try again.",
+      "retry": "Retry",
+      "revokeTitle": "Sign out this device?",
+      "revokeDescription": "{device} will be signed out of your account.",
+      "revokeAllTitle": "Sign out all other devices?",
+      "revokeAllDescription": "Every device except this one will be signed out.",
+      "revokeFailed": "Couldn't sign out the device. Try again.",
+      "revokedAllTitle": "Devices signed out",
+      "revokedAll": "All other devices have been signed out."
     },
     "notifications": {
       "iosHomeScreen": "On iPhone, add EngliTutor to your Home Screen before this device can receive notifications.",
@@ -1097,11 +1212,32 @@
       "enableFailed": "Could not turn on notifications.",
       "notConfigured": "Notifications are not available on this server yet.",
       "saveFailed": "Could not save notifications.",
+      "loadFailed": "Could not load your notification settings.",
+      "retry": "Try again",
       "noSubscription": "This browser did not return a push subscription.",
       "testHint": "Send a test notification to check this device.",
       "testButton": "Send test notification",
       "testSent": "Test notification sent. It should appear in a few seconds.",
-      "testFailed": "Could not send the test notification."
+      "testFailed": "Could not send the test notification.",
+      "learningTitle": "Learning",
+      "learningDescription": "Reminders that keep your study habit going.",
+      "reminderTimeDescription": "When to send your daily reminder.",
+      "deviceTitle": "This device",
+      "permissionLabel": "Notification permission",
+      "statusGranted": "Allowed",
+      "statusDefault": "Not granted yet",
+      "statusDenied": "Blocked",
+      "statusUnsupported": "Not supported",
+      "statusIosInstall": "Install app first",
+      "hintGranted": "This device can receive notifications.",
+      "hintDefault": "Your browser will ask for permission when you save with at least one notification turned on."
+    },
+    "form": {
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "saveFailed": "Couldn't save changes",
+      "unsaved": "You have unsaved changes."
     },
     "loadingTitle": "Loading settings",
     "loadingDescription": "Updating this section…",
@@ -1121,11 +1257,69 @@
     },
     "referral": {
       "redeemFailed": "Could not redeem the referral code. Try again.",
+      "inviteDescription": "Friends get {days} days of Premium when they redeem your code.",
+      "rewardEarning": "You earn {days} days per friend (up to {max} days in total).",
+      "rewardLimit": "You've reached the {max}-day referral reward limit.",
+      "daysValue": "{days} days",
+      "shareUrlLabel": "Share link",
+      "copyFailed": "Could not copy to the clipboard. Copy it manually instead.",
+      "codeLabel": "Referral code",
+      "redeemButton": "Redeem",
+      "alreadyRedeemed": "You already redeemed invite code {code}.",
+      "loadFailed": "Could not load your referral details.",
+      "retry": "Try again",
+      "recentDescription": "Friends who recently redeemed your code.",
       "redeemedNotice": "Referral redeemed. You received {days} days of Premium.",
       "redeemedTitle": "Referral redeemed",
       "redeemedDescription": "You received {days} days of Premium.",
       "notRedeemedTitle": "Referral not redeemed",
       "notRedeemedDescription": "Try again in Settings → Referrals. Your account is unaffected."
+    },
+    "billing": {
+      "planDescription": "Your plan, billing cycle and renewal date.",
+      "upgrade": "Upgrade to Premium",
+      "renewsOnLabel": "Renews on",
+      "endsOnLabel": "Ends on",
+      "historyTitle": "Billing history",
+      "historyDescription": "Activity for your current plan. Past invoices aren't listed here.",
+      "historyEmpty": "No billing history yet.",
+      "historyEmptyHint": "Once you start a trial or subscribe, your plan activity will appear here.",
+      "historyTrial": "Premium trial",
+      "historyBonus": "Bonus Premium days",
+      "loadFailed": "Could not load your billing details.",
+      "retry": "Try again"
+    },
+    "groups": {
+      "account": "Account",
+      "learning": "Learning",
+      "app": "App",
+      "plan": "Plan & perks"
+    },
+    "nav": {
+      "back": "Back",
+      "overview": "Overview",
+      "backToSettings": "Back to Settings"
+    },
+    "account": {
+      "profileDescription": "Your name, contact details, and work info.",
+      "learningDescription": "Languages, target level, and what you want to achieve.",
+      "securityDescription": "How you sign in and your current session."
+    },
+    "overview": {
+      "profile": "Profile",
+      "viewProfile": "Manage account",
+      "plan": "Current plan",
+      "managePlan": "Manage billing",
+      "sourceSubscription": "Subscription",
+      "sourceTrial": "Trial",
+      "sourceBonus": "Bonus days",
+      "sourceFree": "Free",
+      "renewsOn": "Renews {date}",
+      "endsOn": "Ends {date}",
+      "shortcuts": "Shortcuts",
+      "legal": "Legal",
+      "loadFailed": "Couldn't load this right now.",
+      "unnamed": "Your account"
     }
   },
   "translate": {
@@ -1134,6 +1328,34 @@
     "tone": "Tone:",
     "keywordInContext": "Keyword in context",
     "remember": "Remember",
+    "sentenceTranslation": "Whole-sentence translation",
+    "sentenceError": "Couldn't analyse this sentence. The word meaning above still works.",
+    "clausesTitle": "Sentence structure",
+    "clauseRole": {
+      "main": "Main clause",
+      "subordinate": "Subordinate clause",
+      "relative": "Relative clause",
+      "condition": "Condition",
+      "contrast": "Contrast",
+      "purpose": "Purpose",
+      "other": "Clause"
+    },
+    "onlyThisWord": "Just this word",
+    "wordOnlyMeaning": "Meaning of “{word}” on its own",
+    "expressionType": {
+      "phrasal_verb": "Phrasal verb",
+      "prepositional_verb": "Verb + preposition",
+      "verb_phrase": "Verb phrase",
+      "compound_noun": "Compound noun",
+      "compound_adj": "Compound adjective",
+      "noun_phrase": "Noun phrase",
+      "adj_prep": "Adjective + preposition",
+      "noun_prep": "Noun + preposition",
+      "prepositional_phrase": "Prepositional phrase",
+      "idiom": "Idiom",
+      "collocation": "Collocation",
+      "other": "Phrase"
+    },
     "sourceDictionary": "From dictionary · no AI used",
     "sourceDemo": "Demo mode · configure OpenAI for live translations",
     "sourceAi": "Saved or AI result · verify important content",

@@ -19,16 +19,29 @@ export const { useSession, signIn, signUp, signOut } = authClient;
 export { authErrorMessage };
 
 export function getMarketingUrl(): string {
-  return normalizePublicUrl(process.env.NEXT_PUBLIC_MARKETING_URL, "http://localhost:3002");
+  return normalizePublicUrl(
+    process.env.NEXT_PUBLIC_MARKETING_URL,
+    "http://localhost:3002",
+  );
 }
 
 export function useSameOriginAuth(): boolean {
   return useSameOrigin;
 }
 
-/** Share the fresh session with the marketing host, then continue to `next`. */
+/**
+ * Silently share the fresh session with the marketing host, then continue to
+ * `next`. Never redirects visibly through marketing; on failure it goes to `next`.
+ */
 export async function redirectAfterSignIn(next: string): Promise<void> {
   const absolute = new URL(next, window.location.href).toString();
-  const synced = await startSessionSync(authClient, getMarketingUrl(), absolute);
+  const synced = await startSessionSync(
+    authClient,
+    getMarketingUrl(),
+    absolute,
+    {
+      visibleFallback: false,
+    },
+  );
   if (!synced) window.location.replace(next);
 }

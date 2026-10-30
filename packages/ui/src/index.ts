@@ -29,6 +29,7 @@ export {
   SelectValue,
 } from "./components/select";
 export { Separator } from "./components/separator";
+export { Switch, type SwitchProps } from "./components/switch";
 export { ThemeToggle } from "./components/theme-toggle";
 export {
   CookieConsentBanner,

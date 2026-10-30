@@ -20,6 +20,8 @@ export type LearningQuestion =
       kind: "open";
       prompt: string;
       keywords: string[];
+      /** Synonym groups; every group needs one match. Falls back to `keywords` when absent. */
+      keywordGroups?: string[][];
       sampleAnswer: string;
       explanation: string;
     }
@@ -49,10 +51,17 @@ export type LearningQuestion =
   | {
       id: string;
       kind: "hunt";
+      /** On-screen instruction (not the spoken text). */
       prompt: string;
       options: string[];
       correctWords: string[];
       explanation: string;
+      /** Sentence(s) read aloud; mirrors round material. */
+      transcript?: string;
+      level?: LearningLevel;
+      topic?: string;
+      targets?: Array<{ word: string; meaningVi?: string; ipa?: string; accept?: string[] }>;
+      distractors?: Array<{ word: string; type: "sound-alike" | "same-topic" | "form" }>;
     }
   | {
       id: string;

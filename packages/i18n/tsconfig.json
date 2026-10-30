@@ -9,8 +9,7 @@
     "outDir": "dist",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "baseUrl": "."
+    "resolveJsonModule": true
   },
   "include": ["src/**/*.ts", "src/**/*.json"]
 }

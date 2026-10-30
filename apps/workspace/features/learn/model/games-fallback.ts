@@ -1,4 +1,5 @@
 import type { LearningGame, LearningGameRound, LearningQuestion } from "../api/types";
+import { KEYWORD_HUNT_STATIC } from "./keyword-hunt.data";
 
 const open = (
   id: string,
@@ -6,11 +7,13 @@ const open = (
   keywords: string[],
   sampleAnswer: string,
   explanation: string,
+  keywordGroups?: string[][],
 ): LearningQuestion => ({
   id,
   kind: "open",
   prompt,
   keywords,
+  ...(keywordGroups ? { keywordGroups } : {}),
   sampleAnswer,
   explanation,
 });
@@ -54,21 +57,6 @@ const match = (
   kind: "match",
   prompt,
   pairs,
-  explanation,
-});
-
-const hunt = (
-  id: string,
-  prompt: string,
-  options: string[],
-  correctWords: string[],
-  explanation: string,
-): LearningQuestion => ({
-  id,
-  kind: "hunt",
-  prompt,
-  options,
-  correctWords,
   explanation,
 });
 
@@ -156,9 +144,13 @@ export const FALLBACK_GAMES: LearningGame[] = [
         open(
           "sr-intro-q",
           "A hiring manager says: “Tell me about yourself.” Reply in 2–3 short sentences.",
-          ["I", "experience"],
+          ["name", "experience"],
           "Hi, I'm Minh. I'm a frontend developer with two years of experience, and I'd like to grow in a product team.",
           "Name + role + one detail is enough at A2.",
+          [
+            ["my name", "I'm", "I am", "this is"],
+            ["experience", "worked", "working", "years"],
+          ],
         ),
         { lessonIds: ["interview-frontend"] },
       ),
@@ -172,6 +164,7 @@ export const FALLBACK_GAMES: LearningGame[] = [
           ["yesterday"],
           "Yesterday I finished the login page and fixed a small CSS bug.",
           "Start with Yesterday + past verb.",
+          [["yesterday", "last day"]],
         ),
         { lessonIds: ["daily-standup"] },
       ),
@@ -185,8 +178,9 @@ export const FALLBACK_GAMES: LearningGame[] = [
           ["today"],
           "Today I will start the profile settings form and write two tests.",
           "Use Today I will + verb.",
+          [["today", "this morning", "this afternoon"]],
         ),
-        { lessonIds: ["daily-standup"] },
+        { lessonIds: ["daily-standup"], maxWords: 30 },
       ),
       round(
         "sr-weekend",
@@ -198,6 +192,7 @@ export const FALLBACK_GAMES: LearningGame[] = [
           ["weekend"],
           "It was good, thanks. I cooked dinner with friends and watched a film.",
           "Answer + one concrete detail.",
+          [["weekend", "saturday", "sunday", "it was", "was good", "was great", "was nice", "was relaxing"]],
         ),
         { lessonIds: ["office-smalltalk"] },
       ),
@@ -211,6 +206,10 @@ export const FALLBACK_GAMES: LearningGame[] = [
           ["blocker", "need"],
           "I have no blockers right now, but I may need the API document later.",
           "Say none, or name the one thing you are waiting for.",
+          [
+            ["blocker", "blocked", "blocking", "no problem", "nothing"],
+            ["need", "waiting", "require", "depend"],
+          ],
         ),
         { lessonIds: ["daily-standup"] },
       ),
@@ -224,6 +223,7 @@ export const FALLBACK_GAMES: LearningGame[] = [
           ["confirm"],
           "Just to confirm, you want a new hero image and the signup form moved higher, with a preview by Monday noon.",
           "Repeat the request before you promise anything.",
+          [["confirm", "to be clear", "so you want", "so you need", "let me check"]],
         ),
         { lessonIds: ["customer-call"] },
       ),
@@ -340,98 +340,9 @@ export const FALLBACK_GAMES: LearningGame[] = [
     body: "Listen and catch the key words.",
     skill: "listening",
     durationMinutes: 2,
-    howToPlay: "Listen once, then pick the 5 words that were actually in the audio.",
+    howToPlay: "Listen once, then pick the words that were actually in the audio.",
     relatedSkill: "listening",
-    rounds: [
-      round(
-        "kh-standup",
-        "A2",
-        45,
-        hunt("kh-standup-q", "Listen, then tap the 5 words you actually heard.", [
-          "yesterday", "login", "profile", "blockers", "document",
-          "invoice", "password", "sprint", "airport", "salary", "wedding", "printer",
-        ], ["yesterday", "login", "profile", "blockers", "document"], "Listen for the stand-up keywords, not extra office words."),
-        {
-          lessonIds: ["daily-standup"],
-          hearAgainMax: 2,
-          material: {
-            title: "Stand-up",
-            speakable: true,
-            body: "Yesterday I finished the login page. Today I will start the profile settings form. I have no blockers right now, but I may need the API document later.",
-          },
-        },
-      ),
-      round(
-        "kh-customer",
-        "TOEIC",
-        45,
-        hunt("kh-customer-q", "Listen, then tap the 5 words from the customer call.", [
-          "landing", "hero", "signup", "preview", "Monday",
-          "invoice", "refund", "airport", "salary", "wedding", "password", "stadium",
-        ], ["landing", "hero", "signup", "preview", "Monday"], "The request is about the page, the form, and the deadline."),
-        {
-          lessonIds: ["customer-call"],
-          hearAgainMax: 2,
-          material: {
-            title: "Customer call",
-            speakable: true,
-            body: "We like the new landing page. Please replace the hero image and move the signup form higher. Can you send a preview by Monday at noon?",
-          },
-        },
-      ),
-      round(
-        "kh-meeting",
-        "B1",
-        45,
-        hunt("kh-meeting-q", "Listen, then tap the 5 key words from the meeting note.", [
-          "review", "calendar", "prototype", "engineering", "Figma",
-          "invoice", "airport", "wedding", "password", "stadium", "refund", "salary",
-        ], ["review", "calendar", "prototype", "engineering", "Figma"], "Catch the reason, the asks, and who owns engineering."),
-        {
-          lessonIds: ["meeting-followup"],
-          hearAgainMax: 3,
-          material: {
-            title: "Voice message",
-            speakable: true,
-            body: "The client has moved our review to four thirty. Could you update the calendar invite and send the revised prototype before four? I will notify the engineering team. Ask people to leave written comments in Figma.",
-          },
-        },
-      ),
-      round(
-        "kh-tour",
-        "A2",
-        45,
-        hunt("kh-tour-q", "Listen, then tap 5 words from the office tour.", [
-          "reception", "third", "kitchen", "badge", "security",
-          "invoice", "airport", "wedding", "salary", "stadium", "refund", "password",
-        ], ["reception", "third", "kitchen", "badge", "security"], "Places and times from the welcome tour."),
-        {
-          hearAgainMax: 2,
-          material: {
-            title: "Office tour",
-            speakable: true,
-            body: "The reception desk is on the ground floor. The product team sits on the third floor. Meeting Room B is opposite the kitchen. Ask security for a visitor badge before nine thirty.",
-          },
-        },
-      ),
-      round(
-        "kh-delay",
-        "B1",
-        45,
-        hunt("kh-delay-q", "Listen, then tap 5 words from the delay call.", [
-          "traffic", "twenty", "Figma", "payment", "covering",
-          "invoice", "airport", "wedding", "salary", "stadium", "refund", "password",
-        ], ["traffic", "twenty", "Figma", "payment", "covering"], "Reason, delay length, and the two asks."),
-        {
-          hearAgainMax: 3,
-          material: {
-            title: "Delay call",
-            speakable: true,
-            body: "I'm stuck in traffic, so I'll be about twenty minutes late. Could you start without me and share the Figma link? If the client asks about the payment screen, tell them we will cover it later. Thanks for covering for me.",
-          },
-        },
-      ),
-    ],
+    rounds: KEYWORD_HUNT_STATIC,
   },
   {
     id: "flashcard",
