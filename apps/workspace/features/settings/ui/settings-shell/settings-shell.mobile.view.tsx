@@ -7,7 +7,7 @@ import { useWorkspaceI18n } from "@/features/i18n";
 import type { SettingsSection } from "../../model/nav";
 import { settingsNavLabelKey } from "./settings-shell.model";
 
-/** Mobile (<1024px): back link + section title on section pages. Hidden from `lg` via CSS. */
+/** Mobile (<1024px): round back button + title/description on section pages. Hidden from `lg` via CSS. */
 export const SettingsMobileNav = memo(function SettingsMobileNav({
   section,
 }: {
@@ -23,22 +23,24 @@ export const SettingsMobileNav = memo(function SettingsMobileNav({
   }, [sectionHref]);
 
   return (
-    <header className="sticky top-16 z-30 -mx-4 flex items-center gap-1 border-b border-border/70 bg-background/95 px-2 py-1.5 backdrop-blur-md sm:-mx-6 sm:px-4 lg:hidden">
+    <header className="sticky top-16 z-30 -mx-4 flex items-center gap-3 border-b border-border/70 bg-background/95 px-4 py-2 backdrop-blur-md sm:-mx-6 sm:px-6 lg:hidden">
       <Link
         href="/settings"
         aria-label={t("settings.nav.backToSettings")}
-        className="inline-flex h-11 items-center gap-1 rounded-xl px-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         <ChevronLeft className="size-5" aria-hidden />
-        {t("settings.nav.back")}
       </Link>
-      <h2
-        ref={headingRef}
-        tabIndex={-1}
-        className="min-w-0 flex-1 truncate pr-12 text-center text-base font-semibold focus:outline-none"
-      >
-        {t(settingsNavLabelKey(section))}
-      </h2>
+      <div className="min-w-0 flex-1">
+        <h2
+          ref={headingRef}
+          tabIndex={-1}
+          className="truncate text-lg font-semibold leading-tight focus:outline-none"
+        >
+          {t(settingsNavLabelKey(section))}
+        </h2>
+        <p className="line-clamp-2 text-xs text-muted-foreground">{t(section.descriptionKey)}</p>
+      </div>
     </header>
   );
 });
