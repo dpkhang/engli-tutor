@@ -4,14 +4,24 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { accountApi } from "@/features/accounts";
-import { billingMeQueryKey, dailyRemaining, planAllows, useBillingMe } from "@/features/payments";
+import {
+  billingMeQueryKey,
+  dailyRemaining,
+  planAllows,
+  useBillingMe,
+} from "@/features/payments";
 import { queryKeys } from "@/lib/query";
 import { LESSON_PACKS } from "../../model/curriculum";
 import { markLessonStarted } from "../../model/lesson-progress";
 import { useGame } from "../../hooks/use-learning-catalog";
 import { useVocabProgress } from "../../hooks/use-vocab-progress";
 import { gameSessionsApi } from "../../api/vocab-api";
-import { pickGameRounds, roundPoints, shuffleInPlace } from "../../model/games";
+import {
+  pickGameRounds,
+  pointsForRound,
+  roundPoints,
+  shuffleInPlace,
+} from "../../model/games";
 import {
   isMastered,
   needsReview,
@@ -46,7 +56,10 @@ export function GamePlayPage({ slug }: { slug: string }) {
   const [playId, setPlayId] = useState(0);
   const [enter, setEnter] = useState<"next" | "back">("next");
   const isVocab = game?.id === "flashcard";
-  const allDecks = useMemo(() => (isVocab ? (game?.decks ?? []) : []), [game, isVocab]);
+  const allDecks = useMemo(
+    () => (isVocab ? (game?.decks ?? []) : []),
+    [game, isVocab],
+  );
   const profileQuery = useQuery({
     queryKey: queryKeys.account,
     queryFn: accountApi.get,
@@ -65,7 +78,8 @@ export function GamePlayPage({ slug }: { slug: string }) {
   const playsLeft = dailyRemaining(billing.data, "game_session");
   const playsBlocked = playsLeft === 0;
   const lockedModes = useMemo<VocabMode[]>(
-    () => (planAllows(billing.data, "fullVocabModes") ? [] : ["picture", "listen"]),
+    () =>
+      planAllows(billing.data, "fullVocabModes") ? [] : ["picture", "listen"],
     [billing.data],
   );
   const modeLocked = lockedModes.includes(mode);
@@ -77,22 +91,32 @@ export function GamePlayPage({ slug }: { slug: string }) {
   const profileLevel = profileQuery.data?.targetLevel ?? null;
   const level =
     pickedLevel ??
-    (profileLevel && deckLevels.includes(profileLevel) ? profileLevel : deckLevels[0] ?? null);
+    (profileLevel && deckLevels.includes(profileLevel)
+      ? profileLevel
+      : (deckLevels[0] ?? null));
   const decks = useMemo<FlashcardDeckOption[]>(() => {
     const now = Date.now();
     return allDecks
       .filter((deck) => deck.level === level)
       .map((deck) => {
-        const rounds = game?.rounds.filter((round) => round.deck === deck.id) ?? [];
+        const rounds =
+          game?.rounds.filter((round) => round.deck === deck.id) ?? [];
         return {
           ...deck,
-          reviewCount: rounds.filter((round) => needsReview(progress.get(round.id), now)).length,
-          masteredCount: rounds.filter((round) => isMastered(progress.get(round.id))).length,
-          pictureCount: rounds.filter((round) => supportsMode(round, "picture")).length,
+          reviewCount: rounds.filter((round) =>
+            needsReview(progress.get(round.id), now),
+          ).length,
+          masteredCount: rounds.filter((round) =>
+            isMastered(progress.get(round.id)),
+          ).length,
+          pictureCount: rounds.filter((round) => supportsMode(round, "picture"))
+            .length,
         };
       });
   }, [allDecks, game, level, progress]);
-  const deckId = decks.some((deck) => deck.id === pickedDeckId) ? pickedDeckId : decks[0]?.id ?? null;
+  const deckId = decks.some((deck) => deck.id === pickedDeckId)
+    ? pickedDeckId
+    : (decks[0]?.id ?? null);
 
   useEffect(() => {
     if (lesson) markLessonStarted(lesson);
@@ -103,21 +127,32 @@ export function GamePlayPage({ slug }: { slug: string }) {
     setPickedDeckId(null);
   }, []);
 
-  const begin = useCallback((rounds: LearningGameRound[], nextReviewRound: number, nextMode: VocabMode) => {
-    setSession(rounds);
-    setSessionMode(nextMode);
-    setReviewRound(nextReviewRound);
-    setEnter("next");
-    setIndex(0);
-    setScores([]);
-    setAnswers([]);
-    setPlayId((current) => current + 1);
-    startedAt.current = Date.now();
-    setPhase("playing");
-  }, []);
+  const begin = useCallback(
+    (
+      rounds: LearningGameRound[],
+      nextReviewRound: number,
+      nextMode: VocabMode,
+    ) => {
+      setSession(rounds);
+      setSessionMode(nextMode);
+      setReviewRound(nextReviewRound);
+      setEnter("next");
+      setIndex(0);
+      setScores([]);
+      setAnswers([]);
+      setPlayId((current) => current + 1);
+      startedAt.current = Date.now();
+      setPhase("playing");
+    },
+    [],
+  );
 
   const vocabSession = useCallback(
-    (cards: LearningGameRound[], nextReviewRound: number, requested: VocabMode) => {
+    (
+      cards: LearningGameRound[],
+      nextReviewRound: number,
+      requested: VocabMode,
+    ) => {
       if (!game) return;
       const usable = cards.filter((round) => supportsMode(round, requested));
       const nextMode = usable.length ? requested : "flip";
@@ -139,14 +174,37 @@ export function GamePlayPage({ slug }: { slug: string }) {
       begin(pickGameRounds(game.rounds, lesson, profileLevel), 0, "flip");
       return;
     }
-    const tagged = lesson ? game.rounds.filter((round) => round.lessonIds?.includes(lesson)) : [];
-    const inDeck = deckId ? game.rounds.filter((round) => round.deck === deckId) : [];
+    const tagged = lesson
+      ? game.rounds.filter((round) => round.lessonIds?.includes(lesson))
+      : [];
+    const inDeck = deckId
+      ? game.rounds.filter((round) => round.deck === deckId)
+      : [];
     const pool = tagged.length ? tagged : inDeck.length ? inDeck : game.rounds;
     const picked = pickVocabSession(pool, progress, mode);
-    vocabSession(picked.length ? picked : pickVocabSession(pool, progress, "flip"), 0, mode);
-  }, [begin, deckId, game, isVocab, lesson, mode, modeLocked, playsBlocked, profileLevel, progress, vocabSession]);
+    vocabSession(
+      picked.length ? picked : pickVocabSession(pool, progress, "flip"),
+      0,
+      mode,
+    );
+  }, [
+    begin,
+    deckId,
+    game,
+    isVocab,
+    lesson,
+    mode,
+    modeLocked,
+    playsBlocked,
+    profileLevel,
+    progress,
+    vocabSession,
+  ]);
 
-  const cardsById = useMemo(() => new Map((game?.rounds ?? []).map((round) => [round.id, round])), [game]);
+  const cardsById = useMemo(
+    () => new Map((game?.rounds ?? []).map((round) => [round.id, round])),
+    [game],
+  );
 
   const missedRounds = useMemo(
     () =>
@@ -161,7 +219,11 @@ export function GamePlayPage({ slug }: { slug: string }) {
 
   const onPracticeMissed = useCallback(() => {
     if (!missedRounds.length) return;
-    vocabSession(shuffleInPlace([...missedRounds]), reviewRound + 1, sessionMode);
+    vocabSession(
+      shuffleInPlace([...missedRounds]),
+      reviewRound + 1,
+      sessionMode,
+    );
   }, [missedRounds, reviewRound, sessionMode, vocabSession]);
 
   const onReviewDeck = useCallback(
@@ -178,29 +240,40 @@ export function GamePlayPage({ slug }: { slug: string }) {
 
   const autoAdvance = isVocab && sessionMode === "flip";
 
-  const onRoundSubmit = useCallback((value: string, isCorrect: boolean, timing: RoundTiming) => {
-    setScores((prev) => {
-      const next = [...prev];
-      next[index] = isCorrect;
-      return next;
-    });
-    setAnswers((prev) => {
-      const next = [...prev];
-      next[index] = {
-        value,
-        correct: isCorrect,
-        points: roundPoints(isCorrect, timing.secondsLeft, timing.totalSeconds),
-      };
-      return next;
-    });
-    if (!isVocab) return;
-    const cardId = session[index]?.id;
-    if (cardId) review(cardId, isCorrect);
-    if (!autoAdvance) return;
-    setEnter("next");
-    if (index + 1 >= session.length) setPhase("results");
-    else setIndex((current) => current + 1);
-  }, [autoAdvance, index, isVocab, review, session]);
+  const onRoundSubmit = useCallback(
+    (value: string, isCorrect: boolean, timing: RoundTiming) => {
+      setScores((prev) => {
+        const next = [...prev];
+        next[index] = isCorrect;
+        return next;
+      });
+      setAnswers((prev) => {
+        const next = [...prev];
+        next[index] = {
+          value,
+          correct: isCorrect,
+          points: session[index]
+            ? pointsForRound(
+                session[index].question,
+                value,
+                isCorrect,
+                timing.secondsLeft,
+                timing.totalSeconds,
+              )
+            : roundPoints(isCorrect, timing.secondsLeft, timing.totalSeconds),
+        };
+        return next;
+      });
+      if (!isVocab) return;
+      const cardId = session[index]?.id;
+      if (cardId) review(cardId, isCorrect);
+      if (!autoAdvance) return;
+      setEnter("next");
+      if (index + 1 >= session.length) setPhase("results");
+      else setIndex((current) => current + 1);
+    },
+    [autoAdvance, index, isVocab, review, session],
+  );
 
   const onPreviousRound = useCallback(() => {
     setEnter("back");
@@ -218,7 +291,10 @@ export function GamePlayPage({ slug }: { slug: string }) {
   }, []);
 
   const correctCount = scores.filter(Boolean).length;
-  const totalPoints = answers.reduce((sum, answer) => sum + (answer?.points ?? 0), 0);
+  const totalPoints = answers.reduce(
+    (sum, answer) => sum + (answer?.points ?? 0),
+    0,
+  );
 
   const onRetryMissedRounds = useCallback(() => {
     if (isVocab || playsBlocked) return;
@@ -228,7 +304,13 @@ export function GamePlayPage({ slug }: { slug: string }) {
   }, [begin, isVocab, playsBlocked, scores, session]);
 
   useEffect(() => {
-    if (phase !== "results" || !game || recordedPlayId.current === playId || !session.length) return;
+    if (
+      phase !== "results" ||
+      !game ||
+      recordedPlayId.current === playId ||
+      !session.length
+    )
+      return;
     recordedPlayId.current = playId;
     gameSessionsApi
       .record({
@@ -238,9 +320,21 @@ export function GamePlayPage({ slug }: { slug: string }) {
         total: session.length,
         durationMs: Math.min(3_600_000, Date.now() - startedAt.current),
       })
-      .then(() => queryClient.invalidateQueries({ queryKey: billingMeQueryKey }))
+      .then(() =>
+        queryClient.invalidateQueries({ queryKey: billingMeQueryKey }),
+      )
       .catch(() => undefined);
-  }, [correctCount, deckId, game, isVocab, phase, playId, queryClient, session.length, sessionMode]);
+  }, [
+    correctCount,
+    deckId,
+    game,
+    isVocab,
+    phase,
+    playId,
+    queryClient,
+    session.length,
+    sessionMode,
+  ]);
 
   const round = session[index];
 

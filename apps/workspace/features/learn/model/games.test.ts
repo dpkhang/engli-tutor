@@ -2,9 +2,12 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { FALLBACK_GAMES } from "./games-fallback";
 import {
+  evaluateHunt,
   evaluateOpen,
+  huntPoints,
   longestStreak,
   pickGameRounds,
+  pointsForRound,
   roundPoints,
   scoreGameRound,
   timeLimitFor,
@@ -125,4 +128,81 @@ test("pickGameRounds prefers the learner level and keeps lesson priority", () =>
   }
   const tagged = [mk("x", "TOEIC", ["lesson-1"]), ...rounds];
   assert.deepEqual(pickGameRounds(tagged, "lesson-1", "A2").map((item) => item.id), ["x"]);
+});
+
+type HuntQuestion = Extract<LearningQuestion, { kind: "hunt" }>;
+
+const hunt = (overrides: Partial<HuntQuestion> = {}): HuntQuestion => ({
+  id: "h",
+  kind: "hunt",
+  prompt: "Pick",
+  options: ["a", "b", "c", "d", "e", "x", "y"],
+  correctWords: ["a", "b", "c", "d", "e"],
+  explanation: "",
+  ...overrides,
+});
+
+const pick = (words: string[]) => JSON.stringify(words);
+
+test("hunt: all hits is correct with the same points as roundPoints", () => {
+  const q = hunt();
+  const words = ["a", "b", "c", "d", "e"];
+  assert.equal(scoreGameRound(q, pick(words)), true);
+  assert.equal(pointsForRound(q, pick(words), true, 10, 20), roundPoints(true, 10, 20));
+  assert.equal(huntPoints(evaluateHunt(q, words), 5, 10, 20), roundPoints(true, 10, 20));
+});
+
+test("hunt: missing 1 of 5 still passes at 0.8", () => {
+  const q = hunt();
+  const evaluation = evaluateHunt(q, ["a", "b", "c", "d"]);
+  assert.deepEqual(evaluation.missed, ["e"]);
+  assert.equal(evaluation.ratio, 0.8);
+  assert.equal(scoreGameRound(q, pick(["a", "b", "c", "d"])), true);
+});
+
+test("hunt: one false pick passes with fewer points; two fail", () => {
+  const q = hunt();
+  const one = ["a", "b", "c", "d", "e", "x"];
+  assert.equal(scoreGameRound(q, pick(one)), true);
+  assert.ok(pointsForRound(q, pick(one), true, 10, 20) < roundPoints(true, 10, 20));
+  const two = ["a", "b", "c", "d", "e", "x", "y"];
+  assert.equal(scoreGameRound(q, pick(two)), false);
+  assert.deepEqual(evaluateHunt(q, two).falsePicks, ["x", "y"]);
+});
+
+test("hunt: legacy payload without targets uses correctWords", () => {
+  const q = hunt({ targets: undefined });
+  assert.equal(evaluateHunt(q, ["A ", "b"]).hits.length, 2);
+  assert.equal(scoreGameRound(q, pick(["a", "b"])), false);
+});
+
+test("hunt: accept alias counts as a hit, duplicates ignored", () => {
+  const q = hunt({
+    targets: [
+      { word: "start", accept: ["started"] },
+      { word: "end" },
+    ],
+  });
+  const evaluation = evaluateHunt(q, ["Started", "started", "end"]);
+  assert.deepEqual(evaluation.hits, ["start", "end"]);
+  assert.equal(evaluation.falsePicks.length, 0);
+});
+
+test("hunt: invalid JSON is incorrect", () => {
+  assert.equal(scoreGameRound(hunt(), "not json"), false);
+  assert.equal(pointsForRound(hunt(), "not json", false, 10, 20), 0);
+});
+
+test("non-hunt scoring is unchanged", () => {
+  const choice: LearningQuestion = {
+    id: "c",
+    kind: "choice",
+    prompt: "p",
+    options: ["a", "b"],
+    correctIndex: 1,
+    explanation: "",
+  } as LearningQuestion;
+  assert.equal(scoreGameRound(choice, "1"), true);
+  assert.equal(scoreGameRound(choice, "0"), false);
+  assert.equal(pointsForRound(choice, "1", true, 5, 10), roundPoints(true, 5, 10));
 });

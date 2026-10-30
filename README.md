@@ -18,7 +18,7 @@ Frontend của EngliTutor (AI English tutor): một **monorepo pnpm** gồm 2 ap
 
 Source kết hợp ba kiểu tổ chức, mỗi kiểu ở một cấp:
 
-- **Monorepo (pnpm workspace).** `pnpm-workspace.yaml` khai báo `apps/`* và `packages/`*. Package nội bộ được tham chiếu bằng `workspace:*` và trỏ thẳng vào `src/index.ts`; Next.js biên dịch chúng qua `transpilePackages`, nên khi dev không cần build trước.
+- **Monorepo (pnpm workspace).** `pnpm-workspace.yaml` khai báo `apps/`_ và `packages/`_. Package nội bộ được tham chiếu bằng `workspace:*` và trỏ thẳng vào `src/index.ts`; Next.js biên dịch chúng qua `transpilePackages`, nên khi dev không cần build trước.
 - **Feature-based (vertical slice).** Trong mỗi app, code gom theo nghiệp vụ (`learn`, `payments`, `tutor-chat`…), không gom theo loại file (`components/`, `hooks/`…).
 - **Container / Presentational.** Mỗi component màn hình có `index.tsx` lo dữ liệu, hook và sự kiện; `*.view.tsx` chỉ nhận props và render.
 
@@ -271,7 +271,7 @@ sequenceDiagram
   W->>W: chuyển tới returnTo (chỉ khi thuộc origin được phép)
 ```
 
-- Bắt đầu: `redirectAfterSignIn` (`apps/*/lib/auth-client.ts`) → `startSessionSync` (`packages/auth/src/session-sync.ts`).
+- Bắt đầu: `redirectAfterSignIn` (`apps/*/lib/auth-client.ts`) → `startSessionSync` (`packages/auth/src/session-sync.ts`). Workspace → Marketing là silent-only (iframe ẩn; timeout thì đi thẳng `returnTo`); Marketing → Workspace vẫn có visible fallback.
 - Kết thúc: `SessionSyncPage` → `completeSessionSync`. Token sai hoặc hết hạn chỉ khiến host nhận vẫn chưa đăng nhập.
 - Không sync khi hai host cùng hostname (chỉ khác port), vì cookie không phân biệt port; khi đó chỉ redirect thường.
 - Đăng nhập ở workspace (`/login`) đi theo chiều ngược lại: sync session sang marketing rồi quay về `returnTo`.
@@ -487,15 +487,15 @@ Backend cần khớp `WEB_ORIGIN`, `LANDING_ORIGIN` (xem `[../be/README.md](../b
 
 ### Lệnh
 
-| Lệnh                                                        | Mô tả                                                 |
-| ----------------------------------------------------------- | ----------------------------------------------------- |
-| `pnpm build:pkg`                                            | Build packages                                        |
-| `pnpm build`                                                | Packages + cả hai app                                 |
-| `pnpm lint`                                                 | Typecheck                                             |
-| `pnpm test`                                                 | Node test runner cho mọi app/package có script `test` |
-| `pnpm i18n:check`                                           | Kiểm tra key en/vi khớp nhau                          |
-| `pnpm ci:lint` / `pnpm ci:build`                            | i18n + typecheck / build toàn bộ                      |
-| `pnpm ci:workspace` / `pnpm ci:marketing`                   | Lint + build từng app                                 |
+| Lệnh                                      | Mô tả                                                 |
+| ----------------------------------------- | ----------------------------------------------------- |
+| `pnpm build:pkg`                          | Build packages                                        |
+| `pnpm build`                              | Packages + cả hai app                                 |
+| `pnpm lint`                               | Typecheck                                             |
+| `pnpm test`                               | Node test runner cho mọi app/package có script `test` |
+| `pnpm i18n:check`                         | Kiểm tra key en/vi khớp nhau                          |
+| `pnpm ci:lint` / `pnpm ci:build`          | i18n + typecheck / build toàn bộ                      |
+| `pnpm ci:workspace` / `pnpm ci:marketing` | Lint + build từng app                                 |
 
 Format: `pnpm exec oxfmt --write apps packages` (config `.oxfmtrc.json`).
 
@@ -506,7 +506,5 @@ docker compose up -d --build   # cần apps/<app>/.env.production; NEXT_PUBLIC_*
 ```
 
 Deploy production (GitLab CI, Nginx Proxy Manager, vận hành, troubleshooting): [`docs/DEPLOY_VPS.md`](docs/DEPLOY_VPS.md).
-
-
 
 TEST ME

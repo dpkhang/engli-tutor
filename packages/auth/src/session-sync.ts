@@ -23,14 +23,19 @@ export function resolveAllowedUrl(
   if (!raw) return null;
   try {
     const url = new URL(raw);
-    const allowed = allowedOrigins.map(toOrigin).filter((origin): origin is string => Boolean(origin));
+    const allowed = allowedOrigins
+      .map(toOrigin)
+      .filter((origin): origin is string => Boolean(origin));
     return allowed.includes(url.origin) ? url.toString() : null;
   } catch {
     return null;
   }
 }
 
-export function isAllowedSyncOrigin(raw: string, allowedOrigins: readonly string[]): boolean {
+export function isAllowedSyncOrigin(
+  raw: string,
+  allowedOrigins: readonly string[],
+): boolean {
   return resolveAllowedUrl(raw, allowedOrigins) !== null;
 }
 
@@ -51,7 +56,8 @@ function syncInBackground(url: string, targetOrigin: string): Promise<boolean> {
     frame.setAttribute("aria-hidden", "true");
     frame.tabIndex = -1;
     frame.referrerPolicy = "no-referrer";
-    frame.style.cssText = "position:absolute;width:0;height:0;border:0;visibility:hidden";
+    frame.style.cssText =
+      "position:absolute;width:0;height:0;border:0;visibility:hidden";
 
     let settled = false;
     const finish = (ok: boolean) => {
@@ -63,10 +69,15 @@ function syncInBackground(url: string, targetOrigin: string): Promise<boolean> {
       resolve(ok);
     };
     const onMessage = (event: MessageEvent) => {
-      if (event.origin !== targetOrigin || event.source !== frame.contentWindow) return;
-      if ((event.data as { type?: unknown } | null)?.type === SYNC_DONE_MESSAGE) finish(true);
+      if (event.origin !== targetOrigin || event.source !== frame.contentWindow)
+        return;
+      if ((event.data as { type?: unknown } | null)?.type === SYNC_DONE_MESSAGE)
+        finish(true);
     };
-    const timer = window.setTimeout(() => finish(false), SILENT_SYNC_TIMEOUT_MS);
+    const timer = window.setTimeout(
+      () => finish(false),
+      SILENT_SYNC_TIMEOUT_MS,
+    );
 
     window.addEventListener("message", onMessage);
     frame.src = url;
@@ -83,14 +94,16 @@ async function generateSyncUrl(
   if (error || !data?.token) return null;
   const url = new URL(SESSION_SYNC_PATH, target);
   url.searchParams.set("token", data.token);
-  for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
+  for (const [key, value] of Object.entries(params))
+    url.searchParams.set(key, value);
   return url.toString();
 }
 
 /**
  * Hand the current session to `targetOrigin`, then land on `returnTo`.
  * The hand-off runs in a hidden iframe; if that does not finish in time it
- * falls back to a visible redirect through the sync page.
+ * falls back to a visible redirect through the sync page, unless
+ * `options.visibleFallback` is false, in which case it goes straight to `returnTo`.
  * Returns false (without navigating) when there is nothing to sync, so the
  * caller can fall back to a plain redirect.
  */
@@ -98,6 +111,7 @@ export async function startSessionSync(
   client: EngliAuthClient,
   targetOrigin: string,
   returnTo: string,
+  options: { visibleFallback?: boolean } = {},
 ): Promise<boolean> {
   const target = toOrigin(targetOrigin);
   if (!target || target === window.location.origin) return false;
@@ -113,6 +127,11 @@ export async function startSessionSync(
       return false;
     }
     if (await syncInBackground(silentUrl, target)) {
+      window.location.assign(returnTo);
+      return true;
+    }
+
+    if (options.visibleFallback === false) {
       window.location.assign(returnTo);
       return true;
     }
@@ -141,7 +160,9 @@ export async function completeSessionSync(
 ): Promise<string> {
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
-  const returnTo = resolveAllowedUrl(params.get("returnTo"), options.allowedOrigins) ?? options.fallback;
+  const returnTo =
+    resolveAllowedUrl(params.get("returnTo"), options.allowedOrigins) ??
+    options.fallback;
 
   // Keep the token out of history and any later Referer header.
   window.history.replaceState(null, "", window.location.pathname);
