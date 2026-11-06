@@ -8,9 +8,27 @@ export type VocabProgressItem = {
   lastCorrect: boolean | null;
   lastSeenAt: string | null;
   saved: boolean;
+  /** SRS fields; absent on payloads from older servers. */
+  ease?: number;
+  streak?: number;
+  intervalDays?: number;
+  lastGrade?: VocabGrade | null;
 };
 
-export type VocabProgressList = { items: VocabProgressItem[] };
+export type VocabGrade = "again" | "hard" | "good";
+
+/** Exactly one of grade (counts toward vocab_review quota) or correct (does not). */
+export type VocabReviewInput = { grade: VocabGrade } | { correct: boolean };
+
+export type VocabProgressList = { items: VocabProgressItem[]; dueCount?: number };
+
+export type VocabToday = {
+  dueCount: number;
+  wordIds: string[];
+  reviewsUsed: number;
+  reviewsLimit: number | null;
+  resetAt: string;
+};
 
 export type LegacyFlashcardMarks = { unlearned: string[]; saved: string[] };
 
@@ -27,8 +45,9 @@ const BASE = "/api/learning";
 
 export const vocabApi = {
   progress: () => workspaceApiClient.get<VocabProgressList>(`${BASE}/vocab/progress`),
-  review: (wordId: string, correct: boolean) =>
-    workspaceApiClient.post<VocabProgressItem>(`${BASE}/vocab/review`, { wordId, correct }),
+  today: () => workspaceApiClient.get<VocabToday>(`${BASE}/vocab/today`),
+  review: (wordId: string, input: VocabReviewInput) =>
+    workspaceApiClient.post<VocabProgressItem>(`${BASE}/vocab/review`, { wordId, ...input }),
   setSaved: (wordId: string, saved: boolean) =>
     workspaceApiClient.put<VocabProgressItem>(`${BASE}/vocab/saved/${encodeURIComponent(wordId)}`, { saved }),
   import: (marks: LegacyFlashcardMarks) =>

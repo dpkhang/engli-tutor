@@ -16,6 +16,7 @@ import {
   Mic2,
   PenLine,
   Play,
+  RotateCcw,
   Sparkles,
   Timer,
   WandSparkles,
@@ -140,6 +141,8 @@ export type LearnHomeViewProps = {
   drillItems: HomeDrillItem[];
   snapshot: HomeSnapshot;
   dailyChallenge: HomeDailyChallenge;
+  /** Words due for review, same source as the deck list and Review today. */
+  dueCount: number;
 };
 
 function SectionHeader({
@@ -191,6 +194,7 @@ export const LearnHomeView = memo(function LearnHomeView({
   drillItems,
   snapshot,
   dailyChallenge,
+  dueCount,
 }: LearnHomeViewProps) {
   const t = useWorkspaceI18n();
   const [nextLesson, ...moreLessons] = discoverLessons;
@@ -281,6 +285,15 @@ export const LearnHomeView = memo(function LearnHomeView({
           {t("workspace.jumpIn")}
         </p>
         <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible">
+          {dueCount > 0 ? (
+            <LocalizedLink
+              href="/review"
+              className="inline-flex shrink-0 items-center gap-2 rounded-full border border-rose-200 bg-background px-4 py-2.5 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:border-rose-400/30 dark:text-rose-300 dark:hover:bg-rose-400/10"
+            >
+              <RotateCcw className="size-4" aria-hidden />
+              {t("learn.review.homeLink")} ({dueCount})
+            </LocalizedLink>
+          ) : null}
           {QUICK_START.map(({ labelKey, href, icon: Icon }) => (
             <LocalizedLink
               key={labelKey}

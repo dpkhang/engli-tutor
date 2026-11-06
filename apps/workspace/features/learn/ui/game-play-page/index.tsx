@@ -24,6 +24,7 @@ import {
 } from "../../model/games";
 import {
   isMastered,
+  isVocabGrade,
   needsReview,
   pickVocabSession,
   reviewRounds,
@@ -72,7 +73,15 @@ export function GamePlayPage({ slug }: { slug: string }) {
   const [reviewRound, setReviewRound] = useState(0);
   const startedAt = useRef(0);
   const recordedPlayId = useRef(0);
-  const { progress, saved, review, saveCard } = useVocabProgress(isVocab);
+  const {
+    progress,
+    saved,
+    review,
+    saveCard,
+    loading: progressLoading,
+    upgradeReason,
+    clearUpgrade,
+  } = useVocabProgress(isVocab);
   const queryClient = useQueryClient();
   const billing = useBillingMe();
   const playsLeft = dailyRemaining(billing.data, "game_session");
@@ -238,6 +247,34 @@ export function GamePlayPage({ slug }: { slug: string }) {
     [game, mode, modeLocked, playsBlocked, progress, vocabSession],
   );
 
+  const startedToday = useRef(false);
+  const wantsTodayReview = searchParams.get("review") === "today";
+  useEffect(() => {
+    if (
+      !wantsTodayReview ||
+      !game ||
+      !isVocab ||
+      progressLoading ||
+      startedToday.current
+    )
+      return;
+    startedToday.current = true;
+    const due = reviewRounds(game.rounds, progress, "flip");
+    if (due.length) vocabSession(due, 1, "flip");
+  }, [
+    game,
+    isVocab,
+    progress,
+    progressLoading,
+    vocabSession,
+    wantsTodayReview,
+  ]);
+
+  // A 402 on vocab_review ends the session gracefully; the view shows the upgrade notice.
+  useEffect(() => {
+    if (upgradeReason && phase === "playing") setPhase("intro");
+  }, [phase, upgradeReason]);
+
   const autoAdvance = isVocab && sessionMode === "flip";
 
   const onRoundSubmit = useCallback(
@@ -252,27 +289,29 @@ export function GamePlayPage({ slug }: { slug: string }) {
         next[index] = {
           value,
           correct: isCorrect,
-          points: session[index]
-            ? pointsForRound(
-                session[index].question,
-                value,
-                isCorrect,
-                timing.secondsLeft,
-                timing.totalSeconds,
-              )
-            : roundPoints(isCorrect, timing.secondsLeft, timing.totalSeconds),
+          points: roundPoints(
+            isCorrect,
+            timing.secondsLeft,
+            timing.totalSeconds,
+          ),
         };
         return next;
       });
       if (!isVocab) return;
       const cardId = session[index]?.id;
-      if (cardId) review(cardId, isCorrect);
+      if (cardId)
+        review(
+          cardId,
+          sessionMode === "flip" && isVocabGrade(value)
+            ? { grade: value }
+            : isCorrect,
+        );
       if (!autoAdvance) return;
       setEnter("next");
       if (index + 1 >= session.length) setPhase("results");
       else setIndex((current) => current + 1);
     },
-    [autoAdvance, index, isVocab, review, session],
+    [autoAdvance, index, isVocab, review, session, sessionMode],
   );
 
   const onPreviousRound = useCallback(() => {
@@ -375,6 +414,8 @@ export function GamePlayPage({ slug }: { slug: string }) {
       onPreviousRound={onPreviousRound}
       onBackToDecks={onBackToDecks}
       savedCards={saved}
+      upgradeReason={upgradeReason}
+      onDismissUpgrade={clearUpgrade}
       onSaveCard={saveCard}
     />
   );

@@ -28,7 +28,7 @@ function me(overrides: {
       trialAvailable: true,
       ...overrides.entitlements,
     },
-    usage: { tutor_chat: 0, tts: 0, ai_translate: 0, game_session: 0 },
+    usage: { tutor_chat: 0, tts: 0, ai_translate: 0, game_session: 0, vocab_review: 0 },
     trialDays: 7,
     subscriptionPlans: [
       { id: "starter", name: "Free" },
