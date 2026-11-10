@@ -1,114 +1,33 @@
 "use client";
 
-import { Fragment, useMemo, useState } from "react";
+import { Fragment } from "react";
 import { Check, Volume2, X } from "lucide-react";
 import { Button, cn } from "@engli-tutor/ui";
 import { useWorkspaceI18n } from "@/features/i18n";
-import type { LearningGameRound, LearningQuestion } from "../../api/types";
-import { evaluateHunt } from "../../model/games";
+import type { HuntQuestion, HuntSummaryRow, HuntTarget, Segment } from "../game-play-page.model";
+import type { evaluateHunt } from "../../../model/games";
 
-export type HuntQuestion = Extract<LearningQuestion, { kind: "hunt" }>;
-
-export type HuntTarget = {
-  word: string;
-  meaningVi?: string;
-  ipa?: string;
-  accept?: string[];
-};
-
-const norm = (value: string) => value.trim().toLowerCase();
-
-export function getHuntTargets(question: HuntQuestion): HuntTarget[] {
-  return question.targets?.length
-    ? question.targets
-    : question.correctWords.map((word) => ({ word }));
-}
-
-function formsOf(target: HuntTarget): string[] {
-  return [target.word, ...(target.accept ?? [])].map(norm).filter(Boolean);
-}
-
-export function parsePicks(value: string): string[] {
-  try {
-    const parsed: unknown = JSON.parse(value || "[]");
-    return Array.isArray(parsed) ? parsed.map(String) : [];
-  } catch {
-    return [];
-  }
-}
-
-export type ChipStatus = "hit" | "false" | "missed" | "neutral";
-
-/** Status of each option chip once the round is locked. */
-export function huntChipStatus(
-  question: HuntQuestion,
-  picked: string[],
-  word: string,
-): ChipStatus {
-  const targets = getHuntTargets(question);
-  const evaluation = evaluateHunt(question, picked);
-  const key = norm(word);
-  const owner = targets.find((target) => formsOf(target).includes(key));
-  const isPicked = picked.some((pick) => norm(pick) === key);
-  if (isPicked) return owner ? "hit" : "false";
-  if (owner && evaluation.missed.includes(owner.word)) return "missed";
-  return "neutral";
-}
-
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-type Segment = { text: string; target?: HuntTarget };
-
-function splitTranscript(text: string, targets: HuntTarget[]): Segment[] {
-  const lookup = new Map<string, HuntTarget>();
-  for (const target of targets)
-    for (const form of formsOf(target)) lookup.set(form, target);
-  const forms = [...lookup.keys()].sort((a, b) => b.length - a.length);
-  if (!forms.length) return [{ text }];
-  const pattern = new RegExp(
-    `(?<![\\p{L}\\p{N}])(${forms.map(escapeRegExp).join("|")})(?![\\p{L}\\p{N}])`,
-    "giu",
-  );
-  const segments: Segment[] = [];
-  let last = 0;
-  for (const match of text.matchAll(pattern)) {
-    const start = match.index ?? 0;
-    if (start > last) segments.push({ text: text.slice(last, start) });
-    segments.push({ text: match[0], target: lookup.get(norm(match[0])) });
-    last = start + match[0].length;
-  }
-  if (last < text.length) segments.push({ text: text.slice(last) });
-  return segments;
-}
-
-export function HuntReveal({
+export function HuntRevealView({
   question,
-  picked,
-  transcript,
+  targets,
+  evaluation,
+  segments,
+  active,
   correct,
+  onToggleActive,
   onSpeak,
 }: {
   question: HuntQuestion;
-  picked: string[];
-  transcript?: string;
+  targets: HuntTarget[];
+  evaluation: ReturnType<typeof evaluateHunt>;
+  segments: Segment[];
+  active: HuntTarget | null;
   correct: boolean | null;
+  onToggleActive: (target: HuntTarget) => void;
   onSpeak: (word: string) => void;
 }) {
   const t = useWorkspaceI18n();
-  const targets = useMemo(() => getHuntTargets(question), [question]);
-  const evaluation = useMemo(
-    () => evaluateHunt(question, picked),
-    [question, picked],
-  );
-  const segments = useMemo(
-    () => (transcript ? splitTranscript(transcript, targets) : []),
-    [transcript, targets],
-  );
-  const [active, setActive] = useState<HuntTarget | null>(null);
   const explanation = question.explanation;
-
   return (
     <div className="space-y-3 rounded-xl border border-accent/25 bg-accent/8 px-4 py-3">
       <p className="flex flex-wrap items-center gap-2 text-sm font-semibold">
@@ -152,9 +71,7 @@ export function HuntReveal({
                   key={i}
                   type="button"
                   aria-pressed={active?.word === target.word}
-                  onClick={() =>
-                    setActive(active?.word === target.word ? null : target)
-                  }
+                  onClick={() => onToggleActive(target)}
                   className={cn(
                     "rounded px-1 font-semibold focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
                     hit
@@ -167,9 +84,7 @@ export function HuntReveal({
               );
             })}
           </p>
-          <p className="text-xs text-muted-foreground">
-            {t("learn.game.hunt.tapKeyword")}
-          </p>
+          <p className="text-xs text-muted-foreground">{t("learn.game.hunt.tapKeyword")}</p>
         </div>
       ) : null}
 
@@ -179,9 +94,7 @@ export function HuntReveal({
           role="status"
         >
           <span className="font-semibold">{active.word}</span>
-          {active.ipa ? (
-            <span className="text-muted-foreground">{active.ipa}</span>
-          ) : null}
+          {active.ipa ? <span className="text-muted-foreground">{active.ipa}</span> : null}
           {active.meaningVi ? (
             <span>
               <span className="text-xs text-muted-foreground">
@@ -204,56 +117,20 @@ export function HuntReveal({
       ) : null}
 
       {explanation ? (
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          {explanation}
-        </p>
+        <p className="text-sm leading-relaxed text-muted-foreground">{explanation}</p>
       ) : null}
     </div>
   );
 }
 
-type Answer = { value: string } | undefined;
-
-/** Results-screen section: hits/total per round + most frequently missed words. */
-export function HuntResultsSummary({
-  session,
-  answers,
+export function HuntResultsSummaryView({
+  rows,
+  frequent,
 }: {
-  session: LearningGameRound[];
-  answers: Answer[];
+  rows: HuntSummaryRow[];
+  frequent: Array<[string, number]>;
 }) {
   const t = useWorkspaceI18n();
-  const { rows, frequent } = useMemo(() => {
-    const counts = new Map<string, number>();
-    const rowList: Array<{
-      id: string;
-      prompt: string;
-      hits: number;
-      total: number;
-    }> = [];
-    session.forEach((round, i) => {
-      const question = round.question;
-      if (question.kind !== "hunt") return;
-      const evaluation = evaluateHunt(
-        question,
-        parsePicks(answers[i]?.value ?? "[]"),
-      );
-      rowList.push({
-        id: `${round.id}-${i}`,
-        prompt: question.prompt,
-        hits: evaluation.hits.length,
-        total: getHuntTargets(question).length,
-      });
-      for (const word of evaluation.missed)
-        counts.set(word, (counts.get(word) ?? 0) + 1);
-    });
-    const sorted = [...counts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 8);
-    return { rows: rowList, frequent: sorted };
-  }, [session, answers]);
-
-  if (!rows.length) return null;
   return (
     <div className="mt-5 space-y-4">
       <div className="space-y-2">
@@ -286,10 +163,7 @@ export function HuntResultsSummary({
           </p>
           <ul className="flex flex-wrap gap-2">
             {frequent.map(([word, count]) => (
-              <li
-                key={word}
-                className="rounded-full bg-white/15 px-3 py-1 text-sm font-medium"
-              >
+              <li key={word} className="rounded-full bg-white/15 px-3 py-1 text-sm font-medium">
                 {word}
                 {count > 1 ? ` ×${count}` : ""}
               </li>

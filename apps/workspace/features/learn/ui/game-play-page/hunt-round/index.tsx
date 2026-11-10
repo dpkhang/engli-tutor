@@ -4,11 +4,7 @@ import { Check, Volume2, X } from "lucide-react";
 import { Button, cn } from "@engli-tutor/ui";
 import { useWorkspaceI18n } from "@/features/i18n";
 import { ClickableTranslateText } from "@/features/translate";
-import {
-  getHuntTargets,
-  huntChipStatus,
-  type HuntQuestion,
-} from "./hunt-reveal";
+import { getHuntTargets, huntChipStatus, type HuntQuestion } from "../game-play-page.model";
 
 export function HuntRound({
   question,
@@ -83,9 +79,7 @@ export function HuntRound({
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
           {options.map((word) => {
             const on = selected.includes(word);
-            const status = locked
-              ? huntChipStatus(question, selected, word)
-              : "neutral";
+            const status = locked ? huntChipStatus(question, selected, word) : "neutral";
             return (
               <button
                 key={word}
@@ -94,20 +88,12 @@ export function HuntRound({
                 disabled={locked || (!on && selected.length >= targetCount)}
                 onClick={() => {
                   if (locked) return;
-                  onChange(
-                    on
-                      ? selected.filter((item) => item !== word)
-                      : [...selected, word],
-                  );
+                  onChange(on ? selected.filter((item) => item !== word) : [...selected, word]);
                 }}
                 className={cn(
                   "flex min-h-11 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:outline-none disabled:cursor-not-allowed",
-                  !locked &&
-                    on &&
-                    "border-primary bg-primary text-primary-foreground",
-                  !locked &&
-                    !on &&
-                    "border-border hover:border-primary/50 disabled:opacity-50",
+                  !locked && on && "border-primary bg-primary text-primary-foreground",
+                  !locked && !on && "border-border hover:border-primary/50 disabled:opacity-50",
                   locked && "cursor-default",
                   status === "hit" &&
                     "border-emerald-400 bg-emerald-50 text-emerald-800 dark:bg-emerald-400/10 dark:text-emerald-200",
@@ -115,17 +101,11 @@ export function HuntRound({
                     "border-rose-400 bg-rose-50 text-rose-800 dark:bg-rose-400/10 dark:text-rose-200",
                   status === "missed" &&
                     "border-dashed border-amber-500 bg-transparent text-amber-800 dark:text-amber-200",
-                  locked &&
-                    status === "neutral" &&
-                    "border-border text-muted-foreground",
+                  locked && status === "neutral" && "border-border text-muted-foreground",
                 )}
               >
-                {status === "hit" ? (
-                  <Check className="size-4" aria-hidden />
-                ) : null}
-                {status === "false" ? (
-                  <X className="size-4" aria-hidden />
-                ) : null}
+                {status === "hit" ? <Check className="size-4" aria-hidden /> : null}
+                {status === "false" ? <X className="size-4" aria-hidden /> : null}
                 <span>{word}</span>
                 {status === "missed" ? (
                   <span className="text-[11px] font-semibold uppercase">

@@ -4,24 +4,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { accountApi } from "@/features/accounts";
-import {
-  billingMeQueryKey,
-  dailyRemaining,
-  planAllows,
-  useBillingMe,
-} from "@/features/payments";
+import { billingMeQueryKey, dailyRemaining, planAllows, useBillingMe } from "@/features/payments";
 import { queryKeys } from "@/lib/query";
 import { LESSON_PACKS } from "../../model/curriculum";
 import { markLessonStarted } from "../../model/lesson-progress";
 import { useGame } from "../../hooks/use-learning-catalog";
 import { useVocabProgress } from "../../hooks/use-vocab-progress";
 import { gameSessionsApi } from "../../api/vocab-api";
-import {
-  pickGameRounds,
-  pointsForRound,
-  roundPoints,
-  shuffleInPlace,
-} from "../../model/games";
+import { pickGameRounds, pointsForRound, roundPoints, shuffleInPlace } from "../../model/games";
 import {
   isMastered,
   isVocabGrade,
@@ -45,10 +35,7 @@ export function GamePlayPage({ slug }: { slug: string }) {
   const searchParams = useSearchParams();
   const lesson = searchParams.get("lesson");
   const { game, loading } = useGame(slug, lesson);
-  const lessonPack = useMemo(
-    () => LESSON_PACKS.find((item) => item.id === lesson),
-    [lesson],
-  );
+  const lessonPack = useMemo(() => LESSON_PACKS.find((item) => item.id === lesson), [lesson]);
   const [phase, setPhase] = useState<GamePlayPhase>("intro");
   const [session, setSession] = useState<LearningGameRound[]>([]);
   const [index, setIndex] = useState(0);
@@ -57,10 +44,7 @@ export function GamePlayPage({ slug }: { slug: string }) {
   const [playId, setPlayId] = useState(0);
   const [enter, setEnter] = useState<"next" | "back">("next");
   const isVocab = game?.id === "flashcard";
-  const allDecks = useMemo(
-    () => (isVocab ? (game?.decks ?? []) : []),
-    [game, isVocab],
-  );
+  const allDecks = useMemo(() => (isVocab ? (game?.decks ?? []) : []), [game, isVocab]);
   const profileQuery = useQuery({
     queryKey: queryKeys.account,
     queryFn: accountApi.get,
@@ -87,39 +71,27 @@ export function GamePlayPage({ slug }: { slug: string }) {
   const playsLeft = dailyRemaining(billing.data, "game_session");
   const playsBlocked = playsLeft === 0;
   const lockedModes = useMemo<VocabMode[]>(
-    () =>
-      planAllows(billing.data, "fullVocabModes") ? [] : ["picture", "listen"],
+    () => (planAllows(billing.data, "fullVocabModes") ? [] : ["picture", "listen"]),
     [billing.data],
   );
   const modeLocked = lockedModes.includes(mode);
 
-  const deckLevels = useMemo(
-    () => [...new Set(allDecks.map((deck) => deck.level))],
-    [allDecks],
-  );
+  const deckLevels = useMemo(() => [...new Set(allDecks.map((deck) => deck.level))], [allDecks]);
   const profileLevel = profileQuery.data?.targetLevel ?? null;
   const level =
     pickedLevel ??
-    (profileLevel && deckLevels.includes(profileLevel)
-      ? profileLevel
-      : (deckLevels[0] ?? null));
+    (profileLevel && deckLevels.includes(profileLevel) ? profileLevel : (deckLevels[0] ?? null));
   const decks = useMemo<FlashcardDeckOption[]>(() => {
     const now = Date.now();
     return allDecks
       .filter((deck) => deck.level === level)
       .map((deck) => {
-        const rounds =
-          game?.rounds.filter((round) => round.deck === deck.id) ?? [];
+        const rounds = game?.rounds.filter((round) => round.deck === deck.id) ?? [];
         return {
           ...deck,
-          reviewCount: rounds.filter((round) =>
-            needsReview(progress.get(round.id), now),
-          ).length,
-          masteredCount: rounds.filter((round) =>
-            isMastered(progress.get(round.id)),
-          ).length,
-          pictureCount: rounds.filter((round) => supportsMode(round, "picture"))
-            .length,
+          reviewCount: rounds.filter((round) => needsReview(progress.get(round.id), now)).length,
+          masteredCount: rounds.filter((round) => isMastered(progress.get(round.id))).length,
+          pictureCount: rounds.filter((round) => supportsMode(round, "picture")).length,
         };
       });
   }, [allDecks, game, level, progress]);
@@ -137,11 +109,7 @@ export function GamePlayPage({ slug }: { slug: string }) {
   }, []);
 
   const begin = useCallback(
-    (
-      rounds: LearningGameRound[],
-      nextReviewRound: number,
-      nextMode: VocabMode,
-    ) => {
+    (rounds: LearningGameRound[], nextReviewRound: number, nextMode: VocabMode) => {
       setSession(rounds);
       setSessionMode(nextMode);
       setReviewRound(nextReviewRound);
@@ -157,11 +125,7 @@ export function GamePlayPage({ slug }: { slug: string }) {
   );
 
   const vocabSession = useCallback(
-    (
-      cards: LearningGameRound[],
-      nextReviewRound: number,
-      requested: VocabMode,
-    ) => {
+    (cards: LearningGameRound[], nextReviewRound: number, requested: VocabMode) => {
       if (!game) return;
       const usable = cards.filter((round) => supportsMode(round, requested));
       const nextMode = usable.length ? requested : "flip";
@@ -183,19 +147,11 @@ export function GamePlayPage({ slug }: { slug: string }) {
       begin(pickGameRounds(game.rounds, lesson, profileLevel), 0, "flip");
       return;
     }
-    const tagged = lesson
-      ? game.rounds.filter((round) => round.lessonIds?.includes(lesson))
-      : [];
-    const inDeck = deckId
-      ? game.rounds.filter((round) => round.deck === deckId)
-      : [];
+    const tagged = lesson ? game.rounds.filter((round) => round.lessonIds?.includes(lesson)) : [];
+    const inDeck = deckId ? game.rounds.filter((round) => round.deck === deckId) : [];
     const pool = tagged.length ? tagged : inDeck.length ? inDeck : game.rounds;
     const picked = pickVocabSession(pool, progress, mode);
-    vocabSession(
-      picked.length ? picked : pickVocabSession(pool, progress, "flip"),
-      0,
-      mode,
-    );
+    vocabSession(picked.length ? picked : pickVocabSession(pool, progress, "flip"), 0, mode);
   }, [
     begin,
     deckId,
@@ -228,11 +184,7 @@ export function GamePlayPage({ slug }: { slug: string }) {
 
   const onPracticeMissed = useCallback(() => {
     if (!missedRounds.length) return;
-    vocabSession(
-      shuffleInPlace([...missedRounds]),
-      reviewRound + 1,
-      sessionMode,
-    );
+    vocabSession(shuffleInPlace([...missedRounds]), reviewRound + 1, sessionMode);
   }, [missedRounds, reviewRound, sessionMode, vocabSession]);
 
   const onReviewDeck = useCallback(
@@ -250,25 +202,11 @@ export function GamePlayPage({ slug }: { slug: string }) {
   const startedToday = useRef(false);
   const wantsTodayReview = searchParams.get("review") === "today";
   useEffect(() => {
-    if (
-      !wantsTodayReview ||
-      !game ||
-      !isVocab ||
-      progressLoading ||
-      startedToday.current
-    )
-      return;
+    if (!wantsTodayReview || !game || !isVocab || progressLoading || startedToday.current) return;
     startedToday.current = true;
     const due = reviewRounds(game.rounds, progress, "flip");
     if (due.length) vocabSession(due, 1, "flip");
-  }, [
-    game,
-    isVocab,
-    progress,
-    progressLoading,
-    vocabSession,
-    wantsTodayReview,
-  ]);
+  }, [game, isVocab, progress, progressLoading, vocabSession, wantsTodayReview]);
 
   // A 402 on vocab_review ends the session gracefully; the view shows the upgrade notice.
   useEffect(() => {
@@ -289,11 +227,7 @@ export function GamePlayPage({ slug }: { slug: string }) {
         next[index] = {
           value,
           correct: isCorrect,
-          points: roundPoints(
-            isCorrect,
-            timing.secondsLeft,
-            timing.totalSeconds,
-          ),
+          points: roundPoints(isCorrect, timing.secondsLeft, timing.totalSeconds),
         };
         return next;
       });
@@ -302,9 +236,7 @@ export function GamePlayPage({ slug }: { slug: string }) {
       if (cardId)
         review(
           cardId,
-          sessionMode === "flip" && isVocabGrade(value)
-            ? { grade: value }
-            : isCorrect,
+          sessionMode === "flip" && isVocabGrade(value) ? { grade: value } : isCorrect,
         );
       if (!autoAdvance) return;
       setEnter("next");
@@ -330,10 +262,7 @@ export function GamePlayPage({ slug }: { slug: string }) {
   }, []);
 
   const correctCount = scores.filter(Boolean).length;
-  const totalPoints = answers.reduce(
-    (sum, answer) => sum + (answer?.points ?? 0),
-    0,
-  );
+  const totalPoints = answers.reduce((sum, answer) => sum + (answer?.points ?? 0), 0);
 
   const onRetryMissedRounds = useCallback(() => {
     if (isVocab || playsBlocked) return;
@@ -343,12 +272,7 @@ export function GamePlayPage({ slug }: { slug: string }) {
   }, [begin, isVocab, playsBlocked, scores, session]);
 
   useEffect(() => {
-    if (
-      phase !== "results" ||
-      !game ||
-      recordedPlayId.current === playId ||
-      !session.length
-    )
+    if (phase !== "results" || !game || recordedPlayId.current === playId || !session.length)
       return;
     recordedPlayId.current = playId;
     gameSessionsApi
@@ -359,9 +283,7 @@ export function GamePlayPage({ slug }: { slug: string }) {
         total: session.length,
         durationMs: Math.min(3_600_000, Date.now() - startedAt.current),
       })
-      .then(() =>
-        queryClient.invalidateQueries({ queryKey: billingMeQueryKey }),
-      )
+      .then(() => queryClient.invalidateQueries({ queryKey: billingMeQueryKey }))
       .catch(() => undefined);
   }, [
     correctCount,
@@ -374,6 +296,18 @@ export function GamePlayPage({ slug }: { slug: string }) {
     session.length,
     sessionMode,
   ]);
+
+  // Preload flashcard art so the card flip never waits on the image.
+  useEffect(() => {
+    if (game?.id !== "flashcard" || phase !== "playing") return;
+    for (const item of session) {
+      const url = item.material?.imageUrl;
+      if (!url) continue;
+      const loader = new Image();
+      loader.decoding = "sync";
+      loader.src = url;
+    }
+  }, [game?.id, phase, session]);
 
   const round = session[index];
 
