@@ -968,7 +968,8 @@
     "usage": {
       "tutorChat": "Tin nhắn gia sư AI",
       "aiTranslate": "Lượt dịch AI",
-      "gameSession": "Lượt chơi game"
+      "gameSession": "Lượt chơi game",
+      "vocabReview": "Lượt ôn từ vựng"
     },
     "bullet": {
       "dailyAllowance": "{count} {label} mỗi ngày",
@@ -989,16 +990,35 @@
       "pro": "Tình huống này thuộc gói Premium. Hãy dùng thử miễn phí hoặc nâng cấp để mở khoá.",
       "quotaVoice": "Bạn đã dùng hết lượt giọng đọc AI hôm nay. Lượt dùng làm mới lúc nửa đêm, hoặc nâng cấp để có thêm.",
       "quotaTranslate": "Bạn đã dùng hết lượt dịch AI hôm nay. Lượt dùng làm mới lúc nửa đêm, hoặc nâng cấp để có thêm.",
-      "quotaGames": "Bạn đã dùng hết lượt chơi game miễn phí hôm nay. Lượt chơi làm mới lúc nửa đêm, hoặc nâng cấp để chơi không giới hạn."
+      "quotaGames": "Bạn đã dùng hết lượt chơi game miễn phí hôm nay. Lượt chơi làm mới lúc nửa đêm, hoặc nâng cấp để chơi không giới hạn.",
+      "quotaVocabReview": "Bạn đã dùng hết lượt ôn từ vựng miễn phí hôm nay. Lượt ôn làm mới mỗi ngày, hoặc nâng cấp để ôn không giới hạn."
     }
   },
   "learn": {
+    "review": {
+      "title": "Ôn hôm nay",
+      "subtitle": "Các từ đến hạn ôn, từ mọi bộ từ, trong một phiên.",
+      "dueOne": "1 từ đến hạn",
+      "dueOther": "{count} từ đến hạn",
+      "empty": "Hôm nay không có từ đến hạn",
+      "emptyHint": "Làm tốt lắm. Từ sẽ quay lại đây khi đến hạn ôn.",
+      "start": "Bắt đầu ôn",
+      "quota": "Lượt ôn hôm nay: {used} / {limit}",
+      "loading": "Đang tải lượt ôn…",
+      "dismiss": "Đóng",
+      "homeLink": "Ôn hôm nay",
+      "noDeck": "Hiện chưa dùng được từ vựng. Hãy thử lại sau."
+    },
     "vocabMode": {
       "flip": "Lật thẻ",
       "picture": "Đố hình",
       "listen": "Nghe & chọn"
     },
     "game": {
+      "gradeGroup": "Bạn nhớ từ này đến đâu?",
+      "gradeAgain": "Quên",
+      "gradeHard": "Khó",
+      "gradeGood": "Nhớ",
       "flashcardLevel": "Cấp độ thẻ từ",
       "wordCount": "{count} từ",
       "mastered": "đã thuộc {count}",

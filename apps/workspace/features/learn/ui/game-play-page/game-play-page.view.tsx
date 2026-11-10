@@ -39,6 +39,8 @@ import type {
 } from "../../api/types";
 import type { LessonPack } from "../../model/curriculum";
 import { VOCAB_MODES, type VocabMode } from "../../model/vocab-trainer";
+import type { VocabGrade } from "../../api/vocab-api";
+import type { UpgradeReason } from "@/features/payments";
 import { useWorkspaceI18n } from "@/features/i18n";
 import { LocalizedLink } from "@/features/i18n";
 import { HuntRound } from "./hunt-round";
@@ -608,6 +610,92 @@ function ShortcutTip({ label }: { label: string }) {
     </span>
   );
 }
+function HuntRound({
+  options,
+  selected,
+  locked,
+  targetCount,
+  onChange,
+}: {
+  options: string[];
+  selected: string[];
+  locked: boolean;
+  targetCount: number;
+  onChange: (value: string[]) => void;
+}) {
+  const t = useWorkspaceI18n();
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-muted-foreground">
+        {t("learn.game.huntHint", { count: targetCount })} · {selected.length}/
+        {targetCount}
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {options.map((word) => {
+          const on = selected.includes(word);
+          return (
+            <button
+              key={word}
+              type="button"
+              disabled={locked || (!on && selected.length >= targetCount)}
+              onClick={() => {
+                if (locked) return;
+                onChange(
+                  on
+                    ? selected.filter((item) => item !== word)
+                    : [...selected, word],
+                );
+              }}
+              className={cn(
+                "rounded-full border px-3.5 py-2 text-sm",
+                on &&
+                  !locked &&
+                  "border-primary bg-primary text-primary-foreground",
+                locked &&
+                  on &&
+                  "border-emerald-400 bg-emerald-50 dark:bg-emerald-400/10",
+                !on && !locked && "border-border hover:border-primary/50",
+                locked && "cursor-default",
+              )}
+            >
+              {word}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const FLASH_GRADES: Array<{
+  grade: VocabGrade;
+  labelKey: string;
+  shortcut: string;
+  Icon: typeof X;
+  tone: string;
+}> = [
+  {
+    grade: "again",
+    labelKey: "learn.game.gradeAgain",
+    shortcut: "1",
+    Icon: X,
+    tone: "border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-400/30 dark:text-rose-300 dark:hover:bg-rose-400/10",
+  },
+  {
+    grade: "hard",
+    labelKey: "learn.game.gradeHard",
+    shortcut: "2",
+    Icon: Lightbulb,
+    tone: "border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-400/40 dark:text-amber-300 dark:hover:bg-amber-400/10",
+  },
+  {
+    grade: "good",
+    labelKey: "learn.game.gradeGood",
+    shortcut: "3",
+    Icon: Check,
+    tone: "border-emerald-200 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-400/30 dark:text-emerald-300 dark:hover:bg-emerald-400/10",
+  },
+];
 
 function FlashRound({
   question,
@@ -630,7 +718,7 @@ function FlashRound({
   onSpeak: () => void;
   onSave: () => void;
   onBack: () => void;
-  onRate: (value: "xmart" | "check") => void;
+  onRate: (value: VocabGrade) => void;
 }) {
   const t = useWorkspaceI18n();
   const [flipped, setFlipped] = useState(false);
@@ -657,12 +745,15 @@ function FlashRound({
       ) {
         return;
       }
-      if (event.key === "x" || event.key === "X") {
+      const grade = FLASH_GRADES.find(
+        (item) => item.shortcut.toLowerCase() === event.key.toLowerCase(),
+      )?.grade;
+      if (grade) {
         event.preventDefault();
-        onRate("xmart");
+        onRate(grade);
       } else if (event.key === "Enter") {
         event.preventDefault();
-        onRate("check");
+        onRate("good");
       }
     };
     window.addEventListener("keydown", onKey);
@@ -766,7 +857,7 @@ function FlashRound({
         </button>
       </div>
 
-      <div className="grid grid-cols-5 items-center gap-2">
+      <div className="grid grid-cols-3 items-center gap-2">
         <Button
           type="button"
           variant="outline"
@@ -807,40 +898,29 @@ function FlashRound({
         >
           <Volume2 className="size-5" />
         </Button>
-        <span className="group relative">
+      </div>
+      <div
+        role="group"
+        aria-label={t("learn.game.gradeGroup")}
+        className="grid grid-cols-3 gap-2"
+      >
+        {FLASH_GRADES.map(({ grade, labelKey, shortcut, Icon, tone }) => (
           <Button
+            key={grade}
             type="button"
             variant="outline"
-            aria-label={t("learn.game.studyAgain")}
-            aria-keyshortcuts="x"
+            aria-keyshortcuts={shortcut}
             disabled={locked}
             className={cn(
-              mark,
-              "border-rose-200 text-rose-600 hover:border-rose-300 hover:bg-rose-50 dark:border-rose-400/30 dark:text-rose-300 dark:hover:bg-rose-400/10",
+              "h-14 flex-col gap-0.5 rounded-2xl border bg-card shadow-none",
+              tone,
             )}
-            onClick={() => onRate("xmart")}
+            onClick={() => onRate(grade)}
           >
-            <X className="size-5" strokeWidth={1.75} />
+            <Icon className="size-5" strokeWidth={1.75} aria-hidden />
+            <span className="text-xs font-semibold">{t(labelKey)}</span>
           </Button>
-          <ShortcutTip label="X" />
-        </span>
-        <span className="group relative">
-          <Button
-            type="button"
-            variant="outline"
-            aria-label={t("learn.game.nextWord")}
-            aria-keyshortcuts="Enter"
-            disabled={locked}
-            className={cn(
-              mark,
-              "border-emerald-200 text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50 dark:border-emerald-400/30 dark:text-emerald-300 dark:hover:bg-emerald-400/10",
-            )}
-            onClick={() => onRate("check")}
-          >
-            <Check className="size-5" strokeWidth={1.75} />
-          </Button>
-          <ShortcutTip label="Enter" />
-        </span>
+        ))}
       </div>
     </div>
   );
@@ -1171,7 +1251,7 @@ function RoundPlay({
           onSpeak={() => void speak(question.word)}
           onSave={() => onSaveCard(round.id)}
           onBack={onBack}
-          onRate={(rating) => finish(rating === "check" ? "know" : "again")}
+          onRate={finish}
         />
       ) : null}
 
@@ -1301,6 +1381,8 @@ export type GamePlayPageViewProps = {
   onBackToDecks: () => void;
   savedCards: Set<string>;
   onSaveCard: (cardId: string) => void;
+  upgradeReason: UpgradeReason | null;
+  onDismissUpgrade: () => void;
 };
 
 export const GamePlayPageView = memo(function GamePlayPageView({
@@ -1340,6 +1422,8 @@ export const GamePlayPageView = memo(function GamePlayPageView({
   onBackToDecks,
   savedCards,
   onSaveCard,
+  upgradeReason,
+  onDismissUpgrade,
 }: GamePlayPageViewProps) {
   const t = useWorkspaceI18n();
   const { openUpgradeModal } = useUpgradeModal();
@@ -1428,6 +1512,34 @@ export const GamePlayPageView = memo(function GamePlayPageView({
           </p>
         ) : null}
       </header>
+
+      {upgradeReason && game.id === "flashcard" ? (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center gap-3 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-400/40 dark:bg-amber-400/10 dark:text-amber-100"
+        >
+          <p className="min-w-0 flex-1">
+            {t("billing.upgrade.quotaVocabReview")}
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            className="rounded-full"
+            onClick={openUpgradeModal}
+          >
+            {t("workspace.seePlans")}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="rounded-full"
+            onClick={onDismissUpgrade}
+          >
+            {t("learn.review.dismiss")}
+          </Button>
+        </div>
+      ) : null}
 
       {phase === "intro" ? (
         <section className="space-y-5 rounded-3xl border border-border/70 bg-card p-6">

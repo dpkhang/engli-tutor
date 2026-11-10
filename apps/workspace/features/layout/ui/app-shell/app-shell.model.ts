@@ -3,10 +3,11 @@ import { BookOpen, Gamepad2, House, Route, TrendingUp } from "lucide-react";
 
 /**
  * Shared, layout-agnostic bits for the app shell.
- * Mobile (<1024px) and desktop (>=1024px) chrome live in separate views:
+ * Mobile (<850px) and desktop (>=850px) chrome live in separate views:
  * - app-shell.mobile.view.tsx  (compact header + bottom tab bar)
  * - app-shell.desktop.view.tsx (header with pill navigation)
- * Both are always rendered and gated with CSS (`lg:hidden` / `hidden lg:block`)
+ * Both are always rendered and gated with CSS (`nav:hidden` / `hidden nav:block`,
+ * custom 850px breakpoint `--breakpoint-nav` in app/globals.css)
  * so there is no hydration mismatch or first-paint flash.
  */
 export const PRIMARY_NAV = [
@@ -14,7 +15,12 @@ export const PRIMARY_NAV = [
   { href: "/skills", key: "workspace.skills", icon: BookOpen },
   { href: "/games", key: "workspace.games", icon: Gamepad2 },
   { href: "/lessons", key: "workspace.myPath", icon: Route },
-  { href: "/progress", key: "workspace.myProgress", icon: TrendingUp, private: true },
+  {
+    href: "/progress",
+    key: "workspace.myProgress",
+    icon: TrendingUp,
+    private: true,
+  },
 ] as const;
 
 export type PrimaryNavItem = (typeof PRIMARY_NAV)[number];
@@ -22,7 +28,11 @@ export type PrimaryNavItem = (typeof PRIMARY_NAV)[number];
 export function isActivePath(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
   if (href === "/lessons") {
-    return pathname === "/lessons" || (pathname.startsWith("/lessons/") && !pathname.startsWith("/lessons/progress"));
+    return (
+      pathname === "/lessons" ||
+      (pathname.startsWith("/lessons/") &&
+        !pathname.startsWith("/lessons/progress"))
+    );
   }
   if (href === "/progress") {
     return pathname === "/progress" || pathname.startsWith("/progress/");
@@ -42,6 +52,8 @@ export type AppShellViewProps = {
   pathname: string;
   search: ReactNode;
   accountOpen: boolean;
+  /** Mobile only: header + bottom tab bar slide out while scrolling down. */
+  chromeHidden: boolean;
   aiToolsOpen: boolean;
   aiLauncherExpanded: boolean;
   clipAiTools: boolean;

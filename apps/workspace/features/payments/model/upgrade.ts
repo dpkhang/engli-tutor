@@ -28,6 +28,7 @@ const QUOTA_MESSAGE_KEY: Record<UsageMetric, string> = {
   tts: "billing.upgrade.quotaVoice",
   ai_translate: "billing.upgrade.quotaTranslate",
   game_session: "billing.upgrade.quotaGames",
+  vocab_review: "billing.upgrade.quotaVocabReview",
 };
 
 /** Plan-aware message for a 402 response, or null for any other error. */

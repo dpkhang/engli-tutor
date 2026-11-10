@@ -8,7 +8,7 @@ import { useWorkspaceI18n } from "@/features/i18n";
 import { AccountMenu } from "./account-menu";
 import { isActivePath, type AppShellChromeProps } from "./app-shell.model";
 
-/** Mobile (<1024px) compact header, no inline navigation. Hidden from `lg` via CSS. */
+/** Mobile (<850px) compact header, no inline navigation. Hidden from `nav` via CSS. */
 export const AppShellMobileHeader = memo(function AppShellMobileHeader({
   localize,
   search,
@@ -22,10 +22,16 @@ export const AppShellMobileHeader = memo(function AppShellMobileHeader({
   onSignOut,
 }: Omit<AppShellChromeProps, "routePath" | "navItems">) {
   return (
-    <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-md lg:hidden">
+    <header
+      data-shell-chrome
+      className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-md transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none nav:hidden group-data-chrome-hidden/shell:-translate-y-full"
+    >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
-          <Link href={localize("/")} className="group flex shrink-0 items-center text-foreground">
+          <Link
+            href={localize("/")}
+            className="group flex shrink-0 items-center text-foreground"
+          >
             <BrandLogo size={30} />
           </Link>
         </div>
@@ -54,7 +60,7 @@ export const AppShellMobileHeader = memo(function AppShellMobileHeader({
   );
 });
 
-/** Mobile fixed bottom tab bar. Hidden from `lg` via CSS. */
+/** Mobile fixed bottom tab bar. Hidden from `nav` (850px) via CSS. */
 export const AppShellMobileTabBar = memo(function AppShellMobileTabBar({
   routePath,
   navItems,
@@ -63,7 +69,8 @@ export const AppShellMobileTabBar = memo(function AppShellMobileTabBar({
   const t = useWorkspaceI18n();
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden group-has-data-not-found/shell:hidden"
+      data-shell-chrome
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none nav:hidden group-has-data-not-found/shell:hidden group-data-chrome-hidden/shell:translate-y-full"
       aria-label={t("workspace.primaryNavigation")}
     >
       <div className="mx-auto flex h-(--tabbar-h) max-w-xl items-stretch">
@@ -77,7 +84,9 @@ export const AppShellMobileTabBar = memo(function AppShellMobileTabBar({
               aria-current={active ? "page" : undefined}
               className={cn(
                 "flex min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 text-[11px] font-medium transition-colors",
-                active ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                active
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <span

@@ -465,7 +465,7 @@ export function scoreGameRound(
     );
   }
   if (question.kind === "flash") {
-    return value === "know";
+    return value === "know" || value === "good" || value === "hard";
   }
   return false;
 }

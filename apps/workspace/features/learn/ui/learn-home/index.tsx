@@ -5,6 +5,7 @@ import { useSession } from "@/lib/auth-client";
 import { useBillingMe } from "@/features/payments";
 import { planBadgeLabel } from "@/features/payments";
 import { useWorkspaceI18n } from "@/features/i18n";
+import { useVocabProgress } from "../../hooks/use-vocab-progress";
 import { useLessonPacks } from "../../hooks/use-learning-catalog";
 import { useLessonProgress } from "../../hooks/use-lesson-progress";
 import type { LessonPack } from "../../model/curriculum";
@@ -43,6 +44,7 @@ export function LearnHome() {
   const { packs } = useLessonPacks();
   const { progress, hydrated } = useLessonProgress();
   const billing = useBillingMe(Boolean(session?.user));
+  const { dueCount } = useVocabProgress(Boolean(session?.user));
 
   const firstName = useMemo(
     () =>
@@ -192,6 +194,7 @@ export function LearnHome() {
 
   return (
     <LearnHomeView
+      dueCount={dueCount}
       firstName={firstName}
       continueItems={hydrated ? continueItems : []}
       savedItems={hydrated ? savedItems : []}

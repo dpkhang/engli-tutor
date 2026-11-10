@@ -79,6 +79,7 @@ export const USAGE_LABEL_KEY: Record<UsageMetric, string> = {
   tts: "workspace.aiVoice",
   ai_translate: "billing.usage.aiTranslate",
   game_session: "billing.usage.gameSession",
+  vocab_review: "billing.usage.vocabReview",
 };
 
 export function formatVnd(value: number) {
