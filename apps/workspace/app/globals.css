@@ -10,6 +10,11 @@
   --font-sans: var(--font-sans), "Plus Jakarta Sans", sans-serif;
 }
 
+@theme {
+  /* App-shell chrome split: mobile header + bottom tabs below 850px, desktop header from 850px. */
+  --breakpoint-nav: 53.125rem;
+}
+
 @layer base {
   /* EngliTutor ink & chalk — override shared UI teal tokens for workspace only */
   :root {
@@ -146,7 +151,11 @@
     font-family: var(--font-sans);
     background-color: hsl(var(--background));
     background-image:
-      radial-gradient(ellipse at 12% 0%, hsl(214 30% 92% / 0.9), transparent 42%),
+      radial-gradient(
+        ellipse at 12% 0%,
+        hsl(214 30% 92% / 0.9),
+        transparent 42%
+      ),
       linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
   }
 
@@ -173,40 +182,76 @@
 
   .dark body {
     background-image:
-      radial-gradient(ellipse at 18% 0%, hsl(222 28% 14% / 0.85), transparent 45%),
+      radial-gradient(
+        ellipse at 18% 0%,
+        hsl(222 28% 14% / 0.85),
+        transparent 45%
+      ),
       linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
   }
 
   html[data-theme="warm"] body {
     background-image:
-      radial-gradient(ellipse at 14% 0%, hsl(36 50% 90% / 0.95), transparent 44%),
+      radial-gradient(
+        ellipse at 14% 0%,
+        hsl(36 50% 90% / 0.95),
+        transparent 44%
+      ),
       linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
   }
 
   html[data-theme="midnight"] body {
     background-image:
-      radial-gradient(ellipse at 20% 0%, hsl(230 50% 12% / 0.7), transparent 48%),
-      radial-gradient(ellipse at 85% 10%, hsl(250 40% 10% / 0.35), transparent 40%),
+      radial-gradient(
+        ellipse at 20% 0%,
+        hsl(230 50% 12% / 0.7),
+        transparent 48%
+      ),
+      radial-gradient(
+        ellipse at 85% 10%,
+        hsl(250 40% 10% / 0.35),
+        transparent 40%
+      ),
       linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
   }
 
   html[data-theme="forest"] body {
     background-image:
-      radial-gradient(ellipse at 16% 0%, hsl(150 35% 14% / 0.75), transparent 46%),
+      radial-gradient(
+        ellipse at 16% 0%,
+        hsl(150 35% 14% / 0.75),
+        transparent 46%
+      ),
       linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
   }
 
   html[data-theme="ocean"] body {
     background-image:
-      radial-gradient(ellipse at 18% 0%, hsl(200 45% 16% / 0.7), transparent 46%),
-      radial-gradient(ellipse at 90% 8%, hsl(210 40% 12% / 0.4), transparent 38%),
+      radial-gradient(
+        ellipse at 18% 0%,
+        hsl(200 45% 16% / 0.7),
+        transparent 46%
+      ),
+      radial-gradient(
+        ellipse at 90% 8%,
+        hsl(210 40% 12% / 0.4),
+        transparent 38%
+      ),
       linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
   }
 
   html[data-theme="dusk"] body {
     background-image:
-      radial-gradient(ellipse at 15% 0%, hsl(20 55% 22% / 0.45), transparent 42%),
-      radial-gradient(ellipse at 88% 8%, hsl(280 40% 18% / 0.4), transparent 40%),
+      radial-gradient(
+        ellipse at 15% 0%,
+        hsl(20 55% 22% / 0.45),
+        transparent 42%
+      ),
+      radial-gradient(
+        ellipse at 88% 8%,
+        hsl(280 40% 18% / 0.4),
+        transparent 40%
+      ),
       linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
   }
 
@@ -542,7 +587,12 @@
   inset: 0;
   width: 45%;
   content: "";
-  background: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.055), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--foreground) / 0.055),
+    transparent
+  );
   animation: loading-sheen 1.8s ease-in-out infinite;
 }
 

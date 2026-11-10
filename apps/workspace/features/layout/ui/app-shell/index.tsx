@@ -2,7 +2,15 @@
 
 import { resetAccountAppearance } from "@/features/settings";
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { usePathname } from "next/navigation";
 import { authClient, useSession } from "@/lib/auth-client";
 import { useActionDialog } from "@engli-tutor/ui";
@@ -11,11 +19,16 @@ import { useBillingMe } from "@/features/payments";
 import { hasPremiumAccess } from "@/features/payments";
 import { usePendingReferral } from "@/features/referrals";
 import { useSignOutLoading } from "../shared";
-import { TranslateSessionProvider, useTranslateSession, isLessonTranslatePath } from "@/features/translate";
+import {
+  TranslateSessionProvider,
+  useTranslateSession,
+  isLessonTranslatePath,
+} from "@/features/translate";
 import { LessonSearch } from "../lesson-search";
 import { getPathLocale, withCurrentLocale } from "@/lib/locale-path";
 import { useWorkspaceI18n } from "@/features/i18n";
 import { AppShellView } from "./app-shell.view";
+import { useHideChromeOnScroll } from "./use-hide-chrome-on-scroll";
 
 function isAiDockHiddenPath(pathname: string) {
   return (
@@ -79,13 +92,18 @@ function AppShellFrame({ children }: { children: ReactNode }) {
   const { data } = useSession();
   const user = data?.user;
   const billing = useBillingMe(Boolean(user));
-  const displayName = user?.name?.trim() || user?.email?.split("@")[0] || t("workspace.account");
+  const displayName =
+    user?.name?.trim() || user?.email?.split("@")[0] || t("workspace.account");
   const initials = displayName.slice(0, 1).toUpperCase();
   const routePath = stripLocalePath(pathname);
   const isPracticeExercise = /^\/skills\/[^/]+\/[^/]+/.test(routePath);
   const showTranslate = isLessonTranslatePath(routePath);
   const showAiDock = !isAiDockHiddenPath(pathname);
   const search = useMemo(() => <LessonSearch />, []);
+  const chromeHidden = useHideChromeOnScroll({
+    paused: accountOpen,
+    resetKey: pathname,
+  });
   usePendingReferral(Boolean(user));
 
   useEffect(() => {
@@ -210,6 +228,7 @@ function AppShellFrame({ children }: { children: ReactNode }) {
       search={search}
       routeReset={<TranslateRouteReset />}
       accountOpen={accountOpen}
+      chromeHidden={chromeHidden}
       aiToolsOpen={aiToolsOpen}
       aiLauncherExpanded={aiLauncherExpanded}
       clipAiTools={clipAiTools}

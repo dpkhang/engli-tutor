@@ -28,7 +28,7 @@ export const SettingsMobileNav = memo(function SettingsMobileNav({
   }, [sectionHref]);
 
   return (
-    <header className="sticky top-16 z-30 -mx-4 flex items-center gap-3 border-b border-border/70 bg-background/95 px-4 py-2 backdrop-blur-md sm:-mx-6 sm:px-6 lg:hidden">
+    <header className="sticky top-16 z-30 -mx-4 flex items-center gap-3 border-b border-border/70 bg-background/95 px-4 py-2 backdrop-blur-md transition-[top] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none sm:-mx-6 sm:px-6 lg:hidden group-data-chrome-hidden/shell:top-0">
       <Link
         href="/settings"
         aria-label={t("settings.nav.backToSettings")}
