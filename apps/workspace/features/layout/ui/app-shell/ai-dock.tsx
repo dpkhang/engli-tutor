@@ -25,6 +25,8 @@ type AiDockProps = {
 /**
  * Floating AI launcher + translate panel anchor. Stateful and rendered exactly once;
  * its offset follows `--tabbar-h` (4rem on mobile, 0 on desktop), so no variant split is needed.
+ * While the mobile chrome is hidden on scroll (`data-chrome-hidden`), it slides down by
+ * `--tabbar-h` in sync with the tab bar.
  */
 export const AiDock = memo(function AiDock({
   localize,
@@ -47,7 +49,8 @@ export const AiDock = memo(function AiDock({
     const label = launcherLabelRef.current;
     if (!label) return;
     // px-4 on both sides + gap-3 + Sparkles icon + 1px border on both sides
-    const measure = () => setLauncherWidth(Math.ceil(label.scrollWidth) + 32 + 12 + 20 + 2);
+    const measure = () =>
+      setLauncherWidth(Math.ceil(label.scrollWidth) + 32 + 12 + 20 + 2);
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(label);
@@ -58,7 +61,7 @@ export const AiDock = memo(function AiDock({
 
   return (
     <div
-      className="pointer-events-none fixed z-60 flex w-max max-w-[calc(100vw-2rem)] flex-col items-end group-has-data-not-found/shell:hidden"
+      className="pointer-events-none fixed z-60 flex w-max max-w-[calc(100vw-2rem)] flex-col items-end transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none group-has-data-not-found/shell:hidden group-data-chrome-hidden/shell:translate-y-[var(--tabbar-h,0px)]"
       style={{
         right: "max(1rem, env(safe-area-inset-right, 0px))",
         bottom: raiseFabForExerciseBar
@@ -89,8 +92,16 @@ export const AiDock = memo(function AiDock({
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.94 }}
             aria-expanded={aiToolsOpen}
-            aria-label={aiToolsOpen ? t("workspace.hideAiTools") : t("workspace.showAiTools")}
-            title={aiToolsOpen ? t("workspace.hideAiTools") : t("workspace.showAiTools")}
+            aria-label={
+              aiToolsOpen
+                ? t("workspace.hideAiTools")
+                : t("workspace.showAiTools")
+            }
+            title={
+              aiToolsOpen
+                ? t("workspace.hideAiTools")
+                : t("workspace.showAiTools")
+            }
           >
             <motion.span
               className="absolute inset-0 grid place-items-center"
@@ -141,7 +152,9 @@ export const AiDock = memo(function AiDock({
             onAnimationComplete={onAiToolsAnimationComplete}
             className={cn(
               "w-max min-w-13",
-              clipAiTools || !aiToolsOpen ? "overflow-hidden" : "overflow-visible",
+              clipAiTools || !aiToolsOpen
+                ? "overflow-hidden"
+                : "overflow-visible",
             )}
             aria-hidden={!aiToolsOpen}
           >

@@ -5,7 +5,10 @@ import { cn } from "@engli-tutor/ui";
 import { getPathLocale, withLocalePath } from "@/lib/locale-path";
 import { AiDock } from "./ai-dock";
 import { AppShellDesktopHeader } from "./app-shell.desktop.view";
-import { AppShellMobileHeader, AppShellMobileTabBar } from "./app-shell.mobile.view";
+import {
+  AppShellMobileHeader,
+  AppShellMobileTabBar,
+} from "./app-shell.mobile.view";
 import { PRIMARY_NAV, type AppShellViewProps } from "./app-shell.model";
 
 export type { AppShellViewProps } from "./app-shell.model";
@@ -20,6 +23,7 @@ export const AppShellView = memo(function AppShellView({
   pathname,
   search,
   accountOpen,
+  chromeHidden,
   aiToolsOpen,
   aiLauncherExpanded,
   clipAiTools,
@@ -42,8 +46,12 @@ export const AppShellView = memo(function AppShellView({
 }: AppShellViewProps) {
   const locale = getPathLocale(pathname);
   const localize = (href: string) => withLocalePath(href, locale);
-  const routePath = locale ? pathname.slice(locale.length + 1) || "/" : pathname;
-  const navItems = PRIMARY_NAV.filter((item) => !("private" in item && item.private) || Boolean(user));
+  const routePath = locale
+    ? pathname.slice(locale.length + 1) || "/"
+    : pathname;
+  const navItems = PRIMARY_NAV.filter(
+    (item) => !("private" in item && item.private) || Boolean(user),
+  );
   const hideHeader = routePath.startsWith("/policy");
   // Exercise pages have their own fixed action bar at the bottom.
   const showBottomTabs = !hideHeader && !isPracticeExercise;
@@ -62,15 +70,19 @@ export const AppShellView = memo(function AppShellView({
 
   return (
     <div
+      data-chrome-hidden={chromeHidden && !hideHeader ? "" : undefined}
       className={cn(
         "workspace-background group/shell relative min-h-svh",
-        showBottomTabs && "[--tabbar-h:4rem] lg:[--tabbar-h:0px]",
+        showBottomTabs && "[--tabbar-h:4rem] nav:[--tabbar-h:0px]",
       )}
     >
       {routeReset}
       {hideHeader ? null : (
         <>
-          <AppShellMobileHeader {...chrome} accountMenuRef={mobileAccountMenuRef} />
+          <AppShellMobileHeader
+            {...chrome}
+            accountMenuRef={mobileAccountMenuRef}
+          />
           <AppShellDesktopHeader
             {...chrome}
             routePath={routePath}
@@ -81,7 +93,11 @@ export const AppShellView = memo(function AppShellView({
       )}
 
       {showBottomTabs ? (
-        <AppShellMobileTabBar routePath={routePath} navItems={navItems} localize={localize} />
+        <AppShellMobileTabBar
+          routePath={routePath}
+          navItems={navItems}
+          localize={localize}
+        />
       ) : null}
 
       <AiDock

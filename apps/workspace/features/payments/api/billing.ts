@@ -45,7 +45,7 @@ export type Entitlements = {
   trialAvailable: boolean;
 };
 
-export type UsageMetric = "tutor_chat" | "tts" | "ai_translate" | "game_session";
+export type UsageMetric = "tutor_chat" | "tts" | "ai_translate" | "game_session" | "vocab_review";
 
 export type BillingMe = {
   subscription: {

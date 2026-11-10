@@ -8,7 +8,7 @@ import { useWorkspaceI18n } from "@/features/i18n";
 import { AccountMenu } from "./account-menu";
 import { isActivePath, type AppShellChromeProps } from "./app-shell.model";
 
-/** Desktop (>=1024px) header with pill navigation. Hidden below `lg` via CSS. */
+/** Desktop (>=850px) header with pill navigation. Hidden below `nav` via CSS. */
 export const AppShellDesktopHeader = memo(function AppShellDesktopHeader({
   routePath,
   navItems,
@@ -25,14 +25,20 @@ export const AppShellDesktopHeader = memo(function AppShellDesktopHeader({
 }: AppShellChromeProps) {
   const t = useWorkspaceI18n();
   return (
-    <header className="sticky top-0 z-40 hidden border-b border-border/80 bg-background/90 backdrop-blur-md lg:block">
+    <header className="sticky top-0 z-40 hidden border-b border-border/80 bg-background/90 backdrop-blur-md nav:block">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-6">
         <div className="flex min-w-0 items-center gap-3">
-          <Link href={localize("/")} className="group flex shrink-0 items-center text-foreground">
+          <Link
+            href={localize("/")}
+            className="group flex shrink-0 items-center text-foreground"
+          >
             <BrandLogo size={30} />
           </Link>
 
-          <nav className="ml-4 flex items-center gap-1" aria-label={t("workspace.primaryNavigation")}>
+          <nav
+            className="ml-4 flex items-center gap-1"
+            aria-label={t("workspace.primaryNavigation")}
+          >
             {navItems.map((item) => {
               const active = isActivePath(routePath, item.href);
               return (

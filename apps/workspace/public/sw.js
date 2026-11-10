@@ -1,5 +1,5 @@
 // Bump when caching rules change so old caches are dropped on activate.
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const STATIC_CACHE = `englitutor-static-${CACHE_VERSION}`;
 const PAGE_CACHE = `englitutor-pages-${CACHE_VERSION}`;
 const OFFLINE_URL = "/offline.html";
@@ -43,12 +43,20 @@ async function trimCache(name, max) {
   await Promise.all(keys.slice(0, Math.max(0, keys.length - max)).map((key) => cache.delete(key)));
 }
 
-async function cacheFirst(request) {
+// `/_next/static/` is only safe to pin when the build hashed it (prod sends `immutable`).
+// Dev chunks keep stable names with `no-cache`, so caching them would serve stale CSS/JS forever.
+function isCacheable(url, response) {
+  if (!response.ok || response.type !== "basic") return false;
+  if (!url.pathname.startsWith("/_next/static/")) return true;
+  return /\bimmutable\b/i.test(response.headers.get("Cache-Control") || "");
+}
+
+async function cacheFirst(request, url) {
   const cache = await caches.open(STATIC_CACHE);
   const cached = await cache.match(request);
   if (cached) return cached;
   const response = await fetch(request);
-  if (response.ok && response.type === "basic") await cache.put(request, response.clone());
+  if (isCacheable(url, response)) await cache.put(request, response.clone());
   return response;
 }
 
@@ -91,7 +99,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
   if (isStaticAsset(url)) {
-    event.respondWith(cacheFirst(request));
+    event.respondWith(cacheFirst(request, url));
   }
 });
 

@@ -14,6 +14,7 @@ export const queryKeys = {
     game: (slug: string, lesson?: string | null) =>
       ["learning", "game", slug, lesson ?? ""] as const,
     vocabProgress: ["learning", "vocab-progress"] as const,
+    vocabToday: ["learning", "vocab-today"] as const,
   },
   notifications: ["notifications", "preferences"] as const,
   referrals: {

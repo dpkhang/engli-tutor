@@ -6,6 +6,8 @@ export { SkillsHubPage } from "./ui/skills-hub-page";
 export { SkillListPage } from "./ui/skill-list-page";
 export { SkillExercisePage } from "./ui/skill-exercise-page";
 export { GamesHubPage } from "./ui/games-hub-page";
+export { ReviewTodayPage } from "./ui/review-today-page";
+export { useVocabProgress } from "./hooks/use-vocab-progress";
 export { GamePlayPage } from "./ui/game-play-page";
 export { SearchPage } from "./ui/search-page";
 export { learningApi } from "./api/learning-api";

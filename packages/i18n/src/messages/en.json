@@ -968,7 +968,8 @@
     "usage": {
       "tutorChat": "AI tutor messages",
       "aiTranslate": "AI translations",
-      "gameSession": "Game plays"
+      "gameSession": "Game plays",
+      "vocabReview": "Word reviews"
     },
     "bullet": {
       "dailyAllowance": "{count} {label} a day",
@@ -989,16 +990,35 @@
       "pro": "This scenario is part of Premium. Start a free trial or upgrade to unlock it.",
       "quotaVoice": "You've used today's AI voice. Your limit resets at midnight, or upgrade for more.",
       "quotaTranslate": "You've used today's AI translations. Your limit resets at midnight, or upgrade for more.",
-      "quotaGames": "You've used today's free game plays. They reset at midnight, or upgrade for unlimited play."
+      "quotaGames": "You've used today's free game plays. They reset at midnight, or upgrade for unlimited play.",
+      "quotaVocabReview": "You've used today's free word reviews. They reset daily, or upgrade for unlimited reviews."
     }
   },
   "learn": {
+    "review": {
+      "title": "Review today",
+      "subtitle": "Words that are due, from every deck, in one session.",
+      "dueOne": "1 word due",
+      "dueOther": "{count} words due",
+      "empty": "No words due today",
+      "emptyHint": "Nice work. Words come back here when they are due.",
+      "start": "Start review",
+      "quota": "Reviews used today: {used} / {limit}",
+      "loading": "Loading your reviews…",
+      "dismiss": "Dismiss",
+      "homeLink": "Review today",
+      "noDeck": "Vocabulary is unavailable right now. Try again later."
+    },
     "vocabMode": {
       "flip": "Flip",
       "picture": "Picture quiz",
       "listen": "Listen & pick"
     },
     "game": {
+      "gradeGroup": "How well did you remember this word?",
+      "gradeAgain": "Forgot",
+      "gradeHard": "Hard",
+      "gradeGood": "Remembered",
       "flashcardLevel": "Flashcard level",
       "wordCount": "{count} words",
       "mastered": "{count} mastered",
